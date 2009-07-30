@@ -1,0 +1,190 @@
+@charset "UTF-8";
+
+<style type="text/css"> 
+ 
+body  {
+	margin: 0; 
+	text-align: center; 
+	color: #666;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	background-color: #FFFFFF;
+	line-height: 20px;
+}
+body {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 100%;
+	color: #666;
+	line-height: 20px;
+	background-color: #FFFFFF;
+	background-position: center center;
+	background-attachment: scroll;
+	background-repeat: repeat;
+}
+* {
+	margin: 0px;
+	padding: 0px;
+}
+.twoColHybLt #container {
+	width: 100%;  /* this will create a container 80% of the browser width */
+	min-width: 800px;
+	background: #FFFFFF; /* the auto margins (in conjunction with a width) center the page */
+	border: 1px solid #000000;
+	text-align: left; /* this overrides the text-align: center on the body element. */
+	margin-top: 0px;
+	margin-right: auto;
+	margin-bottom: 0;
+	margin-left: auto;
+} 
+
+/* Tips for sidebar1:
+1. Since we are working in relative units, it's best not to use padding on the sidebar. It will be added to the overall width for standards compliant browsers creating an unknown actual width. 
+2. Since em units are used for the sidebar value, be aware that its width will vary with different default text sizes.
+3. Space between the side of the div and the elements within it can be created by placing a left and right margin on those elements as seen in the ".twoColHybLt #sidebar1 p" rule.
+*/
+.twoColHybLt #sidebar1 {
+	float: left;
+	width: 10em; /* top and bottom padding create visual space within this div  */
+	background-color: #FFFFFF;
+	padding-top: 15px;
+	padding-right: 0;
+	padding-bottom: 15px;
+	padding-left: 15px;
+}
+.twoColHybLt #sidebar1 h3, .twoColHybLt #sidebar1 p {
+	margin-left: 10px; /* the left and right margin should be given to every element that will be placed in the side columns */
+	margin-right: 10px;
+}
+
+/* Tips for mainContent:
+1. The space between the mainContent and sidebar1 is created with the left margin on the mainContent div.  No matter how much content the sidebar1 div contains, the column space will remain. You can remove this left margin if you want the #mainContent div's text to fill the #sidebar1 space when the content in #sidebar1 ends.
+2. Be aware it is possible to cause float drop (the dropping of the non-floated mainContent area below the sidebar) if an element wider than it can contain is placed within the mainContent div. WIth a hybrid layout (percentage-based overall width with em-based sidebar), it may not be possible to calculate the exact width available. If the user's text size is larger than average, you will have a wider sidebar div and thus, less room in the mainContent div. You should be aware of this limitation - especially if the client is adding content with Contribute.
+3. In the Internet Explorer Conditional Comment below, the zoom property is used to give the mainContent "hasLayout." This may help avoid several IE-specific bugs.
+*/
+.twoColHybLt #mainContent {
+	margin-top: 0px;
+	margin-right: 20px;
+	margin-bottom: 0;
+	margin-left: 11em;
+} 
+
+/* Miscellaneous classes for reuse */
+.fltrt { /* this class can be used to float an element right in your page. The floated element must precede the element it should be next to on the page. */
+	float: right;
+	margin-left: 8px;
+}
+.fltlft { /* this class can be used to float an element left in your page */
+	float: left;
+	margin-right: 8px;
+}
+.clearfloat { /* this class should be placed on a div or break element and should be the final element before the close of a container that should fully contain a float */
+	clear:both;
+    height:0;
+    font-size: 1px;
+    line-height: 0px;
+}
+#header {
+	margin-bottom: 30px;
+	float: left;
+	width: 100%;
+	clear: right;
+	background-color: #343091;
+}
+#mainContent p img {
+	float: left;
+	border: thin solid #5848A8;
+	padding: 0px;
+	margin-top: 0px;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	margin-left: 0px;
+	height: 235px;
+	width: 156px;
+}
+#contact {
+	color: #FFF;
+	font-size: small;
+	margin-top: 150px;
+	margin-bottom: 10px;
+	height: 20px;
+	margin-left: 600px;
+}
+#header p .green img {
+	float: left;
+}
+#line {
+	color: #48B297;
+	width: 100%;
+	float: left;
+	margin-bottom: 10px;
+}
+#topbar {
+	background-color: #259B7B;
+	height: 15px;
+	width: auto;
+}
+#footer {
+	padding-top: 10px;
+	padding-right: 2px;
+	padding-bottom: 5px;
+	padding-left: 20px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+}
+#sidebar1 p a {
+	text-decoration: none;
+	color: #666;
+}
+#sidebar1 p a:hover {
+	text-decoration: underline;
+	color: #259B7B;
+}
+#mainContent h1 img {
+	background-color: #999;
+	float: left;
+	margin-right: 15px;
+	margin-bottom: 15px;
+}
+#mainContent h1 {
+	color: #332F91;
+	font-size: x-large;
+}
+#mainContent h2 {
+	color: #332F91;
+	font-size: large;
+}
+ </style>
+ul {
+	margin: 0px;
+	padding: 0px;
+	list-style-type: none;
+	text-decoration: none;
+	list-style-image: none;
+}
+ul a {
+	display: block;
+	width: 10em;
+	height: 2.1em;
+	line-height: 2.1em;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #FFF;
+	text-decoration: none;
+	background-color: #332F91;
+	font-size: small;
+	padding-left: .9em;
+	border-bottom-width: thin;
+	border-bottom-style: solid;
+	border-bottom-color: #FFF;
+}
+p {
+	font-size: small;
+}
+a:hover {
+	color: #000;
+	background-color: #CBCAFF;
+}
+ul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
