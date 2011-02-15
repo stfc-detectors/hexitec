@@ -1,0 +1,18 @@
+FC=f77
+export FC
+CC=gcc
+export CC
+
+source /home/steve/setup-scripts/sh/ccp4.setup
+source /home/steve/setup-scripts/sh/ccp4-others.setup
+
+export LAUE_MASTER=/home/steve/laue
+export LAUE_BIN=/home/steve/laue/bin
+export LAUE_SCR=/home/steve/laue/scr
+export LAUE_LIB=/home/steve/laue/lib
+alias laue='$LAUE_MASTER/cmd/laue.cmd'
+alias lget='$LAUE_MASTER/cmd/lget.cmd'
+alias linkimages='$LAUE_MASTER/cmd/linkimages.cmd'
+LAUE_PATH=/home/steve/laue/bin
+export PATH=$PATH:$LAUE_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LAUE_LIB

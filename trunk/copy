@@ -1,0 +1,25 @@
+#
+cp lib/src/ldm_get_imtyp.f ../laue/lib/src/ldm_get_imtyp.f
+cp lib/src/ldm_set_imdat.f ../laue/lib/src/ldm_set_imdat.f
+cp lib/src/ldm_set_imtyp.f ../laue/lib/src/ldm_set_imtyp.f
+cp src/lauegen.f ../laue/src/lauegen.f
+cp src/intlaue.f ../laue/src/intlaue.f
+cp lib/src/ldm_defaults.finc ../laue/lib/src/ldm_defaults.finc
+cp src/ldm_limits.finc ../laue/src/ldm_limits.finc
+cp src/lauegen_limits.finc ../laue/src/lauegen_limits.finc
+#
+cp lib/src/readpstiff.c ../laue/lib/src
+cp lib/src/readpstiff.h ../laue/lib/src
+cp lib/src/readpstiffP.h ../laue/lib/src
+#
+cp lib/src/Makefile.in ../laue/lib/src
+cp lib/src/Makefile.am ../laue/lib/src
+cp gnom/src/Makefile.in ../laue/gnom/src
+cp gnom/src/Makefile.am ../laue/gnom/src
+cp src/Makefile.in ../laue/src
+cp src/Makefile.am ../laue/src
+#
+cp testdata/testb1.ldm ../laue/testdata
+cp testdata/testla2.ldm ../laue/testdata
+cp testdata/b1.tif ../laue/testdata
+cp testdata/la2.tif ../laue/testdata
