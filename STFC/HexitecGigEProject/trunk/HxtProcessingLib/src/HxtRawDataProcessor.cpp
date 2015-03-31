@@ -105,7 +105,7 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
 	const size_t rawLineSize = sizeof(hxtRawLine);
     mRawData = new u8[rawLineSize * 2];
 
-    mDateTimeString = currentDateTime();
+    mCsvFileName = string("");
 
     string mRawCsvFileName = string("");
     string mCorCsvFileName = string("");
@@ -144,20 +144,6 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
 
 	// Delete raw line storage
 	delete [] mRawData;
-}
-
-/// currentDateTime - Construct current date/time into string
-/// Get current date/time, format is YYYYMMDD_HHMMSS
-const std::string HxtRawDataProcessor::currentDateTime() {
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
-    localtime_s(&tstruct, &now);
-    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-    // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
-
-    return buf;
 }
 
 /// setDebug - enable debug output
@@ -612,31 +598,22 @@ bool HxtRawDataProcessor::flushFrames(void) {
 /// writeOutput - write the output of a raw data processing run to output files
 bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
 
-    // Prepend current date/time onto filename
-    string tempDateTime = string(mDateTimeString);
-    tempDateTime.append("_" + aOutputPixelFileName);
-    aOutputPixelFileName = tempDateTime;
-
 	// Write pixel histograms out to binary file
 	ofstream pixelFile;
 	pixelFile.open(aOutputPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
 	if (!pixelFile.is_open()) {
 		LOG(gLogConfig, logERROR) << "Failed to open output file " << aOutputPixelFileName;
 		return false;
-	}
+    }
+
+    // Make a note of filename, to be used by CSV file  shortly
+    size_t periodPosn = aOutputPixelFileName.find(".");
+    mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
 
 	// Write binary file header
 
 	string label("HEXITECH");
 	pixelFile.write(label.c_str(), label.length());
-
-    /// Debugging purposes:
-//    unsigned int headerSize = calculateCurrentHeaderSize(label);
-//    unsigned int bodySize = calculateBodySize();
-//    LOG(gLogConfig, logINFO) << "FORMAT VERSION: " << mFormatVersion << " HeaderSize: " << headerSize << " BodySize: " << bodySize << " Totalsize: " << headerSize+bodySize;
-//    LOG(gLogConfig, logINFO) << "mSSX:             " << mSSX << "   mSSY:             " << mSSY << "   mRot1:          " << mRot1 << "   mRot2:          " << mRot2 << "   mTime:          " << mTime;
-//    LOG(gLogConfig, logINFO) << "mFormatVersion " << mFormatVersion << "\tmFilePrefix " << mFilePrefix << "\tmData: " << mDataTimeStamp;
-//    LOG(gLogConfig, logINFO) << "mRows:          " << mRows << "   mCols:          " << mCols << "   mHistoBins:     " << mHistoBins;
 
     pixelFile.write((const char*)&mFormatVersion, sizeof(u64));
 
@@ -871,12 +848,7 @@ void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
 /// writeSubPixelOutput - write the output of a raw data processing run to output files
 bool HxtRawDataProcessor::writeSubPixelOutput(string aOutputSubPixelFileName) {
 
-    // Prepend current date/time onto filename
-    string tempDateTime = string(mDateTimeString);
-    tempDateTime.append("_" + aOutputSubPixelFileName);
-    aOutputSubPixelFileName = tempDateTime;
-
-	// Write subpixel histograms out to binary file
+    // Write subpixel histograms out to binary file
 	ofstream subPixelFile;
 	subPixelFile.open(aOutputSubPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
 	if (!subPixelFile.is_open()) {
@@ -916,11 +888,6 @@ bool HxtRawDataProcessor::writeCsvFiles(void) {
 	ofstream rawCsvFile;
 	string rawCsvFileName("histoRaw.csv");
 
-    // Prepend current date/time onto filename
-    string tempDateTime = string(mDateTimeString);
-    tempDateTime.append("_" + rawCsvFileName);
-    rawCsvFileName = tempDateTime;
-
     rawCsvFile.open(rawCsvFileName.c_str(), ios::out | ios::trunc);
 	if (!rawCsvFile.is_open()) {
 		LOG(gLogConfig, logERROR) << "Failed to open CSV file" << rawCsvFileName;
@@ -934,12 +901,7 @@ bool HxtRawDataProcessor::writeCsvFiles(void) {
 
 	// Write CSV histogram file out
 	ofstream corCsvFile;
-	string corCsvFileName("histoCorrected.csv");
-
-    // Prepend current date/time onto filename
-    tempDateTime = string(mDateTimeString);
-    tempDateTime.append("_" + corCsvFileName);
-    corCsvFileName = tempDateTime;
+    string corCsvFileName(mCsvFileName);    //"histoCorrected.csv");
 
     corCsvFile.open(corCsvFileName.c_str(), ios::out | ios::trunc);
 	if (!corCsvFile.is_open()) {

@@ -43,7 +43,7 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 	// move all charges on to pixel containing highest initial charge. This charge is also copied into
 	// the 240x240 matrix (apSubPixelFrame) according to subpixel algorithm
 	// (apCurrentDecodedFrame pointer never used)
-    apCurrentDecodedFrame = 0;
+    apCurrentDecodedFrame = apCurrentDecodedFrame;
 
 	if ( apSubPixelFrame == NULL )
 	{

@@ -45,8 +45,8 @@ bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDe
 
     // Apply Momentum after Calibration and Charge XX (CSA, CSD?) applied
 	// (apCurrentDecodedFrame and apSubPixelFrame never used)
-    apCurrentDecodedFrame = 0;
-    apSubPixelFrame = 0;
+    apCurrentDecodedFrame = apCurrentDecodedFrame;
+    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

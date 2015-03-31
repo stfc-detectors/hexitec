@@ -42,7 +42,7 @@ bool HxtFrameIncompleteDataCorrector::apply(HxtDecodedFrame* apLastDecodedFrame,
 		return true;
 	}
 
-    apSubPixelFrame = 0;
+    apSubPixelFrame = apSubPixelFrame;
 
 	// Determine last and current frame indices from objects
 	unsigned long long currentFrameIdx, lastFrameIdx;

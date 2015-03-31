@@ -38,8 +38,8 @@ bool HxtFrameInterpolateCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, Hx
 	// until the end of that column, then check same column in the next frame from the first row until the same 
 	// row as hit pixel.
 	// (apCurrentDecodedFrame and apSubPixelFrame never used)
-    apCurrentDecodedFrame = 0;
-    apSubPixelFrame = 0;
+    apCurrentDecodedFrame = apCurrentDecodedFrame;
+    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

@@ -56,7 +56,7 @@ bool HxtFrameInducedNoiseCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, H
 	// until the end of that column, then check same column in the next frame from the first row until the same 
 	// row as hit pixel.
 	// (apSubPixelFrame never used)
-    apSubPixelFrame = 0;
+    apSubPixelFrame = apSubPixelFrame;
 
 	// Check whether we encountered last frame
 	bool bCurrentFrame = (apCurrentDecodedFrame != NULL);

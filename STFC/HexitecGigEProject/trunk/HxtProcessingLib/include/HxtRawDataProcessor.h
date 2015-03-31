@@ -104,8 +104,7 @@ private:
 		return ((aRow * mCols) + aCol);
 	}
 
-    const std::string currentDateTime();    // Obtain current date/time (Format: YYYYMMDD_HHMMSS)
-    std::string mDateTimeString;
+    string mCsvFileName;
 
     unsigned int mRows;     // number of decoded pixel rows
 	unsigned int mCols;     // number of decoded pixel columns

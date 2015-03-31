@@ -33,8 +33,8 @@ HxtFrameDoublePixelsCorrector::~HxtFrameDoublePixelsCorrector() {
 bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
 												HxtFrame* apSubPixelFrame) {
 
-    apCurrentDecodedFrame = 0;
-    apSubPixelFrame = 0;
+    apCurrentDecodedFrame = apCurrentDecodedFrame;
+    apSubPixelFrame = apSubPixelFrame;
 
 	// Check each pixel in frame apLastDecodedFrame against vector of all pixels
 	// read from file and flag any pixel that occurs more than once

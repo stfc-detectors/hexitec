@@ -34,7 +34,7 @@ bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFra
 	// Determine last and current frame indices from objects - current decoded frame ptr can be null at end
 	// of processing (i.e. on last frame), in which case we still apply the correction to the last frame but
 	// there is no forward rejection of pixel into current frame
-    apSubPixelFrame = 0;
+    apSubPixelFrame = apSubPixelFrame;
 
 	unsigned long long currentFrameIdx = 0, lastFrameIdx = 0;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

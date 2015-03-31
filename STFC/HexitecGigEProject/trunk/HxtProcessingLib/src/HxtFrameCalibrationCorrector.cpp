@@ -57,8 +57,8 @@ bool HxtFrameCalibrationCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, Hx
 	// 		 c = mInterceptValue
 	//		 y = measured in keV
 	// (apCurrentDecodedFrame and apSubPixelFrame never used)
-    apCurrentDecodedFrame = 0;
-    apSubPixelFrame = 0;
+    apCurrentDecodedFrame = apCurrentDecodedFrame;
+    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();
