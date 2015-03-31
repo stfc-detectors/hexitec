@@ -7,8 +7,6 @@ matlab *matlab::matlabInstance = 0;
 
 matlab *matlab::instance()
 {
-//    qDebug() <<"Instantiating Matlab";
-    //sleep(2000);
    if (matlabInstance == 0)
    {
       matlabInstance = new matlab();
@@ -37,23 +35,13 @@ matlab::matlab(QObject *parent) :
 
    if (activeMatlab)
    {
-       qDebug() <<"Matlab 1";
-       //sleep(2000);
       emit writeMessage("Starting MATLAB...");
-       qDebug() <<"Matlab 1 after write  - crashes after this if Matlab enabled..";
-       //sleep(2000);
       if (open())
       {
-          qDebug() <<"Matlab 1 after open";
-          //sleep(2000);
          if (setVisible())
          {
-             qDebug() <<"Matlab 1 after setVisible";
-             //sleep(2000);
             connect(this, SIGNAL(checkRequired()), this, SLOT(checkConnection()));
-            qDebug() <<"Matlab 1 connected";
-            //sleep(2000);
-            //cout << "Main thread = " << QThread::currentThreadId() << endl;
+           //cout << "Main thread = " << QThread::currentThreadId() << endl;
             mainThreadFlag = false;
             start();
          }
@@ -62,8 +50,6 @@ matlab::matlab(QObject *parent) :
       {
          emit writeError("Failed to start MATLAB");
       }
-      qDebug() <<"Matlab 1 End.";
-      //sleep(2000);
    }
 }
 
@@ -96,7 +82,7 @@ void matlab::checkConnection()
    if (activeMatlab)
    {
        qDebug() <<"Matlab 2";
-       //sleep(2000);
+       Sleep(2000);
       if (engEvalString(engine, "hostid") != 0)
       {
          activeMatlab = false;
@@ -169,7 +155,7 @@ bool matlab::evalString(QString string)
    if (activeMatlab)
    {
        qDebug() <<"Matlab 3";
-       //sleep(2000);
+       Sleep(2000);
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.
       Engine *localEngine = engOpen(NULL);
       setOutputBuffer(localEngine);
@@ -212,7 +198,7 @@ int matlab::sendVectorToMatlab(QVector <double> &vector, QString varName)
    if (activeMatlab)
    {
        qDebug() <<"Matlab 4";
-       //sleep(2000);
+       Sleep(2000);
       mainThreadFlag = true;
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.
       Engine *localEngine = engOpen(NULL);
@@ -261,7 +247,7 @@ int matlab::sendArrayToMatlab(int *dimensions, double *data, QString varName)
    if (activeMatlab)
    {
        qDebug() <<"Matlab 5";
-       //sleep(2000);
+       Sleep(2000);
       mainThreadFlag = true;
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.
       Engine *localEngine = engOpen(NULL);
