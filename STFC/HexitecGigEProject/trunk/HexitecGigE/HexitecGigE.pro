@@ -8,6 +8,10 @@ QT       += core gui script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# Prevent MSVC 2013 complaining "Conversion from string literal loses const qualifier"
+QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
+# See: http://stackoverflow.com/a/28625430/2903608
+
 TARGET = HexitecGigE
 TEMPLATE = app
 
@@ -278,8 +282,46 @@ DSoFt64 {
   INCLUDEPATH += "C:/Program Files/MATLAB/R2010a/extern/include/"
   INCLUDEPATH += $$quote(C:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2008-x64)
   DEPENDPATH += $$quote(C:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2008-x64)
-}
+} else:ckd_devel {
 
+#    !exists(torso.cpp) {
+#        error("No such file found - Windows environment variable is working then..")
+#    }
+
+    # te2aspect14 PC 64 bit configuration
+    DEFINES += NONI
+    DEFINES += OS_WIN
+    LIBS += ../DetectorLib/Hexitec.lib /DELAYLOAD:Hexitec.dll
+    LIBS += ../TemperatureHumidityLib/iowkit.lib /DELAYLOAD:iowkit.dll
+    CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../TemperatureHumidityLib/release/TemperatureHumidityLib.lib ../SerialPortLib/release/SerialPortLib.lib
+    CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib -L../SerialPortLib/qextserialport/release -lQt5ExtSerialPort1 /DELAYLOAD:XpsLib.dll
+    CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../TemperatureHumidityLib/debug/TemperatureHumidityLib.lib ../SerialPortLib/debug/SerialPortLib.lib
+    CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib -L../SerialPortLib/qextserialport/debug -lQt5ExtSerialPortd1 /DELAYLOAD:XpsLib.dll
+    INCLUDEPATH += ../DetectorLib
+    INCLUDEPATH += ../TemperatureHumidityLib
+    INCLUDEPATH  += ../HxtProcessingLib/include
+    INCLUDEPATH += ../XpsLib
+    INCLUDEPATH += ../SerialPortLib
+    INCLUDEPATH += ../SerialPortLib/qextserialport/src
+    DEFINES += QEXTSERIALPORT_USING_SHARED
+
+    DEFINES += NI
+    # aSpect PC configuration
+    LIBS += $$quote(-LC:/Program Files/MATLAB/R2014a/extern/lib/win64/microsoft) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
+    LIBS += $$quote(-LC:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/Lib64/MSVC) -lNIDAQmx
+    LIBS += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/Lib64/MSVC/ni4882.obj"
+
+    LIBS += $$quote(-LC:/Program Files/fieldtalk/lib/win/x64/release/) -llibmbusmaster
+    LIBS += ../TemperatureHumidityLib/iowkit.lib
+    CONFIG(release, debug|release): LIBS += $$quote(-LC:/QT/Libs/LibGalil-2.0.1.447-vs2010-x64/release) -lGalil2 /DELAYLOAD:Galil2.dll
+    ##
+    CONFIG(debug, debug|release): LIBS += $$quote(-LC:/QT/Libs/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2 /DELAYLOAD:Galil2.dll
+
+    INCLUDEPATH += "C:\Program Files\MATLAB\R2014a\extern\include"
+    INCLUDEPATH += "C:/QT/libs/LibGalil-2.0.1.447-vs2010-x64"
+    INCLUDEPATH += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/include/"
+    INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.4/Eigen/"
+}
 
 
 

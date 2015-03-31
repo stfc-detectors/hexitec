@@ -174,7 +174,7 @@ char *DataAcquisition::getStatus()
    int minor = daqStatus.getMinorStatus();
    char *status;
    sprintf(status,"%d.%d", major, minor);
-   return daqStatus.getMajorStatus() + "." + daqStatus.getMinorStatus();
+   return status;//daqStatus.getMajorStatus() + "." + daqStatus.getMinorStatus();
 }
 
 bool DataAcquisition::isWaitingForTrigger()

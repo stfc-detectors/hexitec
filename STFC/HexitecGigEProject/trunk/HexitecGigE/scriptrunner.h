@@ -1,6 +1,10 @@
 #ifndef SCRIPTRUNNER_H
 #define SCRIPTRUNNER_H
 
+//Fix MSVC 2013 compiler complaint:
+#define TRUE 1
+#define FALSE 0
+
 #include <QThread>
 #include <QString>
 #include <QtScript>

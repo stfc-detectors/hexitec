@@ -707,6 +707,12 @@ void MainWindow::processNow()
     }
 }
 
+
+void MainWindow::handleSpectrumFile(QString fileName)
+{
+    qDebug() << "MainWindow received spectrum file: " << fileName;
+}
+
 void MainWindow::save()
 {
    hexitecSoftTrigger->acquire();

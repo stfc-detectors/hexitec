@@ -115,6 +115,7 @@ private slots:
    void save();
    // Called by processNowButton in processingWindow
    void processNow();
+   void handleSpectrumFile(QString fileName);
 
    // The public slots can also be used from scripting and other parts of the code
 public slots:

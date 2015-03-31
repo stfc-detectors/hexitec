@@ -1120,14 +1120,12 @@ int HxtProcessing::executeProcessing()
 
     // 3. CS Addition / O R / CS Discriminator
     // 3.1 subpixel
-    // Get pointer to subpixel frame
-//    HxtFrame* subPixelFrame = dataProcessor->getSubPixelFrame();  /// Redundant
 
     // Set Charge Sharing Sub Pixel flag if enabled
     dataProcessor->setCsaCorrector(mEnableCsaspCorrector);
 
     // Create subpixel corrector
-    HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector(/*subPixelFrame*/);
+    HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
     // Register it, enable debug if needed
     if (mDebugLevel) subCorrector->setDebug(true);
     if (mEnableCsaspCorrector) {
@@ -1195,6 +1193,11 @@ int HxtProcessing::executeProcessing()
     // Write output files
     dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
 
+//    size_t periodPosn = mOutputFileNameDecodedFrame.find(".");
+//    string csvFileName = string(mOutputFileNameDecodedFrame.substr(0, periodPosn)) + ".csv";
+//    qDebug() << "T DEBUG  CSV: " << QString(csvFileName.c_str());
+
+
     // Signal produced Hxt filename
     emit hexitechProducedFile(mOutputFileNameDecodedFrame);
 
@@ -1209,9 +1212,10 @@ int HxtProcessing::executeProcessing()
     if (mWriteCsvFiles)
     {
         dataProcessor->writeCsvFiles();
-        /// Finish this when HxtRawDataProcessor function call implemented...
-//        QString spectrumFile = QString::fromStdString()
-//        emit hexitechSpectrumFile(spectrumFile);
+        // Obtain filename of summed spectrum; signal it to processingwindow
+        string sSpectrumFile = dataProcessor->getCorCsvFileName();
+        QString spectrumFile = QString::fromStdString(sSpectrumFile);
+        emit hexitechSpectrumFile(spectrumFile);
     }
 
     //// Delete objects

@@ -114,12 +114,14 @@ private:
    static string sOutputFileNameSubPixelFrame;
    static string sGradientsFile;
    static string sInterceptsFile;
+   static string sMomentumFile;
    static bool bEnableInCorrector;
    static bool bEnableCabCorrector;
    static bool bEnableCsaspCorrector;
    static bool bEnableCsdCorrector;
    static bool bEnableIdCorrector;
    static bool bEnableIpCorrector;
+   static bool bEnableMomCorrector;
    static bool bEnableDbPxlsCorrector;
    static bool bWriteCsvFiles;
    static bool bEnableVector;

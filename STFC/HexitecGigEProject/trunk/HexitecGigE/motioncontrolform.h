@@ -1,6 +1,10 @@
 #ifndef MOTIONCONTROLFORM_H
 #define MOTIONCONTROLFORM_H
 
+//Fix MSVC 2013 compiler complaint:
+#define TRUE 1
+#define FALSE 0
+
 #include <QMainWindow>
 #include <QAbstractTableModel>
 #include <QTableView>

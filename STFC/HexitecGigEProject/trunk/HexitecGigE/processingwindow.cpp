@@ -9,6 +9,8 @@
 // Used by filename manipulation:
 #include <QFileInfo>
 #include <QDir>
+// Used by fileExists() replacement:
+#include <sys/stat.h>
 
 ProcessingWindow *ProcessingWindow::processingWindowInstance = 0;
 hexitech::HxtProcessing *ProcessingWindow::HxtProcessor = 0;
@@ -25,12 +27,14 @@ string ProcessingWindow::sOutputFileNameDecodedFrame;
 string ProcessingWindow::sOutputFileNameSubPixelFrame;
 string ProcessingWindow::sGradientsFile;
 string ProcessingWindow::sInterceptsFile;
+string ProcessingWindow::sMomentumFile;
 bool ProcessingWindow::bEnableInCorrector;
 bool ProcessingWindow::bEnableCabCorrector;
 bool ProcessingWindow::bEnableCsaspCorrector;
 bool ProcessingWindow::bEnableCsdCorrector;
 bool ProcessingWindow::bEnableIdCorrector;
 bool ProcessingWindow::bEnableIpCorrector;
+bool ProcessingWindow::bEnableMomCorrector;
 bool ProcessingWindow::bEnableDbPxlsCorrector;
 bool ProcessingWindow::bWriteCsvFiles;
 bool ProcessingWindow::bEnableVector;
@@ -67,6 +71,10 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
 
       connect(HxtProcessor,                         SIGNAL(hexitechFilesToDisplay(QStringList)),
               reinterpret_cast<const QObject*>(mw), SLOT(readFiles(QStringList)) );
+
+      /// Connect signal from HxtProcessor to receive summed spectrum filename
+      connect(HxtProcessor,                         SIGNAL(hexitechSpectrumFile(QString)),
+              reinterpret_cast<const QObject*>(mw), SLOT(handleSpectrumFile(QString)));
 
       connect(processingWindowInstance,             SIGNAL(updateVisualisationSignal(bool)),
               reinterpret_cast<const QObject*>(mw), SLOT(updateVisualisationTab(bool)) );
@@ -1390,8 +1398,15 @@ bool ProcessingWindow::sanityCheckQString(QStringList aList, QString aString)
 bool ProcessingWindow::fileExists(const char *filename)
 {
     /// Check that filename exists
-    ifstream ifile(filename);
-    return ifile;
+//    string sFileName  = string(filename);
+    struct stat buf;
+    if (stat(filename, &buf) != -1) //sFileName.c_))
+    {
+        return true;
+    }
+    return false;
+//    ifstream ifile(filename);
+//    return ifile;
 }
 
 string ProcessingWindow::validateFileName(QString* qsKeyName, QString* qsKeyValue)
@@ -1468,12 +1483,14 @@ void ProcessingWindow::initHexitechProcessor()
     sOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
     sGradientsFile               = "";
     sInterceptsFile              = "";
+    sMomentumFile                = "";
     bEnableInCorrector           = false;
     bEnableCabCorrector          = false;
     bEnableCsaspCorrector        = false;
     bEnableCsdCorrector          = true;
     bEnableIdCorrector           = true;
     bEnableIpCorrector           = false;
+    bEnableMomCorrector          = false;
     bEnableDbPxlsCorrector       = false;
     bWriteCsvFiles               = false;
     bEnableVector                = false;
@@ -1495,6 +1512,7 @@ void ProcessingWindow::configHexitechSettings()
     HxtProcessor->setOutputFileNameSubPixelFrame( sOutputFileNameSubPixelFrame);
     HxtProcessor->setGradientsFile( sGradientsFile);
     HxtProcessor->setInterceptsFile( sInterceptsFile);
+    HxtProcessor->setMomentumFile(sMomentumFile);
     HxtProcessor->setEnableInCorrector( bEnableInCorrector);
     HxtProcessor->setEnableCabCorrector( bEnableCabCorrector);
     HxtProcessor->setEnableCsaspCorrector( bEnableCsaspCorrector);
