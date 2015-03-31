@@ -36,7 +36,7 @@ matlab::matlab(QObject *parent) :
    if (activeMatlab)
    {
       emit writeMessage("Starting MATLAB...");
-      if (open())
+      if (open(NULL))
       {
          if (setVisible())
          {
