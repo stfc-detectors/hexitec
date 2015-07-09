@@ -1,10 +1,23 @@
 #include "dataacquisitiondefinition.h"
+#include "parameters.h"
+#include <QSettings>
 
 DataAcquisitionDefinition::DataAcquisitionDefinition()
 {
+   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
+   QString twoEasyFilename = Parameters::twoEasyIniFilename;
+
    duration = 1000.0;
    repeatCount = 1;
    repeatInterval = 0;
+   fixedImageCount = 0;
+
+   if (settings.contains("2EasyIniFilename"))
+   {
+      twoEasyFilename = settings.value("2EasyIniFilename").toString();
+   }
+   twoEasyIniFile = new IniFile(twoEasyFilename);
+//   repeatCount = twoEasyIniFile->getInt("Data Acquisition/Repeat Count");
 }
 
 void DataAcquisitionDefinition::setDataFilename(DetectorFilename dataFilename)

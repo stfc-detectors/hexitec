@@ -8,7 +8,7 @@
 #include <QObject>
 #include "detectorcontrolform.h"
 #include "dataacquisitionform.h"
-#include "aspectdetector.h"
+#include "gigedetector.h"
 #include "detectormonitor.h"
 #include "keithley.h"
 #include "dataacquisitiondefinition.h"
@@ -33,7 +33,7 @@ private:
    DataAcquisitionForm *dataAcquisitionForm;
    DetectorControlForm *detectorControlForm;
    Keithley *keithley;
-   AspectDetector *aspectDetector;
+   GigEDetector *gigEDetector;
    DetectorMonitor *detectorMonitor;
    DataAcquisition *dataAcquisition;
    DataAcquisitionDefinition dataAcquisitionDefinition;
@@ -43,7 +43,7 @@ private:
 
    void connectDetectorMonitor();
    void connectDataAcquisition();
-   void connectAspectDetector();
+   void connectGigEDetector();
    void connectDataAcquisitionForm();
    void connectDetectorControlForm();
    void connectDataAcquisitionModel();

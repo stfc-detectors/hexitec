@@ -56,16 +56,17 @@ void DetectorControlForm::connectSignals()
 
 void DetectorControlForm::handleCollectImagesPressed()
 {
-   //emit collectImagesPressed();
+   emit collectImagesPressed();
    waitingForModeChange = true;
-   emit executeCommand(AspectDetector::CONFIGURE, AspectDetector::FIXED, ui->quadrant->value());
-   //emit executeCommand(AspectDetector::COLLECT, ui->imageCount->value(), 1);
+   emit executeCommand(GigEDetector::CONFIGURE, ui->xResolution->value(), ui->yResolution->value());
+//   emit executeCommand(GigEDetector::COLLECT, ui->imageCount->value(), 1);
 }
 
 void DetectorControlForm::abortDAQ()
 {
+   qDebug() <<"DetectorControlForm::abortDAQ() sending signal";
    emit abortDAQPressed();
-   //   emit executeCommand(AspectDetector::ABORT, 0, 0);
+   //   emit executeCommand(GigEDetector::ABORT, 0, 0);
 }
 
 void DetectorControlForm::handleFixedImageCountChanged(int fixedImageCount)
@@ -94,17 +95,18 @@ void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
 
 void DetectorControlForm::initialiseDetectorPressed()
 {
-   emit executeCommand(AspectDetector::INITIALISE, 0,0);
+   emit executeCommand(GigEDetector::INITIALISE, 0,0);
 
    /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(true);
+   qDebug() << "initialiseDetectorPressed() DONE.";
 }
 
 void DetectorControlForm::terminateDetectorPressed()
 {
-   emit executeCommand(AspectDetector::CLOSE, 0,0);
+   emit executeCommand(GigEDetector::CLOSE, 0,0);
 
    /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
@@ -114,7 +116,7 @@ void DetectorControlForm::terminateDetectorPressed()
 
 void DetectorControlForm::reconnectPressed()
 {
-   emit executeCommand(AspectDetector::RECONFIGURE, AspectDetector::FIXED, ui->quadrant->value());
+   emit executeCommand(GigEDetector::RECONFIGURE, ui->xResolution->value(), ui->yResolution->value());
 }
 
 void DetectorControlForm::handleMonitorData(MonitorData *md)
@@ -149,9 +151,9 @@ void DetectorControlForm::handleTemperatureAboveDP()
    }
 }
 
-void DetectorControlForm::handleModeChanged(AspectDetector::Mode mode)
+void DetectorControlForm::handleModeChanged(GigEDetector::Mode mode)
 {
-   if (waitingForModeChange && mode == AspectDetector::FIXED)
+   if (waitingForModeChange && (mode == GigEDetector::FIXED || mode == GigEDetector::GIGE_DEFAULT))
    {
       emit collectImagesPressed();
       waitingForModeChange = false;
@@ -316,7 +318,8 @@ void DetectorControlForm::guiReady()
    ui->collectImages->setEnabled(true);
    ui->abortDAQ->setEnabled(false);
    ui->imageCount->setEnabled(true);
-   ui->quadrant->setEnabled(true);
+   ui->xResolution->setEnabled(true);
+   ui->yResolution->setEnabled(true);
    if (!keithleyReservedByScripting && tAboveTdp)
    {
       ui->biasVoltageButton->setEnabled(true);
@@ -362,6 +365,7 @@ void DetectorControlForm::guiDetectorBusy()
    ui->imageCount->setEnabled(false);
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
-   ui->quadrant->setEnabled(false);
+   ui->xResolution->setEnabled(true);
+   ui->yResolution->setEnabled(true);
    ui->biasVoltageButton->setEnabled(false);
 }

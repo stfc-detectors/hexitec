@@ -6,7 +6,7 @@
 #include<QTime>
 
 #include "monitordata.h"
-#include "aspectdetector.h"
+#include "gigedetector.h"
 #include "detectorfilename.h"
 #include "dataacquisitiondefinition.h"
 #include "offsetsdialog.h"
@@ -68,7 +68,7 @@ private:
 
 public slots:
    void handleMonitorData(MonitorData *md);
-   void handleModeChanged(AspectDetector::Mode mode);
+   void handleModeChanged(GigEDetector::Mode mode);
    void handleDataChanged(DataAcquisitionDefinition dataAcquisitionDefinition);
    void handleDataChanged(QString mode);
    void handleBiasRefreshed(QString time);
@@ -98,7 +98,7 @@ private slots:
    void handleScriptRelease(QString name);
 
 signals:
-   void executeCommand(AspectDetector::DetectorCommand command, int mode);
+   void executeCommand(GigEDetector::DetectorCommand command, int mode);
    void dataFilenameChanged(DetectorFilename dataFilename);
    void logFilenameChanged(DetectorFilename logFilename);
    void dataAcquisitionDefinitionChanged(DataAcquisitionDefinition dataAcquisitionDefinition);

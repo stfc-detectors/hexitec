@@ -94,7 +94,19 @@ void HxtProcessing::pushRawFileName(string aFileName)
         fileMutex.unlock();
     }
     else
-        emit hexitechSignalError("HxtProcessing::pushRawFileName() - Unable to acquire mutex lock!");
+       emit hexitechSignalError("HxtProcessing::pushRawFileName() - Unable to acquire mutex lock!");
+}
+
+void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer)
+{
+   /// This function needs to queue the transfer buffer for processing.
+   /// Once the processing is complete and the buffer no-longer required
+   /// the following signal should be sent to say the buffer can be released
+   /// back to the GigEDetector thread for re-use.
+   /// Its currently done here for testing.
+   qDebug() <<"HxtProcessing::pushTransferBuffer called! In threadId " << QThread::currentThreadId();;
+      emit returnBufferReady(transferBuffer);
+
 }
 
 void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)

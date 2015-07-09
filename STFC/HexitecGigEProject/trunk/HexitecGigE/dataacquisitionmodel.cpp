@@ -18,18 +18,18 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    this->detectorControlForm = detectorControlForm;
 
    keithley = VoltageSourceFactory::instance()->getKeithley();
-   aspectDetector = DetectorFactory::instance()->getAspectDetector();
+   gigEDetector = DetectorFactory::instance()->getGigEDetector();
    detectorMonitor = DetectorFactory::instance()->getDetectorMonitor();
    dataAcquisition = DataAcquisition::instance();
    objectReserver = ObjectReserver::instance();
 
-   dataAcquisitionForm->setModes(aspectDetector->getReducedDataModes());
+//   dataAcquisitionForm->setModes(gigEDetector->getReducedDataModes());
 
    connectDataAcquisitionForm();
    connectDetectorControlForm();
    connectDetectorMonitor();
    connectDataAcquisition();
-   connectAspectDetector();
+   connectGigEDetector();
    connectDataAcquisitionModel();
    connectKeithley();
    connectObjectReserver();
@@ -79,12 +79,13 @@ void DataAcquisitionModel::connectDetectorMonitor()
 
 void DataAcquisitionModel::connectDataAcquisition()
 {
-   connect(dataAcquisition, SIGNAL(executeCommand(AspectDetector::DetectorCommand, int, int)),
-           aspectDetector, SLOT(handleExecuteCommand(AspectDetector::DetectorCommand, int, int)));
-   connect(dataAcquisition, SIGNAL(executeOffsets()),
-           aspectDetector, SLOT(handleExecuteOffsets()));
+   connect(dataAcquisition, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
+           gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
+/*   connect(dataAcquisition, SIGNAL(executeOffsets()),
+           gigEDetector, SLOT(handleExecuteOffsets()));
    connect(dataAcquisition, SIGNAL(executeReducedDataCollection()),
-           aspectDetector, SLOT(handleReducedDataCollection()));
+           gigEDetector, SLOT(handleReducedDataCollection()));
+
    connect(dataAcquisition, SIGNAL(executeSingleBiasRefresh()),
            keithley, SLOT(executeSingleBiasRefresh()));
    connect(dataAcquisition, SIGNAL(storeBiasSettings()),
@@ -95,39 +96,45 @@ void DataAcquisitionModel::connectDataAcquisition()
            keithley, SLOT(handleDisableBiasRefresh()));
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            dataAcquisitionForm, SLOT(handleCollectingChanged(bool)));
+*/
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            detectorControlForm, SLOT(handleCollectingChanged(bool)));
+/*
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            dataAcquisitionForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
+*/
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            detectorControlForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
 }
 
-void DataAcquisitionModel::connectAspectDetector()
+void DataAcquisitionModel::connectGigEDetector()
 {
-   connect(aspectDetector, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-   connect(aspectDetector, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-   connect(aspectDetector, SIGNAL(notifyMode(AspectDetector::Mode)), dataAcquisitionForm, SLOT(handleModeChanged(AspectDetector::Mode)));
-   connect(aspectDetector, SIGNAL(notifyMode(AspectDetector::Mode)), detectorControlForm, SLOT(handleModeChanged(AspectDetector::Mode)));
-   connect(aspectDetector, SIGNAL(notifyMode(AspectDetector::Mode)), dataAcquisition, SLOT(handleModeChanged(AspectDetector::Mode)));
-   connect(aspectDetector, SIGNAL(notifyState(AspectDetector::DetectorState)), dataAcquisition, SLOT(receiveState(AspectDetector::DetectorState)));
-   connect(aspectDetector, SIGNAL(image1Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap1(QPixmap)));
-   connect(aspectDetector, SIGNAL(image2Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap2(QPixmap)));
-   connect(aspectDetector, SIGNAL(image3Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap3(QPixmap)));
-   connect(aspectDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
-   connect(aspectDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
-   connect(aspectDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
-   connect(aspectDetector, SIGNAL(externalTriggerReceived()), dataAcquisition, SLOT(handleExternalTriggerReceived()));
+   connect(gigEDetector, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
+   connect(gigEDetector, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
+   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisitionForm, SLOT(handleModeChanged(GigEDetector::Mode)));
+   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), detectorControlForm, SLOT(handleModeChanged(GigEDetector::Mode)));
+   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisition, SLOT(handleModeChanged(GigEDetector::Mode)));
+   connect(gigEDetector, SIGNAL(notifyState(GigEDetector::DetectorState)), dataAcquisition, SLOT(receiveState(GigEDetector::DetectorState)));
+/*   connect(gigEDetector, SIGNAL(image1Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap1(QPixmap)));
+   connect(gigEDetector, SIGNAL(image2Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap2(QPixmap)));
+   connect(gigEDetector, SIGNAL(image3Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap3(QPixmap)));
+*/
+   connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
+/*
+   connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
+   connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
+   connect(gigEDetector, SIGNAL(externalTriggerReceived()), dataAcquisition, SLOT(handleExternalTriggerReceived()));
+*/
 }
 
 void DataAcquisitionModel::connectDetectorControlForm()
 {
    connect(detectorControlForm, SIGNAL(executeCommand(Keithley::VoltageSourceCommand)),
            keithley, SLOT(handleExecuteCommand(Keithley::VoltageSourceCommand)));
-   connect(detectorControlForm, SIGNAL(executeCommand(AspectDetector::DetectorCommand, int, int)),
-           aspectDetector, SLOT(handleExecuteCommand(AspectDetector::DetectorCommand, int, int)));
+   connect(detectorControlForm, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
+           gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(detectorControlForm, SIGNAL(collectImagesPressed()),
            dataAcquisition, SLOT(handleCollectFixedImages()));
    connect(detectorControlForm, SIGNAL(abortDAQPressed()),
@@ -154,8 +161,8 @@ void DataAcquisitionModel::connectDataAcquisitionModel()
 
 void DataAcquisitionModel::connectDataAcquisitionForm()
 {
-   connect(dataAcquisitionForm, SIGNAL(executeCommand(AspectDetector::DetectorCommand, int)),
-           aspectDetector, SLOT(handleExecuteCommand(AspectDetector::DetectorCommand, int)));
+   connect(dataAcquisitionForm, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int)),
+           gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int)));
    connect(dataAcquisitionForm, SIGNAL(dataFilenameChanged(DetectorFilename)),
            this, SLOT(handleDataFilenameChanged(DetectorFilename)));
    connect(dataAcquisitionForm, SIGNAL(logFilenameChanged(DetectorFilename)),
@@ -207,9 +214,9 @@ void DataAcquisitionModel::connectObjectReserver()
 
 void DataAcquisitionModel::initialiseDetectorFilename(DetectorFilename *detectorFilename)
 {
-   detectorFilename->setDirectory(aspectDetector->getDirectory());
-   detectorFilename->setPrefix(aspectDetector->getPrefix());
-   detectorFilename->setTimestampOn(aspectDetector->getTimestampOn());
+   detectorFilename->setDirectory(gigEDetector->getDirectory());
+   detectorFilename->setPrefix(gigEDetector->getPrefix());
+   detectorFilename->setTimestampOn(gigEDetector->getTimestampOn());
    emit dataChanged(dataAcquisitionDefinition);
 }
 
@@ -256,10 +263,12 @@ void DataAcquisitionModel::setPrefix(QString prefix)
 
 void DataAcquisitionModel::setMode(QString mode)
 {
-   if (aspectDetector->getModes().contains(mode))
+   /*
+   if (gigEDetector->getModes().contains(mode))
    {
       emit dataChanged(mode);
    }
+   */
 }
 
 QString DataAcquisitionModel::getDirectory()

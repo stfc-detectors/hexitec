@@ -16,7 +16,8 @@ class DataAcquisitionFactory : public QObject
    Q_OBJECT
 public:
    ~DataAcquisitionFactory();
-   static DataAcquisitionFactory *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm);
+   static DataAcquisitionFactory *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                           QObject *parent = 0);
    static DataAcquisitionFactory *getInstance();
    DataAcquisition *getDataAcquisition();
    DataAcquisitionModel *getDataAcquisitionModel();

@@ -13,7 +13,7 @@
 #include <QMenu>
 #include <QWidget>
 #include <QTimer>
-#include "aspectdetector.h"
+#include "gigedetector.h"
 
 #include "detectormonitor.h"
 #include "monitordata.h"

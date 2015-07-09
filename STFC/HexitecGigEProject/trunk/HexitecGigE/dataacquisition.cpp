@@ -24,15 +24,16 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    biasOn = false;
    biasRefreshRequired = false;
    setAbort(false);
-   aspectDetector = DetectorFactory::instance()->getAspectDetector();
-   imageIndicatorFile = DetectorFactory::instance()->getImageIndicatorFile();
-   detectorState = AspectDetector::IDLE;
+   gigEDetector = DetectorFactory::instance()->getGigEDetector();
+   detectorState = GigEDetector::IDLE;
    keithley = VoltageSourceFactory::instance()->getKeithley();
    tdp = 0.0;
    currentImageNumber = 0;
    daqStatus = DataAcquisitionStatus();
    qRegisterMetaType<DataAcquisitionStatus>("DataAcquisitionStatus");
    qRegisterMetaType<DataAcquisitionDefinition>("DataAcquisitionDefinition");
+   qRegisterMetaType<GigEDetector::DetectorCommand>("GigEDetector::DetectorCommand");
+   qRegisterMetaType<GigEDetector::DetectorState>("GigEDetector::DetectorState");
    busy = false;
    waitingForTrigger = false;
    collectingTriggered = false;
@@ -63,22 +64,22 @@ void DataAcquisition::configureDataCollection()
    {
 
    dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
-   aspectDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
-   aspectDetector->setDirectory(dataAcquisitionDefinition->getDataFilename()->getDirectory());
-   aspectDetector->setPrefix(dataAcquisitionDefinition->getDataFilename()->getPrefix());
-   aspectDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+//   gigEDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
+   gigEDetector->setDirectory(dataAcquisitionDefinition->getDataFilename()->getDirectory());
+   gigEDetector->setPrefix(dataAcquisitionDefinition->getDataFilename()->getPrefix());
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    if (dataAcquisitionDefinition->getOffsets())
    {
-      aspectDetector->enableDarks();
+      gigEDetector->enableDarks();
    }
    else
    {
-      aspectDetector->disableDarks();
+      gigEDetector->disableDarks();
    }
 
    /*qDebug() << "Configuring DAQ";
    qDebug() << "Data collection time " << dataAcquisitionDefinition->getDuration();
-   qDebug() << "Last time error " << aspectDetector->getTimeError();
+   qDebug() << "Last time error " << GigEDetector->getTimeError();
    qDebug() << "Bias refresh interval " << keithley->getBiasRefreshInterval();*/
 
    setAbort(false);
@@ -93,7 +94,7 @@ void DataAcquisition::configureDataCollection()
    {
       splitDataCollections = 1;
    }
-   if (mode == AspectDetector::CONTINUOUS)
+   if (mode == GigEDetector::CONTINUOUS)
    {
       if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
       {
@@ -150,13 +151,13 @@ void DataAcquisition::initHexitechProcessor()
 DataAcquisition::~DataAcquisition()
 {
    keithley->_HVoff();
-   aspectDetector->unRegisterCallback();
-   if (mode == AspectDetector::SOFT_TRIGGER || mode == AspectDetector::EXTERNAL_TRIGGER)
+//   gigEDetector->unRegisterCallback();
+   if (mode == GigEDetector::SOFT_TRIGGER || mode == GigEDetector::EXTERNAL_TRIGGER)
    {
-      emit executeCommand(AspectDetector::STOP_TRIGGER, 0, 0);
+      emit executeCommand(GigEDetector::STOP_TRIGGER, 0, 0);
       Sleep(1000);
    }
-   emit executeCommand(AspectDetector::KILL, 0, 0);
+   emit executeCommand(GigEDetector::KILL, 0, 0);
    /* Stops crash on application exit.
       Increased following registered callback use.
       Increased following introduction of DAQ status and crashing post triggered DAQ. */
@@ -189,7 +190,16 @@ bool DataAcquisition::isCollectingTriggered()
 
 void DataAcquisition::run()
 {
-   if (mode == AspectDetector::CONTINUOUS)
+   mode = GigEDetector::GIGE_DEFAULT;
+   qDebug() << "mode set to " << mode;
+   if (mode == GigEDetector::GIGE_DEFAULT)
+   {
+      performGigEDefaultDataCollection();
+      // TODO : would emiting this to DataAcquisition be better for thread safety
+      changeDAQStatus(DataAcquisitionStatus::IDLE,
+                      daqStatus.getMinorStatus());
+   }
+   else if (mode == GigEDetector::CONTINUOUS)
    {
       performContinuousDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
@@ -198,15 +208,15 @@ void DataAcquisition::run()
       changeDAQStatus(DataAcquisitionStatus::IDLE,
                       DataAcquisitionStatus::READY);
    }
-   else if (mode == AspectDetector::SOFT_TRIGGER ||
-            mode == AspectDetector::EXTERNAL_TRIGGER)
+   else if (mode == GigEDetector::SOFT_TRIGGER ||
+            mode == GigEDetector::EXTERNAL_TRIGGER)
    {
       performTriggeredDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::WAITING_TRIGGER);
    }
-   else if (mode == AspectDetector::FIXED)
+   else if (mode == GigEDetector::FIXED)
    {
       performFixedDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
@@ -226,7 +236,7 @@ void DataAcquisition::setDirectory(int repeatCount)
    {
       dir->append("/" + dataAcquisitionDefinition->getDataFilename()->getPrefix() + "split");
    }
-   aspectDetector->setDirectory(*dir);
+   gigEDetector->setDirectory(*dir);
    delete dir;
 }
 
@@ -235,6 +245,7 @@ void DataAcquisition::performContinuousDataCollection()
    int nDaq;
    int repeatCount;
    int nDaqOverall = 0;
+
 
    emit storeBiasSettings();
    emit disableBiasRefresh();
@@ -248,7 +259,7 @@ void DataAcquisition::performContinuousDataCollection()
          setDataAcquisitionTime(nDaq);
          collecting = true;
 
-         emit executeCommand(AspectDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
+         emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
          nDaqOverall++;
 
          waitForCollectingDone();
@@ -282,7 +293,23 @@ void DataAcquisition::performContinuousDataCollection()
    daqStatus.setCurrentImage(++nDaqOverall);
    emit dataAcquisitionStatusChanged(daqStatus);
 
-   aspectDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   emit restoreBiasSettings();
+}
+
+void DataAcquisition::performGigEDefaultDataCollection()
+{
+   dataAcquisitionModel = DataAcquisitionModel::getInstance();
+   dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
+
+   emit storeBiasSettings();
+   emit disableBiasRefresh();
+
+   collecting = true;
+
+   emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
+   waitForCollectingDone();
+   collecting = false;
    emit restoreBiasSettings();
 }
 
@@ -308,7 +335,7 @@ void DataAcquisition::initialiseTriggeredDataCollection()
    setDataAcquisitionTime(0);
    biasRefreshRequired = true;
    setDirectory(0);
-   emit executeCommand(AspectDetector::COLLECT, 1, ndaq);
+   emit executeCommand(GigEDetector::COLLECT, 1, ndaq);
 }
 
 void DataAcquisition::performTriggeredDataCollection()
@@ -324,9 +351,9 @@ void DataAcquisition::performTriggeredDataCollection()
       setDataAcquisitionTime(nDaq);
 
       collecting = true;
-      if (mode == AspectDetector::SOFT_TRIGGER)
+      if (mode == GigEDetector::SOFT_TRIGGER)
       {
-         emit executeCommand(AspectDetector::TRIGGER, 1, 1); // Args 2 & 3 not used by AspectDetector
+         emit executeCommand(GigEDetector::TRIGGER, 1, 1); // Args 2 & 3 not used by GigEDetector
       }
 
       waitForCollectingDone();
@@ -339,7 +366,7 @@ void DataAcquisition::performTriggeredDataCollection()
          break;
    }
 
-   aspectDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
    collectingTriggered = false;
 }
@@ -352,7 +379,7 @@ void DataAcquisition::performFixedDataCollection()
    emit disableBiasRefresh();
 
    collecting = true;
-   emit executeCommand(AspectDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
+   emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
 
    waitForCollectingDone();
    collecting = false;
@@ -375,10 +402,10 @@ void DataAcquisition::setDataAcquisitionTime(int nDaq)
 
    if (nDaq != 0)
    {
-      dataCollectionTime -= aspectDetector->getTimeError();
+//      dataCollectionTime -= gigEDetector->getTimeError();
    }
 
-   aspectDetector->setDataAcquisitionDuration(dataCollectionTime);
+   gigEDetector->setDataAcquisitionDuration(dataCollectionTime);
 }
 
 void DataAcquisition::performSingleBiasRefresh()
@@ -442,12 +469,12 @@ int DataAcquisition::waitForCollectingDone()
    int elapsed = 0;
    int percentage = 0;
 
-   //qDebug() << "Waiting for DAQ to finish";
+   qDebug() << "Waiting for DAQ to finish";
    while (collecting)
    {
       sleep(1);
       if (daqStatus.getMinorStatus() == DataAcquisitionStatus::COLLECTING &&
-          mode != AspectDetector::FIXED)
+          mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
       {
          elapsed++;
          percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
@@ -459,7 +486,7 @@ int DataAcquisition::waitForCollectingDone()
          emit dataAcquisitionStatusChanged(daqStatus);
       }
    }
-   //qDebug() << "DAQ finished";
+   qDebug() << "DAQ finished";
 
    return status;
 }
@@ -495,7 +522,7 @@ void DataAcquisition::handleMonitorData(MonitorData *md)
 
 void DataAcquisition::updateImageFile(int writeToFileNumber)
 {
-   imageIndicatorFile->write(writeToFileNumber);
+//   imageIndicatorFile->write(writeToFileNumber);
 }
 
 void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorStatus,
@@ -512,18 +539,18 @@ void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorSt
    emit dataAcquisitionStatusChanged(daqStatus);
 }
 
-void DataAcquisition::handleModeChanged(AspectDetector::Mode mode)
+void DataAcquisition::handleModeChanged(GigEDetector::Mode mode)
 {
-   if (mode == AspectDetector::CONTINUOUS ||
-       mode == AspectDetector::SOFT_TRIGGER ||
-       mode == AspectDetector::EXTERNAL_TRIGGER)
+   if (mode == GigEDetector::CONTINUOUS ||
+       mode == GigEDetector::SOFT_TRIGGER ||
+       mode == GigEDetector::EXTERNAL_TRIGGER)
    {
-      aspectDetector->registerCallback(fileCallback);
+//      gigEDetector->registerCallback(fileCallback);
    }
    this->mode = mode;
 }
 
-void DataAcquisition::receiveState(AspectDetector::DetectorState detectorState)
+void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
 {
    int writeToFileNumber = 0;
    this->detectorState = detectorState;
@@ -531,9 +558,9 @@ void DataAcquisition::receiveState(AspectDetector::DetectorState detectorState)
 
    switch (detectorState)
    {
-   case AspectDetector::IDLE:
+   case GigEDetector::IDLE:
       break;
-   case AspectDetector::READY:
+   case GigEDetector::READY:
       if (daqStatus.getMajorStatus() == DataAcquisitionStatus::INITIALISING)
       {
          daqStatus.setMajorStatus(DataAcquisitionStatus::IDLE);
@@ -545,37 +572,37 @@ void DataAcquisition::receiveState(AspectDetector::DetectorState detectorState)
          collecting = false;
       }
       break;
-   case AspectDetector::INITIALISING:
+   case GigEDetector::INITIALISING:
       changeDAQStatus(DataAcquisitionStatus::INITIALISING,
                       DataAcquisitionStatus::ACTIVE);
       break;
-   case AspectDetector::INITIALISED:
+   case GigEDetector::INITIALISED:
       changeDAQStatus(DataAcquisitionStatus::INITIALISING,
                       DataAcquisitionStatus::DONE);
       break;
-   case AspectDetector::WAITING_DARK:
+   case GigEDetector::WAITING_DARK:
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::WAITING_DARK);
       break;
-   case AspectDetector::OFFSETS:
+   case GigEDetector::OFFSETS:
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::OFFSETS);
       break;
-   case AspectDetector::OFFSETS_PREP:
+   case GigEDetector::OFFSETS_PREP:
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::OFFSETS_PREP);
       break;
-   case AspectDetector::COLLECTING_PREP:
+   case GigEDetector::COLLECTING_PREP:
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::COLLECTING_PREP);
       break;
-   case AspectDetector::COLLECTING:
+   case GigEDetector::COLLECTING:
       waitingForTrigger = false;
       changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
                       DataAcquisitionStatus::COLLECTING);
       writeToFileNumber = ++currentImageNumber;
       break;
-   case AspectDetector::WAITING_TRIGGER:
+   case GigEDetector::WAITING_TRIGGER:
       waitingForTrigger = true;
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::WAITING_TRIGGER);
@@ -586,7 +613,7 @@ void DataAcquisition::receiveState(AspectDetector::DetectorState detectorState)
          biasRefreshRequired = false;
       }
       break;
-   case AspectDetector::TRIGGERING_STOPPED:
+   case GigEDetector::TRIGGERING_STOPPED:
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::TRIGGERING_STOPPED);
       changeDAQStatus(DataAcquisitionStatus::IDLE,
@@ -661,6 +688,17 @@ void DataAcquisition::handleExternalTriggerReceived()
    }
 }
 
+void DataAcquisition::handleBufferReady(unsigned char *transferBuffer)
+{
+   //qDebug() << "\n================== In DataAcquisition callback" << path << " AND mTime = " << mPos->mTime;
+   if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
+   {
+      hxtProcessor->pushTransferBuffer(transferBuffer);
+      hxtProcessor->pushMotorPositions(&motorPositions);
+   }
+
+}
+
 void DataAcquisition::handleTrigger()
 {
    reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
@@ -688,7 +726,7 @@ void DataAcquisition::handleStopTrigger()
    }
    else
    {
-      emit executeCommand(AspectDetector::STOP_TRIGGER, 0, 0);
+      emit executeCommand(GigEDetector::STOP_TRIGGER, 0, 0);
    }
 }
 
@@ -701,9 +739,9 @@ void DataAcquisition::handleCancelOffsets()
 {
    abort = true;
    collecting = false;
-   emit executeCommand(AspectDetector::STATE, AspectDetector::READY, 0);
+   emit executeCommand(GigEDetector::STATE, GigEDetector::READY, 0);
    // Following 2 line necessary for when soft trigger cancelled.
-   aspectDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
 }
 
@@ -716,9 +754,9 @@ void DataAcquisition::handleCancelReducedDataCollection()
 {
    abort = true;
    collecting = false;
-   emit executeCommand(AspectDetector::STATE, AspectDetector::READY, 0);
+   emit executeCommand(GigEDetector::STATE, GigEDetector::READY, 0);
    // Following 2 line necessary for when soft trigger cancelled.
-   aspectDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
 }
 
@@ -745,7 +783,8 @@ void DataAcquisition::handleBiasState(bool biasOn)
 void DataAcquisition::handleAbortDAQ()
 {
    setAbort(true);
-   emit executeCommand(AspectDetector::ABORT, 0, 0);
+   gigEDetector->abort(true);
+   //emit executeCommand(GigEDetector::ABORT, 0, 0);
 }
 
 void DataAcquisition::setAbort(bool abort)

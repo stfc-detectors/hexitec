@@ -8,7 +8,8 @@
 #include <QObject>
 #include <QThread>
 #include <QHash>
-#include "aspectdetector.h"
+#include "motor.h"
+#include "gigedetector.h"
 #include "keithley.h"
 #include "dataacquisitionmodel.h"
 #include "dataacquisitiondefinition.h"
@@ -20,7 +21,7 @@
 class DataAcquisition : public QThread, public Reservable
 {
    Q_OBJECT
-
+/*
    static LONG __cdecl fileCallback(CONST LPSTR path)
    {
       LONG status = 0;
@@ -32,7 +33,7 @@ class DataAcquisition : public QThread, public Reservable
 
       return status;
    }
-
+*/
 public:
    static DataAcquisition *instance();
    ~DataAcquisition();
@@ -72,10 +73,10 @@ private:
                         DataAcquisitionStatus::MinorStatus minorStatus);
    DataAcquisitionModel *dataAcquisitionModel;
    DataAcquisitionDefinition *dataAcquisitionDefinition;
-   AspectDetector *aspectDetector;
+   GigEDetector *gigEDetector;
    FileWriter *imageIndicatorFile;
    Keithley *keithley;
-   AspectDetector::Mode mode;
+   GigEDetector::Mode mode;
    int splitDataCollections;
    int nDaq;
    int nRepeat;
@@ -86,7 +87,7 @@ private:
    bool biasRefreshRequired;
    bool appendRepeatCount;
    bool abort;
-   AspectDetector::DetectorState detectorState;
+   GigEDetector::DetectorState detectorState;
    double tdp;
    DataAcquisitionStatus daqStatus;
    DataAcquisitionStatus::MajorStatus storedMajorStatus;
@@ -98,8 +99,9 @@ private:
    QList <QObject *> rdaql;
    Reservation reservation;
 
+   void performGigEDefaultDataCollection();
 signals:
-   void executeCommand(AspectDetector::DetectorCommand, int, int);
+   void executeCommand(GigEDetector::DetectorCommand, int, int);
    void executeOffsets();
    void executeReducedDataCollection();
    void storeBiasSettings();
@@ -111,8 +113,8 @@ signals:
    void dataAcquisitionStatusChanged(DataAcquisitionStatus dataAcquisitionStatus);
 public slots:
    void handleAbortDAQ();
-   void handleModeChanged(AspectDetector::Mode mode);
-   void receiveState(AspectDetector::DetectorState detectorState);
+   void handleModeChanged(GigEDetector::Mode mode);
+   void receiveState(GigEDetector::DetectorState detectorState);
    void handleCollectReducedImages();
    void handleCollectFixedImages();
    void handleInitTrigger();
@@ -129,6 +131,7 @@ public slots:
    void handleMonitorData(MonitorData *md);
    void positionChanged(Motor *motor, const QVariant & value);
    void handleExternalTriggerReceived();
+   void handleBufferReady(unsigned char * transferBuffer);
 private slots:
    //void handlePushFilename();
 };

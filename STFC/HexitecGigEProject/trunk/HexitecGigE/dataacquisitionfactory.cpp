@@ -3,7 +3,6 @@
 #include "motor.h"
 #include "scriptingwidget.h"
 #include "dataacquisitiondefinition.h"
-//#include "serialport.h"
 
 DataAcquisitionFactory *DataAcquisitionFactory::dafInstance = 0;
 
@@ -76,23 +75,18 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
     * The DetectorMonitor created by the DetectorFactory uses the keithley!
     */
    detectorFactory = DetectorFactory::instance();
-   detectorFactory->createAspectDetector("aspect");
+   qDebug() <<"detectorFactory->createGigEDetector(parent), parent:" << parent;
+   detectorFactory->createGigEDetector(parent);
 
    dataAcquisition = DataAcquisition::instance();
    dataAcquisition->setProperty("objectName", "daq");
-   //dataAcquisitionModel = new DataAcquisitionModel(dataAcquisitionForm, detectorControlForm);
+
    dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm);
    dataAcquisitionModel->setProperty("objectName", "daqModel");
    connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
            SLOT(addObject(QObject*, bool, bool)));
    emit addObject(dataAcquisition, FALSE, TRUE);
    emit addObject(dataAcquisitionModel, FALSE, TRUE);
-/*
-   SerialPort *serialPort1 = new SerialPort("COM1");
-   SerialPort *serialPort2 = new SerialPort("COM2");
-   serialPort1->setProperty("objectName", "sp1");
-   emit addObject(serialPort1, TRUE, FALSE);
-*/
 
    connectMotorsToDAQ();
 }
@@ -122,11 +116,11 @@ DataAcquisitionFactory::~DataAcquisitionFactory()
    delete motorFactory;
 }
 
-DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm)
+DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent)
 {
    if (dafInstance == 0)
    {
-      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm);
+      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm, parent);
    }
 
    return dafInstance;

@@ -2,6 +2,7 @@
 #define DATAACQUISITIONDEFINITION_H
 
 #include "detectorfilename.h"
+#include "inifile.h"
 
 class DataAcquisitionDefinition
 {
@@ -27,6 +28,7 @@ public:
 private:
    DetectorFilename dataFilename;
    DetectorFilename logFilename;
+   IniFile *twoEasyIniFile;
    bool logging;
    bool offsets;
    double duration;

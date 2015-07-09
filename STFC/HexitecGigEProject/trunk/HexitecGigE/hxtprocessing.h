@@ -40,6 +40,7 @@ public:
     void run();
 
     void pushRawFileName(string aFileName); // Add raw filename onto fileQueue queue
+    void pushTransferBuffer(unsigned char *transferBuffer); // Add transfer buffer onto queue
     int executeProcessing();
     int checkConfigValid();
 
@@ -112,6 +113,7 @@ signals:
     void hexitechSignalManualProcessingFinished();
     void hexitechRemoveAnyExcessSlices();
     void hexitechUnprocessedFiles(bool bFilesExists);
+    void returnBufferReady(unsigned char *transferBuffer);
 
 private slots:
     void savePrefix(bool bPrefixChecked);

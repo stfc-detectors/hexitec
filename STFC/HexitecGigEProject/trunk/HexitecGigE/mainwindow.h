@@ -97,6 +97,9 @@ signals:
    void manualProcessingAbandoned();
    // Signal to processingWindow->getHxtProcessor to remove unprocessed raw files
    void removeUnprocessedFiles(bool bRemoveFiles);
+   void executeBufferReady(unsigned char * transferBuffer);
+   void executeReturnBufferReady(unsigned char * transferBuffer);
+   void executeShowImage();
 
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
@@ -127,6 +130,9 @@ public slots:
    void updateHexitechProcessingStatus(bool isBusy);
    // ProcessingWindow signals whether Visualisation tab should be updated
    void updateVisualisationTab(bool bUpdate);
+   void handleBufferReady();
+   void handleReturnBufferReady(unsigned char *buffer);
+   void handleShowImage();
 };
 
 #endif

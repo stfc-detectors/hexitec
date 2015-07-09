@@ -241,11 +241,11 @@ void DataAcquisitionForm::modeChanged(int mode)
    ui->mode->setCurrentIndex(mode);
    if (ui->mode->currentText() != invalidItemText)
    {
-      emit executeCommand(AspectDetector::CONFIGURE, mode);
+      emit executeCommand(GigEDetector::CONFIGURE, mode);
    }
 }
 
-void DataAcquisitionForm::handleModeChanged(AspectDetector::Mode mode)
+void DataAcquisitionForm::handleModeChanged(GigEDetector::Mode mode)
 {
    //qDebug() << "handleModeChanged";
    ui->mode->setCurrentIndex(mode);
@@ -517,7 +517,7 @@ void DataAcquisitionForm::guiWaitingTrigger()
    int mode = ui->mode->currentIndex();
    guiDetectorBusy();
 
-   if (mode == AspectDetector::SOFT_TRIGGER)
+   if (mode == GigEDetector::SOFT_TRIGGER)
    {
        ui->trigger->setEnabled(true);
    }
@@ -567,7 +567,7 @@ void DataAcquisitionForm::guiMode(int mode)
    disableRepeats();
    switch (mode)
    {
-   case AspectDetector::CONTINUOUS:
+   case GigEDetector::CONTINUOUS:
       ui->collectImages->setEnabled(true);
       ui->duration->setEnabled(true);
       ui->dataFileDirectory->setEnabled(true);
@@ -579,7 +579,7 @@ void DataAcquisitionForm::guiMode(int mode)
       ui->stopTrigger->setEnabled(false);
       enableRepeats(mode);
       break;
-   case AspectDetector::SOFT_TRIGGER:
+   case GigEDetector::SOFT_TRIGGER:
       ui->collectImages->setEnabled(false);
       ui->duration->setEnabled(true);
       ui->dataFileDirectory->setEnabled(true);
@@ -590,7 +590,7 @@ void DataAcquisitionForm::guiMode(int mode)
       ui->initTrigger->setEnabled(true);
       ui->stopTrigger->setEnabled(false);
       break;
-   case AspectDetector::EXTERNAL_TRIGGER:
+   case GigEDetector::EXTERNAL_TRIGGER:
       ui->collectImages->setEnabled(false);
       ui->duration->setEnabled(true);
       ui->dataFileDirectory->setEnabled(true);
@@ -601,8 +601,9 @@ void DataAcquisitionForm::guiMode(int mode)
       ui->initTrigger->setEnabled(true);
       ui->stopTrigger->setEnabled(false);
       break;
-   case AspectDetector::FIXED:
-   case AspectDetector::INVALID_MODE:
+   case GigEDetector::FIXED:
+   case GigEDetector::GIGE_DEFAULT:
+   case GigEDetector::INVALID_MODE:
       ui->collectImages->setEnabled(false);
       ui->duration->setEnabled(false);
       ui->dataFileDirectory->setEnabled(false);
@@ -618,7 +619,7 @@ void DataAcquisitionForm::guiMode(int mode)
 
 void DataAcquisitionForm::enableRepeats(int mode)
 {
-   if (mode != AspectDetector::CONTINUOUS)
+   if (mode != GigEDetector::CONTINUOUS)
    {
       ui->repeatCount->setEnabled(false);
       ui->repeatInterval->setEnabled(false);

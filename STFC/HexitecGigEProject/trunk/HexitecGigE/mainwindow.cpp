@@ -154,7 +154,7 @@ MainWindow::MainWindow()
    processingWindow = ProcessingWindow::instance(this);
    if (activeDAQ)
    {
-      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm);
+      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm, this);
       motionControlform = new MotionControlForm();
    }
 
@@ -208,8 +208,11 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-
+   connect(this, SIGNAL(executeBufferReady(unsigned char*)), dataAcquisitionFactory->getDataAcquisition(), SLOT(handleBufferReady(unsigned char*)));
+   connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*)), this, SLOT(handleReturnBufferReady(unsigned char*)));
    emit initialiseProcessingWindow();
+
+   connect(this, SIGNAL(executeShowImage()), DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
 }
 
 MainWindow::~MainWindow()
@@ -880,3 +883,18 @@ bool MainWindow::checkDAQChoice()
    return activeDAQ;
 }
 
+void MainWindow::handleBufferReady()
+{
+   emit executeBufferReady(GigEDetector::getBufferReady());
+}
+
+void MainWindow::handleReturnBufferReady(unsigned char * buffer)
+{
+     GigEDetector::handleReturnBufferReady(buffer);
+//   emit executeReturnBufferReady(buffer);
+}
+
+void MainWindow::handleShowImage()
+{
+   emit executeShowImage();
+}

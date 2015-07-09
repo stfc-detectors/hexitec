@@ -6,7 +6,7 @@
 #include "keithley.h"
 #include "monitordata.h"
 #include "dpwarningdialog.h"
-#include "aspectdetector.h"
+#include "gigedetector.h"
 #include "dataacquisitionstatus.h"
 
 namespace Ui {
@@ -49,7 +49,7 @@ public slots:
     void handleMonitorData(MonitorData *md);
     void handleTemperatureBelowDP();
     void handleTemperatureAboveDP();
-    void handleModeChanged(AspectDetector::Mode mode);
+    void handleModeChanged(GigEDetector::Mode mode);
     void setPixmap1(QPixmap pixmap);
     void setPixmap2(QPixmap pixmap);
     void setPixmap3(QPixmap pixmap);
@@ -73,7 +73,7 @@ private slots:
 
 signals:
    void executeCommand(Keithley::VoltageSourceCommand);
-   void executeCommand(AspectDetector::DetectorCommand, int, int);
+   void executeCommand(GigEDetector::DetectorCommand, int, int);
    void collectImagesPressed();
    void abortDAQPressed();
    void fixedImageCountChanged(int);

@@ -69,14 +69,11 @@ SOURCES += main.cpp \
     filewriter.cpp \
     detectorcontrolform.cpp \
     dataacquisitionform.cpp \
-    detectorfactory.cpp \
     dataacquisition.cpp \
     voltageSourceFactory.cpp \
     dataacquisitionmodel.cpp \
     detectorfilename.cpp \
     dataacquisitiondefinition.cpp \
-    detectormonitor.cpp \
-    monitordata.cpp \
     hxtprocessing.cpp \
     processingwindow.cpp \
     dataacquisitionstatus.cpp \
@@ -138,14 +135,12 @@ HEADERS += mainwindow.h \
     filewriter.h \
     detectorcontrolform.h \
     dataacquisitionform.h \
-    detectorfactory.h \
+//    \
     dataacquisition.h \
     voltageSourceFactory.h \
     dataacquisitionmodel.h \
     detectorfilename.h \
     dataacquisitiondefinition.h \
-    detectormonitor.h \
-    monitordata.h \
     hxtprocessing.h \
     processingwindow.h \
     dataacquisitionstatus.h \
@@ -184,7 +179,7 @@ DSoFt64 {
   DEFINES += OS_WIN
   LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
   LIBS += $$quote(-LC:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/lib64/msvc/) -lNIDAQmx
-  LIBS += ../DetectorLib/Hexitec.lib /DELAYLOAD:Hexitec.dll
+  LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
   LIBS += ../TemperatureHumidityLib/iowkit.lib /DELAYLOAD:iowkit.dll
   LIBS += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/lib64/msvc/ni4882.obj"
   LIBS += $$quote(-LC:/Program Files/fieldtalk/lib/win/x64/release/) -llibmbusmaster
@@ -248,7 +243,7 @@ DSoFt64 {
   LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
   LIBS += $$quote(-LC:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/Lib64/msvc/) -lNIDAQmx
   LIBS += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/Lib64/MSVC/ni4882.obj"
-  LIBS += ../DetectorLib/Hexitec.lib /DELAYLOAD:Hexitec.dll
+  LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
   LIBS += $$quote(-LC:/Program Files/fieldtalk/lib/win/x64/release/) -llibmbusmaster
   LIBS += ../TemperatureHumidityLib/iowkit.lib /DELAYLOAD:iowkit.dll
   CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2 /DELAYLOAD:Galil2.dll
@@ -291,7 +286,7 @@ DSoFt64 {
     # te2aspect14 PC 64 bit configuration
     DEFINES += NONI
     DEFINES += OS_WIN
-    LIBS += ../DetectorLib/Hexitec.lib /DELAYLOAD:Hexitec.dll
+    LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
     LIBS += ../TemperatureHumidityLib/iowkit.lib /DELAYLOAD:iowkit.dll
     CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../TemperatureHumidityLib/release/TemperatureHumidityLib.lib ../SerialPortLib/release/SerialPortLib.lib
     CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib -L../SerialPortLib/qextserialport/release -lQt5ExtSerialPort1 /DELAYLOAD:XpsLib.dll
