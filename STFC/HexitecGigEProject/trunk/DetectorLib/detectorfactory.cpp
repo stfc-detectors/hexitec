@@ -24,7 +24,7 @@ GigEDetector *DetectorFactory::createGigEDetector(QObject *parent)
    imageAcquirer = new ImageAcquirer(this);
    imageAcquirer->setDetector(gigEDetector);
    bufferReadyEvent = gigEDetector->getBufferReadyEvent();
-   stopDAQEvent = gigEDetector->getStopDAQEvent();
+   //stopDAQEvent = gigEDetector->getStopDAQEvent();
    showImageEvent = gigEDetector->getShowImageEvent();
 //   detectorMonitor = new DetectorMonitor(gigEDetector, loggingInterval);
    detectorMonitor = new DetectorMonitor(gigEDetector, NULL);
@@ -47,10 +47,10 @@ WindowsEvent *DetectorFactory::getBufferReadyEvent()
    return bufferReadyEvent;
 }
 
-WindowsEvent *DetectorFactory::getStopDAQEvent()
+/*WindowsEvent *DetectorFactory::getStopDAQEvent()
 {
    return stopDAQEvent;
-}
+}*/
 
 WindowsEvent *DetectorFactory::getShowImageEvent()
 {

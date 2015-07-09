@@ -53,8 +53,8 @@ void GigEDetector::connectUp(const QObject *parent)
 {
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
-   stopDAQEvent = new WindowsEvent(HEXITEC_STOP_DAQ, true);
-   stopDAQEvent->connect1(this, SLOT(handleStop()));
+   //stopDAQEvent = new WindowsEvent(HEXITEC_STOP_DAQ, true);
+   //stopDAQEvent->connect1(this, SLOT(handleStop()));
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
 
@@ -268,10 +268,10 @@ WindowsEvent *GigEDetector::getBufferReadyEvent()
    return bufferReadyEvent;
 }
 
-WindowsEvent *GigEDetector::getStopDAQEvent()
+/*WindowsEvent *GigEDetector::getStopDAQEvent()
 {
    return stopDAQEvent;
-}
+}*/
 
 WindowsEvent *GigEDetector::getShowImageEvent()
 {
