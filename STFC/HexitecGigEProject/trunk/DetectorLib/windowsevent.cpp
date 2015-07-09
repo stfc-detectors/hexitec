@@ -30,3 +30,13 @@ QWinEventNotifier *WindowsEvent::getNotifier()
 {
    return notifier;
 }
+
+void WindowsEvent::SetEvent1()
+{
+   int status;
+   if (!(status = SetEvent(handle)))
+   {
+      qDebug() << "Widows event set failed : status = " << status;
+   }
+
+}

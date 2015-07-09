@@ -18,14 +18,28 @@ DEFINES += DETECTORLIB_LIBRARY HEXITEC_EXPORTS
 
 SOURCES += windowsevent.cpp \
     inifile.cpp \
-    aspectdetector.cpp
+#    aspectdetector.cpp \
+    detectorfactory.cpp \
+    detectormonitor.cpp \
+    gigedetector.cpp \
+    detectorfilename.cpp \
+    monitordata.cpp \
+    imageacquirer.cpp
 
 HEADERS +=DetectorLib_global.h \
     windowsevent.h \
     inifile.h \
-    aspectdetector.h
+#    aspectdetector.h \
+    detectorfactory.h \
+    detectormonitor.h \
+    gigedetector.h \
+    detectorfilename.h \
+    monitordata.h \
+    GigE_extended.h \
+    imageacquirer.h
 
-LIBS += Hexitec.lib Kernel32.lib
+LIBS += Hexitec.lib GigE.lib Kernel32.lib
+LIBS += GigE.lib Kernel32.lib
 CONFIG(release, debug|release): LIBS += ../TemperatureHumidityLib/release/TemperatureHumidityLib.lib
 CONFIG(debug, debug|release): LIBS += ../TemperatureHumidityLib/debug/TemperatureHumidityLib.lib
 INCLUDEPATH += ../DetectorLib

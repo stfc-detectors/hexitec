@@ -17,6 +17,7 @@ public:
    HANDLE handle;
    QWinEventNotifier *notifier;
    QWinEventNotifier *getNotifier();
+   void SetEvent1();
 };
 
 #endif // WINDOWSEVENT_H
