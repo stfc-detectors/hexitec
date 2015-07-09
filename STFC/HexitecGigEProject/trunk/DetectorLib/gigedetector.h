@@ -46,7 +46,6 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    void acquireImages();
 
    WindowsEvent *getBufferReadyEvent();
-   //WindowsEvent *getStopDAQEvent();
    WindowsEvent *getShowImageEvent();
    static PUCHAR getBufferReady();
    void abort(bool restart);
@@ -75,7 +74,6 @@ private:
    unsigned int xResolution;
    unsigned int yResolution;
    WindowsEvent *bufferReadyEvent;
-   //WindowsEvent *stopDAQEvent;
    WindowsEvent *showImageEvent;
    const QObject *parent;
    Mode mode;
@@ -96,6 +94,7 @@ private:
    int *summedImageDest;
    unsigned char *charImageDest;
    QPixmap imagePixmap;
+   unsigned long framesPerBuffer;
 
 
    int setImageFormat(unsigned long xResolution, unsigned long yResolution);  

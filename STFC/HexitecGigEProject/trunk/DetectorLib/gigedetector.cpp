@@ -53,8 +53,6 @@ void GigEDetector::connectUp(const QObject *parent)
 {
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
-   //stopDAQEvent = new WindowsEvent(HEXITEC_STOP_DAQ, true);
-   //stopDAQEvent->connect1(this, SLOT(handleStop()));
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
 
@@ -85,7 +83,7 @@ PUCHAR GigEDetector::getBufferReady()
 
 void GigEDetector::handleReturnBufferReady(PUCHAR transferBuffer)
 {
-   qDebug() << "handleReturnBufferReady(PUCHAR transferBuffer)";
+   qDebug() << "handleReturnBufferReady(PUCHAR transferBuffer), address" << transferBuffer;
    GigE::ReturnBuffer(GigE::detectorHandle, transferBuffer);
 }
 
@@ -114,7 +112,7 @@ int GigEDetector::initialiseConnection()
 int GigEDetector::terminateConnection()
 {
    LONG status = -1;
-/*
+
    status = GigE::CloseSerialPort(GigE::detectorHandle);
    qDebug() <<"CloseSerialPort returned status " << status;
 
@@ -123,7 +121,7 @@ int GigEDetector::terminateConnection()
 
    status = GigE::CloseStream(GigE::detectorHandle);
    qDebug() <<" CloseStream returned status " << status;
-*/
+
    status = GigE::ExitDevice(GigE::detectorHandle);
 
 //   status = GetLastResult(detectorHandle);
@@ -148,13 +146,27 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
 int GigEDetector::configure(unsigned long xResolution, unsigned long yResolution)
 {
    LONG status = -1;
+   double dataAcquisitionDuration;
+   double frameTime = 1.0/400.0;
+
+   mode = GIGE_DEFAULT;
+
+   qDebug() << "CONFIGURING mode " << mode;
+   if (mode == GIGE_DEFAULT)
+   {
+      dataAcquisitionDuration = 1;
+   }
+   else
+   {
+      dataAcquisitionDuration = this->dataAcquisitionDuration;
+   }
+   qDebug() << "CONFIGURING daqd " << dataAcquisitionDuration;
+   framesPerBuffer = (unsigned long) dataAcquisitionDuration / frameTime;
 
    status = GigE::ClosePipeline(GigE::detectorHandle);
-   qDebug() << "CONFIGURING ClosePipeline GigE::detectorHandle:" <<  GigE::detectorHandle
-            <<"status:" << status << "Last error:" << GigE::GetLastResult(GigE::detectorHandle);
-
    status = setImageFormat(xResolution, yResolution);
-   status = GigE::CreatePipeline(GigE::detectorHandle, 512, 100, 100);
+   qDebug() << "CONFIGURING CreatePipeline framesPerBuffer:" <<  framesPerBuffer;
+   status = GigE::CreatePipeline(GigE::detectorHandle, 512, 100, framesPerBuffer);
    qDebug() <<"CreatePipeline returned status " << status;
 
    return status;
@@ -268,11 +280,6 @@ WindowsEvent *GigEDetector::getBufferReadyEvent()
    return bufferReadyEvent;
 }
 
-/*WindowsEvent *GigEDetector::getStopDAQEvent()
-{
-   return stopDAQEvent;
-}*/
-
 WindowsEvent *GigEDetector::getShowImageEvent()
 {
    return showImageEvent;
@@ -290,9 +297,10 @@ void GigEDetector::acquireImages()
 {
    int status;
    ULONGLONG imagesAcquired;
+   ULONG frameCount = count * framesPerBuffer;
 
-   qDebug() <<"acquireImages called, count: " << count <<" In threadId " << QThread::currentThreadId();
-   status = GigE::AcquireImages(GigE::detectorHandle, count, &imagesAcquired);
+   qDebug() <<"acquireImages called, count and frameCount: " << count << " " << frameCount;
+   status = GigE::AcquireImages(GigE::detectorHandle, frameCount, &imagesAcquired);
    qDebug() <<"Acquire images returned status " << status;
    updateState(READY);
 }
@@ -308,8 +316,6 @@ void GigEDetector::abort(bool restart)
    qDebug() << "*** data acquisition stopping ***, threadId" << QThread::currentThreadId();
    GigE::StopAcquisition(GigE::detectorHandle);
    qDebug() << "data acquisition stopped.";
-   //WindowsEvent *stopDAQEvent = DetectorFactory::instance()->getStopDAQEvent();
-   //stopDAQEvent->SetEvent1();
    updateState(READY);
 }
 
@@ -444,8 +450,8 @@ unsigned char *GigEDetector::getImage(int imageNumber)
    qDebug() << "Getting an image from buffer at address: " << buffer;
    imageDest = (short *) malloc(imageSize * sizeof(short));
    image = (unsigned char *) malloc(imageSize * sizeof(unsigned char));
-   memcpy(imageDest, buffer+(segmentSize*2), segmentSize);
-//   GigE::ReturnBuffer(GigE::detectorHandle, buffer);
+   memcpy(imageDest, buffer, segmentSize);
+   handleReturnBufferReady(buffer);
    for (int i = 0; i < imageSize; i++)
    {
       current = imageDest[i];
