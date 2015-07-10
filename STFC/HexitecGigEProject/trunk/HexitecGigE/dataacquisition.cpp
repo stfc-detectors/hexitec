@@ -784,7 +784,6 @@ void DataAcquisition::handleAbortDAQ()
 {
    setAbort(true);
    gigEDetector->abort(true);
-   //emit executeCommand(GigEDetector::ABORT, 0, 0);
 }
 
 void DataAcquisition::setAbort(bool abort)

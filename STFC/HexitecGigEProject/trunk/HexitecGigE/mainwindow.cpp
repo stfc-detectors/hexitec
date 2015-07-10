@@ -891,7 +891,6 @@ void MainWindow::handleBufferReady()
 void MainWindow::handleReturnBufferReady(unsigned char * buffer)
 {
      GigEDetector::handleReturnBufferReady(buffer);
-//   emit executeReturnBufferReady(buffer);
 }
 
 void MainWindow::handleShowImage()
