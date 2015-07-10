@@ -9,12 +9,12 @@ class ImageAcquirer : public QObject
    Q_OBJECT
 public:
    ImageAcquirer(QObject *parent = 0);
+   ~ImageAcquirer();
    void setDetector(GigEDetector *detector);
 
 private:
    QThread *imageAcquirerThread;
-   GigEDetector *detector;
-
+   GigEDetector *detector;   
 signals:
 
 public slots:

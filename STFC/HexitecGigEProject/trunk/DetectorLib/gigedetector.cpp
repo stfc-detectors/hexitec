@@ -487,6 +487,9 @@ unsigned char *GigEDetector::getImage(int imageNumber)
 
 void GigEDetector::handleShowImage()
 {
-   imageDestToPixmap();
+   if (mode == GIGE_DEFAULT)
+   {
+      imageDestToPixmap();
+   }
 }
 
