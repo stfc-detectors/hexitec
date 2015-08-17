@@ -19,6 +19,7 @@ public:
    GigEDetector *getGigEDetector();
    DetectorMonitor *getDetectorMonitor();
    WindowsEvent *getBufferReadyEvent();
+   WindowsEvent *getReturnBufferReadyEvent();
    WindowsEvent *getShowImageEvent();
 protected:
    explicit DetectorFactory(const QObject *parent = 0);
@@ -29,6 +30,7 @@ private:
    DetectorMonitor *detectorMonitor;
    const QObject *parent;
    WindowsEvent *bufferReadyEvent;
+   WindowsEvent *returnBufferReadyEvent;
    WindowsEvent *showImageEvent;
 };
 

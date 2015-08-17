@@ -21,8 +21,9 @@
 
 namespace GigE 
 {
+   #define NOMINMAX
    #include "GigE.h"
-   HANDLE detectorHandle;
+   typedef HANDLE DETECTORHANDLE;
 }
 
 #endif // GIGE_EXTENDED_H

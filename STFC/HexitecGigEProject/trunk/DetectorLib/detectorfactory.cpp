@@ -20,11 +20,22 @@ DetectorFactory *DetectorFactory::instance(const QObject *parent)
 
 GigEDetector *DetectorFactory::createGigEDetector(QObject *parent)
 {
-   gigEDetector = new GigEDetector(parent);
+/*   QString aspectFilename = Parameters::aspectIniFilename;
+
+   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
+   if (settings.contains("aspectIniFilename"))
+   {
+      aspectFilename = settings.value("aspectIniFilename").toString();
+   }
+*/
+   QString aspectFilename = "TEST";
+   gigEDetector = new GigEDetector(aspectFilename, parent);
    imageAcquirer = new ImageAcquirer(this);
    imageAcquirer->setDetector(gigEDetector);
    bufferReadyEvent = gigEDetector->getBufferReadyEvent();
+   returnBufferReadyEvent = gigEDetector->getReturnBufferReadyEvent();
    showImageEvent = gigEDetector->getShowImageEvent();
+
 //   detectorMonitor = new DetectorMonitor(gigEDetector, loggingInterval);
    detectorMonitor = new DetectorMonitor(gigEDetector, NULL);
 
@@ -44,6 +55,11 @@ DetectorMonitor *DetectorFactory::getDetectorMonitor()
 WindowsEvent *DetectorFactory::getBufferReadyEvent()
 {
    return bufferReadyEvent;
+}
+
+WindowsEvent *DetectorFactory::getReturnBufferReadyEvent()
+{
+   return returnBufferReadyEvent;
 }
 
 WindowsEvent *DetectorFactory::getShowImageEvent()

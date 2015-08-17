@@ -1,6 +1,6 @@
 #ifndef WINDOWSEVENT_H
 #define WINDOWSEVENT_H
-
+#define NOMINMAX
 #include <QObject>
 #include <Windows.h>
 #include <QString>
