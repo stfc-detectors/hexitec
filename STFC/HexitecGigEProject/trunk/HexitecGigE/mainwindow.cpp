@@ -208,7 +208,8 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-   connect(this, SIGNAL(executeBufferReady(unsigned char*)), dataAcquisitionFactory->getDataAcquisition(), SLOT(handleBufferReady(unsigned char*)));
+   connect(this, SIGNAL(executeBufferReady(unsigned char*, unsigned long)), dataAcquisitionFactory->getDataAcquisition(),
+           SLOT(handleBufferReady(unsigned char*, unsigned long)));
    connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*)), this, SLOT(handleReturnBufferReady(unsigned char*)));
    emit initialiseProcessingWindow();
 
@@ -885,15 +886,18 @@ bool MainWindow::checkDAQChoice()
 
 void MainWindow::handleBufferReady()
 {
-   emit executeBufferReady(GigEDetector::getBufferReady());
+//   emit executeBufferReady(GigEDetector::getBufferReady(), GigEDetector::getValidFrames());
 }
 
 void MainWindow::handleReturnBufferReady(unsigned char * buffer)
 {
-     GigEDetector::handleReturnBufferReady(buffer);
+   qDebug() << "Need to return buffer here!!!!!";
+//   emit executeReturnBufferReady(buffer);
+//   GigEDetector::handleReturnBufferReady(buffer);
 }
 
 void MainWindow::handleShowImage()
 {
+   qDebug() <<"MainWindow:handleShowImage called!!!!!!!!!!!!";
    emit executeShowImage();
 }

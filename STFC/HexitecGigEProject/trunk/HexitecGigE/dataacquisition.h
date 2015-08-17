@@ -131,7 +131,7 @@ public slots:
    void handleMonitorData(MonitorData *md);
    void positionChanged(Motor *motor, const QVariant & value);
    void handleExternalTriggerReceived();
-   void handleBufferReady(unsigned char * transferBuffer);
+   void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
 private slots:
    //void handlePushFilename();
 };

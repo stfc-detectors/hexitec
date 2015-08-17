@@ -40,7 +40,7 @@ public:
     void run();
 
     void pushRawFileName(string aFileName); // Add raw filename onto fileQueue queue
-    void pushTransferBuffer(unsigned char *transferBuffer); // Add transfer buffer onto queue
+    void pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames); // Add transfer buffer onto queue
     int executeProcessing();
     int checkConfigValid();
 

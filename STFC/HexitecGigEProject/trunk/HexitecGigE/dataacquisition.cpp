@@ -688,12 +688,12 @@ void DataAcquisition::handleExternalTriggerReceived()
    }
 }
 
-void DataAcquisition::handleBufferReady(unsigned char *transferBuffer)
+void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
 {
-   //qDebug() << "\n================== In DataAcquisition callback" << path << " AND mTime = " << mPos->mTime;
+   qDebug() << "DataAcquisition::handleBufferReady passing buffer address and frame count to processing";
    if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
    {
-      hxtProcessor->pushTransferBuffer(transferBuffer);
+      hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
       hxtProcessor->pushMotorPositions(&motorPositions);
    }
 
