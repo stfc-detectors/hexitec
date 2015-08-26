@@ -37,12 +37,14 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 
 GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 {
-   aspectFilename = "C:/karen/STFC/Technical/Detector/hexitecGigE.ini";
+   qDebug() << "aspectFilename = " << aspectFilename;
+   aspectFilename = "C:/karen/STFC/Technical/Detector/aspectGigE.ini";
    this->aspectFilename = aspectFilename;
 //   detectorHandle = new HANDLE();
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
+
 
    readIniFile(this->aspectFilename);
 
@@ -56,6 +58,9 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::Mode");
    qRegisterMetaType<HANDLE>("HANDLE");
    connectUp(parent);
+
+   qDebug() <<"GigEDetector Constructor";
+   initialiseConnection();
 }
 
 GigEDetector::~GigEDetector()
@@ -74,7 +79,7 @@ void GigEDetector::connectUp(const QObject *parent)
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
    returnBufferReadyEvent = new WindowsEvent(HEXITEC_RETURN_BUFFER_READY, true);
-   returnBufferReadyEvent->connect1(this, SLOT(handleReturnBufferReady()));
+//   returnBufferReadyEvent->connect1(this, SLOT(handleReturnBufferReady()));
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
 
@@ -89,8 +94,8 @@ void GigEDetector::connectUp(const QObject *parent)
    triggeredReducedDataEvent->connect1(this, SLOT(handleTriggeredReducedData()));
    stopEvent->connect1(this, SLOT(handleStop()));
 */
-//   connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
-   connect(this, SIGNAL(executeGetImages(int, int)), this, SLOT(handleExecuteGetImages(int, int)));
+   connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
+   connect(this, SIGNAL(executeGetImages()), this, SLOT(handleExecuteGetImages()));
 //   connect(this, SIGNAL(notifyStop()), this, SLOT(handleStop()));
 }
 
@@ -127,8 +132,10 @@ int GigEDetector::initialiseConnection()
    GigEDeviceInfoStr deviceInfo = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
    updateState(INITIALISING);
 
+   qDebug() <<"InitDevice";
    status = InitDevice(&detectorHandle, deviceDescriptor, &pleoraErrorCode, pleoraErrorCodeStr,
                              &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen);
+   qDebug() <<"InitDevice status" << status;
    showError("InitDevice", status);
 
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
@@ -147,6 +154,15 @@ int GigEDetector::initialiseConnection()
       qDebug() <<"\tGateWay:" << deviceInfo.GateWay;
    }
 
+   status = CloseSerialPort(detectorHandle);
+   showError( "CloseSerialPort", status);
+
+   status = ClosePipeline(detectorHandle);
+   showError( "ClosePipeline", status);
+
+   status = CloseStream(detectorHandle);
+   showError( "CloseStream", status);
+
    status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d );
    showError("OpenSerialPort", status);
 
@@ -154,10 +170,11 @@ int GigEDetector::initialiseConnection()
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
-   HexitecSystemConfig systemConfig = { 2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4 };
-   HexitecOperationMode	operationMode = { AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, AS_CONTROL_ENABLED, AS_CONTROL_DISABLED, AS_CONTROL_ENABLED, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED, 0 };
-
-   status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig, &xRes, &yRes, &frameTime, &collectDcTime, 1000);
+   xRes = 80;
+   yRes = 80;
+//HexitecSensorConfig		sensorConfig = { AS_HEXITEC_GAIN_HIGH, 1, 1, 6, 0, 1, 8, { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }, { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } };
+   status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
+                              &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
    if (!status)
    {
@@ -209,23 +226,26 @@ int GigEDetector::configure(unsigned long xResolution, unsigned long yResolution
    LONG status = -1;
    double dataAcquisitionDuration;
 
-   mode = GIGE_DEFAULT;
+//   mode = GIGE_DEFAULT;
+   mode = CONTINUOUS;
+   qDebug() << "!!!!!!!!!!!!!!!!!GigEDetector::configure!!!!!!!!!!!!!!!!!!!!";
 
    if (mode == GIGE_DEFAULT)
    {
       dataAcquisitionDuration = 1.0;
+      framesPerBuffer = (unsigned long) (1000.0/ frameTime);
    }
    else
    {
-      dataAcquisitionDuration = this->dataAcquisitionDuration;
+      framesPerBuffer = 100;
+      count = 1;
    }
-
-   framesPerBuffer = (unsigned long) dataAcquisitionDuration / frameTime;
 
    status = ClosePipeline(detectorHandle);
    status = setImageFormat(xResolution, yResolution);
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
 
+   qDebug() << "!!!!!!!!!!!!!!!!!GigEDetector::configure DONE!!!!!!!!!!!!!!!";
    return status;
 }
 
@@ -248,12 +268,13 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    {
       getImages(ival1, ival2);
    }
-/*
+
    else if (command == COLLECT_OFFSETS)
    {
-      getOffsets();
+      qDebug() << "command == COLLECT_OFFSETS";
+//      getOffsets();
    }
-   else if (command == TRIGGER)
+/*   else if (command == TRIGGER)
    {
       triggerCollection();
    }
@@ -326,7 +347,43 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
 
 void GigEDetector::getImages(int count, int ndaq)
 {
-   emit executeGetImages(count, ndaq);
+   this->count = count;
+   configure(80, 80);
+   setGetImageParams();
+
+   qDebug() << "ndaq, offsetsOn" <<  ndaq << offsetsOn;
+
+   ndaq = 0;
+   if (ndaq == 0 && offsetsOn)
+   {
+      updateState(OFFSETS_PREP);
+      emit prepareForOffsets();
+   }
+   else
+   {
+//      emit executeGetImages();
+      handleReducedDataCollection();
+   }
+
+}
+
+void GigEDetector::setGetImageParams()
+{
+   QString path;
+
+//   streaming = 1;
+   path = directory + "/" + prefix;
+   qDebug() << "setGetImageParams() path = " << path;
+   /*
+   if (timestampOn)
+   {
+      path += QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + "_reduced";
+   }
+*/
+   path.replace(QString("/"), QString("\\"));
+   sprintf_s(pathString, "%s", path.toUtf8().data());
+
+   imgCntAverage = 1;
 }
 
 WindowsEvent *GigEDetector::getBufferReadyEvent()
@@ -344,27 +401,64 @@ WindowsEvent *GigEDetector::getShowImageEvent()
    return showImageEvent;
 }
 
-void GigEDetector::handleExecuteGetImages(int count, int ndaq)
+void GigEDetector::handleReducedDataCollection()
+{
+   qDebug() << "handleReducedDataCollection";
+   emit executeGetImages();
+}
+
+void GigEDetector::handleExecuteGetImages()
 {
    updateState(COLLECTING);
-   this->count = count;
+//   this->count = count;
    emit executeAcquireImages();
+}
+
+void GigEDetector::handleExecuteOffsets()
+{
+   if (offsetsOn)
+   {
+      updateState(OFFSETS);
+      collectOffsets();
+      updateState(COLLECTING_PREP);
+      emit prepareForDataCollection();
+   }
+   else
+   {
+      updateState(READY);
+   }
+}
+
+void GigEDetector::offsetsDialogAccepted()
+{
+//   collectOffsets();
+   qDebug() << "Call collectOffsets() here!!!";
+}
+
+LONG GigEDetector::collectOffsets()
+{
+   qDebug() << "Get GigE to collect and load up offsets here!!!";
+
+   return 0;
 }
 
 void GigEDetector::acquireImages()
 {
-   int status;
-   ULONGLONG imagesAcquired;
-   ULONG frameCount = count * framesPerBuffer;
+   int status = -1;
+   ULONGLONG framesAcquired;
+   double durationSeconds = dataAcquisitionDuration/1000.0;
+   ULONG frameCount = count * ((durationSeconds/frameTime) + 0.5);
    ULONG frameTimeout = (ULONG)(frameTime * 2500.0);
 
    if( frameTimeout < 100 )
    {
       frameTimeout = 100;
    }
+   qDebug() <<"frameTime" << frameTime << "count" << count << "frames per buffer" << framesPerBuffer;
 
-   status = AcquireFrames(detectorHandle, frameCount, &imagesAcquired, frameTimeout);
-   qDebug() <<"Acquire images returned status " << status;
+   qDebug() <<"frameCount" << frameCount << "durationSeconds" << durationSeconds;
+   status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
+   qDebug() <<"Acquire frames returned status " << status << "Acquired frames " << framesAcquired;
    updateState(READY);
 }
 
@@ -421,6 +515,7 @@ void GigEDetector::setDirectory(QString directory)
 
 void GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
 {
+   qDebug() <<"setDataAcquisitionDuration: " << dataAcquisitionDuration;
    this->dataAcquisitionDuration = dataAcquisitionDuration;
 }
 
@@ -515,7 +610,9 @@ unsigned char *GigEDetector::getImage(int imageNumber)
    image = (unsigned char *) malloc(imageSize * sizeof(unsigned char));
    memcpy(imageDest, buffer, segmentSize);
    returnBuffer = buffer;
-   returnBufferReadyEvent->SetEvent1();
+   emit executeReturnBufferReady(returnBuffer);
+
+//   returnBufferReadyEvent->SetEvent1();
    for (int i = 0; i < imageSize; i++)
    {
       current = imageDest[i];
@@ -565,7 +662,7 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
    status = 0;
    iniFile = new IniFile(aspectFilename);
 //   directory = iniFile->getString("Controls/Toplevel Path");
-   directory = "U:/DSoFt_Images";
+   directory = "C:/karen/STFC/Technical/DSoFt_Images";
 //   prefix = iniFile->getString("Controls/Prefix");
    prefix = "Hexitec_";
    qDebug() << "aspectFilename:" << aspectFilename;
@@ -654,7 +751,7 @@ void GigEDetector::showError(const LPSTR context, long asError)
    CHAR	pleoraErrorCodeStr[STR_LENGTH] = { 0 };
    CHAR	pleoraErrorDescription[STR_LENGTH] = { 0 };
 
-   sysError = GetAsErrorMsg( asError, asErrorMessage, STR_LENGTH );
+/*   sysError = GetAsErrorMsg( asError, asErrorMessage, STR_LENGTH );
 
    if( sysError )
    {
@@ -682,4 +779,5 @@ void GigEDetector::showError(const LPSTR context, long asError)
       qDebug() << "Pleora Result Code String:" << pleoraErrorCodeStr;
       qDebug() << "Pleora Result Description:" << pleoraErrorDescription;
    }
+   */
 }

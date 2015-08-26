@@ -61,17 +61,23 @@ signals:
    void writeError(QString message);
    void writeMessage(QString message);
    void executeCommand(GigEDetector::DetectorCommand, int, int);
-   void executeGetImages(int count, int ndaq);
+//   void executeGetImages(int count, int ndaq);
+   void executeGetImages();
    void executeReturnBufferReady(unsigned char * transferBuffer);
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void notifyStop();
    void imageAcquired(QPixmap data);
    void executeAcquireImages();
- public slots:
+   void prepareForOffsets();
+   void prepareForDataCollection();
+public slots:
    void handleShowImage();
    void handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2 = 1);
-   void handleExecuteGetImages(int count, int ndaq);   
+   void handleExecuteGetImages();
    void handleStop();
+   void handleReducedDataCollection();
+   void handleExecuteOffsets();
+   void offsetsDialogAccepted();
    void handleBufferReady();
    void handleReturnBufferReady();
 private:
@@ -91,12 +97,13 @@ private:
    int count;
    QString directory;
    QString prefix;
-   //char pathString[256];
+   char pathString[256];
    // Data acquisition time in mSecs
    double dataAcquisitionDuration;
    unsigned char xRes, xResAcquiredImage;
    unsigned char yRes, yResAcquiredImage;
    double frameTime;
+   int imgCntAverage;
 //   ImageInfoPtr imageInfoPtr;
    short *imageDest;
    int *summedImageDest;
@@ -120,6 +127,8 @@ private:
    unsigned char *getImage(int imageNumber);
    void run();
    void showError(const LPSTR context, long asError);
+   LONG collectOffsets();
+   void setGetImageParams();
 };
 
 #endif // GIGEDETECTOR_H
