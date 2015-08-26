@@ -241,7 +241,8 @@ void DataAcquisitionForm::modeChanged(int mode)
    ui->mode->setCurrentIndex(mode);
    if (ui->mode->currentText() != invalidItemText)
    {
-      emit executeCommand(GigEDetector::CONFIGURE, mode);
+       qDebug() <<"Change GUI sensitivity here!";
+//      emit executeCommand(GigEDetector::CONFIGURE, mode);
    }
 }
 
@@ -622,13 +623,15 @@ void DataAcquisitionForm::guiMode(int mode)
 
 void DataAcquisitionForm::enableRepeats(int mode)
 {
-   if (mode != GigEDetector::CONTINUOUS)
+/*
+ *    if (mode != GigEDetector::CONTINUOUS)
    {
       ui->repeatCount->setEnabled(false);
       ui->repeatInterval->setEnabled(false);
    }
    else
    {
+   */
       ui->repeatCount->setEnabled(true);
       if (ui->repeatCount->value() > 1)
       {
@@ -638,7 +641,7 @@ void DataAcquisitionForm::enableRepeats(int mode)
       {
          ui->repeatInterval->setEnabled(false);
       }
-   }
+//   }
 }
 
 void DataAcquisitionForm::disableRepeats()

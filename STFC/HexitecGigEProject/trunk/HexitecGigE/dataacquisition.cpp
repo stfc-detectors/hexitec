@@ -94,14 +94,11 @@ void DataAcquisition::configureDataCollection()
    {
       splitDataCollections = 1;
    }
-   if (mode == GigEDetector::CONTINUOUS)
+   if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
    {
-      if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
-      {
-         appendRepeatCount = true;
-      }
+      appendRepeatCount = true;
    }
-   //qDebug() << "Data collection to be achieved by repeating " << nRepeat << " collections, each split into " << splitDataCollections;
+   qDebug() << "Data collection to be achieved by repeating " << nRepeat << " collections, each split into " << splitDataCollections;
 
    currentImageNumber = 0;
 
@@ -241,7 +238,7 @@ void DataAcquisition::setDirectory(int repeatCount)
    gigEDetector->setDirectory(*dir);
    delete dir;
 }
-/*
+
 void DataAcquisition::performContinuousDataCollection()
 {
    int nDaq;
@@ -297,8 +294,9 @@ void DataAcquisition::performContinuousDataCollection()
 
    gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
-}*/
+}
 
+/*
 void DataAcquisition::performContinuousDataCollection()
 {
    int nDaq;
@@ -320,7 +318,7 @@ void DataAcquisition::performContinuousDataCollection()
       setDirectory(repeatCount);
       collecting = true;
 
-      emit executeCommand(GigEDetector::COLLECT, 1, 1);
+      emit executeCommand(GigEDetector::COLLECT, 1, 0);
       waitForCollectingDone();
       collecting = false;
 
@@ -338,7 +336,7 @@ void DataAcquisition::performContinuousDataCollection()
    }
    emit restoreBiasSettings();
 }
-
+*/
 void DataAcquisition::performGigEDefaultDataCollection()
 {
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
@@ -452,6 +450,7 @@ void DataAcquisition::setDataAcquisitionTime(int nDaq)
 
 void DataAcquisition::performSingleBiasRefresh()
 {
+   qDebug() << "performSingleBiasRefresh(): biasOn " << biasOn;
    if (biasOn)
    {
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
@@ -465,6 +464,8 @@ void DataAcquisition::performSingleBiasRefresh()
 void DataAcquisition::pauseDataAcquisition()
 {
    int pauseDuration = 0;
+
+   qDebug() <<"pauseDataAcquisition()repeatInterval" << dataAcquisitionDefinition->getRepeatInterval();
 
    if ((pauseDuration = dataAcquisitionDefinition->getRepeatInterval()) > 0)
    {
