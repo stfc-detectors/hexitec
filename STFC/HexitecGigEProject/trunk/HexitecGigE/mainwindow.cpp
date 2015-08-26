@@ -886,7 +886,8 @@ bool MainWindow::checkDAQChoice()
 
 void MainWindow::handleBufferReady()
 {
-//   emit executeBufferReady(GigEDetector::getBufferReady(), GigEDetector::getValidFrames());
+   qDebug() <<"MainWindow:handleBufferReady called!!!!!!!!!!!!";
+   emit executeBufferReady(GigEDetector::getBufferReady(), GigEDetector::getValidFrames());
 }
 
 void MainWindow::handleReturnBufferReady(unsigned char * buffer)

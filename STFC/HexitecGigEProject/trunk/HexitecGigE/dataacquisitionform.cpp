@@ -321,6 +321,7 @@ void DataAcquisitionForm::offsetsDialogRejected()
 
 void DataAcquisitionForm::dataCollectionDialogAccepted()
 {
+   qDebug() << "dataCollectionDialogAccepted()";
    emit executeReducedDataCollection();
 }
 
@@ -565,6 +566,8 @@ void DataAcquisitionForm::guiMode(int mode)
    ui->mode->setEnabled(true);
    ui->loggingEnabled->setEnabled(true);
    disableRepeats();
+
+   mode = GigEDetector::CONTINUOUS;
    switch (mode)
    {
    case GigEDetector::CONTINUOUS:

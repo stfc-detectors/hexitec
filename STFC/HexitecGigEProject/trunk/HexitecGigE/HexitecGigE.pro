@@ -3,7 +3,6 @@
 # Project created by QtCreator 2011-11-24T10:35:18
 #
 #-------------------------------------------------
-
 QT       += core gui script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -78,9 +77,9 @@ SOURCES += main.cpp \
     processingwindow.cpp \
     dataacquisitionstatus.cpp \
     newportxpsmotor.cpp \
-    parameters.cpp \
     setaxesdialog.cpp \
-    displaylegendsdialog.cpp
+    displaylegendsdialog.cpp \
+    parameters.cpp
 
 HEADERS += mainwindow.h \
     voxel.h \
@@ -145,9 +144,9 @@ HEADERS += mainwindow.h \
     processingwindow.h \
     dataacquisitionstatus.h \
     newportxpsmotor.h \
-    parameters.h \
     setaxesdialog.h \
-    displaylegendsdialog.h
+    displaylegendsdialog.h \
+    parameters.h
 
 FORMS += \
     gridsizequery.ui \

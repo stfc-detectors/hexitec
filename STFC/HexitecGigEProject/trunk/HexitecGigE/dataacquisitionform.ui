@@ -52,7 +52,7 @@
   <widget class="QLabel" name="durationLabel">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>247</x>
      <y>60</y>
      <width>41</width>
      <height>20</height>
@@ -174,7 +174,7 @@
   <widget class="QDoubleSpinBox" name="duration">
    <property name="geometry">
     <rect>
-     <x>303</x>
+     <x>290</x>
      <y>60</y>
      <width>74</width>
      <height>20</height>
@@ -232,7 +232,7 @@
   <widget class="QLabel" name="secondsLabel">
    <property name="geometry">
     <rect>
-     <x>383</x>
+     <x>368</x>
      <y>60</y>
      <width>41</width>
      <height>20</height>
@@ -421,20 +421,20 @@
   <widget class="QLabel" name="timesLabel">
    <property name="geometry">
     <rect>
-     <x>470</x>
+     <x>469</x>
      <y>60</y>
-     <width>61</width>
+     <width>64</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>times, every</string>
+    <string>times,  every</string>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="repeatInterval">
    <property name="geometry">
     <rect>
-     <x>536</x>
+     <x>537</x>
      <y>60</y>
      <width>51</width>
      <height>20</height>

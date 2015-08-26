@@ -81,11 +81,11 @@ void DataAcquisitionModel::connectDataAcquisition()
 {
    connect(dataAcquisition, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
-/*   connect(dataAcquisition, SIGNAL(executeOffsets()),
+   connect(dataAcquisition, SIGNAL(executeOffsets()),
            gigEDetector, SLOT(handleExecuteOffsets()));
    connect(dataAcquisition, SIGNAL(executeReducedDataCollection()),
            gigEDetector, SLOT(handleReducedDataCollection()));
-
+/*
    connect(dataAcquisition, SIGNAL(executeSingleBiasRefresh()),
            keithley, SLOT(executeSingleBiasRefresh()));
    connect(dataAcquisition, SIGNAL(storeBiasSettings()),
@@ -94,15 +94,16 @@ void DataAcquisitionModel::connectDataAcquisition()
            keithley, SLOT(restoreBiasSettings()));
    connect(dataAcquisition, SIGNAL(disableBiasRefresh()),
            keithley, SLOT(handleDisableBiasRefresh()));
+*/
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            dataAcquisitionForm, SLOT(handleCollectingChanged(bool)));
-*/
+
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            detectorControlForm, SLOT(handleCollectingChanged(bool)));
-/*
+
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            dataAcquisitionForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
-*/
+
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            detectorControlForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
@@ -122,10 +123,10 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(image3Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap3(QPixmap)));
 */
    connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
-/*
+
    connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
-   connect(gigEDetector, SIGNAL(externalTriggerReceived()), dataAcquisition, SLOT(handleExternalTriggerReceived()));
+/*   connect(gigEDetector, SIGNAL(externalTriggerReceived()), dataAcquisition, SLOT(handleExternalTriggerReceived()));
 */
 }
 

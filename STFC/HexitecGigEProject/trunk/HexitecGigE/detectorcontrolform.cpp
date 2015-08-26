@@ -58,6 +58,7 @@ void DetectorControlForm::handleCollectImagesPressed()
 {
    emit collectImagesPressed();
    waitingForModeChange = true;
+   qDebug() <<"ui->xResolution->value(), ui->yResolution->value()" << ui->xResolution->value() << ui->yResolution->value();
    emit executeCommand(GigEDetector::CONFIGURE, ui->xResolution->value(), ui->yResolution->value());
 //   emit executeCommand(GigEDetector::COLLECT, ui->imageCount->value(), 1);
 }

@@ -190,10 +190,12 @@ bool DataAcquisition::isCollectingTriggered()
 
 void DataAcquisition::run()
 {
-   mode = GigEDetector::GIGE_DEFAULT;
+//   mode = GigEDetector::GIGE_DEFAULT;
+   mode = GigEDetector::CONTINUOUS;
    qDebug() << "mode set to " << mode;
    if (mode == GigEDetector::GIGE_DEFAULT)
    {
+      qDebug() <<"DataAcquisition::run()";
       performGigEDefaultDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
       changeDAQStatus(DataAcquisitionStatus::IDLE,
@@ -239,7 +241,7 @@ void DataAcquisition::setDirectory(int repeatCount)
    gigEDetector->setDirectory(*dir);
    delete dir;
 }
-
+/*
 void DataAcquisition::performContinuousDataCollection()
 {
    int nDaq;
@@ -295,6 +297,46 @@ void DataAcquisition::performContinuousDataCollection()
 
    gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
+}*/
+
+void DataAcquisition::performContinuousDataCollection()
+{
+   int nDaq;
+   int repeatCount;
+   int nDaqOverall = 0;
+
+
+   nRepeat = 3;
+   qDebug() << "DataAcquisition::performContinuousDataCollection: nRepeat = " << nRepeat;
+
+   dataAcquisitionModel = DataAcquisitionModel::getInstance();
+   dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
+
+   emit storeBiasSettings();
+   emit disableBiasRefresh();
+
+   for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
+   {
+      setDirectory(repeatCount);
+      collecting = true;
+
+      emit executeCommand(GigEDetector::COLLECT, 1, 1);
+      waitForCollectingDone();
+      collecting = false;
+
+      if (abortRequired())
+         break;
+
+      if (repeatPauseRequired(repeatCount))
+      {
+         pauseDataAcquisition();
+         if (abortRequired())
+            break;
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::COLLECTING);
+      }
+   }
+   emit restoreBiasSettings();
 }
 
 void DataAcquisition::performGigEDefaultDataCollection()
@@ -306,7 +348,7 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit disableBiasRefresh();
 
    collecting = true;
-
+   qDebug() <<"emit executeCommand(GigEDetector::COLLECT next";
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
    collecting = false;
@@ -690,9 +732,9 @@ void DataAcquisition::handleExternalTriggerReceived()
 
 void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
 {
-   qDebug() << "DataAcquisition::handleBufferReady passing buffer address and frame count to processing";
    if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
    {
+      qDebug() << "DataAcquisition::handleBufferReady passing buffer address and frame count to processing";
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
       hxtProcessor->pushMotorPositions(&motorPositions);
    }
