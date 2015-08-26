@@ -40,7 +40,6 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    qDebug() << "aspectFilename = " << aspectFilename;
    aspectFilename = "C:/karen/STFC/Technical/Detector/aspectGigE.ini";
    this->aspectFilename = aspectFilename;
-//   detectorHandle = new HANDLE();
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
@@ -172,7 +171,8 @@ int GigEDetector::initialiseConnection()
    showError("OpenStream", status);
    xRes = 80;
    yRes = 80;
-//HexitecSensorConfig		sensorConfig = { AS_HEXITEC_GAIN_HIGH, 1, 1, 6, 0, 1, 8, { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }, { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } };
+   framesPerBuffer = 100;
+
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                               &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
@@ -183,6 +183,12 @@ int GigEDetector::initialiseConnection()
       qDebug() << "Configure Detector - frameTime:" << frameTime ;
       qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
    }
+   status = setImageFormat(xRes, yRes);
+   qDebug() <<"setImageFormat: xRes, yRes, status " << xRes << yRes << status;
+   status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
+   qDebug() <<"CreatePipeline(): framesPerBufer, status " << framesPerBuffer << status;
+
+   qDebug() << "!!!!!!!!!!!!!!!!!GigEDetector::InitialiseConnection and configure DONE!!!!!!!!!!!!!!!";
 
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
 
@@ -220,7 +226,7 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
 
    return status;
 }
-
+/*
 int GigEDetector::configure(unsigned long xResolution, unsigned long yResolution)
 {
    LONG status = -1;
@@ -248,7 +254,7 @@ int GigEDetector::configure(unsigned long xResolution, unsigned long yResolution
    qDebug() << "!!!!!!!!!!!!!!!!!GigEDetector::configure DONE!!!!!!!!!!!!!!!";
    return status;
 }
-
+*/
 void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2)
 {
    int status;
@@ -282,12 +288,12 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    {
       connectUp();
    }
-   */
+
    else if (command == CONFIGURE)
    {
       configure(ival1, ival2);
    }
-/*      else
+      else
       {
          // Already configured for the requested mode and quadrant.
          emit notifyMode(mode);
@@ -348,12 +354,10 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
 void GigEDetector::getImages(int count, int ndaq)
 {
    this->count = count;
-   configure(80, 80);
    setGetImageParams();
 
    qDebug() << "ndaq, offsetsOn" <<  ndaq << offsetsOn;
 
-   ndaq = 0;
    if (ndaq == 0 && offsetsOn)
    {
       updateState(OFFSETS_PREP);

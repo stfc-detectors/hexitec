@@ -27,7 +27,7 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    ~GigEDetector();
    int initialiseConnection();
    int terminateConnection();
-   int configure(unsigned long xResolution, unsigned long yResolution);
+//   int configure(unsigned long xResolution, unsigned long yResolution);
    unsigned int getXResolution();
    unsigned int getYResolution();
    void setXResolution(unsigned int xResolution);
