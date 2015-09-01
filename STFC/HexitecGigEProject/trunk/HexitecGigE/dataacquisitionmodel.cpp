@@ -114,9 +114,9 @@ void DataAcquisitionModel::connectGigEDetector()
 {
    connect(gigEDetector, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(gigEDetector, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisitionForm, SLOT(handleModeChanged(GigEDetector::Mode)));
-   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), detectorControlForm, SLOT(handleModeChanged(GigEDetector::Mode)));
-   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisition, SLOT(handleModeChanged(GigEDetector::Mode)));
+//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisitionForm, SLOT(handleModeChanged(GigEDetector::Mode)));
+//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), detectorControlForm, SLOT(handleModeChanged(GigEDetector::Mode)));
+//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisition, SLOT(handleModeChanged(GigEDetector::Mode)));
    connect(gigEDetector, SIGNAL(notifyState(GigEDetector::DetectorState)), dataAcquisition, SLOT(receiveState(GigEDetector::DetectorState)));
 /*   connect(gigEDetector, SIGNAL(image1Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap1(QPixmap)));
    connect(gigEDetector, SIGNAL(image2Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap2(QPixmap)));

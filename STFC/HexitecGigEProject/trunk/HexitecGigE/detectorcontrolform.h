@@ -49,7 +49,6 @@ public slots:
     void handleMonitorData(MonitorData *md);
     void handleTemperatureBelowDP();
     void handleTemperatureAboveDP();
-    void handleModeChanged(GigEDetector::Mode mode);
     void setPixmap1(QPixmap pixmap);
     void setPixmap2(QPixmap pixmap);
     void setPixmap3(QPixmap pixmap);

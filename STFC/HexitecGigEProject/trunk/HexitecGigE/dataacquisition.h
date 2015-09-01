@@ -57,6 +57,7 @@ private:
    int waitForCollectingDone();
    int waitForBiasRefreshDone();
    void configureDataCollection();
+   void configureBasicCollection();
    void setDirectory(int repeatCount);
    void initialiseTriggeredDataCollection();
    void performContinuousDataCollection();
@@ -113,7 +114,6 @@ signals:
    void dataAcquisitionStatusChanged(DataAcquisitionStatus dataAcquisitionStatus);
 public slots:
    void handleAbortDAQ();
-   void handleModeChanged(GigEDetector::Mode mode);
    void receiveState(GigEDetector::DetectorState detectorState);
    void handleCollectReducedImages();
    void handleCollectFixedImages();

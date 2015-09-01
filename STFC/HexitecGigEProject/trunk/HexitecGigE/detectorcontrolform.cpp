@@ -152,15 +152,6 @@ void DetectorControlForm::handleTemperatureAboveDP()
    }
 }
 
-void DetectorControlForm::handleModeChanged(GigEDetector::Mode mode)
-{
-   if (waitingForModeChange && (mode == GigEDetector::FIXED || mode == GigEDetector::GIGE_DEFAULT))
-   {
-      emit collectImagesPressed();
-      waitingForModeChange = false;
-   }
-}
-
 void DetectorControlForm::handleCollectingChanged(bool collectingOn)
 {
    if (!collectingOn)

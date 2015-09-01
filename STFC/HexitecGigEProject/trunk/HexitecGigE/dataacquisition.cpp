@@ -47,6 +47,16 @@ void DataAcquisition::positionChanged(Motor *motor, const QVariant & value)
    motorPositions[name] = position;
 }
 
+void DataAcquisition::configureBasicCollection()
+
+{
+   dataAcquisitionModel = DataAcquisitionModel::getInstance();
+   dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
+   gigEDetector->setDataAcquisitionDuration(1000);
+   mode = GigEDetector::GIGE_DEFAULT;
+   gigEDetector->setMode(mode);
+}
+
 void DataAcquisition::configureDataCollection()
 {
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
@@ -100,6 +110,8 @@ void DataAcquisition::configureDataCollection()
    }
    qDebug() << "Data collection to be achieved by repeating " << nRepeat << " collections, each split into " << splitDataCollections;
 
+   mode = GigEDetector::CONTINUOUS;
+   gigEDetector->setMode(mode);
    currentImageNumber = 0;
 
    daqStatus.setDaqImages(splitDataCollections * nRepeat);
@@ -187,8 +199,6 @@ bool DataAcquisition::isCollectingTriggered()
 
 void DataAcquisition::run()
 {
-//   mode = GigEDetector::GIGE_DEFAULT;
-   mode = GigEDetector::CONTINUOUS;
    qDebug() << "mode set to " << mode;
    if (mode == GigEDetector::GIGE_DEFAULT)
    {
@@ -582,17 +592,6 @@ void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorSt
    emit dataAcquisitionStatusChanged(daqStatus);
 }
 
-void DataAcquisition::handleModeChanged(GigEDetector::Mode mode)
-{
-   if (mode == GigEDetector::CONTINUOUS ||
-       mode == GigEDetector::SOFT_TRIGGER ||
-       mode == GigEDetector::EXTERNAL_TRIGGER)
-   {
-//      gigEDetector->registerCallback(fileCallback);
-   }
-   this->mode = mode;
-}
-
 void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
 {
    int writeToFileNumber = 0;
@@ -690,6 +689,8 @@ void DataAcquisition::handleCollectReducedImages()
 
 void DataAcquisition::handleCollectFixedImages()
 {
+   qDebug() << "handleCollectFixedImages()";
+   configureBasicCollection();
    start();
 }
 

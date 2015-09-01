@@ -248,7 +248,6 @@ void DataAcquisitionForm::modeChanged(int mode)
 
 void DataAcquisitionForm::handleModeChanged(GigEDetector::Mode mode)
 {
-   //qDebug() << "handleModeChanged";
    ui->mode->setCurrentIndex(mode);
 }
 
