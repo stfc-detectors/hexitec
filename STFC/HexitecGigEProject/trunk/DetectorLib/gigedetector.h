@@ -28,6 +28,7 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    int initialiseConnection();
    int terminateConnection();
 //   int configure(unsigned long xResolution, unsigned long yResolution);
+   int getEnvironmentalValues(double *rh, double *th, double *tasic, double *tadc, double *t);
    unsigned int getXResolution();
    unsigned int getYResolution();
    void setXResolution(unsigned int xResolution);
@@ -102,8 +103,10 @@ private:
    double dataAcquisitionDuration;
    unsigned char xRes, xResAcquiredImage;
    unsigned char yRes, yResAcquiredImage;
+   ULONG collectDcTime;
    double frameTime;
    int imgCntAverage;
+   ULONG timeout;
 //   ImageInfoPtr imageInfoPtr;
    short *imageDest;
    int *summedImageDest;

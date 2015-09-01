@@ -20,7 +20,7 @@ private:
    QTimer *timer;
    GigEDetector *gigEDetector;
 //   Keithley *keithley;
-   double th, t, tdp, rh, ik, tasic;
+   double th, t, tdp, rh, ik, tasic, tadc;
    double a, b, c;
    double gamma;
    bool temperatureInRange;

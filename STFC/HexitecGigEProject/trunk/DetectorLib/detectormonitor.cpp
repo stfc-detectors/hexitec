@@ -4,6 +4,34 @@
 #include <QDateTime>
 #include <cmath>
 
+/*
+DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
+   QObject(parent)
+{
+   this->loggingInterval = 1;
+   if (loggingInterval > 0)
+   {
+      this->loggingInterval = loggingInterval;
+   }
+   monitorCount = this->loggingInterval;
+//   logfileWriter = NULL;
+   readTAsic =false;
+   temperatureInRange = false;
+   a = 6.112;
+   b = 17.67;
+   c = 243.5;
+   timer = new QTimer(this);
+   connect(timer, SIGNAL(timeout()), this, SLOT(monitor()));
+   this->gigEDetector = gigEDetector;
+
+   housingTemperature = new SHT21Temperature(this);
+   housingHumidity = new SHT21Humidity(this);
+   fingerTemperatureController = West6100PlusTemperatureController::instance(portName);
+   keithley = VoltageSourceFactory::instance()->getKeithley();
+
+}
+*/
+
 DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
    QObject(parent)
 {
@@ -94,13 +122,9 @@ void DetectorMonitor::monitor()
    }
 }
 
+/*
 void DetectorMonitor::read()
 {
-   th = 20;
-   t = 21;
-   rh = 22;
-   ik = 5;
-   /*
    th = housingTemperature->getTemperature();
    t = fingerTemperatureController->getTemperature();
    rh = housingHumidity->getHumidity();
@@ -110,18 +134,30 @@ void DetectorMonitor::read()
       gigEDetector->current(&tasic);
       readTAsic = false;
    }
-   */
    calcTDP();
 
+}
+*/
+void DetectorMonitor::read()
+{
+   int status = -1;
+
+   ik = 5;
+   /*
+   ik = keithley->getCurrent();
+   */
+
+   status = gigEDetector->getEnvironmentalValues(&rh, &th, &tasic, &tadc, &t);
+   if(!status)
+   {
+       calcTDP();
+   }
 }
 
 void DetectorMonitor::calcTDP()
 {
-   /*
    gamma = log(rh/100) + ((b*th) / (c+th));
    tdp = c * gamma / (b - gamma);
-   */
-   tdp = 0;
 }
 
 void DetectorMonitor::handleWriteError(QString message)

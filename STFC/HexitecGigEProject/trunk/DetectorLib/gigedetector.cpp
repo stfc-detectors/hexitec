@@ -22,7 +22,7 @@ HexitecOperationMode operationMode = { AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                                 AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                                 AS_CONTROL_DISABLED, 0 };
 HexitecSystemConfig	systemConfig = { 2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4 };
-ULONG collectDcTime = 0;
+//ULONG collectDcTime = 0;
 
 static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
@@ -37,13 +37,14 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 
 GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 {
+   timeout = 1000;
+   collectDcTime = 0;
    qDebug() << "aspectFilename = " << aspectFilename;
    aspectFilename = "C:/karen/STFC/Technical/Detector/aspectGigE.ini";
    this->aspectFilename = aspectFilename;
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
-
 
    readIniFile(this->aspectFilename);
 
@@ -215,6 +216,16 @@ int GigEDetector::terminateConnection()
    showError( "ExitDevice", status);
 
    return status;
+}
+
+int GigEDetector::getEnvironmentalValues(double *rh, double *th, double *tasic, double *tadc, double *t)
+{
+    int status = -1;
+
+    status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tadc, t, timeout);
+    showError("ReadEnvironmentValues", status);
+
+    return status;
 }
 
 int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResolution)
@@ -441,7 +452,11 @@ void GigEDetector::offsetsDialogAccepted()
 
 LONG GigEDetector::collectOffsets()
 {
+   int status = -1;
+
    qDebug() << "Get GigE to collect and load up offsets here!!!";
+   status = CollectOffsetValues(detectorHandle, 1000, collectDcTime);								// make sure to have stable operating conditions (high voltage, temperature, x-ray turned off)
+   showError("CollectOffsetValues", status);
 
    return 0;
 }
