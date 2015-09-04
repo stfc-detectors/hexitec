@@ -28,7 +28,7 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    int initialiseConnection();
    int terminateConnection();
 //   int configure(unsigned long xResolution, unsigned long yResolution);
-   int getEnvironmentalValues(double *rh, double *th, double *tasic, double *tadc, double *t);
+   int getDetectorValues(double *rh, double *th, double *tasic, double *tadc, double *hv, double *t);
    unsigned int getXResolution();
    unsigned int getYResolution();
    void setXResolution(unsigned int xResolution);
@@ -81,6 +81,8 @@ public slots:
    void offsetsDialogAccepted();
    void handleBufferReady();
    void handleReturnBufferReady();
+   void handleSetTargetTemperature(double targetTemperature);
+   void handleSetHV(double voltage);
 private:
    QThread *gigEDetectorThread;
    DetectorState state;
@@ -93,6 +95,11 @@ private:
    Mode mode;
    bool offsetsOn;
    bool triggered;
+   double hvSetPoint;
+   double targetTemperature;
+   double vCal;
+   double uMid;
+   double detCtrl;
 
    bool timestampOn;
    int count;

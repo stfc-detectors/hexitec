@@ -142,12 +142,12 @@ void DetectorMonitor::read()
 {
    int status = -1;
 
-   ik = 5;
    /*
    ik = keithley->getCurrent();
    */
 
-   status = gigEDetector->getEnvironmentalValues(&rh, &th, &tasic, &tadc, &t);
+   status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tadc, &t, &ik);
+
    if(!status)
    {
        calcTDP();

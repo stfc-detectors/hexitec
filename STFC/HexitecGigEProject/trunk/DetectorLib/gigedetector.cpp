@@ -22,7 +22,6 @@ HexitecOperationMode operationMode = { AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                                 AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                                 AS_CONTROL_DISABLED, 0 };
 HexitecSystemConfig	systemConfig = { 2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4 };
-//ULONG collectDcTime = 0;
 
 static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
@@ -52,6 +51,11 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 
    xRes = 80;
    yRes = 80;
+   vCal = 0.5;
+   uMid = 1.0;
+   detCtrl = 0;
+   targetTemperature = 20.0;
+   hvSetPoint = 0;
 
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
@@ -118,6 +122,26 @@ void GigEDetector::handleReturnBufferReady()
 {
    qDebug() << "handleReturnBufferReady, address" << returnBuffer;
    ReturnBuffer(detectorHandle, returnBuffer);
+}
+
+void GigEDetector::handleSetTargetTemperature(double targetTemperature)
+{
+    int status = -1;
+
+    this->targetTemperature = targetTemperature;
+
+    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
+    showError("SetDAC", status);
+}
+
+void GigEDetector::handleSetHV(double voltage)
+{
+    int status = -1;
+
+    this->hvSetPoint = voltage;
+
+    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
+    showError("SetDAC", status);
 }
 
 int GigEDetector::initialiseConnection()
@@ -218,12 +242,17 @@ int GigEDetector::terminateConnection()
    return status;
 }
 
-int GigEDetector::getEnvironmentalValues(double *rh, double *th, double *tasic, double *tadc, double *t)
+int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, double *tadc, double *t, double *hv)
 {
     int status = -1;
+    double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
 
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tadc, t, timeout);
     showError("ReadEnvironmentValues", status);
+
+    status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
+    showError("ReadEnvironmentValues", status);
+    *hv = hvOut;
 
     return status;
 }
@@ -770,7 +799,7 @@ void GigEDetector::showError(const LPSTR context, long asError)
    CHAR	pleoraErrorCodeStr[STR_LENGTH] = { 0 };
    CHAR	pleoraErrorDescription[STR_LENGTH] = { 0 };
 
-/*   sysError = GetAsErrorMsg( asError, asErrorMessage, STR_LENGTH );
+   sysError = GetAsErrorMsg( asError, asErrorMessage, STR_LENGTH );
 
    if( sysError )
    {
@@ -790,13 +819,13 @@ void GigEDetector::showError(const LPSTR context, long asError)
       }
    }
 
-   qDebug() << "aSpect Result: " << context << asErrorMessage;
 
    if( !result )
    {
+      qDebug() << "aSpect Result: " << context << asErrorMessage;
       qDebug() << "Pleora Result Code:" << pleoraErrorCode;
       qDebug() << "Pleora Result Code String:" << pleoraErrorCodeStr;
       qDebug() << "Pleora Result Description:" << pleoraErrorDescription;
    }
-   */
+
 }
