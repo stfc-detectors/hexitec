@@ -17,7 +17,7 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
 
-   keithley = VoltageSourceFactory::instance()->getKeithley();
+   hv = VoltageSourceFactory::instance()->getHV();
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
    detectorMonitor = DetectorFactory::instance()->getDetectorMonitor();
    dataAcquisition = DataAcquisition::instance();
@@ -31,7 +31,7 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    connectDataAcquisition();
    connectGigEDetector();
    connectDataAcquisitionModel();
-   connectKeithley();
+   connectHV();
    connectObjectReserver();
 
    initialiseDetectorFilename(dataFilename);
@@ -70,7 +70,7 @@ void DataAcquisitionModel::connectDetectorMonitor()
    connect(detectorMonitor, SIGNAL(updateMonitorData(MonitorData *)), dataAcquisition, SLOT(handleMonitorData(MonitorData *)));
    connect(detectorMonitor, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
    connect(detectorMonitor, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-   connect(detectorMonitor, SIGNAL(temperatureBelowDP()), keithley, SLOT(handleTemperatureBelowDP()));
+   connect(detectorMonitor, SIGNAL(temperatureBelowDP()), hv, SLOT(handleTemperatureBelowDP()));
    connect(detectorMonitor, SIGNAL(temperatureBelowDP()), detectorControlForm, SLOT(handleTemperatureBelowDP()));
    connect(detectorMonitor, SIGNAL(temperatureBelowDP()), dataAcquisition, SLOT(handleAbortDAQ()));
    connect(detectorMonitor, SIGNAL(temperatureAboveDP()), detectorControlForm, SLOT(handleTemperatureAboveDP()));
@@ -85,16 +85,16 @@ void DataAcquisitionModel::connectDataAcquisition()
            gigEDetector, SLOT(handleExecuteOffsets()));
    connect(dataAcquisition, SIGNAL(executeReducedDataCollection()),
            gigEDetector, SLOT(handleReducedDataCollection()));
-/*
+
    connect(dataAcquisition, SIGNAL(executeSingleBiasRefresh()),
-           keithley, SLOT(executeSingleBiasRefresh()));
+           hv, SLOT(executeSingleBiasRefresh()));
    connect(dataAcquisition, SIGNAL(storeBiasSettings()),
-           keithley, SLOT(storeBiasSettings()));
+           hv, SLOT(storeBiasSettings()));
    connect(dataAcquisition, SIGNAL(restoreBiasSettings()),
-           keithley, SLOT(restoreBiasSettings()));
+           hv, SLOT(restoreBiasSettings()));
    connect(dataAcquisition, SIGNAL(disableBiasRefresh()),
-           keithley, SLOT(handleDisableBiasRefresh()));
-*/
+           hv, SLOT(handleDisableBiasRefresh()));
+
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            dataAcquisitionForm, SLOT(handleCollectingChanged(bool)));
 
@@ -108,6 +108,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorControlForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
+   connect(dataAcquisition, SIGNAL(setTargetTemperature(double)),
+           gigEDetector, SLOT(handleSetTargetTemperature(double)));
 }
 
 void DataAcquisitionModel::connectGigEDetector()
@@ -132,8 +134,8 @@ void DataAcquisitionModel::connectGigEDetector()
 
 void DataAcquisitionModel::connectDetectorControlForm()
 {
-   connect(detectorControlForm, SIGNAL(executeCommand(Keithley::VoltageSourceCommand)),
-           keithley, SLOT(handleExecuteCommand(Keithley::VoltageSourceCommand)));
+   connect(detectorControlForm, SIGNAL(executeCommand(HV::VoltageSourceCommand)),
+           hv, SLOT(handleExecuteCommand(HV::VoltageSourceCommand)));
    connect(detectorControlForm, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(detectorControlForm, SIGNAL(collectImagesPressed()),
@@ -192,17 +194,19 @@ void DataAcquisitionModel::connectDataAcquisitionForm()
            detectorMonitor, SLOT(createLogFile(DetectorFilename *)));
 }
 
-void DataAcquisitionModel::connectKeithley()
+void DataAcquisitionModel::connectHV()
 {
-   connect(keithley, SIGNAL(biasRefreshing()), detectorMonitor, SLOT(handleBiasRefreshing()));
-   connect(keithley, SIGNAL(biasRefreshing()), dataAcquisition, SLOT(handleBiasRefreshing()));
+   connect(hv, SIGNAL(biasRefreshing()), detectorMonitor, SLOT(handleBiasRefreshing()));
+   connect(hv, SIGNAL(biasRefreshing()), dataAcquisition, SLOT(handleBiasRefreshing()));
 
-   connect(keithley, SIGNAL(biasRefreshed(QString)), dataAcquisitionForm, SLOT(handleBiasRefreshed(QString)));
-   connect(keithley, SIGNAL(biasRefreshed(QString)), detectorControlForm, SLOT(handleBiasRefreshed(QString)));
-   connect(keithley, SIGNAL(biasRefreshed(QString)), dataAcquisition, SLOT(handleBiasRefreshed(QString)));
+   connect(hv, SIGNAL(biasRefreshed(QString)), dataAcquisitionForm, SLOT(handleBiasRefreshed(QString)));
+   connect(hv, SIGNAL(biasRefreshed(QString)), detectorControlForm, SLOT(handleBiasRefreshed(QString)));
+   connect(hv, SIGNAL(biasRefreshed(QString)), dataAcquisition, SLOT(handleBiasRefreshed(QString)));
 
-   connect(keithley, SIGNAL(biasState(bool)), dataAcquisition, SLOT(handleBiasState(bool)));
-   connect(keithley, SIGNAL(biasVoltageChanged(bool)), this, SLOT(handleBiasVoltageChanged(bool)));
+   connect(hv, SIGNAL(biasState(bool)), dataAcquisition, SLOT(handleBiasState(bool)));
+   connect(hv, SIGNAL(biasVoltageChanged(bool)), this, SLOT(handleBiasVoltageChanged(bool)));
+
+   connect(hv, SIGNAL(setHV(double)), gigEDetector, SLOT(handleSetHV(double)));
 }
 
 void DataAcquisitionModel::connectObjectReserver()
@@ -299,11 +303,11 @@ void DataAcquisitionModel::changeDaqDuration()
    int splitDataCollections;
    int repeatCount = dataAcquisitionDefinition.getRepeatCount();
    int repeatInterval = dataAcquisitionDefinition.getRepeatInterval();
-   int biasRefreshTime = keithley->getBiasRefreshTime();
-   bool biasOn = keithley->getBiasOnState();
+   int biasRefreshTime = hv->getBiasRefreshTime();
+   bool biasOn = hv->getBiasOnState();
 
    daqDuration = dataAcquisitionDefinition.getDuration();
-   splitDataCollections = ceil(((double) daqDuration) / ((double ) keithley->getBiasRefreshInterval()));
+   splitDataCollections = ceil(((double) daqDuration) / ((double ) hv->getBiasRefreshInterval()));
 
    // If bias on add number of bias refreshes per collection
    if (biasOn)
@@ -320,7 +324,7 @@ void DataAcquisitionModel::changeDaqDuration()
    // The last image in the last collection doesn't have bias refresh
    if (biasOn && (daqDuration > 0))
    {
-      daqDuration -= keithley->getBiasRefreshTime();
+      daqDuration -= hv->getBiasRefreshTime();
    }
 
    // The last collection doesn't have a pause

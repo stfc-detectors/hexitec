@@ -26,7 +26,7 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    setAbort(false);
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
    detectorState = GigEDetector::IDLE;
-   keithley = VoltageSourceFactory::instance()->getKeithley();
+   hv = VoltageSourceFactory::instance()->getHV();
    tdp = 0.0;
    currentImageNumber = 0;
    daqStatus = DataAcquisitionStatus();
@@ -90,7 +90,7 @@ void DataAcquisition::configureDataCollection()
    /*qDebug() << "Configuring DAQ";
    qDebug() << "Data collection time " << dataAcquisitionDefinition->getDuration();
    qDebug() << "Last time error " << GigEDetector->getTimeError();
-   qDebug() << "Bias refresh interval " << keithley->getBiasRefreshInterval();*/
+   qDebug() << "Bias refresh interval " << hv->getBiasRefreshInterval();*/
 
    setAbort(false);
    nRepeat = 1;
@@ -98,7 +98,7 @@ void DataAcquisition::configureDataCollection()
 
    if (biasOn)
    {
-      splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )keithley->getBiasRefreshInterval()));
+      splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )hv->getBiasRefreshInterval()));
    }
    else
    {
@@ -159,7 +159,7 @@ void DataAcquisition::initHexitechProcessor()
 
 DataAcquisition::~DataAcquisition()
 {
-   keithley->_HVoff();
+   hv->off();
 //   gigEDetector->unRegisterCallback();
    if (mode == GigEDetector::SOFT_TRIGGER || mode == GigEDetector::EXTERNAL_TRIGGER)
    {
@@ -440,7 +440,7 @@ void DataAcquisition::performFixedDataCollection()
 void DataAcquisition::setDataAcquisitionTime(int nDaq)
 {
 //   double dataCollectionTime;
-   double biasRefreshDataCollectionTime = keithley->getBiasRefreshInterval();
+   double biasRefreshDataCollectionTime = hv->getBiasRefreshInterval();
    double finalDataCollectionTime = dataAcquisitionDefinition->getDuration() - (biasRefreshDataCollectionTime * ((double) (splitDataCollections - 1)));
 
    dataCollectionTime = biasRefreshDataCollectionTime;
@@ -546,15 +546,7 @@ int DataAcquisition::waitForCollectingDone()
 
 void DataAcquisition::handleSetFingerTemperature(double temperature)
 {
-   West6100PlusTemperatureController *wtc = West6100PlusTemperatureController::getInstance();
-   if (wtc == 0)
-   {
-      QMessageBox msgBox;
-      msgBox.setText("Software control of the West 6100+ temperature controller is not available");
-      msgBox.setIcon(QMessageBox::Critical);
-      msgBox.exec();
-   }
-   else if (temperature < tdp)
+   if (temperature < tdp)
    {
       QMessageBox msgBox;
       msgBox.setText(QString("Cannot set a Finger Temperature lower than dew point\n") +
@@ -564,7 +556,7 @@ void DataAcquisition::handleSetFingerTemperature(double temperature)
    }
    else
    {
-      wtc->setTargetTemperature(temperature);
+     emit setTargetTemperature(temperature);
    }
 }
 

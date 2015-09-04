@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QWidget>
-#include "keithley.h"
+#include "hv.h"
 #include "monitordata.h"
 #include "dpwarningdialog.h"
 #include "gigedetector.h"
@@ -71,7 +71,7 @@ private slots:
    void handleSetFingerTemperature();
 
 signals:
-   void executeCommand(Keithley::VoltageSourceCommand);
+   void executeCommand(HV::VoltageSourceCommand);
    void executeCommand(GigEDetector::DetectorCommand, int, int);
    void collectImagesPressed();
    void abortDAQPressed();

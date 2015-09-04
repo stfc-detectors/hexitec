@@ -10,7 +10,7 @@
 #include <QHash>
 #include "motor.h"
 #include "gigedetector.h"
-#include "keithley.h"
+#include "hv.h"
 #include "dataacquisitionmodel.h"
 #include "dataacquisitiondefinition.h"
 #include "hxtprocessing.h"
@@ -76,7 +76,7 @@ private:
    DataAcquisitionDefinition *dataAcquisitionDefinition;
    GigEDetector *gigEDetector;
    FileWriter *imageIndicatorFile;
-   Keithley *keithley;
+   HV *hv;
    GigEDetector::Mode mode;
    int splitDataCollections;
    int nDaq;
@@ -112,6 +112,7 @@ signals:
    void pushFilename();
    void collectingChanged(bool);
    void dataAcquisitionStatusChanged(DataAcquisitionStatus dataAcquisitionStatus);
+   void setTargetTemperature(double targetTemperature);
 public slots:
    void handleAbortDAQ();
    void receiveState(GigEDetector::DetectorState detectorState);

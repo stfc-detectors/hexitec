@@ -83,13 +83,14 @@ void DetectorControlForm::handleSetFingerTemperature()
 
 void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
 {
+    qDebug() <<"DetectorControlForm::biasVoltageClicked with " << biasVoltageOn;
    if (biasVoltageOn)
    {
-      emit executeCommand(Keithley::HVON);
+      emit executeCommand(HV::HVON);
    }
    else
    {
-      emit executeCommand(Keithley::HVOFF);
+      emit executeCommand(HV::HVOFF);
    }
    emit biasVoltageChanged(biasVoltageOn);
 }

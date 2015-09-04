@@ -5,7 +5,7 @@
  * See for instance http://qt-project.org/forums/viewthread/22133 */
 #define NOMINMAX
 
-#include "keithley.h"
+#include "hv.h"
 #include "scriptingwidget.h"
 
 class VoltageSourceFactory : public QWidget
@@ -13,12 +13,12 @@ class VoltageSourceFactory : public QWidget
    Q_OBJECT
 public:
    static VoltageSourceFactory *instance();
-   Keithley *createKeithley(QString name);
-   Keithley *getKeithley();
+       HV *createHV(QString name);
+       HV *getHV();
 protected:
    explicit VoltageSourceFactory(QWidget *parent = 0);
 private:
-   Keithley *keithley;
+   HV *hv;
    static VoltageSourceFactory *vsfInstance; 
 signals:
     void addObject(QObject *object, bool, bool);

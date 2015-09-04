@@ -79,7 +79,8 @@ SOURCES += main.cpp \
     newportxpsmotor.cpp \
     setaxesdialog.cpp \
     displaylegendsdialog.cpp \
-    parameters.cpp
+    parameters.cpp \
+    hv.cpp
 
 HEADERS += mainwindow.h \
     voxel.h \
@@ -146,7 +147,8 @@ HEADERS += mainwindow.h \
     newportxpsmotor.h \
     setaxesdialog.h \
     displaylegendsdialog.h \
-    parameters.h
+    parameters.h \
+    hv.h
 
 FORMS += \
     gridsizequery.ui \

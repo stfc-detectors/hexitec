@@ -19,7 +19,7 @@ VoltageSourceFactory *VoltageSourceFactory::instance()
    return vsfInstance;
 }
 
-Keithley *VoltageSourceFactory::createKeithley(QString name)
+HV *VoltageSourceFactory::createHV(QString name)
 {
    QString detectorFilename = Parameters::twoEasyIniFilename;
    QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
@@ -28,15 +28,15 @@ Keithley *VoltageSourceFactory::createKeithley(QString name)
       detectorFilename = settings.value("2EasyIniFilename").toString();
    }
 
-   keithley = new Keithley();
-   keithley->setProperty("objectName", name);
-   keithley->initialise(detectorFilename);
-   emit addObject(keithley, true, true);
+   hv = new HV();
+   hv->setProperty("objectName", name);
+   hv->initialise(detectorFilename);
+   emit addObject(hv, true, true);
 
-   return keithley;
+   return hv;
 }
 
-Keithley *VoltageSourceFactory::getKeithley()
+HV *VoltageSourceFactory::getHV()
 {
-   return keithley;
+   return hv;
 }

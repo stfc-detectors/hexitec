@@ -10,7 +10,7 @@
 #include "dataacquisitionform.h"
 #include "gigedetector.h"
 #include "detectormonitor.h"
-#include "keithley.h"
+#include "hv.h"
 #include "dataacquisitiondefinition.h"
 #include "detectorfilename.h"
 #include "objectreserver.h"
@@ -32,7 +32,7 @@ private:
    static DataAcquisitionModel *damInstance;
    DataAcquisitionForm *dataAcquisitionForm;
    DetectorControlForm *detectorControlForm;
-   Keithley *keithley;
+   HV *hv;
    GigEDetector *gigEDetector;
    DetectorMonitor *detectorMonitor;
    DataAcquisition *dataAcquisition;
@@ -47,7 +47,7 @@ private:
    void connectDataAcquisitionForm();
    void connectDetectorControlForm();
    void connectDataAcquisitionModel();
-   void connectKeithley();
+   void connectHV();
    void connectObjectReserver();
    void setDetectorFilename(DetectorFilename sourceFilename, DetectorFilename *destFilename);
    void initialise();

@@ -67,8 +67,7 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    // If the configuration is done by setting a valid address this can also
    // be used to replace 24 below.
    voltageSourceFactory = VoltageSourceFactory::instance();
-   voltageSourceFactory->createKeithley("keithley");
-   voltageSourceFactory->getKeithley()->GPIBconnect(24);
+   voltageSourceFactory->createHV("hv");
 
    // TO DO : Check whether an aspect detector is configured before the following.
    /* Currently the following should be done after creating the keithley (above).
