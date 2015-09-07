@@ -105,7 +105,7 @@ void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, 
    /// back to the GigEDetector thread for re-use.
    /// Its currently done here for testing.
    qDebug() <<"HxtProcessing::pushTransferBuffer called! In threadId " << QThread::currentThreadId();;
-   emit returnBufferReady(transferBuffer);
+   emit returnBufferReady(transferBuffer, validFrames);
 
 }
 

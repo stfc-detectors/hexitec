@@ -56,7 +56,6 @@ void DataAcquisitionForm::connectSignals()
    connect(ui->logFileDirectoryButton, SIGNAL(clicked()), this, SLOT(setLogDirectory()));
    connect(ui->loggingEnabled, SIGNAL(stateChanged(int)), this, SLOT(handleLoggingEnabled(int)));
    connect(ui->offsetsButton, SIGNAL(stateChanged(int)), this, SLOT(handleDataAcquisitionDefinition()));
-//   connect(ui->duration, SIGNAL(valueChanged(double)), this, SLOT(handleDataAcquisitionDefinition()));
    connect(ui->duration, SIGNAL(valueChanged(double)), this, SLOT(handleDataAcquisitionDefinition()));
    connect(ui->repeatInterval, SIGNAL(valueChanged(double)), this, SLOT(handleDataAcquisitionDefinition()));
    connect(ui->repeatCount, SIGNAL(valueChanged(int)), this, SLOT(handleDataAcquisitionDefinition()));
@@ -622,25 +621,15 @@ void DataAcquisitionForm::guiMode(int mode)
 
 void DataAcquisitionForm::enableRepeats(int mode)
 {
-/*
- *    if (mode != GigEDetector::CONTINUOUS)
+   ui->repeatCount->setEnabled(true);
+   if (ui->repeatCount->value() > 1)
    {
-      ui->repeatCount->setEnabled(false);
-      ui->repeatInterval->setEnabled(false);
+      ui->repeatInterval->setEnabled(true);
    }
    else
    {
-   */
-      ui->repeatCount->setEnabled(true);
-      if (ui->repeatCount->value() > 1)
-      {
-         ui->repeatInterval->setEnabled(true);
-      }
-      else
-      {
-         ui->repeatInterval->setEnabled(false);
-      }
-//   }
+      ui->repeatInterval->setEnabled(false);
+   }
 }
 
 void DataAcquisitionForm::disableRepeats()

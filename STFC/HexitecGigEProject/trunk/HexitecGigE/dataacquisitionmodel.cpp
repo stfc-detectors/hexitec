@@ -227,6 +227,8 @@ void DataAcquisitionModel::initialiseDetectorFilename(DetectorFilename *detector
 
 void DataAcquisitionModel::setDetectorFilename(DetectorFilename sourceFilename, DetectorFilename *destFilename)
 {
+   qDebug() <<"DataAcquisitionModel::setDetectorFilename with" <<
+              sourceFilename.getDirectory() << sourceFilename.getPrefix() << sourceFilename.getTimestampOn();
    destFilename->setDirectory(sourceFilename.getDirectory());
    destFilename->setPrefix(sourceFilename.getPrefix());
    destFilename->setTimestampOn(sourceFilename.getTimestampOn());

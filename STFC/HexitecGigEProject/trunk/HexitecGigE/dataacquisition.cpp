@@ -74,7 +74,7 @@ void DataAcquisition::configureDataCollection()
    {
 
    dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
-//   gigEDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
+   gigEDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
    gigEDetector->setDirectory(dataAcquisitionDefinition->getDataFilename()->getDirectory());
    gigEDetector->setPrefix(dataAcquisitionDefinition->getDataFilename()->getPrefix());
    gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
@@ -199,10 +199,8 @@ bool DataAcquisition::isCollectingTriggered()
 
 void DataAcquisition::run()
 {
-   qDebug() << "mode set to " << mode;
    if (mode == GigEDetector::GIGE_DEFAULT)
    {
-      qDebug() <<"DataAcquisition::run()";
       performGigEDefaultDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
       changeDAQStatus(DataAcquisitionStatus::IDLE,
@@ -356,7 +354,6 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit disableBiasRefresh();
 
    collecting = true;
-   qDebug() <<"emit executeCommand(GigEDetector::COLLECT next";
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
    collecting = false;
@@ -460,7 +457,6 @@ void DataAcquisition::setDataAcquisitionTime(int nDaq)
 
 void DataAcquisition::performSingleBiasRefresh()
 {
-   qDebug() << "performSingleBiasRefresh(): biasOn " << biasOn;
    if (biasOn)
    {
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
@@ -474,8 +470,6 @@ void DataAcquisition::performSingleBiasRefresh()
 void DataAcquisition::pauseDataAcquisition()
 {
    int pauseDuration = 0;
-
-   qDebug() <<"pauseDataAcquisition()repeatInterval" << dataAcquisitionDefinition->getRepeatInterval();
 
    if ((pauseDuration = dataAcquisitionDefinition->getRepeatInterval()) > 0)
    {
@@ -522,7 +516,6 @@ int DataAcquisition::waitForCollectingDone()
    int elapsed = 0;
    int percentage = 0;
 
-   qDebug() << "Waiting for DAQ to finish";
    while (collecting)
    {
       sleep(1);
@@ -681,7 +674,6 @@ void DataAcquisition::handleCollectReducedImages()
 
 void DataAcquisition::handleCollectFixedImages()
 {
-   qDebug() << "handleCollectFixedImages()";
    configureBasicCollection();
    start();
 }

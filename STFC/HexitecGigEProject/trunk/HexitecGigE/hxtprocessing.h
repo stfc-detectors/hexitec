@@ -113,7 +113,7 @@ signals:
     void hexitechSignalManualProcessingFinished();
     void hexitechRemoveAnyExcessSlices();
     void hexitechUnprocessedFiles(bool bFilesExists);
-    void returnBufferReady(unsigned char *transferBuffer);
+    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
 
 private slots:
     void savePrefix(bool bPrefixChecked);

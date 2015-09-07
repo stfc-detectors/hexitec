@@ -68,7 +68,6 @@ int HV::getBiasRefreshInterval()
 void HV::off()
 {
    emit setHV(0.0);
-   qDebug() << "HV::off() - get detector to do this!";
    biasOnState = false;
    emit biasState(false);
 }
@@ -77,7 +76,6 @@ void HV::on(double voltage)
 {
     this->voltage = voltage;
     emit setHV(voltage);
-    qDebug() << "HV::on() - get detector to do this!";
     biasOnState = true;
     emit biasState(true);
     if (fabs(voltage - vr) < 0.0000001)
@@ -88,7 +86,6 @@ void HV::on(double voltage)
 
 void HV::on()
 {
-    qDebug() << "HV::on() - get on(value) to do this with !" << voltage;
     on(voltage);
 }
 

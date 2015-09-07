@@ -131,7 +131,7 @@ public slots:
    // ProcessingWindow signals whether Visualisation tab should be updated
    void updateVisualisationTab(bool bUpdate);
    void handleBufferReady();
-   void handleReturnBufferReady(unsigned char *buffer);
+//   void handleReturnBufferReady(unsigned char *buffer);
    void handleShowImage();
 };
 
