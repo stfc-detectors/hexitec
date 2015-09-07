@@ -4,7 +4,6 @@
 #include <QDateTime>
 #include <cmath>
 
-/*
 DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
    QObject(parent)
 {
@@ -23,39 +22,6 @@ DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval
    timer = new QTimer(this);
    connect(timer, SIGNAL(timeout()), this, SLOT(monitor()));
    this->gigEDetector = gigEDetector;
-
-   housingTemperature = new SHT21Temperature(this);
-   housingHumidity = new SHT21Humidity(this);
-   fingerTemperatureController = West6100PlusTemperatureController::instance(portName);
-   keithley = VoltageSourceFactory::instance()->getKeithley();
-
-}
-*/
-
-DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
-   QObject(parent)
-{
-   this->loggingInterval = 1;
-   if (loggingInterval > 0)
-   {
-      this->loggingInterval = loggingInterval;
-   }
-   monitorCount = this->loggingInterval;
-//   logfileWriter = NULL;
-   readTAsic =false;
-   temperatureInRange = false;
-   a = 6.112;
-   b = 17.67;
-   c = 243.5;
-   timer = new QTimer(this);
-   connect(timer, SIGNAL(timeout()), this, SLOT(monitor()));
-   this->gigEDetector = gigEDetector;
-   /*
-   housingTemperature = new SHT21Temperature(this);
-   housingHumidity = new SHT21Humidity(this);
-   fingerTemperatureController = West6100PlusTemperatureController::instance(portName);
-   keithley = VoltageSourceFactory::instance()->getKeithley();
-   */
 }
 
 DetectorMonitor::~DetectorMonitor()
@@ -65,10 +31,7 @@ DetectorMonitor::~DetectorMonitor()
 int DetectorMonitor::stop()
 {
    int status = 0;
-/*
-   housingTemperature->close();
-   housingHumidity->close();
-*/
+
    return status;
 }
 
@@ -122,29 +85,9 @@ void DetectorMonitor::monitor()
    }
 }
 
-/*
-void DetectorMonitor::read()
-{
-   th = housingTemperature->getTemperature();
-   t = fingerTemperatureController->getTemperature();
-   rh = housingHumidity->getHumidity();
-   ik = keithley->getCurrent();
-   if (readTAsic)
-   {
-      gigEDetector->current(&tasic);
-      readTAsic = false;
-   }
-   calcTDP();
-
-}
-*/
 void DetectorMonitor::read()
 {
    int status = -1;
-
-   /*
-   ik = keithley->getCurrent();
-   */
 
    status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tadc, &t, &ik);
 

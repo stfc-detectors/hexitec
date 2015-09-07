@@ -1,5 +1,7 @@
 #include <QDebug>
 #include <QThread>
+#include <stdio.h>
+
 /* Following necessary as a workaround for qdatetime errors at Qt 5.0.2.
  * See for instance http://qt-project.org/forums/viewthread/22133 */
 #define NOMINMAX
@@ -8,7 +10,6 @@
 #include <QImage>
 
 #include "windowsevent.h"
-//#include "GigE_extended.h"
 #include "gigedetector.h"
 #include "detectorfactory.h"
 
@@ -63,7 +64,6 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    qRegisterMetaType<HANDLE>("HANDLE");
    connectUp(parent);
 
-   qDebug() <<"GigEDetector Constructor";
    initialiseConnection();
 }
 
@@ -120,7 +120,16 @@ ULONG GigEDetector::getValidFrames()
 
 void GigEDetector::handleReturnBufferReady()
 {
-   qDebug() << "handleReturnBufferReady, address" << returnBuffer;
+   ReturnBuffer(detectorHandle, returnBuffer);
+}
+
+void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
+{
+   qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
+   outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
+   outFile.write((const char *)returnBuffer, validFrames * frameSize);
+   outFile.close();
+
    ReturnBuffer(detectorHandle, returnBuffer);
 }
 
@@ -156,10 +165,8 @@ int GigEDetector::initialiseConnection()
    GigEDeviceInfoStr deviceInfo = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
    updateState(INITIALISING);
 
-   qDebug() <<"InitDevice";
    status = InitDevice(&detectorHandle, deviceDescriptor, &pleoraErrorCode, pleoraErrorCodeStr,
                              &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen);
-   qDebug() <<"InitDevice status" << status;
    showError("InitDevice", status);
 
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
@@ -198,6 +205,7 @@ int GigEDetector::initialiseConnection()
    yRes = 80;
    framesPerBuffer = 100;
 
+
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                               &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
@@ -209,11 +217,7 @@ int GigEDetector::initialiseConnection()
       qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
    }
    status = setImageFormat(xRes, yRes);
-   qDebug() <<"setImageFormat: xRes, yRes, status " << xRes << yRes << status;
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
-   qDebug() <<"CreatePipeline(): framesPerBufer, status " << framesPerBuffer << status;
-
-   qDebug() << "!!!!!!!!!!!!!!!!!GigEDetector::InitialiseConnection and configure DONE!!!!!!!!!!!!!!!";
 
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
 
@@ -261,8 +265,9 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
 {
    LONG status = -1;
 
-   status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution,yResolution, 0, 0, "One", "Off");
+   status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution, yResolution, 0, 0, "One", "Off");
    showError( "SetFrameFormatControl", status);
+   frameSize = xResolution * xResolution * 2;
 
    return status;
 }
@@ -417,15 +422,19 @@ void GigEDetector::setGetImageParams()
 
 //   streaming = 1;
    path = directory + "/" + prefix;
-   qDebug() << "setGetImageParams() path = " << path;
-   /*
+
    if (timestampOn)
    {
-      path += QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + "_reduced";
+      path += QDateTime::currentDateTime().toString("yyMMdd_hhmmss");
    }
-*/
+   path += ".bin";
+
+   qDebug() << "setGetImageParams() path = " << path;
    path.replace(QString("/"), QString("\\"));
    sprintf_s(pathString, "%s", path.toUtf8().data());
+
+   outFile.open(pathString, std::ofstream::binary);
+   outFile.close();
 
    imgCntAverage = 1;
 }
@@ -447,14 +456,12 @@ WindowsEvent *GigEDetector::getShowImageEvent()
 
 void GigEDetector::handleReducedDataCollection()
 {
-   qDebug() << "handleReducedDataCollection";
    emit executeGetImages();
 }
 
 void GigEDetector::handleExecuteGetImages()
 {
    updateState(COLLECTING);
-//   this->count = count;
    emit executeAcquireImages();
 }
 
@@ -483,7 +490,7 @@ LONG GigEDetector::collectOffsets()
 {
    int status = -1;
 
-   qDebug() << "Get GigE to collect and load up offsets here!!!";
+   qDebug() << "Get GigE to collect offsets here!!!";
    status = CollectOffsetValues(detectorHandle, 1000, collectDcTime);								// make sure to have stable operating conditions (high voltage, temperature, x-ray turned off)
    showError("CollectOffsetValues", status);
 
@@ -502,7 +509,6 @@ void GigEDetector::acquireImages()
    {
       frameTimeout = 100;
    }
-   qDebug() <<"frameTime" << frameTime << "count" << count << "frames per buffer" << framesPerBuffer;
 
    qDebug() <<"frameCount" << frameCount << "durationSeconds" << durationSeconds;
    status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
@@ -518,7 +524,6 @@ void GigEDetector::handleStop()
 
 void GigEDetector::abort(bool restart)
 {
-   qDebug() << "*** data acquisition stopping ***, threadId" << QThread::currentThreadId();
    StopAcquisition(detectorHandle);
    qDebug() << "data acquisition stopped.";
    updateState(READY);
@@ -527,7 +532,6 @@ void GigEDetector::abort(bool restart)
 void GigEDetector::updateState(DetectorState state)
 {
    this->state = state;
-//   qDebug() <<"DetectorState state: " << state;
    emit notifyState(state);
 }
 
@@ -563,7 +567,6 @@ void GigEDetector::setDirectory(QString directory)
 
 void GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
 {
-   qDebug() <<"setDataAcquisitionDuration: " << dataAcquisitionDuration;
    this->dataAcquisitionDuration = dataAcquisitionDuration;
 }
 
@@ -584,7 +587,6 @@ QString GigEDetector::getPrefix()
 
 void GigEDetector::setTimestampOn(bool timestampOn)
 {
-   //qDebug() << "GigEDetector Setting timestampOn to " << timestampOn;
    this->timestampOn = timestampOn;
 }
 
@@ -660,7 +662,6 @@ unsigned char *GigEDetector::getImage(int imageNumber)
    returnBuffer = buffer;
    emit executeReturnBufferReady(returnBuffer);
 
-//   returnBufferReadyEvent->SetEvent1();
    for (int i = 0; i < imageSize; i++)
    {
       current = imageDest[i];

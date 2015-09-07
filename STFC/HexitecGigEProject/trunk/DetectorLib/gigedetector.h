@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QPixmap>
+#include <fstream>
+#include <QDateTime>
 
 #include "inifile.h"
 #include "windowsevent.h"
@@ -81,6 +83,7 @@ public slots:
    void offsetsDialogAccepted();
    void handleBufferReady();
    void handleReturnBufferReady();
+   void handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames);
    void handleSetTargetTemperature(double targetTemperature);
    void handleSetHV(double voltage);
 private:
@@ -88,6 +91,9 @@ private:
    DetectorState state;
    unsigned int xResolution;
    unsigned int yResolution;
+   int frameSize;
+   std::ofstream outFile;
+
    WindowsEvent *bufferReadyEvent;
    WindowsEvent *returnBufferReadyEvent;
    WindowsEvent *showImageEvent;
