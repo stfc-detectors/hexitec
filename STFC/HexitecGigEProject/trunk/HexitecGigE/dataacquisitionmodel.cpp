@@ -74,6 +74,7 @@ void DataAcquisitionModel::connectDetectorMonitor()
    connect(detectorMonitor, SIGNAL(temperatureBelowDP()), detectorControlForm, SLOT(handleTemperatureBelowDP()));
    connect(detectorMonitor, SIGNAL(temperatureBelowDP()), dataAcquisition, SLOT(handleAbortDAQ()));
    connect(detectorMonitor, SIGNAL(temperatureAboveDP()), detectorControlForm, SLOT(handleTemperatureAboveDP()));
+   connect(detectorMonitor, SIGNAL(monitoringDone()), dataAcquisition, SLOT(handleMonitored()));
    detectorMonitor->start();
 }
 
@@ -110,6 +111,13 @@ void DataAcquisitionModel::connectDataAcquisition()
            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(setTargetTemperature(double)),
            gigEDetector, SLOT(handleSetTargetTemperature(double)));
+
+   connect(dataAcquisition, SIGNAL(executeMonitorEnvironmentalValues()),
+           detectorMonitor, SLOT(executeMonitorEnvironmentalValues()));
+   connect(dataAcquisition, SIGNAL(enableMonitoring()),
+           detectorMonitor, SLOT(enableMonitoring()));
+   connect(dataAcquisition, SIGNAL(disableMonitoring()),
+           detectorMonitor, SLOT(disableMonitoring()));
 }
 
 void DataAcquisitionModel::connectGigEDetector()

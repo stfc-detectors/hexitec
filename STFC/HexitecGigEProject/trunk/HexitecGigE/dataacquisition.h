@@ -55,6 +55,7 @@ private:
    static QHash<QString, int> motorPositions;
    void run();
    int waitForCollectingDone();
+   void waitForMonitoringDone();
    int waitForBiasRefreshDone();
    void configureDataCollection();
    void configureBasicCollection();
@@ -65,6 +66,7 @@ private:
    void performFixedDataCollection();
    void setDataAcquisitionTime(int nDaq);
    void performSingleBiasRefresh();
+   void performMonitorEnvironmentalValues();
    void setAbort(bool abort);
    bool abortRequired();
    void pauseDataAcquisition();
@@ -84,6 +86,7 @@ private:
    int currentImageNumber;
    bool collecting;
    bool biasRefreshing;
+   bool monitoring;
    bool biasOn;
    bool biasRefreshRequired;
    bool appendRepeatCount;
@@ -108,7 +111,10 @@ signals:
    void storeBiasSettings();
    void restoreBiasSettings();
    void disableBiasRefresh();
+   void enableMonitoring();
+   void disableMonitoring();
    void executeSingleBiasRefresh();
+   void executeMonitorEnvironmentalValues();
    void pushFilename();
    void collectingChanged(bool);
    void dataAcquisitionStatusChanged(DataAcquisitionStatus dataAcquisitionStatus);
@@ -127,6 +133,7 @@ public slots:
    void handleCancelReducedDataCollection();
    void handleBiasRefreshing();
    void handleBiasRefreshed(QString time);
+   void handleMonitored();
    void handleBiasState(bool biasOn);
    void handleSetFingerTemperature(double temperature);
    void handleMonitorData(MonitorData *md);

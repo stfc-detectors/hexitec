@@ -21,6 +21,7 @@ DataAcquisition::DataAcquisition(QObject *parent) :
 {
    collecting = false;
    biasRefreshing = false;
+   monitoring = false;
    biasOn = false;
    biasRefreshRequired = false;
    setAbort(false);
@@ -256,10 +257,12 @@ void DataAcquisition::performContinuousDataCollection()
 
    emit storeBiasSettings();
    emit disableBiasRefresh();
+   emit disableMonitoring();
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
       setDirectory(repeatCount);
+      performMonitorEnvironmentalValues();
 
       for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)
       {
@@ -277,6 +280,7 @@ void DataAcquisition::performContinuousDataCollection()
          if (nDaq < (splitDataCollections - 1) ||
              !repeatPauseRequired(repeatCount))
          {
+            performMonitorEnvironmentalValues();
             performSingleBiasRefresh();
             if (abortRequired())
                break;
@@ -302,6 +306,7 @@ void DataAcquisition::performContinuousDataCollection()
 
    gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
    emit restoreBiasSettings();
+   emit enableMonitoring();
 }
 
 /*
@@ -453,6 +458,19 @@ void DataAcquisition::setDataAcquisitionTime(int nDaq)
    }
 
    gigEDetector->setDataAcquisitionDuration(dataCollectionTime);
+}
+
+void DataAcquisition::performMonitorEnvironmentalValues()
+{
+   monitoring = true;
+   emit executeMonitorEnvironmentalValues();
+   waitForMonitoringDone();
+}
+
+void DataAcquisition::waitForMonitoringDone()
+{
+   while (monitoring)
+      sleep(0.1);
 }
 
 void DataAcquisition::performSingleBiasRefresh()
@@ -801,6 +819,11 @@ void DataAcquisition::handleBiasRefreshed(QString time)
    changeDAQStatus(daqStatus.getMajorStatus(),
                    storedMinorStatus);
    biasRefreshing = false;
+}
+
+void DataAcquisition::handleMonitored()
+{
+   monitoring = false;
 }
 
 void DataAcquisition::handleBiasState(bool biasOn)
