@@ -27,9 +27,11 @@ private:
    bool readTAsic;
    int loggingInterval;
    int monitorCount;
+   bool monitoringEnabled;
 //   FileWriter *logfileWriter;
    void calcTDP();
    void read();
+   void monitorEnvironmentalValues();
 
 public:
    explicit DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent = 0);
@@ -37,9 +39,10 @@ public:
    int start();
    int stop();
    int getLoggingInterval();
-   
+
 signals:
    void updateMonitorData(MonitorData *md);
+   void monitoringDone();
    void writeError(QString message);
    void writeMessage(QString message);
    void temperatureBelowDP();
@@ -54,6 +57,9 @@ public slots:
    void handleBiasRefreshing();
    void receiveState(GigEDetector::DetectorState detectorState);
    void createLogFile(DetectorFilename *logFilename);
+   void executeMonitorEnvironmentalValues();
+   void enableMonitoring();
+   void disableMonitoring();
 };
 
 #endif // DETECTORMONITOR_H

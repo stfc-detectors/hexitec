@@ -8,6 +8,7 @@
 #define STR_LENGTH 1024
 //
 #include <QImage>
+#include <QDir>
 
 #include "windowsevent.h"
 #include "gigedetector.h"
@@ -432,7 +433,11 @@ void GigEDetector::setGetImageParams()
    qDebug() << "setGetImageParams() path = " << path;
    path.replace(QString("/"), QString("\\"));
    sprintf_s(pathString, "%s", path.toUtf8().data());
-
+   if ( !QDir(directory).exists())
+   {
+      qDebug() <<"Creating directory" << directory;
+      QDir().mkdir(directory);
+   }
    outFile.open(pathString, std::ofstream::binary);
    outFile.close();
 
@@ -502,7 +507,7 @@ void GigEDetector::acquireImages()
    int status = -1;
    ULONGLONG framesAcquired;
    double durationSeconds = dataAcquisitionDuration/1000.0;
-   ULONG frameCount = count * ((durationSeconds/frameTime) + 0.5);
+   ULONG frameCount = (durationSeconds/frameTime) + 0.5;
    ULONG frameTimeout = (ULONG)(frameTime * 2500.0);
 
    if( frameTimeout < 100 )

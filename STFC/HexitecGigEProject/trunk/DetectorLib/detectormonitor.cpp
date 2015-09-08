@@ -7,6 +7,7 @@
 DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
    QObject(parent)
 {
+   monitoringEnabled = true;
    this->loggingInterval = 1;
    if (loggingInterval > 0)
    {
@@ -51,25 +52,42 @@ int DetectorMonitor::start()
 
 void DetectorMonitor::monitor()
 {
+   if (monitoringEnabled)
+   {
+      monitorEnvironmentalValues();
+   }
+}
+
+void DetectorMonitor::executeMonitorEnvironmentalValues()
+{
+   if (!monitoringEnabled)
+   {
+      monitorEnvironmentalValues();
+   }
+}
+
+void DetectorMonitor::monitorEnvironmentalValues()
+{
    read();
    emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic));
+   emit monitoringDone();
 /*
-   if (logfileWriter != NULL)
+if (logfileWriter != NULL)
+{
+   if (monitorCount == loggingInterval)
    {
-      if (monitorCount == loggingInterval)
-      {
-         logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
-                               QString::number(t, 'f', 1) + " " +
-                               QString::number(th, 'f', 1) + " " +
-                               QString::number(tdp, 'f', 1) + " " +
-                               QString::number(tasic, 'f', 1) + " " +
-                               QString::number(rh, 'f', 1) + " " +
-                               QString::number(ik, 'g', 3));
-         monitorCount = 0;
-      }
-      monitorCount++;
+      logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
+                            QString::number(t, 'f', 1) + " " +
+                            QString::number(th, 'f', 1) + " " +
+                            QString::number(tdp, 'f', 1) + " " +
+                            QString::number(tasic, 'f', 1) + " " +
+                            QString::number(rh, 'f', 1) + " " +
+                            QString::number(ik, 'g', 3));
+      monitorCount = 0;
    }
-   */
+   monitorCount++;
+}
+*/
    if (t < tdp)
    {
       if (temperatureInRange)
@@ -83,6 +101,7 @@ void DetectorMonitor::monitor()
       emit temperatureAboveDP();
       temperatureInRange = true;
    }
+
 }
 
 void DetectorMonitor::read()
@@ -101,6 +120,16 @@ void DetectorMonitor::calcTDP()
 {
    gamma = log(rh/100) + ((b*th) / (c+th));
    tdp = c * gamma / (b - gamma);
+}
+
+void DetectorMonitor::enableMonitoring()
+{
+   monitoringEnabled = true;
+}
+
+void DetectorMonitor::disableMonitoring()
+{
+   monitoringEnabled = false;
 }
 
 void DetectorMonitor::handleWriteError(QString message)
