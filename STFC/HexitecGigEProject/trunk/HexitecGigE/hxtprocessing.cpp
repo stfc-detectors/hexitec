@@ -85,8 +85,17 @@ HxtProcessing::~HxtProcessing()
     delete gLogConfig;
 }
 
-void HxtProcessing::pushRawFileName(string aFileName)
+void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
 {
+   /* This method is being used to indicate a new image collection is starting.
+    * aFileName contains the name (directory and prefix, but no extension) to use
+    * for the new image. frameSize is the size (in bytes) of each frame within
+    * the transfer buffer. This filename with .bin axtension is used to store the
+    * raw image. New filenames for processed data can be created by adding any
+    * extension (except .bin) to this filename.
+    */
+   qDebug() << "hxtProcessing::pushRawFileName() with " << aFileName.c_str()
+               << "frameSize (bytes) = " << frameSize;
     /// Pass .dat file (aFileName) onto fileQueue queue
     if (fileMutex.tryLock(mutexTimeout))
     {
@@ -96,15 +105,19 @@ void HxtProcessing::pushRawFileName(string aFileName)
     else
        emit hexitechSignalError("HxtProcessing::pushRawFileName() - Unable to acquire mutex lock!");
 }
+void HxtProcessing::pushImageComplete(unsigned long long totalFramesAcquired)
+{
+   qDebug() <<"The image is complete and has " << totalFramesAcquired << "total frames";
+}
 
 void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames)
 {
    /// This function needs to queue the transfer buffer for processing.
    /// Once the processing is complete and the buffer no-longer required
    /// the following signal should be sent to say the buffer can be released
-   /// back to the GigEDetector thread for re-use.
+   /// back to the GigEDetector thread for saving the raw data and for re-use.
    /// Its currently done here for testing.
-   qDebug() <<"HxtProcessing::pushTransferBuffer called! In threadId " << QThread::currentThreadId();;
+   qDebug() <<"HxtProcessing::pushTransferBuffer called: transfer buffer, validFrames " << transferBuffer << validFrames;
    emit returnBufferReady(transferBuffer, validFrames);
 
 }

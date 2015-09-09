@@ -58,16 +58,12 @@ void DetectorControlForm::handleCollectImagesPressed()
 {
    emit collectImagesPressed();
    waitingForModeChange = true;
-   qDebug() <<"ui->xResolution->value(), ui->yResolution->value()" << ui->xResolution->value() << ui->yResolution->value();
    emit executeCommand(GigEDetector::CONFIGURE, ui->xResolution->value(), ui->yResolution->value());
-//   emit executeCommand(GigEDetector::COLLECT, ui->imageCount->value(), 1);
 }
 
 void DetectorControlForm::abortDAQ()
 {
-   qDebug() <<"DetectorControlForm::abortDAQ() sending signal";
    emit abortDAQPressed();
-   //   emit executeCommand(GigEDetector::ABORT, 0, 0);
 }
 
 void DetectorControlForm::handleFixedImageCountChanged(int fixedImageCount)
@@ -83,7 +79,6 @@ void DetectorControlForm::handleSetFingerTemperature()
 
 void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
 {
-    qDebug() <<"DetectorControlForm::biasVoltageClicked with " << biasVoltageOn;
    if (biasVoltageOn)
    {
       emit executeCommand(HV::HVON);
@@ -103,7 +98,6 @@ void DetectorControlForm::initialiseDetectorPressed()
     * executed via signal/slot. Set GUI correctly. */
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(true);
-   qDebug() << "initialiseDetectorPressed() DONE.";
 }
 
 void DetectorControlForm::terminateDetectorPressed()

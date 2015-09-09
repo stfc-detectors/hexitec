@@ -88,11 +88,6 @@ void DataAcquisition::configureDataCollection()
       gigEDetector->disableDarks();
    }
 
-   /*qDebug() << "Configuring DAQ";
-   qDebug() << "Data collection time " << dataAcquisitionDefinition->getDuration();
-   qDebug() << "Last time error " << GigEDetector->getTimeError();
-   qDebug() << "Bias refresh interval " << hv->getBiasRefreshInterval();*/
-
    setAbort(false);
    nRepeat = 1;
    appendRepeatCount = false;
@@ -109,7 +104,6 @@ void DataAcquisition::configureDataCollection()
    {
       appendRepeatCount = true;
    }
-   qDebug() << "Data collection to be achieved by repeating " << nRepeat << " collections, each split into " << splitDataCollections;
 
    mode = GigEDetector::CONTINUOUS;
    gigEDetector->setMode(mode);
@@ -161,7 +155,6 @@ void DataAcquisition::initHexitechProcessor()
 DataAcquisition::~DataAcquisition()
 {
    hv->off();
-//   gigEDetector->unRegisterCallback();
    if (mode == GigEDetector::SOFT_TRIGGER || mode == GigEDetector::EXTERNAL_TRIGGER)
    {
       emit executeCommand(GigEDetector::STOP_TRIGGER, 0, 0);
@@ -236,14 +229,12 @@ void DataAcquisition::run()
 void DataAcquisition::setDirectory(int repeatCount)
 {
    QString *dir = new QString(dataAcquisitionDefinition->getDataFilename()->getDirectory());
+
    if (appendRepeatCount)
    {
       dir->append("/" + dataAcquisitionDefinition->getDataFilename()->getPrefix() + QString().sprintf("repeat_%03d", repeatCount));
    }
-   if (splitDataCollections > 1)
-   {
-      dir->append("/" + dataAcquisitionDefinition->getDataFilename()->getPrefix() + "split");
-   }
+
    gigEDetector->setDirectory(*dir);
    delete dir;
 }
@@ -254,18 +245,23 @@ void DataAcquisition::performContinuousDataCollection()
    int repeatCount;
    int nDaqOverall = 0;
 
-
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
+      totalFramesAcquired = 0;
+      emit appendTimestamp(true);
       setDirectory(repeatCount);
       performMonitorEnvironmentalValues();
 
       for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)
       {
+         if (nDaq > 0)
+         {
+            emit appendTimestamp(false);
+         }
          setDataAcquisitionTime(nDaq);
          collecting = true;
 
@@ -286,6 +282,8 @@ void DataAcquisition::performContinuousDataCollection()
                break;
          }
       }
+
+      emit imageComplete(totalFramesAcquired);
 
       // Break the outer loop too.
       if (abortRequired())
@@ -309,47 +307,7 @@ void DataAcquisition::performContinuousDataCollection()
    emit enableMonitoring();
 }
 
-/*
-void DataAcquisition::performContinuousDataCollection()
-{
-   int nDaq;
-   int repeatCount;
-   int nDaqOverall = 0;
 
-
-   nRepeat = 3;
-   qDebug() << "DataAcquisition::performContinuousDataCollection: nRepeat = " << nRepeat;
-
-   dataAcquisitionModel = DataAcquisitionModel::getInstance();
-   dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
-
-   emit storeBiasSettings();
-   emit disableBiasRefresh();
-
-   for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
-   {
-      setDirectory(repeatCount);
-      collecting = true;
-
-      emit executeCommand(GigEDetector::COLLECT, 1, 0);
-      waitForCollectingDone();
-      collecting = false;
-
-      if (abortRequired())
-         break;
-
-      if (repeatPauseRequired(repeatCount))
-      {
-         pauseDataAcquisition();
-         if (abortRequired())
-            break;
-         changeDAQStatus(daqStatus.getMajorStatus(),
-                         DataAcquisitionStatus::COLLECTING);
-      }
-   }
-   emit restoreBiasSettings();
-}
-*/
 void DataAcquisition::performGigEDefaultDataCollection()
 {
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
@@ -441,7 +399,6 @@ void DataAcquisition::performFixedDataCollection()
 
 void DataAcquisition::setDataAcquisitionTime(int nDaq)
 {
-//   double dataCollectionTime;
    double biasRefreshDataCollectionTime = hv->getBiasRefreshInterval();
    double finalDataCollectionTime = dataAcquisitionDefinition->getDuration() - (biasRefreshDataCollectionTime * ((double) (splitDataCollections - 1)));
 
@@ -576,11 +533,6 @@ void DataAcquisition::handleMonitorData(MonitorData *md)
    tdp = md->getTDP();
 }
 
-void DataAcquisition::updateImageFile(int writeToFileNumber)
-{
-//   imageIndicatorFile->write(writeToFileNumber);
-}
-
 void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorStatus,
                                       DataAcquisitionStatus::MinorStatus minorStatus)
 {
@@ -667,8 +619,6 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
       break;
 
    }
-
-   updateImageFile(writeToFileNumber);
 }
 
 void DataAcquisition::collectReducedImages()
@@ -738,11 +688,22 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 {
    if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
    {
-      qDebug() << "DataAcquisition::handleBufferReady passing buffer address and frame count to processing";
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
       hxtProcessor->pushMotorPositions(&motorPositions);
    }
 
+}
+
+void DataAcquisition::handleImageStarted(char *path, int frameSize)
+{
+   hxtProcessor->pushRawFileName(path, frameSize);
+
+   hxtProcessor->pushMotorPositions(&motorPositions);
+}
+
+void DataAcquisition::handleImageComplete(unsigned long long framesAcquired)
+{
+   totalFramesAcquired += framesAcquired;
 }
 
 void DataAcquisition::handleTrigger()

@@ -74,7 +74,6 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
     * The DetectorMonitor created by the DetectorFactory uses the keithley!
     */
    detectorFactory = DetectorFactory::instance();
-   qDebug() <<"detectorFactory->createGigEDetector(parent), parent:" << parent;
    detectorFactory->createGigEDetector(parent);
 
    dataAcquisition = DataAcquisition::instance();

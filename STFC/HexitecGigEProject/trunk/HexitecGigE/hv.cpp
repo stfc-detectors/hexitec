@@ -130,10 +130,8 @@ void HV::biasRefresh(int refreshTime)
 
 void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
 {
-    qDebug() <<"HV::handleExecuteCommand with " << command;
 
     Reservation reservation = ObjectReserver::instance()->reserveForGUI(rkl);
-    qDebug() <<"Reservation done ";
 
     if (reservation.getReserved().isEmpty())
     {
@@ -143,13 +141,11 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
     {
        if (command == HVON)
        {
-          qDebug() << "Start the refreshtimer";
           emit startRefreshTimerSignal(biasRefreshInterval);
           on();
        }
        else if (command == HVOFF)
        {
-          qDebug() << "turn biasoff";
           off();
           ObjectReserver::instance()->release(reservation.getReserved(), "GUIReserver");
        }
@@ -244,7 +240,6 @@ bool HV::getBiasOnState()
 
 void HV::startBiasRefreshTimer()
 {
-    qDebug() << "Starting bias refresh timer " << biasRefreshTime;
    biasRefreshTimer->start(biasRefreshTime);
 }
 

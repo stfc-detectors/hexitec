@@ -39,7 +39,7 @@ public:
     ~HxtProcessing();
     void run();
 
-    void pushRawFileName(string aFileName); // Add raw filename onto fileQueue queue
+    void pushRawFileName(string aFileName, int frameSize); // Add raw filename onto fileQueue queue
     void pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames); // Add transfer buffer onto queue
     int executeProcessing();
     int checkConfigValid();
@@ -125,6 +125,7 @@ private slots:
     void removeFiles(bool bRemoveFiles);
     // DataAcquisitionForm signalling (via MainWindow) that data collection finished
     void handleDataAcquisitionStatusChanged(DataAcquisitionStatus);
+    void pushImageComplete(unsigned long long framesAcquired);
 
 protected:
     // Go through fileQueue looking for any motor position changes

@@ -320,7 +320,6 @@ void DataAcquisitionForm::offsetsDialogRejected()
 
 void DataAcquisitionForm::dataCollectionDialogAccepted()
 {
-   qDebug() << "dataCollectionDialogAccepted()";
    emit executeReducedDataCollection();
 }
 

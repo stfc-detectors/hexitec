@@ -63,7 +63,6 @@ public:
    Q_INVOKABLE void setDirectory(QString directory);
    Q_INVOKABLE void setPrefix(QString prefix);
    Q_INVOKABLE void setTimestampOn(bool timestampOn);
-   Q_INVOKABLE void setMode(QString mode);
    Q_INVOKABLE QString getDirectory();
    QList<QObject *> getReserveList();
 

@@ -21,19 +21,7 @@
 class DataAcquisition : public QThread, public Reservable
 {
    Q_OBJECT
-/*
-   static LONG __cdecl fileCallback(CONST LPSTR path)
-   {
-      LONG status = 0;
 
-      //qDebug() << "\n================== In DataAcquisition callback" << path << " AND mTime = " << mPos->mTime;
-      hxtProcessor->pushRawFileName(path);
-
-      hxtProcessor->pushMotorPositions(&motorPositions);
-
-      return status;
-   }
-*/
 public:
    static DataAcquisition *instance();
    ~DataAcquisition();
@@ -102,8 +90,9 @@ private:
    bool collectingTriggered;
    QList <QObject *> rdaql;
    Reservation reservation;
-
+   unsigned long long totalFramesAcquired;
    void performGigEDefaultDataCollection();
+
 signals:
    void executeCommand(GigEDetector::DetectorCommand, int, int);
    void executeOffsets();
@@ -119,6 +108,9 @@ signals:
    void collectingChanged(bool);
    void dataAcquisitionStatusChanged(DataAcquisitionStatus dataAcquisitionStatus);
    void setTargetTemperature(double targetTemperature);
+   void appendTimestamp(bool appendTimestamp);
+   void imageComplete(unsigned long long totalFramesAcquired);
+
 public slots:
    void handleAbortDAQ();
    void receiveState(GigEDetector::DetectorState detectorState);
@@ -140,6 +132,9 @@ public slots:
    void positionChanged(Motor *motor, const QVariant & value);
    void handleExternalTriggerReceived();
    void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
+   void handleImageStarted(char *path, int frameSize);
+   void handleImageComplete(unsigned long long framesAcquired);
+
 private slots:
    //void handlePushFilename();
 };

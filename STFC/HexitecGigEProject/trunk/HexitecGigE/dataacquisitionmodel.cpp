@@ -23,8 +23,6 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    dataAcquisition = DataAcquisition::instance();
    objectReserver = ObjectReserver::instance();
 
-//   dataAcquisitionForm->setModes(gigEDetector->getReducedDataModes());
-
    connectDataAcquisitionForm();
    connectDetectorControlForm();
    connectDetectorMonitor();
@@ -111,6 +109,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(setTargetTemperature(double)),
            gigEDetector, SLOT(handleSetTargetTemperature(double)));
+   connect(dataAcquisition, SIGNAL(appendTimestamp(bool)),
+           gigEDetector, SLOT(handleAppendTimestamp(bool)));
 
    connect(dataAcquisition, SIGNAL(executeMonitorEnvironmentalValues()),
            detectorMonitor, SLOT(executeMonitorEnvironmentalValues()));
@@ -118,26 +118,23 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorMonitor, SLOT(enableMonitoring()));
    connect(dataAcquisition, SIGNAL(disableMonitoring()),
            detectorMonitor, SLOT(disableMonitoring()));
+   connect(dataAcquisition, SIGNAL(imageComplete(unsigned long long)),
+           ProcessingWindow::getHxtProcessor(), SLOT(pushImageComplete(unsigned long long)));
 }
 
 void DataAcquisitionModel::connectGigEDetector()
 {
    connect(gigEDetector, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(gigEDetector, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisitionForm, SLOT(handleModeChanged(GigEDetector::Mode)));
-//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), detectorControlForm, SLOT(handleModeChanged(GigEDetector::Mode)));
-//   connect(gigEDetector, SIGNAL(notifyMode(GigEDetector::Mode)), dataAcquisition, SLOT(handleModeChanged(GigEDetector::Mode)));
    connect(gigEDetector, SIGNAL(notifyState(GigEDetector::DetectorState)), dataAcquisition, SLOT(receiveState(GigEDetector::DetectorState)));
-/*   connect(gigEDetector, SIGNAL(image1Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap1(QPixmap)));
-   connect(gigEDetector, SIGNAL(image2Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap2(QPixmap)));
-   connect(gigEDetector, SIGNAL(image3Acquired(QPixmap)), detectorControlForm, SLOT(setPixmap3(QPixmap)));
-*/
    connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
 
    connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
-/*   connect(gigEDetector, SIGNAL(externalTriggerReceived()), dataAcquisition, SLOT(handleExternalTriggerReceived()));
-*/
+   connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
+           dataAcquisition, SLOT(handleImageStarted(char *, int)));
+   connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
+           dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
 }
 
 void DataAcquisitionModel::connectDetectorControlForm()
@@ -235,8 +232,6 @@ void DataAcquisitionModel::initialiseDetectorFilename(DetectorFilename *detector
 
 void DataAcquisitionModel::setDetectorFilename(DetectorFilename sourceFilename, DetectorFilename *destFilename)
 {
-   qDebug() <<"DataAcquisitionModel::setDetectorFilename with" <<
-              sourceFilename.getDirectory() << sourceFilename.getPrefix() << sourceFilename.getTimestampOn();
    destFilename->setDirectory(sourceFilename.getDirectory());
    destFilename->setPrefix(sourceFilename.getPrefix());
    destFilename->setTimestampOn(sourceFilename.getTimestampOn());
@@ -258,7 +253,6 @@ void DataAcquisitionModel::configure(QString directory, QString prefix, bool tim
    dataAcquisitionDefinition.setRepeatInterval(repeatInterval * 1000);
    dataAcquisitionDefinition.setOffsets(offsets);
 
-   //changeDaqDuration(); Commented out as the GUI is doing the DAQ work and a result of the GUI fields being updated. i.e. Scripting changes the model which updates the GUI.
    emit dataChanged(dataAcquisitionDefinition);
 }
 
@@ -274,16 +268,6 @@ void DataAcquisitionModel::setPrefix(QString prefix)
    DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
    dataFilename->setPrefix(prefix);
    emit dataChanged(dataAcquisitionDefinition);
-}
-
-void DataAcquisitionModel::setMode(QString mode)
-{
-   /*
-   if (gigEDetector->getModes().contains(mode))
-   {
-      emit dataChanged(mode);
-   }
-   */
 }
 
 QString DataAcquisitionModel::getDirectory()
