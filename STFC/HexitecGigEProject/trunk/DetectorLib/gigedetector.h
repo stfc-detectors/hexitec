@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <fstream>
 #include <QDateTime>
+#include <string>
 
 #include "inifile.h"
 #include "windowsevent.h"
@@ -57,22 +58,24 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    static PUCHAR getBufferReady();
    static ULONG getValidFrames();
    void abort(bool restart);
-//   static void handleReturnBufferReady(unsigned char *transferBuffer);
+
 signals:
    void notifyState(GigEDetector::DetectorState state);
    void notifyMode(GigEDetector::Mode mode);
    void writeError(QString message);
    void writeMessage(QString message);
    void executeCommand(GigEDetector::DetectorCommand, int, int);
-//   void executeGetImages(int count, int ndaq);
    void executeGetImages();
    void executeReturnBufferReady(unsigned char * transferBuffer);
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void notifyStop();
    void imageAcquired(QPixmap data);
+   void imageStarted(char *path, int frameSize);
+   void imageComplete(unsigned long long framesAcquired);
    void executeAcquireImages();
    void prepareForOffsets();
    void prepareForDataCollection();
+
 public slots:
    void handleShowImage();
    void handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2 = 1);
@@ -80,12 +83,14 @@ public slots:
    void handleStop();
    void handleReducedDataCollection();
    void handleExecuteOffsets();
-   void offsetsDialogAccepted();
+//   void offsetsDialogAccepted();
    void handleBufferReady();
    void handleReturnBufferReady();
    void handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames);
    void handleSetTargetTemperature(double targetTemperature);
    void handleSetHV(double voltage);
+   void handleAppendTimestamp(bool appendTimestamp);
+
 private:
    QThread *gigEDetectorThread;
    DetectorState state;
@@ -93,6 +98,7 @@ private:
    unsigned int yResolution;
    int frameSize;
    std::ofstream outFile;
+   bool appendTimestamp;
 
    WindowsEvent *bufferReadyEvent;
    WindowsEvent *returnBufferReadyEvent;
@@ -120,7 +126,6 @@ private:
    double frameTime;
    int imgCntAverage;
    ULONG timeout;
-//   ImageInfoPtr imageInfoPtr;
    short *imageDest;
    int *summedImageDest;
    unsigned char *charImageDest;

@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QThread>
 
 #include "imageacquirer.h"
@@ -23,6 +22,5 @@ void ImageAcquirer::setDetector(GigEDetector *detector)
 
 void ImageAcquirer::handleExecuteAcquireImages()
 {
-   qDebug() <<"handleAcquireImages called, count: In threadId " << QThread::currentThreadId();
    detector->acquireImages();
 }
