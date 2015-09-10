@@ -689,15 +689,12 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
    if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
    {
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
-      hxtProcessor->pushMotorPositions(&motorPositions);
    }
-
 }
 
 void DataAcquisition::handleImageStarted(char *path, int frameSize)
 {
    hxtProcessor->pushRawFileName(path, frameSize);
-
    hxtProcessor->pushMotorPositions(&motorPositions);
 }
 
