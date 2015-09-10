@@ -19,7 +19,7 @@ matlab::matlab(QObject *parent) :
    QThread(parent)
 {
    startScriptFlag = false;
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
    if (settings.contains("MATLAB"))
    {
       if (settings.value("MATLAB").toString() == "On")

@@ -22,10 +22,10 @@ VoltageSourceFactory *VoltageSourceFactory::instance()
 HV *VoltageSourceFactory::createHV(QString name)
 {
    QString detectorFilename = Parameters::twoEasyIniFilename;
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
-   if (settings.contains("2EasyIniFilename"))
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   if (settings.contains("hexitecGigEIniFilename"))
    {
-      detectorFilename = settings.value("2EasyIniFilename").toString();
+      detectorFilename = settings.value("hexitecGigEIniFilename").toString();
    }
 
    hv = new HV();

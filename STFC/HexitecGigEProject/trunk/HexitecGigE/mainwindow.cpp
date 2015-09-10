@@ -825,7 +825,7 @@ void MainWindow::testDevelopment()
 
 void MainWindow::checkKeithleyConfiguration()
 {
-   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "2Easy");
+   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
    keithleyPresent = false;
    if (settings->contains("KEITHLEY"))
    {
@@ -868,7 +868,7 @@ bool MainWindow::checkDAQChoice()
 {
    bool activeDAQ = false;
 
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
    if (settings.contains("DataAcquisition"))
    {
       if (settings.value("DataAcquisition").toString() == "On")

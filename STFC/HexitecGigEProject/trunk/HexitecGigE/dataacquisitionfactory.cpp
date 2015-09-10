@@ -3,12 +3,15 @@
 #include "motor.h"
 #include "scriptingwidget.h"
 #include "dataacquisitiondefinition.h"
+#include "parameters.h"
 
 DataAcquisitionFactory *DataAcquisitionFactory::dafInstance = 0;
 
 DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent)
 {
-   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "2Easy");
+   QString aspectFilename = Parameters::aspectIniFilename;
+   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+
    motorModel = new MotorModel();
    motorFactory = MotorFactory::instance();
    QString motor;
@@ -73,8 +76,15 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    /* Currently the following should be done after creating the keithley (above).
     * The DetectorMonitor created by the DetectorFactory uses the keithley!
     */
+
+   if (settings->contains("aspectIniFilename"))
+   {
+      qDebug() <<"Setting found";
+      aspectFilename = settings->value("aspectIniFilename").toString();
+   }
+
    detectorFactory = DetectorFactory::instance();
-   detectorFactory->createGigEDetector(parent);
+   detectorFactory->createGigEDetector(aspectFilename, parent);
 
    dataAcquisition = DataAcquisition::instance();
    dataAcquisition->setProperty("objectName", "daq");

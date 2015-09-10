@@ -1,10 +1,11 @@
 #include "dataacquisitiondefinition.h"
 #include "parameters.h"
 #include <QSettings>
+#include <QDebug>
 
 DataAcquisitionDefinition::DataAcquisitionDefinition()
 {
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
    QString twoEasyFilename = Parameters::twoEasyIniFilename;
 
    duration = 1000.0;
@@ -12,11 +13,12 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
    repeatInterval = 0;
    fixedImageCount = 0;
 
-   if (settings.contains("2EasyIniFilename"))
+   if (settings.contains("hexitecGigEIniFilename"))
    {
-      twoEasyFilename = settings.value("2EasyIniFilename").toString();
+      twoEasyFilename = settings.value("hexitecGigEIniFilename").toString();
    }
    twoEasyIniFile = new IniFile(twoEasyFilename);
+   qDebug () << "ini filename: " << twoEasyFilename;
 //   repeatCount = twoEasyIniFile->getInt("Data Acquisition/Repeat Count");
 }
 

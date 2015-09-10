@@ -112,10 +112,10 @@ ProcessingWindow::ProcessingWindow(MainWindow *mw, QWidget *parent) :
    mainWindow->setCentralWidget(this);
 
    hexitechFilename = Parameters::twoEasyIniFilename;
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
-   if (settings.contains("2EasyIniFilename"))
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   if (settings.contains("hexitecGigEIniFilename"))
    {
-      hexitechFilename = settings.value("2EasyIniFilename").toString();
+      hexitechFilename = settings.value("hexitecGigEIniFilename").toString();
    }
    if (!fileExists(hexitechFilename.toStdString().c_str()))
    {

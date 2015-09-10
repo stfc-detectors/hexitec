@@ -5,7 +5,7 @@
 
 NewportXpsMotor::NewportXpsMotor(QString name, int id, QObject *parent):Motor(name, parent)
 {
-   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "2Easy");
+   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
    char pIPAddress[13] = {"192.168.1.70"};
    int port = 5001;
    double timeout = 0.1;

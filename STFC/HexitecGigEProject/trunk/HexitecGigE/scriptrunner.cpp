@@ -15,10 +15,10 @@ ScriptRunner::ScriptRunner(QObject *parent) :
 
    QString twoEasyFilename = Parameters::twoEasyIniFilename;
 
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
-   if (settings.contains("2EasyIniFilename"))
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   if (settings.contains("hexitecGigEIniFilename"))
    {
-      twoEasyFilename = settings.value("2EasyIniFilename").toString();
+      twoEasyFilename = settings.value("hexitecGigEIniFilename").toString();
    }
 
    if (QFileInfo(twoEasyFilename).exists())
