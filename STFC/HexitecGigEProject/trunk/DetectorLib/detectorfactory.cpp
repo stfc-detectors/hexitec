@@ -1,6 +1,5 @@
 #include <QDebug>
 #include "windowsevent.h"
-#include "parameters.h"
 #include "detectorfactory.h"
 
 DetectorFactory *DetectorFactory::dfInstance = 0;
@@ -19,16 +18,8 @@ DetectorFactory *DetectorFactory::instance(const QObject *parent)
    return dfInstance;
 }
 
-GigEDetector *DetectorFactory::createGigEDetector(QObject *parent)
+GigEDetector *DetectorFactory::createGigEDetector(QString aspectFilename, QObject *parent)
 {
-   QString aspectFilename = Parameters::aspectIniFilename;
-
-   QSettings settings(QSettings::UserScope, "TEDDI", "2Easy");
-   if (settings.contains("aspectIniFilename"))
-   {
-      aspectFilename = settings.value("aspectIniFilename").toString();
-   }
-
    gigEDetector = new GigEDetector(aspectFilename, parent);
    imageAcquirer = new ImageAcquirer(this);
    imageAcquirer->setDetector(gigEDetector);

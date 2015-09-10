@@ -15,7 +15,7 @@ class DetectorFactory : public QObject
 public:
    ~DetectorFactory();
    static DetectorFactory *instance(const QObject *parent = 0);
-   GigEDetector *createGigEDetector(QObject *parent);
+   GigEDetector *createGigEDetector(QString aspectFilename, QObject *parent);
    GigEDetector *getGigEDetector();
    DetectorMonitor *getDetectorMonitor();
    WindowsEvent *getBufferReadyEvent();

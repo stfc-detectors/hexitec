@@ -41,14 +41,14 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    timeout = 1000;
    collectDcTime = 0;
    qDebug() << "aspectFilename = " << aspectFilename;
-   aspectFilename = "C:/karen/STFC/Technical/Detector/aspectGigE.ini";
    this->aspectFilename = aspectFilename;
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
 
-   readIniFile(this->aspectFilename);
-
+   framesPerBuffer = 1000;
+   directory = "C:";
+   prefix = "GigE_";
    xRes = 80;
    yRes = 80;
    vCal = 0.5;
@@ -56,6 +56,8 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    detCtrl = 0;
    targetTemperature = 20.0;
    hvSetPoint = 0;
+
+   readIniFile(this->aspectFilename);
 
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
@@ -205,18 +207,13 @@ int GigEDetector::initialiseConnection()
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
-   xRes = 80;
-   yRes = 80;
-   framesPerBuffer = 100;
-
 
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                               &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
    if (!status)
    {
-      qDebug() <<"Configure Detector - width:" << xRes;
-      qDebug() <<"Configure Detector - height:" << yRes;
+      qDebug() <<"Configure Detector - frames per buffer:" << framesPerBuffer;
       qDebug() << "Configure Detector - frameTime:" << frameTime ;
       qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
    }
@@ -629,11 +626,10 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
 
    status = 0;
    iniFile = new IniFile(aspectFilename);
-//   directory = iniFile->getString("Controls/Toplevel Path");
-   directory = "C:/karen/STFC/Technical/DSoFt_Images";
-//   prefix = iniFile->getString("Controls/Prefix");
-   prefix = "Hexitec_";
-   qDebug() << "aspectFilename:" << aspectFilename;
+   directory = iniFile->getString("Control-Settings/Toplevel Path");
+   prefix = iniFile->getString("Control-Settings/Prefix");
+
+   framesPerBuffer = iniFile->getInt("Control-Settings/Frames Per Buffer");
 
    sensorConfig.Gain = (HexitecGain)iniFile->getInt("Control-Settings/Gain");
    sensorConfig.Row_S1 = iniFile->getInt("Control-Settings/Row -> S1");
