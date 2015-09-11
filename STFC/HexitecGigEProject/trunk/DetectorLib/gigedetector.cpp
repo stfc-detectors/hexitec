@@ -40,7 +40,6 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 {
    timeout = 1000;
    collectDcTime = 0;
-   qDebug() << "aspectFilename = " << aspectFilename;
    this->aspectFilename = aspectFilename;
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
@@ -56,6 +55,7 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    detCtrl = 0;
    targetTemperature = 20.0;
    hvSetPoint = 0;
+   appendTimestamp = false;
 
    readIniFile(this->aspectFilename);
 
@@ -127,9 +127,12 @@ void GigEDetector::handleReturnBufferReady()
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
 //   qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
-   outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
-   outFile.write((const char *)returnBuffer, validFrames * frameSize);
-   outFile.close();
+   if (mode == CONTINUOUS)
+   {
+      outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
+      outFile.write((const char *)returnBuffer, validFrames * frameSize);
+      outFile.close();
+   }
 
    ReturnBuffer(detectorHandle, returnBuffer);
 }
@@ -330,7 +333,8 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
 void GigEDetector::getImages(int count, int ndaq)
 {
    this->count = count;
-   if (appendTimestamp)
+
+   if (mode == CONTINUOUS && appendTimestamp)
    {
       setGetImageParams();
    }
@@ -344,7 +348,6 @@ void GigEDetector::getImages(int count, int ndaq)
    {
       handleReducedDataCollection();
    }
-
 }
 
 void GigEDetector::setGetImageParams()
@@ -446,7 +449,11 @@ void GigEDetector::acquireImages()
    }
 
    status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
-   emit imageComplete(framesAcquired);
+   showError("AcquireFrames", status);
+   if (mode == CONTINUOUS)
+   {
+      emit imageComplete(framesAcquired);
+   }
    updateState(READY);
 }
 
