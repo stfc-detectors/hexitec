@@ -79,7 +79,6 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
 
    if (settings->contains("aspectIniFilename"))
    {
-      qDebug() <<"Setting found";
       aspectFilename = settings->value("aspectIniFilename").toString();
    }
 

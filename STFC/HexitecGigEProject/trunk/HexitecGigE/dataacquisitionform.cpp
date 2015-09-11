@@ -398,9 +398,14 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
       break;
    case DataAcquisitionStatus::ACQUIRING_DATA:
       int progress = 100;
-      if (status.getCurrentImage() <= status.getDaqImages())
+      int currImg = status.getCurrentImage();
+      int daqImgs = status.getDaqImages();
+      if (currImg > 0 && daqImgs > 0)
       {
-         progress = 100 * status.getCurrentImage()/ status.getDaqImages();
+         if (currImg <= daqImgs)
+         {
+            progress = 100 * status.getCurrentImage() / status.getDaqImages();
+         }
       }
       ui->progressBar->setValue(progress);
       ui->imageProgressBar->setValue(status.getPercentage());

@@ -18,7 +18,6 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
       twoEasyFilename = settings.value("hexitecGigEIniFilename").toString();
    }
    twoEasyIniFile = new IniFile(twoEasyFilename);
-   qDebug () << "ini filename: " << twoEasyFilename;
 //   repeatCount = twoEasyIniFile->getInt("Data Acquisition/Repeat Count");
 }
 

@@ -53,6 +53,7 @@ void DataAcquisition::configureBasicCollection()
 {
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
    dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
+   gigEDetector->setTimestampOn(false);
    gigEDetector->setDataAcquisitionDuration(1000);
    mode = GigEDetector::GIGE_DEFAULT;
    gigEDetector->setMode(mode);
@@ -315,12 +316,14 @@ void DataAcquisition::performGigEDefaultDataCollection()
 
    emit storeBiasSettings();
    emit disableBiasRefresh();
+   emit disableMonitoring();
 
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
    collecting = false;
    emit restoreBiasSettings();
+   emit enableMonitoring();
 }
 
 bool DataAcquisition::repeatPauseRequired(int repeatCount)
@@ -495,7 +498,7 @@ int DataAcquisition::waitForCollectingDone()
    {
       sleep(1);
       if (daqStatus.getMinorStatus() == DataAcquisitionStatus::COLLECTING &&
-          mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
+          mode == GigEDetector::CONTINUOUS)
       {
          elapsed++;
          percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
