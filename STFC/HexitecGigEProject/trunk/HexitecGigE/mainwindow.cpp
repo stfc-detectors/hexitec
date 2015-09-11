@@ -202,19 +202,25 @@ MainWindow::MainWindow()
 
    // Allow processingWindow to signal when User may (not) be allowed to collect data
    connect(processingWindow, SIGNAL(updateMainWindowDataTakingSignal(bool)), fileMenu->actions().at(1), SLOT(setEnabled(bool)));
-
    // Allow MainWindow signal to processingWindow if manual processing has begun/been abandoned
    connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-   connect(this, SIGNAL(executeBufferReady(unsigned char*, unsigned long)), dataAcquisitionFactory->getDataAcquisition(),
-           SLOT(handleBufferReady(unsigned char*, unsigned long)));
+
+   if (activeDAQ)
+   {
+      connect(this, SIGNAL(executeBufferReady(unsigned char*, unsigned long)), dataAcquisitionFactory->getDataAcquisition(),
+              SLOT(handleBufferReady(unsigned char*, unsigned long)));
+      connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
+              DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
+      connect(this, SIGNAL(executeShowImage()),
+              DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
+   }
+
    connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
            DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
    emit initialiseProcessingWindow();
-
-   connect(this, SIGNAL(executeShowImage()), DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
 }
 
 MainWindow::~MainWindow()
