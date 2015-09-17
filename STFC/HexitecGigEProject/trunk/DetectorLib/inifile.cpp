@@ -1,5 +1,5 @@
 #include "inifile.h"
-//#include <QDebug>
+#include <QDebug>
 
 IniFile::IniFile(QString filename)
 {
@@ -20,7 +20,7 @@ void IniFile::readIniFile()
 
 void IniFile::writeIniFile()
 {
-   QStringList keys = iniParameters->allKeys();
+   QStringList keys = parameters.keys();
 
    foreach (QString key, keys)
    {
@@ -42,6 +42,11 @@ QVariant IniFile::getParameter(QString name)
    }
 
    return parameter;
+}
+
+bool IniFile::getBool(QString name)
+{
+   return getParameter(name).toBool();
 }
 
 int IniFile::getInt(QString name)
@@ -82,12 +87,13 @@ QVariant IniFile::setParameter(QString name, QVariant value)
    if (parameters.contains(name))
    {
       parameters[name] = value;
-      status = QVariant(VALID);
    }
    else
    {
-      status = QVariant(INVALID);
+      parameters.insert(name, value);
    }
+   status = QVariant(VALID);
 
    return status;
 }
+

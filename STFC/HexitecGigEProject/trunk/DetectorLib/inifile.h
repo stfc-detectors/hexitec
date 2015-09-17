@@ -15,6 +15,7 @@ public:
    IniFile(QString filename);
    void readIniFile();
    void writeIniFile();
+   bool getBool(QString name);
    int getInt(QString name);
    float getFloat(QString name);
    double getDouble(QString name);

@@ -27,7 +27,6 @@ GigEDetector *DetectorFactory::createGigEDetector(QString aspectFilename, QObjec
    returnBufferReadyEvent = gigEDetector->getReturnBufferReadyEvent();
    showImageEvent = gigEDetector->getShowImageEvent();
 
-//   detectorMonitor = new DetectorMonitor(gigEDetector, loggingInterval);
    detectorMonitor = new DetectorMonitor(gigEDetector, NULL);
 
    return gigEDetector;

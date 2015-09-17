@@ -24,7 +24,9 @@ SOURCES += windowsevent.cpp \
     gigedetector.cpp \
     detectorfilename.cpp \
     monitordata.cpp \
-    imageacquirer.cpp
+    imageacquirer.cpp \
+    filewriter.cpp \
+    detectorexception.cpp
 
 HEADERS +=DetectorLib_global.h \
     windowsevent.h \
@@ -35,7 +37,9 @@ HEADERS +=DetectorLib_global.h \
     gigedetector.h \
     detectorfilename.h \
     monitordata.h \
-    imageacquirer.h
+    imageacquirer.h \
+    filewriter.h \
+    detectorexception.h
 
 LIBS += Hexitec.lib GigE.lib Kernel32.lib
 LIBS += GigE.lib Kernel32.lib

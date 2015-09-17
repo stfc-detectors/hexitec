@@ -21,6 +21,7 @@ public:
    WindowsEvent *getBufferReadyEvent();
    WindowsEvent *getReturnBufferReadyEvent();
    WindowsEvent *getShowImageEvent();
+
 protected:
    explicit DetectorFactory(const QObject *parent = 0);
 private:

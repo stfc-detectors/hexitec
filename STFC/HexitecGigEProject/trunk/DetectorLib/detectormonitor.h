@@ -11,7 +11,7 @@
 #include "gigedetector.h"
 #include "monitordata.h"
 #include "detectorfilename.h"
-//#include "filewriter.h"
+#include "filewriter.h"
 
 class DetectorMonitor : public QObject
 {
@@ -20,7 +20,7 @@ private:
    QTimer *timer;
    GigEDetector *gigEDetector;
 //   Keithley *keithley;
-   double th, t, tdp, rh, ik, tasic, tadc;
+   double th, t, tdp, rh, ik, tasic, tdac;
    double a, b, c;
    double gamma;
    bool temperatureInRange;
@@ -28,13 +28,13 @@ private:
    int loggingInterval;
    int monitorCount;
    bool monitoringEnabled;
-//   FileWriter *logfileWriter;
+   FileWriter *logfileWriter;
    void calcTDP();
    void read();
    void monitorEnvironmentalValues();
 
 public:
-   explicit DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent = 0);
+   explicit DetectorMonitor(GigEDetector *gigEDetector, QObject *parent = 0);
    ~DetectorMonitor();
    int start();
    int stop();

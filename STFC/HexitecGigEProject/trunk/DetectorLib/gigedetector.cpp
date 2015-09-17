@@ -65,7 +65,6 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    qRegisterMetaType<HANDLE>("HANDLE");
    connectUp(parent);
 
-   initialiseConnection();
 }
 
 GigEDetector::~GigEDetector()
@@ -175,13 +174,13 @@ int GigEDetector::initialiseConnection()
    updateState(INITIALISING);
 
    status = InitDevice(&detectorHandle, deviceDescriptor, &pleoraErrorCode, pleoraErrorCodeStr,
-                             &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen);
+                       &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen);
    showError("InitDevice", status);
 
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
    showError("GetDeviceInformation", status);
 
-   if( !status )
+   if (!status)
    {
       qDebug() <<"\tVendor:" << deviceInfo.Vendor;
       qDebug() <<"\tModel:" << deviceInfo.Model;
@@ -193,24 +192,15 @@ int GigEDetector::initialiseConnection()
       qDebug() <<"\tNetMask:" << deviceInfo.NetMask;
       qDebug() <<"\tGateWay:" << deviceInfo.GateWay;
    }
-
    status = CloseSerialPort(detectorHandle);
-   showError( "CloseSerialPort", status);
-
    status = ClosePipeline(detectorHandle);
-   showError( "ClosePipeline", status);
-
    status = CloseStream(detectorHandle);
-   showError( "CloseStream", status);
-
    status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d );
    showError("OpenSerialPort", status);
-
    frameTime = 0;
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
-
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                               &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
@@ -220,13 +210,15 @@ int GigEDetector::initialiseConnection()
       qDebug() << "Configure Detector - frameTime:" << frameTime ;
       qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
    }
+
    status = setImageFormat(xRes, yRes);
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
+   showError( "ConfigureDetector", status);
+
 
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
-
-   updateState(INITIALISED);
    updateState(READY);
+   emit writeMessage("Detector connection initialised Ok");
 
    return status;
 }
@@ -247,15 +239,17 @@ int GigEDetector::terminateConnection()
    status = ExitDevice(detectorHandle);
    showError( "ExitDevice", status);
 
+   updateState(IDLE);
+
    return status;
 }
 
-int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, double *tadc, double *t, double *hv)
+int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *t, double *hv)
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
 
-    status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tadc, t, timeout);
+    status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
     showError("ReadEnvironmentValues", status);
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
@@ -418,13 +412,7 @@ void GigEDetector::handleExecuteOffsets()
       updateState(READY);
    }
 }
-/*
-void GigEDetector::offsetsDialogAccepted()
-{
-//   collectOffsets();
-   qDebug() << "Call collectOffsets() here!!!";
-}
-*/
+
 LONG GigEDetector::collectOffsets()
 {
    int status = -1;
@@ -455,6 +443,16 @@ void GigEDetector::acquireImages()
       emit imageComplete(framesAcquired);
    }
    updateState(READY);
+}
+
+int GigEDetector::getLoggingInterval()
+{
+   return loggingInterval;
+}
+
+void GigEDetector::beginMonitoring()
+{
+   emit enableMonitoring();
 }
 
 void GigEDetector::handleStop()
@@ -630,13 +628,22 @@ void GigEDetector::handleShowImage()
 LONG GigEDetector::readIniFile(QString aspectFilename)
 {
    LONG status = -1;
+   int loggingInterval = 1;
 
    status = 0;
    iniFile = new IniFile(aspectFilename);
-   directory = iniFile->getString("Control-Settings/Toplevel Path");
-   prefix = iniFile->getString("Control-Settings/Prefix");
+//   directory = iniFile->getString("Control-Settings/Toplevel Path");
+//   prefix = iniFile->getString("Control-Settings/Prefix");
 
    framesPerBuffer = iniFile->getInt("Control-Settings/Frames Per Buffer");
+   if ((loggingInterval = iniFile->getInt("Control-Settings/Logging Interval")) != QVariant(INVALID))
+   {
+      this->loggingInterval = loggingInterval;
+   }
+   else
+   {
+      this->loggingInterval = 1;
+   }
 
    sensorConfig.Gain = (HexitecGain)iniFile->getInt("Control-Settings/Gain");
    sensorConfig.Row_S1 = iniFile->getInt("Control-Settings/Row -> S1");
@@ -745,10 +752,22 @@ void GigEDetector::showError(const LPSTR context, long asError)
 
    if( !result )
    {
+      errorMessage = "aSpect Result: ";
+      errorMessage.append(QString::fromLatin1((char *)context));
+      errorMessage.append(QString::fromLatin1((char *)asErrorMessage));
+      errorMessage.append("Pleora Result Code: ");
+      errorMessage.append(QString::fromLatin1((char *)pleoraErrorCode));
+      errorMessage.append(", Pleora Result Code String: ");
+      errorMessage.append(QString::fromLatin1((char *)pleoraErrorCodeStr));
+      errorMessage.append(", Pleora Result Description: ");
+      errorMessage.append(QString::fromLatin1((char *)pleoraErrorDescription));
+
       qDebug() << "aSpect Result: " << context << asErrorMessage;
       qDebug() << "Pleora Result Code:" << pleoraErrorCode;
       qDebug() << "Pleora Result Code String:" << pleoraErrorCodeStr;
       qDebug() << "Pleora Result Description:" << pleoraErrorDescription;
+
+      throw DetectorException(errorMessage);
    }
 
 }

@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <string>
 
+#include "detectorexception.h"
 #include "inifile.h"
 #include "windowsevent.h"
 #include "GigE.h"
@@ -31,7 +32,7 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    int initialiseConnection();
    int terminateConnection();
 //   int configure(unsigned long xResolution, unsigned long yResolution);
-   int getDetectorValues(double *rh, double *th, double *tasic, double *tadc, double *hv, double *t);
+   int getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *hv, double *t);
    unsigned int getXResolution();
    unsigned int getYResolution();
    void setXResolution(unsigned int xResolution);
@@ -51,6 +52,8 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
 //   void timerEvent(QTimerEvent *event);
    void setDataAcquisitionDuration(double imageAcquisitionDuration);
    void acquireImages();
+   int getLoggingInterval();
+   void beginMonitoring();
 
    WindowsEvent *getBufferReadyEvent();
    WindowsEvent *getReturnBufferReadyEvent();
@@ -75,6 +78,7 @@ signals:
    void executeAcquireImages();
    void prepareForOffsets();
    void prepareForDataCollection();
+   void enableMonitoring();
 
 public slots:
    void handleShowImage();
@@ -83,7 +87,6 @@ public slots:
    void handleStop();
    void handleReducedDataCollection();
    void handleExecuteOffsets();
-//   void offsetsDialogAccepted();
    void handleBufferReady();
    void handleReturnBufferReady();
    void handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames);
@@ -99,6 +102,7 @@ private:
    int frameSize;
    std::ofstream outFile;
    bool appendTimestamp;
+   QString errorMessage;
 
    WindowsEvent *bufferReadyEvent;
    WindowsEvent *returnBufferReadyEvent;
@@ -131,6 +135,7 @@ private:
    unsigned char *charImageDest;
    QPixmap imagePixmap;
    unsigned long framesPerBuffer;
+   int loggingInterval;
    QString aspectFilename;
    IniFile *iniFile;
    HexitecSensorConfig sensorConfig;

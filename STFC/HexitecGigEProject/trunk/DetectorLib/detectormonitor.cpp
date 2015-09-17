@@ -4,17 +4,13 @@
 #include <QDateTime>
 #include <cmath>
 
-DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, int loggingInterval, QObject *parent) :
+DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, QObject *parent) :
    QObject(parent)
 {
-   monitoringEnabled = true;
-   this->loggingInterval = 1;
-   if (loggingInterval > 0)
-   {
-      this->loggingInterval = loggingInterval;
-   }
+   monitoringEnabled = false;
+   this->loggingInterval = gigEDetector->getLoggingInterval();
    monitorCount = this->loggingInterval;
-//   logfileWriter = NULL;
+   logfileWriter = NULL;
    readTAsic =false;
    temperatureInRange = false;
    a = 6.112;
@@ -71,23 +67,23 @@ void DetectorMonitor::monitorEnvironmentalValues()
    read();
    emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic));
    emit monitoringDone();
-/*
-if (logfileWriter != NULL)
-{
-   if (monitorCount == loggingInterval)
+
+   if (logfileWriter != NULL)
    {
-      logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
-                            QString::number(t, 'f', 1) + " " +
-                            QString::number(th, 'f', 1) + " " +
-                            QString::number(tdp, 'f', 1) + " " +
-                            QString::number(tasic, 'f', 1) + " " +
-                            QString::number(rh, 'f', 1) + " " +
-                            QString::number(ik, 'g', 3));
-      monitorCount = 0;
+      if (monitorCount == loggingInterval)
+      {
+         logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
+                               QString::number(t, 'f', 1) + " " +
+                               QString::number(th, 'f', 1) + " " +
+                               QString::number(tdp, 'f', 1) + " " +
+                               QString::number(tasic, 'f', 1) + " " +
+                               QString::number(tdac, 'f', 1) + " " +
+                               QString::number(rh, 'f', 1));
+         monitorCount = 0;
+      }
+      monitorCount++;
    }
-   monitorCount++;
-}
-*/
+
    if (t < tdp)
    {
       if (temperatureInRange)
@@ -108,7 +104,7 @@ void DetectorMonitor::read()
 {
    int status = -1;
 
-   status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tadc, &t, &ik);
+   status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tdac, &t, &ik);
 
    if(!status)
    {
@@ -159,7 +155,7 @@ void DetectorMonitor::receiveState(GigEDetector::DetectorState detectorState)
 void DetectorMonitor::createLogFile(DetectorFilename *logFilename)
 {
    QString filename;
-/*
+
    if (logfileWriter != NULL)
    {
       delete logfileWriter;
@@ -176,8 +172,8 @@ void DetectorMonitor::createLogFile(DetectorFilename *logFilename)
       logfileWriter = new FileWriter(logFilename->getDirectory(), filename, logFilename->getTimestampOn(), true);
       if (logfileWriter != NULL)
       {
-         logfileWriter->append("Timestamp : Finger Temp : Housing Temp : Dew Point : Detector Temp : Relative Humidity : Keithley Current");
+         logfileWriter->append("Timestamp : Finger Temp : Housing Temp : Dew Point : Detector Temp : DAC Temp : Relative Humidity");
       }
    }
-   */
+
 }
