@@ -92,10 +92,24 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    dataAcquisitionModel->setProperty("objectName", "daqModel");
    connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
            SLOT(addObject(QObject*, bool, bool)));
+   connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
+   connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
+
    emit addObject(dataAcquisition, FALSE, TRUE);
    emit addObject(dataAcquisitionModel, FALSE, TRUE);
 
-   connectMotorsToDAQ();
+   try
+   {
+      detectorFactory->getGigEDetector()->initialiseConnection();
+      detectorFactory->getGigEDetector()->beginMonitoring();
+      connectMotorsToDAQ();
+   }
+   catch (DetectorException &ex)
+   {
+      connectMotorsToDAQ();
+      detectorControlForm->initialiseFailed();
+      emit writeError(ex.getMessage());
+   }
 }
 
 void DataAcquisitionFactory::connectMotorsToDAQ()

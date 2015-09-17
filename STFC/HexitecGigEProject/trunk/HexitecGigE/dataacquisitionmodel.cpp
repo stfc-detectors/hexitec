@@ -93,6 +93,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            hv, SLOT(restoreBiasSettings()));
    connect(dataAcquisition, SIGNAL(disableBiasRefresh()),
            hv, SLOT(handleDisableBiasRefresh()));
+   connect(dataAcquisition, SIGNAL(enableBiasRefresh()),
+           hv, SLOT(handleEnableBiasRefresh()));
 
    connect(dataAcquisition, SIGNAL(collectingChanged(bool)),
            dataAcquisitionForm, SLOT(handleCollectingChanged(bool)));
@@ -128,13 +130,14 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
    connect(gigEDetector, SIGNAL(notifyState(GigEDetector::DetectorState)), dataAcquisition, SLOT(receiveState(GigEDetector::DetectorState)));
    connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
-
    connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
    connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
            dataAcquisition, SLOT(handleImageStarted(char *, int)));
    connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
+   connect(gigEDetector, SIGNAL(enableMonitoring()),
+           detectorMonitor, SLOT(enableMonitoring()));
 }
 
 void DataAcquisitionModel::connectDetectorControlForm()
@@ -153,6 +156,14 @@ void DataAcquisitionModel::connectDetectorControlForm()
            dataAcquisition, SLOT(handleSetFingerTemperature(double)));
    connect(detectorControlForm, SIGNAL(biasVoltageChanged(bool)),
            this, SLOT(handleBiasVoltageChanged(bool)));
+   connect(detectorControlForm, SIGNAL(disableMonitoring()),
+           detectorMonitor, SLOT(disableMonitoring()));
+   connect(detectorControlForm, SIGNAL(disableBiasRefresh()),
+           hv, SLOT(handleDisableBiasRefresh()));
+   connect(detectorControlForm, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
+   connect(detectorControlForm, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
+   connect(detectorControlForm, SIGNAL(initialiseDetector()),
+           dataAcquisition, SLOT(handleInitialiseDetector()));
 }
 
 void DataAcquisitionModel::connectDataAcquisitionModel()
@@ -224,9 +235,6 @@ void DataAcquisitionModel::connectObjectReserver()
 
 void DataAcquisitionModel::initialiseDetectorFilename(DetectorFilename *detectorFilename)
 {
-   detectorFilename->setDirectory(gigEDetector->getDirectory());
-   detectorFilename->setPrefix(gigEDetector->getPrefix());
-   detectorFilename->setTimestampOn(gigEDetector->getTimestampOn());
    emit dataChanged(dataAcquisitionDefinition);
 }
 
@@ -285,11 +293,13 @@ void DataAcquisitionModel::setTimestampOn(bool timestampOn)
 void DataAcquisitionModel::handleDataFilenameChanged(DetectorFilename dataFilename)
 {
    setDetectorFilename(dataFilename, dataAcquisitionDefinition.getDataFilename());
+   dataAcquisitionDefinition.setDataFilename(dataFilename);
 }
 
 void DataAcquisitionModel::handleLogFilenameChanged(DetectorFilename logFilename)
 {
    setDetectorFilename(logFilename, dataAcquisitionDefinition.getLogFilename());
+   dataAcquisitionDefinition.setLogFilename(logFilename);
 }
 
 void DataAcquisitionModel::changeDaqDuration()

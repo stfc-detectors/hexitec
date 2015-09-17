@@ -76,6 +76,7 @@ private slots:
     void storeBiasSettings();
     void restoreBiasSettings();
     void handleDisableBiasRefresh();
+    void handleEnableBiasRefresh();
     void endOfRefresh();
     void endOfSettle();
     void startRefreshTimer(double interval);

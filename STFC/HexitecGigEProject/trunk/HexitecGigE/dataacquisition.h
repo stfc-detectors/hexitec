@@ -14,7 +14,6 @@
 #include "dataacquisitionmodel.h"
 #include "dataacquisitiondefinition.h"
 #include "hxtprocessing.h"
-#include "filewriter.h"
 #include "dataacquisitionstatus.h"
 #include "reservable.h"
 
@@ -65,7 +64,6 @@ private:
    DataAcquisitionModel *dataAcquisitionModel;
    DataAcquisitionDefinition *dataAcquisitionDefinition;
    GigEDetector *gigEDetector;
-   FileWriter *imageIndicatorFile;
    HV *hv;
    GigEDetector::Mode mode;
    int splitDataCollections;
@@ -100,6 +98,7 @@ signals:
    void storeBiasSettings();
    void restoreBiasSettings();
    void disableBiasRefresh();
+   void enableBiasRefresh();
    void enableMonitoring();
    void disableMonitoring();
    void executeSingleBiasRefresh();
@@ -134,6 +133,7 @@ public slots:
    void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void handleImageStarted(char *path, int frameSize);
    void handleImageComplete(unsigned long long framesAcquired);
+   void handleInitialiseDetector();
 
 private slots:
    //void handlePushFilename();

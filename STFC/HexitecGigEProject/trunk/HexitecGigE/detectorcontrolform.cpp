@@ -1,3 +1,4 @@
+#include <QThread>
 #include "detectorcontrolform.h"
 #include "ui_detectorcontrolform.h"
 #include "objectreserver.h"
@@ -23,8 +24,8 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    tAboveTdp = false;
    firstMonitor = true;
 
-
    connectSignals();
+   guiReady();
 }
 
 DetectorControlForm::~DetectorControlForm()
@@ -48,7 +49,6 @@ void DetectorControlForm::connectSignals()
    connect(ui->collectImages, SIGNAL(pressed()), this, SLOT(handleCollectImagesPressed()));
    connect(ui->initialiseConnection, SIGNAL(pressed()), this, SLOT(initialiseDetectorPressed()));
    connect(ui->terminateConnection, SIGNAL(pressed()), this, SLOT(terminateDetectorPressed()));
-   connect(ui->reconnect, SIGNAL(pressed()), this, SLOT(reconnectPressed()));
    connect(ui->abortDAQ, SIGNAL(pressed()), this, SLOT(abortDAQ()));
    connect(ui->imageCount, SIGNAL(valueChanged(int)), this, SLOT(handleFixedImageCountChanged(int)));
    connect(ui->setFingerTemperatureButton, SIGNAL(pressed()), this, SLOT(handleSetFingerTemperature()));
@@ -58,7 +58,6 @@ void DetectorControlForm::handleCollectImagesPressed()
 {
    emit collectImagesPressed();
    waitingForModeChange = true;
-   emit executeCommand(GigEDetector::CONFIGURE, ui->xResolution->value(), ui->yResolution->value());
 }
 
 void DetectorControlForm::abortDAQ()
@@ -92,17 +91,28 @@ void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
 
 void DetectorControlForm::initialiseDetectorPressed()
 {
-   emit executeCommand(GigEDetector::INITIALISE, 0,0);
+   try
+   {
+      emit initialiseDetector();
+      QThread::sleep(5);
 
-   /* Need to properly get status back from detector class when commnad
+      /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
-   ui->initialiseConnection->setEnabled(false);
-   ui->terminateConnection->setEnabled(true);
+      ui->initialiseConnection->setEnabled(false);
+      ui->terminateConnection->setEnabled(true);
+   }
+   catch (DetectorException &ex)
+   {
+      initialiseFailed();
+      emit writeError(ex.getMessage());
+   }
 }
 
 void DetectorControlForm::terminateDetectorPressed()
 {
-   emit executeCommand(GigEDetector::CLOSE, 0,0);
+   emit disableMonitoring();
+   emit disableBiasRefresh();
+   emit executeCommand(GigEDetector::CLOSE, 0, 0);
 
    /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
@@ -110,9 +120,11 @@ void DetectorControlForm::terminateDetectorPressed()
    ui->terminateConnection->setEnabled(false);
 }
 
-void DetectorControlForm::reconnectPressed()
+void DetectorControlForm::initialiseFailed()
 {
-   emit executeCommand(GigEDetector::RECONFIGURE, ui->xResolution->value(), ui->yResolution->value());
+   emit executeCommand(GigEDetector::CLOSE, 0, 0);
+   ui->initialiseConnection->setEnabled(true);
+   ui->terminateConnection->setEnabled(false);
 }
 
 void DetectorControlForm::handleMonitorData(MonitorData *md)
@@ -121,7 +133,6 @@ void DetectorControlForm::handleMonitorData(MonitorData *md)
    ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
    ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
    ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
-   ui->biasCurrent->setText(QString::number(md->getIK(), 'g', 3));
    ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
    if (firstMonitor)
    {
@@ -177,6 +188,9 @@ void DetectorControlForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          guiInitialising();
          break;
       case DataAcquisitionStatus::READY:
+         guiReady();
+         break;
+      case DataAcquisitionStatus::DONE:
          guiReady();
          break;
       case DataAcquisitionStatus::BIAS_REFRESHING:
@@ -260,21 +274,6 @@ void DetectorControlForm::handleBiasRefreshed(QString time)
    }
 }
 
-void DetectorControlForm::setPixmap1(QPixmap pixmap)
-{
-   ui->image1Label->setPixmap(pixmap);
-}
-
-void DetectorControlForm::setPixmap2(QPixmap pixmap)
-{
-   ui->image2Label->setPixmap(pixmap);
-}
-
-void DetectorControlForm::setPixmap3(QPixmap pixmap)
-{
-   ui->image3Label->setPixmap(pixmap);
-}
-
 void DetectorControlForm::setPixmap(QPixmap pixmap)
 {
    ui->imageLabel->setPixmap(pixmap);
@@ -284,7 +283,6 @@ void DetectorControlForm::guiInitialising()
 {
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(false);
-   ui->reconnect->setEnabled(false);
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
 }
@@ -293,7 +291,6 @@ void DetectorControlForm::guiIdle()
 {
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(true);
-   ui->reconnect->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
 }
 
@@ -301,12 +298,9 @@ void DetectorControlForm::guiReady()
 {
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(true);
-   ui->reconnect->setEnabled(true);
    ui->collectImages->setEnabled(true);
    ui->abortDAQ->setEnabled(false);
    ui->imageCount->setEnabled(true);
-   ui->xResolution->setEnabled(true);
-   ui->yResolution->setEnabled(true);
    if (!keithleyReservedByScripting && tAboveTdp)
    {
       ui->biasVoltageButton->setEnabled(true);
@@ -348,11 +342,8 @@ void DetectorControlForm::guiDetectorBusy()
 {
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(false);
-   ui->reconnect->setEnabled(false);
    ui->imageCount->setEnabled(false);
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
-   ui->xResolution->setEnabled(true);
-   ui->yResolution->setEnabled(true);
    ui->biasVoltageButton->setEnabled(false);
 }

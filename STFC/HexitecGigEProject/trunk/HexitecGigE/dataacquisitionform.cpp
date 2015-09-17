@@ -25,7 +25,7 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    ui->duration->setSingleStep(0.01);
 
    connectSignals();
-   handleDataAcquisitionDefinition();
+//   handleDataAcquisitionDefinition();
 }
 
 DataAcquisitionForm::~DataAcquisitionForm()
@@ -224,7 +224,6 @@ void DataAcquisitionForm::handleMonitorData(MonitorData *md)
    ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
    ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
    ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
-   ui->biasCurrent->setText(QString::number(md->getIK(), 'g', 3));
    ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
 }
 
@@ -254,6 +253,8 @@ void DataAcquisitionForm::handleDataChanged(DataAcquisitionDefinition dataAcquis
 {
    QString directory = dataAcquisitionDefinition.getDataFilename()->getDirectory();
    QString prefix = dataAcquisitionDefinition.getDataFilename()->getPrefix();
+   QString logDirectory = dataAcquisitionDefinition.getLogFilename()->getDirectory();
+   QString logPrefix = dataAcquisitionDefinition.getLogFilename()->getPrefix();
    bool timestampOn = dataAcquisitionDefinition.getDataFilename()->getTimestampOn();
 
    dataFilename->setDirectory(directory);
@@ -262,10 +263,10 @@ void DataAcquisitionForm::handleDataChanged(DataAcquisitionDefinition dataAcquis
    ui->dataFilePrefix->setText(prefix);
    dataFilename->setTimestampOn(timestampOn);
    ui->dataFileTimestamp->setChecked(timestampOn);
-   logFilename->setDirectory(directory);
-   ui->logFileDirectory->setText(directory);
-   logFilename->setPrefix(prefix);
-   ui->logFilePrefix->setText(prefix);
+   logFilename->setDirectory(logDirectory);
+   ui->logFileDirectory->setText(logDirectory);
+   logFilename->setPrefix(logPrefix);
+   ui->logFilePrefix->setText(logPrefix);
    logFilename->setTimestampOn(timestampOn);
    ui->logFileTimestamp->setChecked(timestampOn);
 
@@ -483,7 +484,6 @@ void DataAcquisitionForm::guiReady()
 {
    int mode = ui->mode->currentIndex();
    guiMode(ui->mode->currentIndex());
-   //qDebug() << "DataAcquisitionForm::guiReady() mode from comboBox: " << mode;
    enableRepeats(mode);
    enableLogfileParameters(!loggingEnabled);
 }

@@ -552,7 +552,6 @@ void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorSt
 
 void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
 {
-   int writeToFileNumber = 0;
    this->detectorState = detectorState;
    busy = true;
 
@@ -579,6 +578,8 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
    case GigEDetector::INITIALISED:
       changeDAQStatus(DataAcquisitionStatus::INITIALISING,
                       DataAcquisitionStatus::DONE);
+      emit enableMonitoring();
+      emit enableBiasRefresh();
       break;
    case GigEDetector::WAITING_DARK:
       changeDAQStatus(daqStatus.getMajorStatus(),
@@ -600,7 +601,6 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
       waitingForTrigger = false;
       changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
                       DataAcquisitionStatus::COLLECTING);
-      writeToFileNumber = ++currentImageNumber;
       break;
    case GigEDetector::WAITING_TRIGGER:
       waitingForTrigger = true;
@@ -704,6 +704,12 @@ void DataAcquisition::handleImageStarted(char *path, int frameSize)
 void DataAcquisition::handleImageComplete(unsigned long long framesAcquired)
 {
    totalFramesAcquired += framesAcquired;
+}
+
+void DataAcquisition::handleInitialiseDetector()
+{
+   gigEDetector->initialiseConnection();
+   emit enableMonitoring();
 }
 
 void DataAcquisition::handleTrigger()

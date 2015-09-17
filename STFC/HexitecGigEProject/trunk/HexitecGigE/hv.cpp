@@ -205,6 +205,12 @@ void HV::handleDisableBiasRefresh()
 
 }
 
+void HV::handleEnableBiasRefresh()
+{
+    enableBiasRefresh();
+
+}
+
 void HV::endOfRefresh()
 {
     emit stopBiasRefreshTimerSignal();

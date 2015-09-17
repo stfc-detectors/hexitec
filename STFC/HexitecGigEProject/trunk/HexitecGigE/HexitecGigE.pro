@@ -65,7 +65,6 @@ SOURCES += main.cpp \
     datacollectiondialog.cpp \
     dpwarningdialog.cpp \
     vboutofrangedialog.cpp \
-    filewriter.cpp \
     detectorcontrolform.cpp \
     dataacquisitionform.cpp \
     dataacquisition.cpp \
@@ -132,7 +131,6 @@ HEADERS += mainwindow.h \
     datacollectiondialog.h \
     dpwarningdialog.h \
     vboutofrangedialog.h \
-    filewriter.h \
     detectorcontrolform.h \
     dataacquisitionform.h \
 //    \

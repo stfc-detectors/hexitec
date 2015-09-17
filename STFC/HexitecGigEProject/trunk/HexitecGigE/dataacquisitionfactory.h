@@ -36,6 +36,8 @@ private:
 
 signals:
    void addObject(QObject *object, bool scripting = TRUE, bool gui = TRUE);
+   void writeError(QString message);
+   void writeMessage(QString message);
 };
 
 #endif // DATAACQUISITIONFACTORY_H

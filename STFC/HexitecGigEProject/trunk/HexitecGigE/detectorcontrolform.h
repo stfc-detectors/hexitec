@@ -20,6 +20,7 @@ class DetectorControlForm : public QWidget
 public:
    explicit DetectorControlForm(QWidget *parent = 0);
    ~DetectorControlForm();
+   void initialiseFailed();
    QMainWindow *getMainWindow();
    void setKeithleyName(QString keithleyName);
    QString keithleyName;
@@ -49,9 +50,6 @@ public slots:
     void handleMonitorData(MonitorData *md);
     void handleTemperatureBelowDP();
     void handleTemperatureAboveDP();
-    void setPixmap1(QPixmap pixmap);
-    void setPixmap2(QPixmap pixmap);
-    void setPixmap3(QPixmap pixmap);
     void setPixmap(QPixmap pixmap);
     void handleBiasRefreshed(QString time);
     void handleCollectingChanged(bool collectingOn);
@@ -65,7 +63,6 @@ private slots:
    void handleCollectImagesPressed();
    void initialiseDetectorPressed();
    void terminateDetectorPressed();
-   void reconnectPressed();
    void abortDAQ();
    void handleFixedImageCountChanged(int fixedImageCount);
    void handleSetFingerTemperature();
@@ -74,10 +71,15 @@ signals:
    void executeCommand(HV::VoltageSourceCommand);
    void executeCommand(GigEDetector::DetectorCommand, int, int);
    void collectImagesPressed();
+   void initialiseDetector();
    void abortDAQPressed();
    void fixedImageCountChanged(int);
    void setFingerTemperature(double);
    void biasVoltageChanged(bool);
+   void disableMonitoring();
+   void disableBiasRefresh();
+   void writeError(QString message);
+   void writeMessage(QString message);
 };
 
 #endif // DETECTORCONTROLFORM_H
