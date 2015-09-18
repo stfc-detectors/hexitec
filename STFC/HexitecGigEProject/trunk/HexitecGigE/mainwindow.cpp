@@ -181,6 +181,8 @@ MainWindow::MainWindow()
    {
       tabs->addTab(detectorControlForm->getMainWindow(), QString("Detector Control"));
       tabs->addTab(dataAcquisitionForm->getMainWindow(), QString("Data Acquisition"));
+      connect(this, SIGNAL(startDAQ()), dataAcquisitionForm, SLOT(handleCollectImagesPressed()));
+      connect(this, SIGNAL(stopDAQ()), dataAcquisitionForm, SLOT(handleAbortDAQPressed()));
    }
 #ifdef NI
    if (activeDAQ)
@@ -489,6 +491,19 @@ void MainWindow::saveFiles()
 
 }
 
+void MainWindow::handleStartDAQ()
+{
+   emit startDAQ();
+//   deleteSlice(DataModel::instance()->getActiveSlice());
+}
+
+void MainWindow::handleStopDAQ()
+{
+   emit stopDAQ();
+//   deleteSlice(DataModel::instance()->getActiveSlice());
+}
+
+
 void MainWindow::deleteActiveSlice()
 {
    deleteSlice(DataModel::instance()->getActiveSlice());
@@ -552,6 +567,8 @@ void MainWindow::about()
 
 void MainWindow::createMenus()
 {
+   QAction *startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
+   QAction *stopDAQAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
    QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
    QAction *saveAction = new QAction(QIcon(":/images/WriteImage.png"), tr("&Save EZD..."), this);
@@ -564,6 +581,8 @@ void MainWindow::createMenus()
    readAction->setShortcuts(QKeySequence::New);
    quitAct->setShortcuts(QKeySequence::Quit);
 
+   startDAQAct->setText("Start DAQ");
+   stopDAQAct->setText("Stop DAQ");
    deleteSliceAct->setText(tr("Clear active image"));
    readAction->setStatusTip(tr("Load data or scripts"));
    saveAction->setStatusTip(tr("Save active slice"));
@@ -573,6 +592,8 @@ void MainWindow::createMenus()
    descriminateReadAct->setStatusTip(tr("Load data with charge descrinimation"));
    prinCompsAction ->setStatusTip(tr("Get Principle Components"));
 
+   connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
+   connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
    connect(deleteSliceAct, SIGNAL(triggered()), this, SLOT(deleteActiveSlice()));
    connect(readAction, SIGNAL(triggered()), this, SLOT(readFiles()));
    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFiles()));
@@ -581,6 +602,7 @@ void MainWindow::createMenus()
    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
    connect(descriminateReadAct, SIGNAL(triggered()), this, SLOT(externalChargeShare()));
    connect(prinCompsAction , SIGNAL(triggered()), this, SLOT(getPrinComps()));
+
 
    /*QMenu **/fileMenu = menuBar()->addMenu(tr("&File"));
    viewMenu = menuBar()->addMenu(tr("&View"));
@@ -600,6 +622,8 @@ void MainWindow::createMenus()
    helpMenu->addAction(aboutQtAct);
 
    QToolBar *fileToolBar = addToolBar(tr("File"));
+   fileToolBar->addAction(startDAQAct);
+   fileToolBar->addAction(stopDAQAct);
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
    fileToolBar->addAction(descriminateReadAct);

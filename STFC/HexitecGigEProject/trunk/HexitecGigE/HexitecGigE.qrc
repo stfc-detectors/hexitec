@@ -38,5 +38,7 @@
         <file>images/importFromMatlab.png</file>
         <file>images/removeImage.png</file>
         <file>images/camera.png</file>
+        <file>images/startDAQ.png</file>
+        <file>images/stopDAQ.png</file>
     </qresource>
 </RCC>

@@ -100,6 +100,8 @@ signals:
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void executeReturnBufferReady(unsigned char * transferBuffer);
    void executeShowImage();
+   void startDAQ();
+   void stopDAQ();
 
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
@@ -122,6 +124,8 @@ private slots:
 
    // The public slots can also be used from scripting and other parts of the code
 public slots:
+   void handleStartDAQ();
+   void handleStopDAQ();
    void readFiles(QStringList files);
    void readData(QString fileName);
    void sendActiveSliceToMatlab();

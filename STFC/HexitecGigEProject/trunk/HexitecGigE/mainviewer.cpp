@@ -29,7 +29,6 @@ QToolBar *MainViewer::createToolbar()
    QAction *renderGridToggle = new QAction(QIcon(":/images/grid.png"), tr(""),this);
    QAction *cycleColorMap = new QAction(QIcon(":/images/colorWheel.png"), tr(""),this);
 
-
    renderZoomInAct->setText("Zoom In");
    renderZoomOutAct->setText("Zoom Out");
    renderGridToggle->setText(tr("Toggle Grid"));
