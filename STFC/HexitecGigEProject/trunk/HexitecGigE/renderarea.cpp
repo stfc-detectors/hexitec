@@ -21,7 +21,7 @@ RenderArea::RenderArea(QWidget *parent) :
 {
    setDynamicStateOff();
    toolDisplayOff();
-   showLogo = false;
+   showHexitec_Logo = false;
    cellSizeX = 1;
    cellSizeY = 1;
    offsetX = 0;
@@ -82,7 +82,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::paintWidget(QPainter &painter)
 {
-   QImage splash(":/images/splash.png");
+   QImage splash(":/images/Hexitec_Logo50.png");
    if (imageData.width() == 0)
    {
       painter.drawImage(offsetX, offsetY, splash);
@@ -104,11 +104,11 @@ void RenderArea::paintWidget(QPainter &painter)
    }
 
 
-   if (showLogo)
+   if (showHexitec_Logo)
    {
-      QImage logo(":/images/logo.png");
+      QImage Hexitec_logo(":/images/Hexitec_logo.png");
       painter.setOpacity(0.8);
-      painter.drawImage(75 + offsetX + imageData.width() * cellSizeX, imageData.height() * cellSizeY - 28, logo);
+      painter.drawImage(75 + offsetX + imageData.width() * cellSizeX, imageData.height() * cellSizeY - 28, Hexitec_logo);
    }
 
    // define the axis boundaries

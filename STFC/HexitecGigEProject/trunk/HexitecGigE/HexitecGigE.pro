@@ -45,7 +45,6 @@ SOURCES += main.cpp \
     galilmotor.cpp \
     matlab.cpp \
     applicationoutput.cpp \
-    hardtrigger.cpp \
     hexitecsofttrigger.cpp \
     reservable.cpp \
     scriptrunner.cpp \
@@ -59,8 +58,6 @@ SOURCES += main.cpp \
     getvaluedialog.cpp \
     matlabvariable.cpp \
     eigencomponent.cpp \
-    keithley.cpp \
-    keithleymainwindow.cpp \
     offsetsdialog.cpp \
     datacollectiondialog.cpp \
     dpwarningdialog.cpp \
@@ -111,7 +108,7 @@ HEADERS += mainwindow.h \
     galilmotor.h \
     matlab.h \
     applicationoutput.h \
-    hardtrigger.h \
+#    hardtrigger.h \
     hexitecsofttrigger.h \
     reservable.h \
     scriptrunner.h \
@@ -125,15 +122,12 @@ HEADERS += mainwindow.h \
     getvaluedialog.h \
     matlabvariable.h \
     eigencomponent.h \
-    keithley.h \
-    keithleymainwindow.h \
     offsetsdialog.h \
     datacollectiondialog.h \
     dpwarningdialog.h \
     vboutofrangedialog.h \
     detectorcontrolform.h \
     dataacquisitionform.h \
-//    \
     dataacquisition.h \
     voltageSourceFactory.h \
     dataacquisitionmodel.h \
@@ -177,23 +171,17 @@ DSoFt64 {
   DEFINES += NONI
   DEFINES += OS_WIN
   LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
-  LIBS += $$quote(-LC:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/lib64/msvc/) -lNIDAQmx
   LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
-  LIBS += ../TemperatureHumidityLib/iowkit.lib /DELAYLOAD:iowkit.dll
-  LIBS += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/lib64/msvc/ni4882.obj"
-  LIBS += $$quote(-LC:/Program Files/fieldtalk/lib/win/x64/release/) -llibmbusmaster
   CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2 /DELAYLOAD:Galil2.dll
-  CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../TemperatureHumidityLib/release/TemperatureHumidityLib.lib ../SerialPortLib/release/SerialPortLib.lib
+  CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
   CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib -L../SerialPortLib/qextserialport/release -lQt5ExtSerialPort1 /DELAYLOAD:XpsLib.dll
   CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2 /DELAYLOAD:Galil2.dll
-  CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../TemperatureHumidityLib/debug/TemperatureHumidityLib.lib ../SerialPortLib/debug/SerialPortLib.lib
+  CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
   CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib -L../SerialPortLib/qextserialport/debug -lQt5ExtSerialPortd1 /DELAYLOAD:XpsLib.dll
   INCLUDEPATH += "C:/Program Files/MATLAB/R2012b/extern/include/"
   INCLUDEPATH += "C:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64"
   INCLUDEPATH += ../Eigen/3_1_2/Eigen
   INCLUDEPATH += ../DetectorLib
-  INCLUDEPATH += ../TemperatureHumidityLib
-  INCLUDEPATH += "C:/Program Files (x86)/National Instruments/Shared/ExternalCompilerSupport/C/include/"
   INCLUDEPATH  += ../HxtProcessingLib/include
   INCLUDEPATH += ../XpsLib
   INCLUDEPATH += ../SerialPortLib

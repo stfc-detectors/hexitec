@@ -153,7 +153,7 @@ QToolBar *Plotter::createToolBar()
 void Plotter::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
-    QImage image(":/images/logo_vsm.png");
+    QImage image(":/images/Hexitec_logo10.png");
 
     // define the axis boundaries
     axesBox.setLeft(leftMargin);
@@ -318,7 +318,7 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         painter.drawRect(rubberBandRect);
     }
 
-    // add the logo
+    // add the Hexitec_logo
     painter.setOpacity(0.7);
     painter.drawImage(axesBox.left() + axesBox.width() - image.width() - 5, axesBox.top() + 5, image);
     painter.setOpacity(1.0);

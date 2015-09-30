@@ -122,6 +122,7 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorMonitor, SLOT(disableMonitoring()));
    connect(dataAcquisition, SIGNAL(imageComplete(unsigned long long)),
            ProcessingWindow::getHxtProcessor(), SLOT(pushImageComplete(unsigned long long)));
+
 }
 
 void DataAcquisitionModel::connectGigEDetector()

@@ -48,7 +48,7 @@ QToolBar *MainViewer::createToolbar()
 
 void MainViewer::showNewActiveSlice()
 {
-   renderArea->logoOff();
+   renderArea->Hexitec_logoOff();
    renderArea->renderSum(DataModel::instance()->getActiveSlice());
    renderArea->title(DataModel::instance()->getActiveSlice()->getTitle());
    renderArea->setDynamicStateOn();
@@ -57,7 +57,7 @@ void MainViewer::showNewActiveSlice()
 
 void MainViewer::showMatlabArray(MatlabVariable *ma)
 {
-   renderArea->logoOff();
+   renderArea->Hexitec_logoOff();
    int xSize = ma->getXSize();
    int ySize = ma->getYSize();
    double *data = ma->getData();
@@ -81,7 +81,7 @@ MainViewer::MainViewer()
    renderArea = new RenderArea(this);
    renderArea->setOffset(40,40);
    renderArea->setCellSize(3);
-   renderArea->logoOn();
+   renderArea->Hexitec_logoOn();
    renderArea->toolDisplayOn();
    renderArea->colorBarOn();
    renderArea->setDynamicStateOn();

@@ -75,11 +75,6 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
 
-   if (activeDAQ)
-   {
-      checkKeithleyConfiguration();
-   }
-
    connect(plotter, SIGNAL(renderChannel(double)), thumbViewer, SLOT(renderChannel(double)));
    connect(plotter, SIGNAL(renderSum(double, int)), thumbViewer, SLOT(renderSum(double, int)));
    connect(plotter, SIGNAL(renderSum(double, double)), thumbViewer, SLOT(renderSum(double, double)));
@@ -137,16 +132,11 @@ MainWindow::MainWindow()
    {
       detectorControlForm = new DetectorControlForm();
       dataAcquisitionForm = new DataAcquisitionForm();
+      connect(dataAcquisitionForm, SIGNAL(enableMainWindowActions()),
+              this, SLOT(enableMainWindowActions()));
+      connect(dataAcquisitionForm, SIGNAL(disableMainWindowActions()),
+              this, SLOT(disableMainWindowActions()));
    }
-
-#ifdef NI
-   KeithleyMainWindow *keithleyMainWindow;
-   if (activeDAQ)
-   {
-      keithleyMainWindow = new KeithleyMainWindow();
-   }
-#endif
-
 //   We don't have one of these so this won't happen.
    scriptingWidget->runInitScript();
 
@@ -158,22 +148,16 @@ MainWindow::MainWindow()
       motionControlform = new MotionControlForm();
    }
 
-#ifdef NI
    if (activeDAQ)
    {
-      Keithley *keithley = VoltageSourceFactory::instance()->getKeithley();
-      detectorControlForm->setKeithleyName(keithley->property("objectName").toString());
-      connect(keithley, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-      connect(keithley, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
-      connect(keithley, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-      connect(keithley, SIGNAL(plotValues(QVector <double> &, QVector <double> &, bool)),
-              keithleyMainWindow->plotter, SLOT(addCurveData(QVector<double>&,QVector<double>&,bool)));
+      HV *hv = VoltageSourceFactory::instance()->getHV();
+      detectorControlForm->setHvName(hv->property("objectName").toString());
+      qDebug() <<"hv name = " << detectorControlForm->hvName;
       QString daqName = dataAcquisitionFactory->getDataAcquisition()->property("objectName").toString();
       dataAcquisitionForm->setDaqName(daqName);
       QString daqModelName = dataAcquisitionFactory->getDataAcquisitionModel()->property("objectName").toString();
       dataAcquisitionForm->setDaqModelName(daqModelName);
    }
-#endif
 
    createStatusBar();
    tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
@@ -183,16 +167,6 @@ MainWindow::MainWindow()
       tabs->addTab(dataAcquisitionForm->getMainWindow(), QString("Data Acquisition"));
       connect(this, SIGNAL(startDAQ()), dataAcquisitionForm, SLOT(handleCollectImagesPressed()));
       connect(this, SIGNAL(stopDAQ()), dataAcquisitionForm, SLOT(handleAbortDAQPressed()));
-   }
-#ifdef NI
-   if (activeDAQ)
-   {
-      /* Removed tab addition for Matt Wilson's tidying.
-      tabs->addTab(keithleyMainWindow, QString("Keithley"));*/
-   }
-#endif
-   if (activeDAQ)
-   {
       tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
    }
 
@@ -493,14 +467,14 @@ void MainWindow::saveFiles()
 
 void MainWindow::handleStartDAQ()
 {
+   disableMainWindowActions();
    emit startDAQ();
-//   deleteSlice(DataModel::instance()->getActiveSlice());
 }
 
 void MainWindow::handleStopDAQ()
 {
    emit stopDAQ();
-//   deleteSlice(DataModel::instance()->getActiveSlice());
+   enableMainWindowActions();
 }
 
 
@@ -552,7 +526,7 @@ void MainWindow::deleteExcessSlices()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About This App"),
-                      tr(//"<img src=:/images/splash_sm.png>",
+                      tr(//"<img src=:/images/Hexitec_Logo50.png>",
                          "<B>2Easy</b> is designed for the purpose of exploring and manipulating hyperspectral image data. The software is part of an ongoing"
                          " collaboration and its development is currently supported by University of Manchester (UoM) under the EPSRC project entitled"
                          "<i> HEXITEC: Translation Grant. The Application of Colour X-ray Imaging </i> (EP/H046577/1); the project is led by Professor Cernik (UoM)"
@@ -567,8 +541,8 @@ void MainWindow::about()
 
 void MainWindow::createMenus()
 {
-   QAction *startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
-   QAction *stopDAQAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
+   startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
+   stopDAQAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
    QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
    QAction *saveAction = new QAction(QIcon(":/images/WriteImage.png"), tr("&Save EZD..."), this);
@@ -923,4 +897,16 @@ void MainWindow::handleBufferReady()
 void MainWindow::handleShowImage()
 {
    emit executeShowImage();
+}
+
+void MainWindow::enableMainWindowActions()
+{
+   startDAQAct->setEnabled(true);
+   stopDAQAct->setDisabled(true);
+}
+
+void MainWindow::disableMainWindowActions()
+{
+   startDAQAct->setDisabled(true);
+   stopDAQAct->setEnabled(true);
 }

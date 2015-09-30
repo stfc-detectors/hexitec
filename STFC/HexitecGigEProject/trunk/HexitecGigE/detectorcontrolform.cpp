@@ -20,7 +20,7 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    mainWindow = new QMainWindow();
    mainWindow->setCentralWidget(this);
    dpWarningDialog = new DPWarningDialog(this);
-   keithleyReservedByScripting = false;
+   hvReservedByScripting = false;
    tAboveTdp = false;
    firstMonitor = true;
 
@@ -38,9 +38,9 @@ QMainWindow *DetectorControlForm::getMainWindow()
    return mainWindow;
 }
 
-void DetectorControlForm::setKeithleyName(QString keithleyName)
+void DetectorControlForm::setHvName(QString hvName)
 {
-   this->keithleyName = keithleyName;
+   this->hvName = hvName;
 }
 
 void DetectorControlForm::connectSignals()
@@ -74,6 +74,16 @@ void DetectorControlForm::handleSetFingerTemperature()
 {
    double temperature = ui->setFingerTemperature->value();
    emit setFingerTemperature(temperature);
+/*   try
+   {
+      emit setFingerTemperature(temperature);
+   }
+   catch (DetectorException &ex)
+   {
+      qDebug() <<"DetectorException cought";
+//      emit writeError(ex.getMessage());
+   }
+*/
 }
 
 void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
@@ -94,7 +104,7 @@ void DetectorControlForm::initialiseDetectorPressed()
    try
    {
       emit initialiseDetector();
-      QThread::sleep(5);
+      QThread::sleep(2);
 
       /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
@@ -152,7 +162,7 @@ void DetectorControlForm::handleTemperatureBelowDP()
 void DetectorControlForm::handleTemperatureAboveDP()
 {
    tAboveTdp = true;
-   if (!keithleyReservedByScripting)
+   if (!hvReservedByScripting)
    {
       ui->biasVoltageButton->setEnabled(true);
    }
@@ -240,26 +250,26 @@ void DetectorControlForm::handleBiasVoltageChanged(bool biasOn)
 
 void DetectorControlForm::handleScriptReserve(QString name)
 {
-   if (name == keithleyName)
+   if (name == hvName)
    {
       ui->biasVoltageButton->setEnabled(false);
-      keithleyReservedByScripting = true;
+      hvReservedByScripting = true;
    }
 }
 
 void DetectorControlForm::handleScriptRelease(QString name)
 {
-   if (name == keithleyName)
+   if (name == hvName)
    {
       ui->biasVoltageButton->setEnabled(true);
-      keithleyReservedByScripting = false;
+      hvReservedByScripting = false;
    }
 }
 
 void DetectorControlForm::guiBiasRefreshing()
 {
    ui->collectImages->setEnabled(false); // Disable data collection during bias refresh
-   if (!keithleyReservedByScripting)
+   if (!hvReservedByScripting)
    {
       ui->biasVoltageButton->setEnabled(false); // Don't allow bias to be turned off during bias refresh
    }
@@ -268,7 +278,7 @@ void DetectorControlForm::guiBiasRefreshing()
 void DetectorControlForm::handleBiasRefreshed(QString time)
 {
    ui->biasLastRefreshed->setText(time);
-   if (!keithleyReservedByScripting)
+   if (!hvReservedByScripting)
    {
       ui->biasVoltageButton->setEnabled(true); // Allow bias to be turned on/off again
    }
@@ -301,7 +311,7 @@ void DetectorControlForm::guiReady()
    ui->collectImages->setEnabled(true);
    ui->abortDAQ->setEnabled(false);
    ui->imageCount->setEnabled(true);
-   if (!keithleyReservedByScripting && tAboveTdp)
+   if (!hvReservedByScripting && tAboveTdp)
    {
       ui->biasVoltageButton->setEnabled(true);
    }

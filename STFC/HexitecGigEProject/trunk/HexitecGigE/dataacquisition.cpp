@@ -3,7 +3,6 @@
 #include "detectorfilename.h"
 #include "detectorfactory.h"
 #include "voltageSourceFactory.h"
-#include "west6100plustemperaturecontroller.h"
 #include "processingwindow.h"
 #include "math.h"
 #include "motor.h"
@@ -70,7 +69,7 @@ void DataAcquisition::configureDataCollection()
 
    if (reservation.getReserved().isEmpty())
    {
-//      qDebug() <<"configureDataCollection Could not reserve all objects, message = " << reservation.getMessage();
+      qDebug() <<"configureDataCollection Could not reserve all objects, message = " << reservation.getMessage();
    }
    else
    {
@@ -527,7 +526,18 @@ void DataAcquisition::handleSetFingerTemperature(double temperature)
    }
    else
    {
-     emit setTargetTemperature(temperature);
+      emit setTargetTemperature(temperature);
+      /*
+      try
+      {
+         emit setTargetTemperature(temperature);
+      }
+      catch (DetectorException &ex)
+      {
+         qDebug() <<"ex.getMessage()" << ex.getMessage();
+//         emit writeError(ex.getMessage());
+      }
+      */
    }
 }
 

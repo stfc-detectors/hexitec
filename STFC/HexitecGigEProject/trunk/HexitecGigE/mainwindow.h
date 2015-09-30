@@ -57,6 +57,8 @@ private:
    void checkKeithleyConfiguration();
    void closeEvent(QCloseEvent *event);
    bool checkDAQChoice();
+   QAction *startDAQAct;
+   QAction *stopDAQAct;
 
    ProcessingWindow *processingWindow;
    QMainWindow *visualisation;
@@ -137,6 +139,8 @@ public slots:
    void handleBufferReady();
 //   void handleReturnBufferReady(unsigned char *buffer);
    void handleShowImage();
+   void enableMainWindowActions();
+   void disableMainWindowActions();
 };
 
 #endif

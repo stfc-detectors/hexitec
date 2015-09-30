@@ -22,15 +22,15 @@ public:
    ~DetectorControlForm();
    void initialiseFailed();
    QMainWindow *getMainWindow();
-   void setKeithleyName(QString keithleyName);
-   QString keithleyName;
+   void setHvName(QString hvName);
+   QString hvName;
 
 private:
    Ui::DetectorControlForm *ui;
    QMainWindow *mainWindow;
    DPWarningDialog *dpWarningDialog;
    bool waitingForModeChange;
-   bool keithleyReservedByScripting;
+   bool hvReservedByScripting;
    bool tAboveTdp;
    bool firstMonitor;
    void connectSignals();

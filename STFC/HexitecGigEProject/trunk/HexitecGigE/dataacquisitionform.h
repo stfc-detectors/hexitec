@@ -114,6 +114,8 @@ signals:
    void cancelReducedDataCollection();
    void abortDAQPressed();
    void createLogFile(DetectorFilename *logFilename);
+   void enableMainWindowActions();
+   void disableMainWindowActions();
 };
 
 #endif // DATAACQUISITIONFORM_H

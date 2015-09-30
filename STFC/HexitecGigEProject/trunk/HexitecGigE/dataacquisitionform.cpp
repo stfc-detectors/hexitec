@@ -483,6 +483,8 @@ void DataAcquisitionForm::guiIdle()
 void DataAcquisitionForm::guiReady()
 {
    int mode = ui->mode->currentIndex();
+
+   emit enableMainWindowActions();
    guiMode(ui->mode->currentIndex());
    enableRepeats(mode);
    enableLogfileParameters(!loggingEnabled);
@@ -536,6 +538,7 @@ void DataAcquisitionForm::guiWaitingTrigger()
 
 void DataAcquisitionForm::guiDetectorBusy()
 {
+   emit disableMainWindowActions();
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
 

@@ -18,8 +18,8 @@ public:
     int getBiasRefreshTime();
     int getBiasRefreshInterval();
     bool getBiasOnState();
-    void off();
-    void on(double voltage);
+    Q_INVOKABLE void off();
+    Q_INVOKABLE void on(double voltage);
     void on();
     void biasRefresh(int);
     void biasRefresh();

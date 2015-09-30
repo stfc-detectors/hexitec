@@ -47,8 +47,8 @@ public:
     Q_INVOKABLE void colorBarOn () {colorBar = true;}
     Q_INVOKABLE void colorBarOff () {colorBar = false;}
     Q_INVOKABLE void colorBarToggle() {colorBar = !colorBar;}
-    Q_INVOKABLE void logoOn() {showLogo = true;}
-    Q_INVOKABLE void logoOff() {showLogo = false;}
+    Q_INVOKABLE void Hexitec_logoOn() {showHexitec_Logo = true;}
+    Q_INVOKABLE void Hexitec_logoOff() {showHexitec_Logo = false;}
     Q_INVOKABLE void toolDisplayOn() {showTools = true;}
     Q_INVOKABLE void toolDisplayOff() {showTools = false;}
     Q_INVOKABLE void setMinZ(double);
@@ -131,7 +131,7 @@ private:
     bool zoomState;
     bool showGridLines;
     bool showRubberBand;
-    bool showLogo;
+    bool showHexitec_Logo;
     bool showTools;
     bool mouseButtonPressed;
     bool mouseDoubleClicked;

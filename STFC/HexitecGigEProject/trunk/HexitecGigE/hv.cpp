@@ -74,6 +74,7 @@ void HV::off()
 
 void HV::on(double voltage)
 {
+    qDebug() << "hv.on() called!";
     this->voltage = voltage;
     emit setHV(voltage);
     biasOnState = true;
@@ -132,6 +133,7 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
 {
 
     Reservation reservation = ObjectReserver::instance()->reserveForGUI(rkl);
+    qDebug() << "Turning HV off and releasing!";
 
     if (reservation.getReserved().isEmpty())
     {
@@ -147,6 +149,7 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
        else if (command == HVOFF)
        {
           off();
+          qDebug() << "Turning HV off and releasing!";
           ObjectReserver::instance()->release(reservation.getReserved(), "GUIReserver");
        }
     }
