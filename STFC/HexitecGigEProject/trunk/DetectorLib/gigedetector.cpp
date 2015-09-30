@@ -86,18 +86,6 @@ void GigEDetector::connectUp(const QObject *parent)
 //   returnBufferReadyEvent->connect1(this, SLOT(handleReturnBufferReady()));
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
-
-   /*   startTriggerEvent = new WindowsEvent(HEXITEC_START_TRIGGER, true);
-   triggeredEvent = new WindowsEvent(HEXITEC_TRIGGERED, true);
-   triggeredReducedDataEvent = new WindowsEvent(HEXITEC_TRIGGERED_REDUCED_DATA, true);
-   stopEvent = new WindowsEvent(HEXITEC_STOP, true);
-   saveBufferEvent = new WindowsEvent(HEXITEC_SAVE_BUFFER, true);
-   stopGrabEvent = new WindowsEvent(HEXITEC_STOP_GRAB, true, true);
-
-   triggeredEvent->connect1(this, SLOT(handleTriggered()));
-   triggeredReducedDataEvent->connect1(this, SLOT(handleTriggeredReducedData()));
-   stopEvent->connect1(this, SLOT(handleStop()));
-*/
    connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
    connect(this, SIGNAL(executeGetImages()), this, SLOT(handleExecuteGetImages()));
 //   connect(this, SIGNAL(notifyStop()), this, SLOT(handleStop()));
@@ -248,13 +236,19 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
-
+/*
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
     showError("ReadEnvironmentValues", status);
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
-    showError("ReadEnvironmentValues", status);
+    showError("ReadOperatingValues", status);
     *hv = hvOut;
+*/
+    *rh = 20.0;
+    *th = 25.0;
+    *tasic = 26.0;
+    *tdac = 27.0;
+    *t = 28.0;
 
     return status;
 }
@@ -748,7 +742,6 @@ void GigEDetector::showError(const LPSTR context, long asError)
          result = 0;
       }
    }
-
 
    if( !result )
    {

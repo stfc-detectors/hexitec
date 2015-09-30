@@ -19,7 +19,6 @@ class DetectorMonitor : public QObject
 private:
    QTimer *timer;
    GigEDetector *gigEDetector;
-//   Keithley *keithley;
    double th, t, tdp, rh, ik, tasic, tdac;
    double a, b, c;
    double gamma;

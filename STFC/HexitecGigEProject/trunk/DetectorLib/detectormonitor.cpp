@@ -56,6 +56,11 @@ void DetectorMonitor::monitor()
 
 void DetectorMonitor::executeMonitorEnvironmentalValues()
 {
+   /* Bias refreshing is turned off when the detector performs other operations
+    * e.g. data collection. When a long DAQ occurs the ENvirnmental parameters
+    * need to be checked before a bias refresh is performed.
+    */
+
    if (!monitoringEnabled)
    {
       monitorEnvironmentalValues();
@@ -113,9 +118,10 @@ void DetectorMonitor::read()
 }
 
 void DetectorMonitor::calcTDP()
-{
+{  
    gamma = log(rh/100) + ((b*th) / (c+th));
    tdp = c * gamma / (b - gamma);
+   qDebug() << "tpd = " << tdp;
 }
 
 void DetectorMonitor::enableMonitoring()

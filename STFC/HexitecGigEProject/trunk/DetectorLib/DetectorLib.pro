@@ -18,7 +18,6 @@ DEFINES += DETECTORLIB_LIBRARY HEXITEC_EXPORTS
 
 SOURCES += windowsevent.cpp \
     inifile.cpp \
-#    aspectdetector.cpp \
     detectorfactory.cpp \
     detectormonitor.cpp \
     gigedetector.cpp \
@@ -31,7 +30,6 @@ SOURCES += windowsevent.cpp \
 HEADERS +=DetectorLib_global.h \
     windowsevent.h \
     inifile.h \
-#    aspectdetector.h \
     detectorfactory.h \
     detectormonitor.h \
     gigedetector.h \
@@ -41,12 +39,9 @@ HEADERS +=DetectorLib_global.h \
     filewriter.h \
     detectorexception.h
 
-LIBS += Hexitec.lib GigE.lib Kernel32.lib
 LIBS += GigE.lib Kernel32.lib
-CONFIG(release, debug|release): LIBS += ../TemperatureHumidityLib/release/TemperatureHumidityLib.lib
-CONFIG(debug, debug|release): LIBS += ../TemperatureHumidityLib/debug/TemperatureHumidityLib.lib
+LIBS += GigE.lib Kernel32.lib
 INCLUDEPATH += ../DetectorLib
-INCLUDEPATH += ../TemperatureHumidityLib
 
 unix:!symbian {
     maemo5 {
