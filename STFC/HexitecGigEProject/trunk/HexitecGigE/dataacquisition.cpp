@@ -3,7 +3,6 @@
 #include "detectorfilename.h"
 #include "detectorfactory.h"
 #include "voltageSourceFactory.h"
-//#include "west6100plustemperaturecontroller.h"
 #include "processingwindow.h"
 #include "math.h"
 #include "motor.h"
@@ -249,6 +248,7 @@ void DataAcquisition::performContinuousDataCollection()
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
+//   waitForMonitoringDone();
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -317,6 +317,7 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
+//   waitForMonitoringDone();
 
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);

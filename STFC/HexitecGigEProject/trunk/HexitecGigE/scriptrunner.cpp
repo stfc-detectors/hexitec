@@ -31,13 +31,13 @@ ScriptRunner::ScriptRunner(QObject *parent) :
 void ScriptRunner::configueSerialPorts(QString twoEasyFilename)
 {
     IniFile *scriptingIniFile = new IniFile(twoEasyFilename);
-    QStringList names = scriptingIniFile->getStringList("Serial Ports/Name");
-    QStringList ports = scriptingIniFile->getStringList("Serial Ports/Port");
-    QStringList terminators = scriptingIniFile->getStringList("Serial Ports/Write Terminator");
-    QStringList baudRates = scriptingIniFile->getStringList("Serial Ports/Baud Rate");
-    QStringList dataBits = scriptingIniFile->getStringList("Serial Ports/Data Bits");
-    QStringList stopBits = scriptingIniFile->getStringList("Serial Ports/Stop Bits");
-    QStringList parities = scriptingIniFile->getStringList("Serial Ports/Parity");
+    QStringList names = scriptingIniFile->getStringList("Serial_Ports/Name");
+    QStringList ports = scriptingIniFile->getStringList("Serial_Ports/Port");
+    QStringList terminators = scriptingIniFile->getStringList("Serial_Ports/Write_Terminator");
+    QStringList baudRates = scriptingIniFile->getStringList("Serial_Ports/Baud_Rate");
+    QStringList dataBits = scriptingIniFile->getStringList("Serial_Ports/Data_Bits");
+    QStringList stopBits = scriptingIniFile->getStringList("Serial_Ports/Stop_Bits");
+    QStringList parities = scriptingIniFile->getStringList("Serial_Ports/Parity");
 
     SerialPort *newSerialPort;
     for (int i = 0; i < names.size(); ++i)

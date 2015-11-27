@@ -194,8 +194,6 @@ MainWindow::MainWindow()
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
    }
 
-   connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
-           DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
    emit initialiseProcessingWindow();
 }
 

@@ -30,12 +30,12 @@ HV::HV(QObject *parent) :
 void HV::initialise(QString detectorFilename)
 {
     detectorIniFile = new IniFile(detectorFilename);
-    vb = detectorIniFile->getFloat("Bias Voltage/Bias Voltage");
-    vr = detectorIniFile->getFloat("Bias Voltage/Refresh Voltage");
-    vbrTime = detectorIniFile->getInt("Bias Voltage/Time Refresh Voltage Held");
-    vbSettleTime = detectorIniFile->getInt("Bias Voltage/Bias Voltage Settle Time");
-    currentLimit = detectorIniFile->getDouble("Bias Voltage/Current Limit");
-    biasRefreshInterval = detectorIniFile->getInt("Bias Voltage/Bias Refresh Interval");
+    vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
+    vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
+    vbrTime = detectorIniFile->getInt("Bias_Voltage/Time Refresh_Voltage_Held");
+    vbSettleTime = detectorIniFile->getInt("Bias_Voltage/Bias_Voltage_Settle_Time");
+    currentLimit = detectorIniFile->getDouble("Bias_Voltage/Current_Limit");
+    biasRefreshInterval = detectorIniFile->getInt("Bias_Voltage/Bias_Refresh_Interval");
     totalBiasRefreshTime = vbrTime + vbSettleTime;
     //   biasRefreshInterval += totalBiasRefreshTime;
     voltage = vb;

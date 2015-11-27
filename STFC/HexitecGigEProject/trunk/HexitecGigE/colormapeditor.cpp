@@ -26,8 +26,8 @@ void ColorMapEditor::resetManualColourLimits()
     }
 
     twoEasyIniFile = new IniFile(twoEasyFilename);
-    int minimumColour = twoEasyIniFile->getInt("Visualisation/Colour Minimum");
-    int maximumColour = twoEasyIniFile->getInt("Visualisation/Colour Maximum");
+    int minimumColour = twoEasyIniFile->getInt("Visualisation/Colour_Minimum");
+    int maximumColour = twoEasyIniFile->getInt("Visualisation/Colour_Maximum");
     ui->minimumColour->setValue(minimumColour);
     ui->maximumColour->setValue(maximumColour);
 }

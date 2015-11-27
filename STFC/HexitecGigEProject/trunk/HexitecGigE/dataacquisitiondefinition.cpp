@@ -28,39 +28,39 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
    this->repeatInterval = repeatCount;
    this->offsets = offsets;
 
-   if ((duration = twoEasyIniFile->getDouble("Data Acquisition/Duration")) != QVariant(INVALID))
+   if ((duration = twoEasyIniFile->getDouble("Data_Acquisition/Duration")) != QVariant(INVALID))
    {
       this->duration = duration * 1000.0;
    }
-   if ((repeatCount = twoEasyIniFile->getInt("Data Acquisition/Repeat Count")) != QVariant(INVALID))
+   if ((repeatCount = twoEasyIniFile->getInt("Data_Acquisition/Repeat_Count")) != QVariant(INVALID))
    {
       this->repeatCount = repeatCount;
    }
-   if ((repeatInterval = twoEasyIniFile->getInt("Data Acquisition/Repeat Interval"))!= QVariant(INVALID))
+   if ((repeatInterval = twoEasyIniFile->getInt("Data_Acquisition/Repeat_Interval"))!= QVariant(INVALID))
    {
       this->repeatInterval = repeatInterval;
    }
-   if ((offsets = twoEasyIniFile->getBool("Data Acquisition/Collect Offsets")) != QVariant(INVALID))
+   if ((offsets = twoEasyIniFile->getBool("Data_Acquisition/Collect_Offsets")) != QVariant(INVALID))
    {
       this->offsets = offsets;
    }
-   if ((prefix = twoEasyIniFile->getString("Data Acquisition/Data File Prefix")) != QVariant(INVALID))
+   if ((prefix = twoEasyIniFile->getString("Data_Acquisition/Data_File_Prefix")) != QVariant(INVALID))
    {
       this->dataFilename.setPrefix(prefix);
    }
-   if ((directory = twoEasyIniFile->getString("Data Acquisition/Directory")) != QVariant(INVALID))
+   if ((directory = twoEasyIniFile->getString("Data_Acquisition/Directory")) != QVariant(INVALID))
    {
       this->dataFilename.setDirectory(directory);
    }
-   if ((prefix = twoEasyIniFile->getString("Data Acquisition/Prefix")) != QVariant(INVALID))
+   if ((prefix = twoEasyIniFile->getString("Data_Acquisition/Prefix")) != QVariant(INVALID))
    {
       this->dataFilename.setPrefix(prefix);
    }
-   if ((logDirectory = twoEasyIniFile->getString("Data Acquisition/Log Directory")) != QVariant(INVALID))
+   if ((logDirectory = twoEasyIniFile->getString("Data_Acquisition/Log_Directory")) != QVariant(INVALID))
    {
       this->logFilename.setDirectory(logDirectory);
    }
-   if ((logPrefix = twoEasyIniFile->getString("Data Acquisition/Log Prefix")) != QVariant(INVALID))
+   if ((logPrefix = twoEasyIniFile->getString("Data_Acquisition/Log_Prefix")) != QVariant(INVALID))
    {
       this->logFilename.setPrefix(logPrefix);
    }
@@ -68,46 +68,46 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
 
 void DataAcquisitionDefinition::setDataFilename(DetectorFilename dataFilename)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Prefix", dataFilename.getPrefix());
-   twoEasyIniFile->setParameter("Data Acquisition/Directory", dataFilename.getDirectory());
-   twoEasyIniFile->writeIniFile();
    this->dataFilename = dataFilename;
+   twoEasyIniFile->setParameter("Data_Acquisition/Prefix", dataFilename.getPrefix());
+   twoEasyIniFile->setParameter("Data_Acquisition/Directory", dataFilename.getDirectory());
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setLogFilename(DetectorFilename logFilename)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Log Prefix", logFilename.getPrefix());
-   twoEasyIniFile->setParameter("Data Acquisition/Log Directory", logFilename.getDirectory());
-   twoEasyIniFile->writeIniFile();
    this->logFilename = logFilename;
+   twoEasyIniFile->setParameter("Data_Acquisition/Log_Prefix", logFilename.getPrefix());
+   twoEasyIniFile->setParameter("Data_Acquisition/Log_Directory", logFilename.getDirectory());
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setOffsets(bool offsets)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Offsets", (QVariant) offsets);
-   twoEasyIniFile->writeIniFile();
    this->offsets = offsets;
+   twoEasyIniFile->setParameter("Data_Acquisition/Offsets", (QVariant) offsets);
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setDuration(double duration)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Duration", (QVariant) (duration / 1000.0));
-   twoEasyIniFile->writeIniFile();
    this->duration = duration;
+   twoEasyIniFile->setParameter("Data_Acquisition/Duration", (QVariant) (duration / 1000.0));
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setRepeatCount(int repeatCount)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Repeat Count", (QVariant) repeatCount);
-   twoEasyIniFile->writeIniFile();
    this->repeatCount = repeatCount;
+   twoEasyIniFile->setParameter("Data_Acquisition/Repeat_Count", (QVariant) repeatCount);
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setRepeatInterval(int repeatInterval)
 {
-   twoEasyIniFile->setParameter("Data Acquisition/Repeat Interval", (QVariant) repeatInterval);
-   twoEasyIniFile->writeIniFile();
    this->repeatInterval = repeatInterval;
+   twoEasyIniFile->setParameter("Data_Acquisition/Repeat_Interval", (QVariant) repeatInterval);
+   twoEasyIniFile->writeIniFile();
 }
 
 void DataAcquisitionDefinition::setFixedImageCount(int fixedImageCount)
