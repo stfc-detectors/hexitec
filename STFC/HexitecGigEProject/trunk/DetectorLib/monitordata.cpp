@@ -1,6 +1,7 @@
 #include "monitordata.h"
 
-MonitorData::MonitorData(double th, double t, double tdp, double rh, double ik, double tasic, QObject *parent) :
+MonitorData::MonitorData(double th, double t, double tdp, double rh, double ik, double tasic,
+                         bool valid, QObject *parent) :
    QObject(parent)
 {
    this->th = th;
@@ -9,6 +10,7 @@ MonitorData::MonitorData(double th, double t, double tdp, double rh, double ik, 
    this->rh = rh;
    this->ik = ik;
    this->tasic = tasic;
+   this->valid = valid;
 }
 
 double MonitorData::getTH()
@@ -39,4 +41,9 @@ double MonitorData::getIK()
 double MonitorData::getTASIC()
 {
    return tasic;
+}
+
+bool MonitorData::getValid()
+{
+   return valid;
 }

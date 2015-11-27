@@ -50,6 +50,7 @@ void DetectorMonitor::monitor()
 {
    if (monitoringEnabled)
    {
+      qDebug() << "monitoringEnabled";
       monitorEnvironmentalValues();
    }
 }
@@ -69,40 +70,48 @@ void DetectorMonitor::executeMonitorEnvironmentalValues()
 
 void DetectorMonitor::monitorEnvironmentalValues()
 {
-   read();
-   emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic));
-   emit monitoringDone();
-
-   if (logfileWriter != NULL)
+   try
    {
-      if (monitorCount == loggingInterval)
+      read();
+      emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, true));
+      emit monitoringDone();
+
+      if (logfileWriter != NULL)
       {
-         logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
-                               QString::number(t, 'f', 1) + " " +
-                               QString::number(th, 'f', 1) + " " +
-                               QString::number(tdp, 'f', 1) + " " +
-                               QString::number(tasic, 'f', 1) + " " +
-                               QString::number(tdac, 'f', 1) + " " +
-                               QString::number(rh, 'f', 1));
-         monitorCount = 0;
+         if (monitorCount == loggingInterval)
+         {
+            logfileWriter->append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss") + " " +
+                                  QString::number(t, 'f', 1) + " " +
+                                  QString::number(th, 'f', 1) + " " +
+                                  QString::number(tdp, 'f', 1) + " " +
+                                  QString::number(tasic, 'f', 1) + " " +
+                                  QString::number(tdac, 'f', 1) + " " +
+                                  QString::number(rh, 'f', 1));
+            monitorCount = 0;
+         }
+         monitorCount++;
       }
-      monitorCount++;
-   }
 
-   if (t < tdp)
-   {
-      if (temperatureInRange)
+      if (t < tdp)
       {
-         emit temperatureBelowDP();
-         temperatureInRange = false;
+         if (temperatureInRange)
+         {
+            emit temperatureBelowDP();
+            temperatureInRange = false;
+         }
+      }
+      else if (!temperatureInRange)
+      {
+         emit temperatureAboveDP();
+         temperatureInRange = true;
       }
    }
-   else if (!temperatureInRange)
+   catch (DetectorException &ex)
    {
-      emit temperatureAboveDP();
-      temperatureInRange = true;
+      qDebug() << "DetectorException caught in monitorEnvironmentalValues()";
+      emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, false));
+      emit writeError(ex.getMessage());
    }
-
 }
 
 void DetectorMonitor::read()
@@ -110,6 +119,7 @@ void DetectorMonitor::read()
    int status = -1;
 
    status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tdac, &t, &ik);
+   qDebug() << rh << t << tasic << tdac << t;
 
    if(!status)
    {
@@ -118,10 +128,9 @@ void DetectorMonitor::read()
 }
 
 void DetectorMonitor::calcTDP()
-{  
+{
    gamma = log(rh/100) + ((b*th) / (c+th));
    tdp = c * gamma / (b - gamma);
-   qDebug() << "tpd = " << tdp;
 }
 
 void DetectorMonitor::enableMonitoring()

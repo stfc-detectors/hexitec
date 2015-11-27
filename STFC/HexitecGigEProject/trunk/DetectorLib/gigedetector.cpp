@@ -236,20 +236,21 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
-/*
+
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
     showError("ReadEnvironmentValues", status);
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
     *hv = hvOut;
-*/
+
+/*
     *rh = 20.0;
     *th = 25.0;
     *tasic = 26.0;
     *tdac = 27.0;
     *t = 28.0;
-
+*/
     return status;
 }
 
@@ -727,12 +728,14 @@ void GigEDetector::showError(const LPSTR context, long asError)
 
    if( sysError )
    {
+      qDebug() << "System Error";
       sysError = GetSystemErrorMsg( sysError, sysErrorMessage, STR_LENGTH );
       qDebug() << "\n%s\n\tSystem Error" << context << sysError << "occured trying to get aSpect error message for aSpect error: " << sysErrorMessage << asError;
       return;
    }
    else if( asError )
    {
+      qDebug() << "Aspect Error";
       if( context != "InitDevice" )
       {
          result = GetLastResult(detectorHandle, &pleoraErrorCode, pleoraErrorCodeStr, &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen );
@@ -743,17 +746,20 @@ void GigEDetector::showError(const LPSTR context, long asError)
       }
    }
 
+
    if( !result )
    {
+      qDebug() << "Pleora Error";
+
       errorMessage = "aSpect Result: ";
+
       errorMessage.append(QString::fromLatin1((char *)context));
       errorMessage.append(QString::fromLatin1((char *)asErrorMessage));
+
       errorMessage.append("Pleora Result Code: ");
-      errorMessage.append(QString::fromLatin1((char *)pleoraErrorCode));
+      errorMessage.append(QString::number(pleoraErrorCode));
       errorMessage.append(", Pleora Result Code String: ");
       errorMessage.append(QString::fromLatin1((char *)pleoraErrorCodeStr));
-      errorMessage.append(", Pleora Result Description: ");
-      errorMessage.append(QString::fromLatin1((char *)pleoraErrorDescription));
 
       qDebug() << "aSpect Result: " << context << asErrorMessage;
       qDebug() << "Pleora Result Code:" << pleoraErrorCode;
