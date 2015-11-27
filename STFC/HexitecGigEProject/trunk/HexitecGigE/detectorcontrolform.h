@@ -34,6 +34,7 @@ private:
    bool tAboveTdp;
    bool firstMonitor;
    void connectSignals();
+   void terminateDetector();
    void guiIdle();
    void guiReady();
    void guiInitialising();

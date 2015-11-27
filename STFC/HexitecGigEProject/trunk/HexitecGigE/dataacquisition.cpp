@@ -3,6 +3,7 @@
 #include "detectorfilename.h"
 #include "detectorfactory.h"
 #include "voltageSourceFactory.h"
+//#include "west6100plustemperaturecontroller.h"
 #include "processingwindow.h"
 #include "math.h"
 #include "motor.h"
@@ -526,24 +527,21 @@ void DataAcquisition::handleSetFingerTemperature(double temperature)
    }
    else
    {
-      emit setTargetTemperature(temperature);
-      /*
-      try
-      {
-         emit setTargetTemperature(temperature);
-      }
-      catch (DetectorException &ex)
-      {
-         qDebug() <<"ex.getMessage()" << ex.getMessage();
-//         emit writeError(ex.getMessage());
-      }
-      */
+     emit setTargetTemperature(temperature);
    }
 }
 
 void DataAcquisition::handleMonitorData(MonitorData *md)
 {
-   tdp = md->getTDP();
+   if (md->getValid())
+   {
+      tdp = md->getTDP();
+   }
+   else
+   {
+      qDebug() << "Monitoring Failed!";
+   }
+
 }
 
 void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorStatus,

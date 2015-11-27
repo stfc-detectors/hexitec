@@ -220,11 +220,19 @@ void DataAcquisitionForm::setLogDirectory()
 
 void DataAcquisitionForm::handleMonitorData(MonitorData *md)
 {
-   ui->housingTemperature->setText(QString::number(md->getTH(), 'f', 1));
-   ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
-   ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
-   ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
-   ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
+   if (md->getValid())
+   {
+      ui->housingTemperature->setText(QString::number(md->getTH(), 'f', 1));
+      ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
+      ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
+      ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
+      ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
+   }
+   else
+   {
+      qDebug() << "DataAcquisitionForm needs to do something with its GUI ";
+      disableGui();
+   }
 }
 
 void DataAcquisitionForm::setModes(QStringList modes)
@@ -240,7 +248,7 @@ void DataAcquisitionForm::modeChanged(int mode)
    if (ui->mode->currentText() != invalidItemText)
    {
        qDebug() <<"Change GUI sensitivity here!";
-//      emit executeCommand(GigEDetector::CONFIGURE, mode);
+       disableGui();
    }
 }
 

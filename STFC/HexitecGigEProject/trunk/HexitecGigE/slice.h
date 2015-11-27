@@ -9,7 +9,6 @@ S D M Jacques 24 Feb 2011
 
 #include <QObject>
 #include <QVector>
-#include <voxel.h>
 #include <QString>
 #include <QStringList>
 

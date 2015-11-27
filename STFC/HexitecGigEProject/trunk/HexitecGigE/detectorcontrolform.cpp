@@ -74,16 +74,6 @@ void DetectorControlForm::handleSetFingerTemperature()
 {
    double temperature = ui->setFingerTemperature->value();
    emit setFingerTemperature(temperature);
-/*   try
-   {
-      emit setFingerTemperature(temperature);
-   }
-   catch (DetectorException &ex)
-   {
-      qDebug() <<"DetectorException cought";
-//      emit writeError(ex.getMessage());
-   }
-*/
 }
 
 void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
@@ -104,7 +94,7 @@ void DetectorControlForm::initialiseDetectorPressed()
    try
    {
       emit initialiseDetector();
-      QThread::sleep(2);
+      QThread::sleep(5);
 
       /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
@@ -120,12 +110,18 @@ void DetectorControlForm::initialiseDetectorPressed()
 
 void DetectorControlForm::terminateDetectorPressed()
 {
+   terminateDetector();
+}
+
+void DetectorControlForm::terminateDetector()
+{
    emit disableMonitoring();
    emit disableBiasRefresh();
    emit executeCommand(GigEDetector::CLOSE, 0, 0);
 
    /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
+   guiDetectorBusy();
    ui->initialiseConnection->setEnabled(true);
    ui->terminateConnection->setEnabled(false);
 }
@@ -139,15 +135,22 @@ void DetectorControlForm::initialiseFailed()
 
 void DetectorControlForm::handleMonitorData(MonitorData *md)
 {
-   ui->housingTemperature->setText(QString::number(md->getTH(), 'f', 1));
-   ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
-   ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
-   ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
-   ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
-   if (firstMonitor)
+   if (md->getValid())
    {
-       ui->setFingerTemperature->setValue(md->getT());
-       firstMonitor = false;
+      ui->housingTemperature->setText(QString::number(md->getTH(), 'f', 1));
+      ui->housingHumidity->setText(QString::number(md->getRH(), 'f', 1));
+      ui->fingerTemperature->setText(QString::number(md->getT(), 'f', 1));
+      ui->dewPoint->setText(QString::number(md->getTDP(), 'f', 1));
+      ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
+      if (firstMonitor)
+      {
+         ui->setFingerTemperature->setValue(md->getT());
+         firstMonitor = false;
+      }
+   }
+   else
+   {
+      terminateDetector();
    }
 }
 
