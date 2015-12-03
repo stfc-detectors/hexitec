@@ -13,6 +13,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+///// For callback functionality:
+//#include <functional>
 
 #include "HxtLogger.h"
 #include "HxtRawDataTypes.h"
@@ -29,13 +31,30 @@ using namespace std;
 
 namespace hexitech {
 
+///// HexitecGigE Edition; Defined class and create callback function
+///// Source: http://stackoverflow.com/a/2298291/2903608
+//class HxtRawDataProcessor;
+//int dataProcessorCallback(const HxtRawDataProcessor& dp);
+
 class HxtRawDataProcessor {
 public:
     HxtRawDataProcessor(unsigned int aRows, unsigned int aCols, double aHistoStart = 0.0, double aHistoEnd = 10000.0, unsigned int aHistoBins = 1000,
                         u64 formatVersion=1,
                         int ssx=-1, int ssy=-1, int ssz=-1, int ssrot=-1, int timer=-1, int galx=-1, int galy=-1, int galz=-1, int galrot=-1,
-                        string filePrefix="", string dataTimeStamp=0);
+                        string filePrefix="", string dataTimeStamp=0, bool enableCallback=false);
 	virtual ~HxtRawDataProcessor();
+//    /// ---------------------------------------------
+//    /// typedef to support callback functionality:
+
+//    typedef std::/*tr1::*/function<int (const HxtRawDataProcessor&)> DataProcessorFunc;
+////    typedef std::tr1::function<int (const GameCharacter&)> HealthCalcFunc;
+
+//    /// Explicit CTOR for callback functionality
+//    explicit HxtRawDataProcessor(DataProcessorFunc dp = dataProcessorCallback/*, bool bEnableCallback = true*/) :
+//        callbackFunc(dp)/*, mCallbackAvailable(bEnableCallback)*/ {}
+
+//    int getCallbackFunc() const { return callbackFunc(*this); }
+//    /// ---------------------------------------------
 
 	void setDebug(bool aDebug);
 
@@ -44,18 +63,25 @@ public:
 	void InterpolateDeadPixels(const unsigned int aThreshold);
 
 	void registerCorrector(HxtFrameCorrector* apCorrector);
+    bool deregisterCorrector(HxtFrameCorrector* apCorrector);
 
 	void applyPixelThresholds(HxtPixelThreshold* apThreshold);
 
 	bool parseFile(string aFileName);
 	bool parseFile(vector<string> aFileList);
-	bool flushFrames(void);
+    /// HexitecGigE Added: (2 functions)
+    bool parseBuffer(unsigned short *aBufferName, unsigned long frameLength);
+    bool parseBuffer(vector<unsigned short*> &aBufferNames, vector<unsigned long> &aValidFrames);
+    bool flushFrames(void);
 
 	bool outputFrame(HxtFrame* pSubPixelFrame);
 	bool outputFrame(unsigned int aFrameIdx);
 	bool writePixelOutput(string aOutputFileName);
 	bool writeSubPixelOutput(string aOutputFileName);
 	bool writeCsvFiles(void);
+    /// HexitecGigE Added: (Support copying .HXT contents to buffer, not file)
+    bool copyPixelOutput(unsigned short* aHxtBuffer);
+
 
 	HxtFrame* getSubPixelFrame();
 
@@ -74,28 +100,43 @@ public:
     string getRawCsvFileName() { return mRawCsvFileName; }
     string getCorCsvFileName() { return mCorCsvFileName; }
 
-
+    /// Debugging frame by frame (access the function)
+    void setDebugFrameDir(string aDebugFrameDir){ mDebugFrameDir = aDebugFrameDir; }
+    void setEnableDebugFrame(bool aDebugFrames) { mDebugFrames = aDebugFrames; }
 private:
 	bool processFrame(unsigned int currentFrameIdx, unsigned int lastFrameIdx);
 
-	/// dumpRawLine - inline function to print raw Hxt data line
-	inline void dumpRawLine(hxtRawLine* apLine, LogLevel aLevel) {
-		LOG(gLogConfig, aLevel) << setw(3) << (int)apLine->byte[0] << " " << setw(3) << (int)apLine->byte[1] << " " << setw(3) << (int)apLine->byte[2] << " ";
-	}
+    /// ----- HexitecGigE Addition: Callback functionality ---- Not Yet Implemented
+//    DataProcessorFunc callbackFunc;
+    bool mCallbackAvailable;
+    /// ---------------------------------------------------------------------
+    /// Setup lookup table for pixel reordering:
+    int* mPixelTable;
 
-	/// isFramePreamble - inline function to detect if raw line is a frame preamble
-	inline bool isFramePreamble(hxtRawLine* apLine) {
-		return ((apLine->byte[0] == kHxtFramePreambleLabel) &&
-				(apLine->byte[1] == kHxtFramePreambleLabel) &&
-				(apLine->byte[2] == kHxtFramePreambleLabel));
-	}
+//	/// dumpRawLine - inline function to print raw Hxt data line    // Now redundant
+//	inline void dumpRawLine(hxtRawLine* apLine, LogLevel aLevel) {
+//		LOG(gLogConfig, aLevel) << setw(3) << (int)apLine->byte[0] << " " << setw(3) << (int)apLine->byte[1] << " " << setw(3) << (int)apLine->byte[2] << " ";
+//	}
 
-	/// isRowMarker - inline function to detect if raw line is a row marker
-	inline bool isRowMarker(hxtRowMarker* apRow) {
-		return ((apRow->pad == 0) && (apRow->rowLabel == kHxtRowMarkerLabel));
-	}
+//	/// isFramePreamble - inline function to detect if raw line is a frame preamble
+//	inline bool isFramePreamble(hxtRawLine* apLine) {
+//		return ((apLine->byte[0] == kHxtFramePreambleLabel) &&
+//				(apLine->byte[1] == kHxtFramePreambleLabel) &&
+//				(apLine->byte[2] == kHxtFramePreambleLabel));
+//	}
 
-	// getPixelThreshold - inline function to retreive pixel threshold indexed by row and column
+//	/// isRowMarker - inline function to detect if raw line is a row marker
+//	inline bool isRowMarker(hxtRowMarker* apRow) {
+//		return ((apRow->pad == 0) && (apRow->rowLabel == kHxtRowMarkerLabel));
+//	}
+
+    /// Debugging frame by frame
+    string mDebugFrameDir;
+    unsigned int mFrameNumber;
+    bool mDebugFrames;
+    bool debugWriteFrame(unsigned int aFrameIdx, string fileDescription);
+    ///
+    // getPixelThreshold - inline function to retreive pixel threshold indexed by row and column
 	inline double getPixelThreshold(unsigned int aRow, unsigned int aCol) {
 		return mPixelThreshold[(aRow * mCols) + aCol];
 	}
@@ -122,11 +163,11 @@ private:
 	unsigned int   mEventsDetected;       // number of events detected in parser
 	unsigned int   mEventsAboveThreshold; // number of events above threshold
 
-	bool           mReadNextLine ;        // flag if parser should read next line at next pass
-	bool           mAtStartOfFiles;       // flag if parser as at start of file list
-	int            mRowIdx;               // current row index in parser state
-	hxtParserState mNextParserState;      // next state of parser, i.e. what sort of line to detect
-	hxtRawLine     mPartialFrameHeader;   // raw line to hold partial frame header that spans file boundary
+//	bool           mReadNextLine ;        // flag if parser should read next line at next pass
+//	bool           mAtStartOfFiles;       // flag if parser as at start of file list
+    int            mRowIdx;               // current pixel row index within current frame
+//	hxtParserState mNextParserState;      // next state of parser, i.e. what sort of line to detect
+//	hxtRawLine     mPartialFrameHeader;   // raw line to hold partial frame header that spans file boundary
 
 	unsigned int   mCorrectedFramesWritten;   // number of frames written to output histograms
 	unsigned int   mSubPixelFramesWritten;   // number of frames written to output histograms
@@ -162,8 +203,8 @@ private:
 	// Timer for timing file processing operations
 	Timer*       mFileTimer;
 
-	// Memory to and store raw lines of data
-	u8* mRawData;
+    // Memory to and store raw lines of data - Now just one 16-bit raw pixel value
+    u16* mRawData;
 
     // File format version
     u64 mFormatVersion;

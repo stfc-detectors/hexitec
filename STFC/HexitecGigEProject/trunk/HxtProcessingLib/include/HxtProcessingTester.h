@@ -19,15 +19,22 @@ using namespace std;
 
 namespace hexitech {
 
-class HxtProcessingTester {
+class HxtProcessing {
 
 public:
-    HxtProcessingTester(string aAppName, unsigned int aDebugLevel);
-    ~HxtProcessingTester();
+    HxtProcessing(string aAppName, unsigned int aDebugLevel);
+    ~HxtProcessing();
 
     void pushRawFileName(string aFileName); // Add raw file name onto vector of files to be processed
+    void pushBufferNameAndFrames(unsigned short *aBufferName, unsigned long aValidFrames); // Add transfer buffer onto queue
 
-    int executeProcessing();
+    int executeProcessing(bool bProcessFiles, bool bWriteFiles);
+
+    /// HexitecGigE Addition:
+    void setCallback(bool aCallback) { mEnableCallback = aCallback; }
+    bool getCallback() { return mEnableCallback; }
+    // Need a function to apply settings (just once), then the user  may call executeProcessing() to their hearts content..
+    void prepSettings();
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -48,6 +55,8 @@ public:
     void setThresholdFileName(string aThresholdFileName) { mThresholdFileName = aThresholdFileName; }
     void setOutputFileNameDecodedFrame(string aOutputFileNameDecodedFrame) { mOutputFileNameDecodedFrame = aOutputFileNameDecodedFrame; }
     void setOutputFileNameSubPixelFrame(string aOutputFileNameSubPixelFrame) { mOutputFileNameSubPixelFrame = aOutputFileNameSubPixelFrame; }
+    string getOutputFileNameDecodedFrame() { return mOutputFileNameDecodedFrame; }
+    string getOutputFileNameSubPixelFrame() { return mOutputFileNameSubPixelFrame; }
     void setGradientsFile(string aGradientsFile) { mGradientsFile = aGradientsFile; }
     void setInterceptsFile(string aInterceptsFile) { mInterceptsFile = aInterceptsFile; }
     void setMomentumFile(string aMomentumFile) { mMomentumFile = aMomentumFile; }
@@ -80,7 +89,25 @@ public:
     void printUsage(string aAppName);
 
 protected:
+    /// HexitecGigE Addition:
+    bool mEnableCallback;
+    vector<unsigned short*> mBufferNames;
+    vector<unsigned long>  mValidFrames;
+    ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
+    HxtPixelThreshold* pixelThreshold;
+    HxtRawDataProcessor* dataProcessor;
+    HxtFrameInducedNoiseCorrector* inCorrector;
+    HxtPixelThreshold* gradientsContents;
+    HxtPixelThreshold* interceptsContents;
+    HxtFrameCalibrationCorrector* cabCorrector;
+    HxtFrameChargeSharingSubPixelCorrector* subCorrector;
+    HxtFrameChargeSharingDiscCorrector* csdCorrector;
+    HxtFrameIncompleteDataCorrector* idCorrector;
+    HxtPixelThreshold* momentumContents;
+    HxtFrameMomentumCorrector* momCorrector;
+    HxtFrameDoublePixelsCorrector* dbpxlCorrector;
 
+    ///
     vector<string> mRawFileNames;
     unsigned int mDebugLevel;
     unsigned int mHistoStartVal;

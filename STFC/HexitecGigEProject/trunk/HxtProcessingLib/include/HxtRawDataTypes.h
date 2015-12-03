@@ -14,36 +14,36 @@ typedef unsigned int u32;
 typedef unsigned long long u64;
 
 typedef struct {
-	u8 byte[3];
+    u8 byte[3];
 } hxtRawLine;
 
-typedef struct {
-	u8 frameByte[6];
-} hxtFrameCounter;
+//typedef struct {
+//	u8 frameByte[6];
+//} hxtFrameCounter;
 
-typedef struct {
-	u8 pad;
-	u8 rowLabel;
-	u8 rowIdx;
-} hxtRowMarker;
+//typedef struct {
+//	u8 pad;
+//	u8 rowLabel;
+//	u8 rowIdx;
+//} hxtRowMarker;
 
-typedef struct {
-	u16 pixel;
-	u8  colIdx;
-} hxtColumnData;
+//typedef struct {
+//	u16 pixel;
+//	u8  colIdx;
+//} hxtColumnData;
 
 typedef struct {
 	u32 nRow;
 	u32 nCol;
 } hxtPixel;
 
-typedef enum {
-	framePreamble,
-	frameHeaderStart,
-	frameHeaderEnd,
-	rowMarker,
-	colData
-} hxtParserState;
+//typedef enum {
+//	framePreamble,
+//	frameHeaderStart,
+//	frameHeaderEnd,
+//	rowMarker,
+//	colData
+//} hxtParserState;
 
 // Motor positions struct - Passing as one unit within GUI/HxtProcessing
 typedef struct {
@@ -75,7 +75,7 @@ typedef enum {
     positionUninitialised = 2222222            // Used to be -65536
 } motorSpecialValues;
 
-const u8 kHxtFramePreambleLabel = 255;
-const u8 kHxtRowMarkerLabel     = 192;
+//const u8 kHxtFramePreambleLabel = 255;
+//const u8 kHxtRowMarkerLabel     = 192;
 
 #endif /* HXTRAWDATATYPES_H_ */

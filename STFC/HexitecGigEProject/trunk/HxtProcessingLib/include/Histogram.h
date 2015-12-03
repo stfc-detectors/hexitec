@@ -17,12 +17,20 @@ public:
 
 	Histogram(const double aStart, const double aEnd, const unsigned int aBins);
 	Histogram(const Histogram& aOther);
-	~Histogram();
+    /// HexitecGigE Overload operators:
+    Histogram operator+ (const Histogram& aOther);
+    Histogram & operator= (const Histogram& aOther);
+    /// Overloading operators require access to aOther's private members
+//    double & getStart() { return  *mStart; }
+//    double & getInterval() { return *mBinsInterval; }
+//    unsigned int & GetBinContent
+    /// -----------------
+    ~Histogram();
 
 	void Fill(const double aValue);
 	const unsigned int GetTotalCount(void);
-	const unsigned int GetBinContent(const unsigned int aIdx);
-	const double GetBinStart(const unsigned int aIdx);
+    const unsigned int GetBinContent(const unsigned int aIdx)  const;
+    const double GetBinStart(const unsigned int aIdx) const;
 	void Clear(void);
 	// Set a specific bin to a specific value (for Interpolate only)
 	void SetValue(const unsigned int aIdx, const unsigned int aValue);
@@ -31,7 +39,9 @@ public:
 	void WriteCsv(std::ofstream& aOutFile);
 	void BinaryWriteBins(std::ofstream& aOutFile);
 	void BinaryWriteContent(std::ofstream& aOutFile);
-
+    /// HexitecGigE Added:
+    void BinaryCopyBins(char* aHxtBuffer);
+    void BinaryCopyContent(char* aHxtBuffer);
 private:
 
 	double mStart, mBinsInterval;

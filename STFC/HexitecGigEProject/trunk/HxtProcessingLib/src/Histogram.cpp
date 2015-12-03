@@ -40,6 +40,47 @@ Histogram::Histogram(const Histogram& aOther):
       mFrequency[i] = aOther.mFrequency[i];
 }
 
+/// ----    HexitecGigE Addition    ----
+/// Plus operator - adds histogram onto current histogram
+/// @param
+Histogram Histogram::operator+ (const Histogram& aOther)
+{
+    unsigned int aValue = -1;
+    // Check both histograms compatible before addition
+    for (unsigned int iBin=0; iBin < mBins; iBin++)
+    {
+        if (GetBinStart(iBin) != aOther.GetBinStart(iBin))
+            std::cout << " *** Op+   Error: Histograms not compatible; Bin start values differ: "
+                 << GetBinStart(iBin) << " vs " << aOther.GetBinStart(iBin) << std::endl;
+
+        aValue = this->GetBinContent(iBin) + aOther.GetBinContent(iBin);
+        this->SetValue(iBin, aValue);
+    }
+
+    return *this;
+}
+
+/// Equal operator - copies histogram over current histogram
+/// @param
+Histogram & Histogram::operator= (const Histogram& aOther)
+{
+    unsigned int aValue = -1;
+    // Check both histograms compatible before addition
+    for (unsigned int iBin=0; iBin < mBins; iBin++)
+    {
+        if (this->GetBinStart(iBin) != aOther.GetBinStart(iBin))
+            std::cout << " *** Equal = Op Error: Histograms not compatible; Bin start values differ: "
+                 << GetBinStart(iBin) << " vs " << aOther.GetBinStart(iBin) << std::endl;
+
+        aValue = aOther.GetBinContent(iBin);
+        this->SetValue(iBin, aValue);
+    }
+
+    return *this;
+}
+
+
+
 /// Destructor - deletes frequency array
 Histogram::~Histogram() {
 	// Delete frequency array
@@ -86,7 +127,7 @@ const unsigned int Histogram::GetTotalCount(void)
 /// Gets the start (low) limit of a given histogram bin
 /// @param aIdx index of bin to return
 /// @return start (lower) limit of histogram
-const double Histogram::GetBinStart(const unsigned int aIdx) {
+const double Histogram::GetBinStart(const unsigned int aIdx) const {
 
 	double start = 0.0;
 	if (aIdx < mBins) start = ((double)aIdx / mBinsInterval) + mStart;
@@ -97,7 +138,7 @@ const double Histogram::GetBinStart(const unsigned int aIdx) {
 /// Gets the content of a given histogram bin
 /// @param aIdx index of bin to return
 /// @return number of counts in specified bin
-const unsigned int Histogram::GetBinContent(const unsigned int aIdx) {
+const unsigned int Histogram::GetBinContent(const unsigned int aIdx) const {
 
 	unsigned int value = 0;
 	if (aIdx < mBins) value = mFrequency[aIdx];
@@ -149,5 +190,27 @@ void Histogram::BinaryWriteContent(std::ofstream& aOutFile) {
 		double content = (double)this->GetBinContent(iBin);
 		aOutFile.write((char*)&content, sizeof(content));
 	}
+
+}
+
+void Histogram::BinaryCopyBins(char* aHxtBuffer) {
+
+    unsigned short* pBuffer = (unsigned short*) aHxtBuffer;
+    for (unsigned int iBin = 0; iBin < mBins; iBin++) {
+        double binStart = this->GetBinStart(iBin);
+        memcpy(pBuffer, (char*)&binStart, sizeof(binStart));
+        pBuffer++;
+    }
+
+}
+
+void Histogram::BinaryCopyContent(char* aHxtBuffer) {
+
+    unsigned short* pBuffer = (unsigned short*) aHxtBuffer;
+    for (unsigned int iBin = 0; iBin < mBins; iBin++) {
+        double content = (double)this->GetBinContent(iBin);
+        memcpy(pBuffer, (char*)&content, sizeof(content));
+        pBuffer++;
+    }
 
 }

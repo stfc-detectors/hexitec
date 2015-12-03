@@ -7,23 +7,16 @@
 
 #include "HxtProcessingTester.h"
 
-// This makes QT a dependency for this project:
-#include <QDebug>
-
-
 const unsigned int kHxtSensorCols = 80;
 const unsigned int kHxtSensorRows = 80;
 
 using namespace std;
 
-// Declaration of global log configuration used throughout - must be initialised
-//LogConfig* gLogConfig;
-
 namespace hexitech {
 
 /// Main entry point for application - parses arguments, creates raw data processor and corrector objects,
 /// invokes processor on specified files and writes output data files
-HxtProcessingTester::HxtProcessingTester(string aAppName, unsigned int aDebugLevel) :
+HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mDebugLevel(aDebugLevel)
 {
     // Default values
@@ -78,68 +71,78 @@ HxtProcessingTester::HxtProcessingTester(string aAppName, unsigned int aDebugLev
     mGalRot        = -65535;
     mFilePrefix    = "-1";
     mDataTimeStamp = string("000000_000000");
+
+    /// HexitecGigE Addition:
+    mEnableCallback = false;
+
+    /// --------    Moving stuff from executeProcessing that need not be repeated.. ------- ///
+
+    pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    // Create new raw data processor instance
+    dataProcessor = new HxtRawDataProcessor(kHxtSensorRows, kHxtSensorCols, mHistoStartVal, mHistoEndVal, mHistoBins,
+                                                                 mFormatVersion, mX, mY, mZ, mRot,
+                                                                 mTimer, mGalx, mGaly, mGalz, mGalRot,
+                                                                 string("prefix"), mDataTimeStamp, mEnableCallback);
+    // 1. Induced Noise Corrector
+    inCorrector = new HxtFrameInducedNoiseCorrector(mInducedNoiseThreshold);
+    // 2. Calibration
+    // Create pointer to Gradients file
+    gradientsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    // Create pointer to Intercepts file
+    interceptsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    cabCorrector = 0;
+    // 3. CS Addition / O R / CS Discriminator
+    // 3.1 subpixel
+    // Create subpixel corrector
+    subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
+    // 3.2 CS Addition
+    csdCorrector = new HxtFrameChargeSharingDiscCorrector();
+    // 4. Incomplete Data
+    idCorrector = new HxtFrameIncompleteDataCorrector();
+    // 5. Momentum
+    // Create pointer to Momentum file
+    momentumContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    momCorrector = 0;
+    // x. Development purposes only, check for pixels read out more than once
+    dbpxlCorrector = new HxtFrameDoublePixelsCorrector();
+
+
 }
 
-HxtProcessingTester::~HxtProcessingTester()
+HxtProcessing::~HxtProcessing()
 {
     // Close log configuration and any associated files
     gLogConfig->close();
     delete gLogConfig;
+
+    //// Delete objects
+    delete dataProcessor;
+    delete idCorrector;
+    delete csdCorrector;
+    delete subCorrector;
+    delete inCorrector;
+    delete pixelThreshold;
+    delete gradientsContents;
+    delete interceptsContents;
+    delete dbpxlCorrector;
+    if (cabCorrector != 0) delete cabCorrector;
+    if (momCorrector != 0) delete momCorrector;
+    delete momentumContents;
 }
 
-void HxtProcessingTester::pushRawFileName(string aFileName)
+void HxtProcessing::pushRawFileName(string aFileName)
 {
     mRawFileNames.push_back(aFileName);
 }
 
-int HxtProcessingTester::executeProcessing()
+void HxtProcessing::pushBufferNameAndFrames(unsigned short *aBufferName, unsigned long aValidFrame)
 {
-    gLogConfig->setDebugLevel(mDebugLevel); // Less important..
+    mBufferNames.push_back(aBufferName);
+    mValidFrames.push_back(aValidFrame);
+}
 
-    /* Check for illegal configuration settings */
-
-    // Cannot run Charge Sharing Addition and Charge Sharing Discriminator together
-    if (mEnableCsaspCorrector && mEnableCsdCorrector)
-    {
-        LOG(gLogConfig, logERROR) << "Cannot combine Charge Sharing Addition and Charge Sharing Discriminator";
-        return 1;
-    }
-
-    // Are both calibration file specified?
-    if ( (!mGradientsFile.empty()) && (!mInterceptsFile.empty()) )
-    {
-        // Both calibration files specified, enable calibration
-        mEnableCabCorrector = true;
-    }
-    else
-    {
-        // Is one calibration file specified, but not the other?
-        if ( (mGradientsFile.empty() && !mInterceptsFile.empty())
-             || (!mGradientsFile.empty() && mInterceptsFile.empty()) )
-        {
-            LOG(gLogConfig, logERROR) << "Calibration requires both Gradients and Intercepts files" << endl;
-            return 2;
-        }
-        else
-            mEnableCabCorrector = false;
-    }
-
-
-    // Is momentum file specified?
-    if (!mMomentumFile.empty())
-        mEnableMomCorrector = true;
-    else
-        mEnableMomCorrector = false;
-
-    // Cannot specify both global threshold and threshold file
-    if ( (mGlobalThreshold != -1.0) && (!mThresholdFileName.empty()))
-    {
-        LOG(gLogConfig, logERROR) << "Cannot specify both a global threshold and a threshold file" << endl;
-        return 3;
-    }
-
-
-
+void HxtProcessing::prepSettings()
+{
     LOG(gLogConfig, logNOTICE) << "Starting up";
 
     // Display user settings
@@ -175,167 +178,192 @@ int HxtProcessingTester::executeProcessing()
         ((mEnableIpCorrector) ? (" Interpolate") : "") <<
         ((mEnableMomCorrector) ? (" Momentum") : "");
 
+   LOG(gLogConfig, logINFO) << "Writing to log file " << logFileStream.str();
 
-    LOG(gLogConfig, logINFO) << "Writing to log file " << logFileStream.str();
+   // Load a threshold file
+   if (mGlobalThreshold != -1.0) {
+       pixelThreshold->setGlobalThreshold(mGlobalThreshold);
+   }
+   if (!mThresholdFileName.empty()) {
+       pixelThreshold->loadThresholds(mThresholdFileName);
+   }
 
-    // Load a threshold file
-    HxtPixelThreshold* pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    if (mGlobalThreshold != -1.0) {
-        pixelThreshold->setGlobalThreshold(mGlobalThreshold);
-    }
-    if (!mThresholdFileName.empty()) {
-        pixelThreshold->loadThresholds(mThresholdFileName);
-    }
+   // Test setting up vector implementation
+   dataProcessor->setVector(mEnableVector);
 
-    // Create new raw data processor instance
-    HxtRawDataProcessor* dataProcessor = new HxtRawDataProcessor(kHxtSensorRows, kHxtSensorCols, mHistoStartVal, mHistoEndVal, mHistoBins,
-                                                                 mFormatVersion, mX, mY, mZ, mRot,
-                                                                 mTimer, mGalx, mGaly, mGalz, mGalRot,
-                                                                 string("prefix"), mDataTimeStamp);
+   // Set debug flags if debug level non-zero
+   if (mDebugLevel) dataProcessor->setDebug(true);
 
-    // Test setting up vector implementation
-    dataProcessor->setVector(mEnableVector);
+   // Apply thresholds to raw data processor
+   dataProcessor->applyPixelThresholds(pixelThreshold);
 
-    // Set debug flags if debug level non-zero
-    if (mDebugLevel) dataProcessor->setDebug(true);
+   // Create and register frame correctors with raw data processor if enabled
 
-    // Apply thresholds to raw data processor
-    dataProcessor->applyPixelThresholds(pixelThreshold);
+   // 1. Induced Noise Corrector
 
-    // Create and register frame correctors with raw data processor if enabled
+   // Register it, enable debug if needed
+   if (mDebugLevel) inCorrector->setDebug(true);
+   if (mEnableInCorrector) {
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(inCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << inCorrector->getName() << " corrector to data";
+   }
 
-    // 1. Induced Noise Corrector
-    HxtFrameInducedNoiseCorrector* inCorrector = new HxtFrameInducedNoiseCorrector(mInducedNoiseThreshold);
-    // Register it, enable debug if needed
-    if (mDebugLevel) inCorrector->setDebug(true);
-    if (mEnableInCorrector) {
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(inCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << inCorrector->getName() << " corrector to data";
-    }
+   // 2. Calibration
 
-    // 2. Calibration
+   // Load Gradients file and Intercepts file contents to memory
+   if (mEnableCabCorrector) {
+       // Load files' contents into memory
+       gradientsContents->loadThresholds(mGradientsFile);
+       interceptsContents->loadThresholds(mInterceptsFile);
 
-    // Create pointer to Gradients file
-    HxtPixelThreshold* gradientsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    // Create pointer to Intercepts file
-    HxtPixelThreshold* interceptsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    HxtFrameCalibrationCorrector* cabCorrector = 0;
+       // Create Calibration Corrector
+       cabCorrector = new HxtFrameCalibrationCorrector(gradientsContents, interceptsContents, kHxtSensorRows, kHxtSensorCols);
+       // Register it, enable debug if needed
+       if (mDebugLevel) cabCorrector->setDebug(true);
 
-    // Load Gradients file and Intercepts file contents to memory
-    if (mEnableCabCorrector) {
-        // Load files' contents into memory
-        gradientsContents->loadThresholds(mGradientsFile);
-        interceptsContents->loadThresholds(mInterceptsFile);
-
-        // Create Calibration Corrector
-        cabCorrector = new HxtFrameCalibrationCorrector(gradientsContents, interceptsContents, kHxtSensorRows, kHxtSensorCols);
-        // Register it, enable debug if needed
-        if (mDebugLevel) cabCorrector->setDebug(true);
-
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(cabCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << cabCorrector->getName() << " corrector to data";
-    }
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(cabCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << cabCorrector->getName() << " corrector to data";
+   }
 
 
-    // 3. CS Addition / O R / CS Discriminator
-    // 3.1 subpixel
+   // 3. CS Addition / O R / CS Discriminator
+   // 3.1 subpixel
 
-    // Set Charge Sharing Sub Pixel flag if enabled
-    dataProcessor->setCsaCorrector(mEnableCsaspCorrector);
+   // Set Charge Sharing Sub Pixel flag if enabled
+   dataProcessor->setCsaCorrector(mEnableCsaspCorrector);
 
-    // Create subpixel corrector
-    HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
-    // Register it, enable debug if needed
-    if (mDebugLevel) subCorrector->setDebug(true);
-    if (mEnableCsaspCorrector) {
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(subCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << subCorrector->getName() << " corrector to data";
-    }
+   // Create subpixel corrector
 
-    // 3.2 CS Addition
-    HxtFrameChargeSharingDiscCorrector* csdCorrector = new HxtFrameChargeSharingDiscCorrector();
-    if (mDebugLevel) csdCorrector->setDebug(true);
-    if (mEnableCsdCorrector) {
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(csdCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << csdCorrector->getName() << " corrector to data";
-    }
+   // Register it, enable debug if needed
+   if (mDebugLevel) subCorrector->setDebug(true);
+   if (mEnableCsaspCorrector) {
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(subCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << subCorrector->getName() << " corrector to data";
+   }
 
-    // 4. Incomplete Data
-    HxtFrameIncompleteDataCorrector* idCorrector = new HxtFrameIncompleteDataCorrector();
-    if (mDebugLevel) idCorrector->setDebug(true);
-    if (mEnableIdCorrector) {
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(idCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << idCorrector->getName() << " corrector to data";
-    }
+   // 3.2 CS Addition
 
-    // 5. Momentum
+   if (mDebugLevel) csdCorrector->setDebug(true);
+   if (mEnableCsdCorrector) {
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(csdCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << csdCorrector->getName() << " corrector to data";
+   }
 
-    // Create pointer to Momentum file
-    HxtPixelThreshold* momentumContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    HxtFrameMomentumCorrector* momCorrector = 0;
+   // 4. Incomplete Data
 
-    // Load Momentum file contents to memory
-    if (mEnableMomCorrector) {
-        // Load file's contents into memory
-        momentumContents->loadThresholds(mMomentumFile);
+   if (mDebugLevel) idCorrector->setDebug(true);
+   if (mEnableIdCorrector) {
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(idCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << idCorrector->getName() << " corrector to data";
+   }
 
-        // Create Momentum Corrector
-        momCorrector = new HxtFrameMomentumCorrector(momentumContents, kHxtSensorRows, kHxtSensorCols);
-        // Register it, enable debug if needed
-        if (mDebugLevel) momCorrector->setDebug(true);
+   // 5. Momentum
 
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(momCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << momCorrector->getName() << " corrector to data";
-    }
+   // Load Momentum file contents to memory
+   if (mEnableMomCorrector) {
+       // Load file's contents into memory
+       momentumContents->loadThresholds(mMomentumFile);
+
+       // Create Momentum Corrector
+       momCorrector = new HxtFrameMomentumCorrector(momentumContents, kHxtSensorRows, kHxtSensorCols);
+       // Register it, enable debug if needed
+       if (mDebugLevel) momCorrector->setDebug(true);
+
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(momCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << momCorrector->getName() << " corrector to data";
+   }
 
 
-    // x. Development purposes only, check for pixels read out more than once
-    HxtFrameDoublePixelsCorrector* dbpxlCorrector = new HxtFrameDoublePixelsCorrector();
-    if (mEnableDbPxlsCorrector)  {
-        if (mDebugLevel) dbpxlCorrector->setDebug(true);
-        dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(dbpxlCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
-    }
+   // x. Development purposes only, check for pixels read out more than once
 
-    // Parse the specified raw files
-    dataProcessor->parseFile(mRawFileNames);
+   if (mEnableDbPxlsCorrector)  {
+       if (mDebugLevel) dbpxlCorrector->setDebug(true);
+       dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(dbpxlCorrector));
+       LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
+   }
 
-    // Flush last frames through processor to output
-    dataProcessor->flushFrames();
+}
 
-    // Interpolate pixel histograms if enabled
-    if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
+int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
+{
+    /// Move away from this function:
+    gLogConfig->setDebugLevel(mDebugLevel); // Less important..
 
-    // Write output files
-    dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
+    /* Check for illegal configuration settings */  /// Move or stay?
 
-    // Write subpixel files if subpixel corrector enabled
-    if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);
-
-    // Write CSV diagnostic histograms if selected
-    if (mWriteCsvFiles)
+    // Cannot run Charge Sharing Addition and Charge Sharing Discriminator together
+    if (mEnableCsaspCorrector && mEnableCsdCorrector)
     {
-        dataProcessor->writeCsvFiles();
-        string rawSpectrumFile = dataProcessor->getRawCsvFileName();
-        string corSpectrumFile = dataProcessor->getCorCsvFileName();
-        qDebug() << "raw spectrum:" << rawSpectrumFile.c_str();
-        qDebug() << "cor spectrum:" << corSpectrumFile.c_str();
-
+        LOG(gLogConfig, logERROR) << "Cannot combine Charge Sharing Addition and Charge Sharing Discriminator";
+        return 1;
     }
 
-    //// Delete objects
-    delete dataProcessor;
-    delete idCorrector;
-    delete csdCorrector;
-    delete subCorrector;
-    delete inCorrector;
-    delete pixelThreshold;
-    delete gradientsContents;
-    delete interceptsContents;
-    delete dbpxlCorrector;
-    if (cabCorrector != 0) delete cabCorrector;
-    if (momCorrector != 0) delete momCorrector;
+    // If Calibration (Energy) enabled, check specified files exists
+    if (mEnableCabCorrector)
+    {
+        // Is of the calibration files not specified?
+        if (mGradientsFile.empty() || mInterceptsFile.empty())
+        {
+            LOG(gLogConfig, logERROR) << "Calibration requires both Gradients and Intercepts files" << endl;
+            return 2;
+        }
+     }
 
+    // If Momentum enabled, check specified file exists
+    if (mEnableMomCorrector)
+    {
+        if (mMomentumFile.empty())
+        {
+            LOG(gLogConfig, logERROR) << "Momentum requires Momentum file to be specified" << endl;
+            return 4;
+        }
+    }
+
+    // Cannot specify both global threshold and threshold file
+    if ( (mGlobalThreshold != -1.0) && (!mThresholdFileName.empty()))
+    {
+        LOG(gLogConfig, logERROR) << "Cannot specify both a global threshold and a threshold file" << endl;
+        return 3;
+    }
+
+    /// If files to be processed, i.e. bProcessFiles = true (files) [false (buffers)]
+    ///  then no need for callback:
+    mEnableCallback = (!bProcessFiles);
+
+    /// Parse the specified raw file(s)/buffer(s)
+    if (bProcessFiles)
+    {
+        dataProcessor->parseFile(mRawFileNames);
+        mRawFileNames.clear();
+    }
+    else
+        dataProcessor->parseBuffer(mBufferNames, mValidFrames);
+        /// Clear/release buffer(s) parsed above
+
+    if (bWriteFiles)
+    {
+        // Flush last frames through processor to output
+        dataProcessor->flushFrames();
+
+        // Interpolate pixel histograms if enabled
+        if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
+
+        // Write output files
+        dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
+
+        // Write subpixel files if subpixel corrector enabled
+        if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);
+
+        // Write CSV diagnostic histograms if selected
+        if (mWriteCsvFiles)
+        {
+            dataProcessor->writeCsvFiles();
+            string rawSpectrumFile = dataProcessor->getRawCsvFileName();
+            string corSpectrumFile = dataProcessor->getCorCsvFileName();
+            cout << "raw spectrum:" << rawSpectrumFile.c_str() << endl;
+            cout << "cor spectrum:" << corSpectrumFile.c_str() << endl;
+        }
+    }
     LOG(gLogConfig, logNOTICE) << "Finished";
 
     return 0;
@@ -345,7 +373,7 @@ int HxtProcessingTester::executeProcessing()
 
 /// printUsage - print usage string
 /// @arg aAppName string of application name
-void HxtProcessingTester::printUsage(string aAppName) {
+void HxtProcessing::printUsage(string aAppName) {
 
     cout << endl
          << aAppName
