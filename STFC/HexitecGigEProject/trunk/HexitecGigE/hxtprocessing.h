@@ -41,8 +41,12 @@ public:
 
     void pushRawFileName(string aFileName, int frameSize); // Add raw filename onto fileQueue queue
     void pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames); // Add transfer buffer onto queue
-    int executeProcessing();
+    int executeProcessing(bool bProcessFiles, bool & bWriteFiles);
+
     int checkConfigValid();
+    /// HexitecGigE Addition:
+    ///  Need function to apply settings (just once), then the user may call executeProcessing() to their hearts content..
+    void prepSettings();
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -80,6 +84,7 @@ public:
 
     void setWriteCsvFiles(bool aWriteCsvFiles) { mWriteCsvFiles = aWriteCsvFiles; }
     void setEnableVector(bool aEnableVector) { mEnableVector = aEnableVector; }
+    void setEnableDebugFrame(bool aEnableDebugFrame) { mEnableDebugFrame = aEnableDebugFrame; }
 
     // Function supporting file format version 2
     void setFormatVersion(u64 formatVersion) { mFormatVersion = formatVersion; }
@@ -106,8 +111,10 @@ private:
 signals:
     void hexitechRunning(bool isRunning);
     void hexitechFilesToDisplay(QStringList filesList);
+    void hexitechBufferToDisplay(unsigned short* hxtBuffer);      /// HexitecGigE Added
     void hexitechSpectrumFile(QString spectrumFile);
     void hexitechConsumedFiles(vector<string> fileNames);
+    void hexitechConsumedBuffers(vector<unsigned short*> bufferNames);   /// HexitecGigE Added
     void hexitechProducedFile(string fileName);
     void hexitechSignalError(QString errorString);
     void hexitechSignalManualProcessingFinished();
@@ -116,6 +123,7 @@ signals:
     void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
 
 private slots:
+    void handleReturnHxtBuffer(unsigned short* buffer);
     void savePrefix(bool bPrefixChecked);
     void saveMotor(bool bMotorChecked);
     void saveTimeStamp(bool bTimeStampChecked);
@@ -133,6 +141,36 @@ protected:
     // Check that fileQueue only contain files to be manually processed
     bool confirmOnlyManualFilesInQueue();
 
+    /// HexitecGigE Addition:
+    string mAppName;
+    bool mEnableCallback;
+    vector<unsigned short*> mBufferNames;
+    vector<unsigned long>  mValidFrames;
+    vector<unsigned short*> mHxtBuffers;    /// Pool of buffers;signalled to Visualisation tab to be displayed
+    unsigned int numHxtBuffers;
+    bool mFirstBufferInCollection;
+    ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
+    HxtPixelThreshold* pixelThreshold;
+    HxtRawDataProcessor* dataProcessor;
+    HxtFrameInducedNoiseCorrector* inCorrector;
+    HxtPixelThreshold* gradientsContents;
+    HxtPixelThreshold* interceptsContents;
+    HxtFrameCalibrationCorrector* cabCorrector;
+    HxtFrameChargeSharingSubPixelCorrector* subCorrector;
+    HxtFrameChargeSharingDiscCorrector* csdCorrector;
+    HxtFrameIncompleteDataCorrector* idCorrector;
+    HxtPixelThreshold* momentumContents;
+    HxtFrameMomentumCorrector* momCorrector;
+    HxtFrameDoublePixelsCorrector* dbpxlCorrector;
+    ///
+    Timer* mProcessingTimer;
+    Timer* mDiscWritingTimer;
+    Timer* mIdleTimer;
+    string mDebugFrameDir;
+    bool mEnableDebugFrame;
+    /// DEBUGGING PURPOSES:
+    bool bReordering;
+    ///
     vector<string> mRawFileNames;
     unsigned int mDebugLevel;
     unsigned int mHistoStartVal;
@@ -183,9 +221,11 @@ protected:
 
     // Provide lock access mechanism to fileQueue, motorQueue, targetCondition, bProcessQueueContents
     QMutex fileMutex;
+    QMutex bufferMutex;
     QMutex motorMutex;
     QMutex processingMutex;
     QMutex qContentsMutex;
+    QMutex framesMutex;
     int mutexTimeout;
 
     ostringstream logFileStream;
@@ -193,6 +233,10 @@ protected:
     // Queues for raw filename and motor positions
     QQueue<string> fileQueue;
     QQueue<motorPositions> motorQueue;
+    // bufferQueue added
+    QQueue<unsigned short*> bufferQueue;
+    QQueue<unsigned long> framesQueue;
+    int mFrameSize;
 };
 
 

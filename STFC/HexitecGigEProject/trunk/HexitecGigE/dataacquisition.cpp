@@ -702,12 +702,16 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
    {
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
    }
+   ///  HexitecGigE Addition:
+   /// Must provide a set of motorPositions also,
+   /// or bufferQueue fills up while motorQueue remains empty..
+   hxtProcessor->pushMotorPositions(&motorPositions);
 }
 
 void DataAcquisition::handleImageStarted(char *path, int frameSize)
 {
    hxtProcessor->pushRawFileName(path, frameSize);
-   hxtProcessor->pushMotorPositions(&motorPositions);
+//   hxtProcessor->pushMotorPositions(&motorPositions); /// Provide motorPositions together with buffer instead
 }
 
 void DataAcquisition::handleImageComplete(unsigned long long framesAcquired)

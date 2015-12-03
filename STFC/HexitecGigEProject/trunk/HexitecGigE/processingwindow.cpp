@@ -38,6 +38,7 @@ bool ProcessingWindow::bEnableMomCorrector;
 bool ProcessingWindow::bEnableDbPxlsCorrector;
 bool ProcessingWindow::bWriteCsvFiles;
 bool ProcessingWindow::bEnableVector;
+bool ProcessingWindow::bEnableDebugFrame;
 
 ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
 {
@@ -55,6 +56,7 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
 
       // Connect signals and slots
       connect(HxtProcessor, SIGNAL(hexitechConsumedFiles(vector<string>)), processingWindowInstance, SLOT(displayHxtProcessingDatFiles(vector<string>)));
+      connect(HxtProcessor, SIGNAL(hexitechConsumedBuffers(vector<unsigned short*>)), processingWindowInstance, SLOT(displayHxtProcessingBuffers(vector<unsigned short*>)));
       connect(HxtProcessor, SIGNAL(hexitechProducedFile(string)),          processingWindowInstance, SLOT(displayHxtProcessingHxtFile(string)));
 
       connect(processingWindowInstance, SIGNAL(updatePrefixSignal(bool)),           HxtProcessor, SLOT(savePrefix(bool)));
@@ -71,6 +73,13 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
 
       connect(HxtProcessor,                         SIGNAL(hexitechFilesToDisplay(QStringList)),
               reinterpret_cast<const QObject*>(mw), SLOT(readFiles(QStringList)) );
+
+      /// HexitecGigE Addition: (The following 2 connections)
+      connect(HxtProcessor,                         SIGNAL(hexitechBufferToDisplay(unsigned short*)),
+              reinterpret_cast<const QObject*>(mw), SLOT(readBuffer(unsigned short*)));
+
+      connect(reinterpret_cast<const QObject*>(mw), SIGNAL(returnHxtBuffer(unsigned short*)),
+              HxtProcessor,                         SLOT(handleReturnHxtBuffer(unsigned short*)));
 
       /// Connect signal from HxtProcessor to receive summed spectrum filename
       connect(HxtProcessor,                         SIGNAL(hexitechSpectrumFile(QString)),
@@ -283,14 +292,26 @@ void ProcessingWindow::displayHxtProcessingDatFiles(vector<string> fileNames)
     vector<string>::iterator fileIterator;
     for (fileIterator = fileNames.begin(); fileIterator != fileNames.end(); fileIterator++)
     {
-        handleWriteMessage(QString("Consumed: %1").arg((*fileIterator).c_str()));
+        handleWriteMessage(QString(" - Consumed: %1").arg((*fileIterator).c_str()));
+    }
+}
+
+void ProcessingWindow::displayHxtProcessingBuffers(vector<unsigned short*> bufferNames)
+{
+    //cout << "processingwindow.cpp:291 sort out displayHxtProcessingBuffers().." << endl;
+    /// Enable HxtProcessing object to signal which buffer(s) being processed
+    vector<unsigned short*>::iterator fileIterator;
+    for (fileIterator = bufferNames.begin(); fileIterator != bufferNames.end(); fileIterator++)
+    {
+        ;
+//        handleWriteMessage(QString("Consumed: %1").arg((*fileIterator).c_str()));
     }
 }
 
 void ProcessingWindow::displayHxtProcessingHxtFile(string fileName)
 {
     /// Allow HxtProcessing object to signal the name of the produced .hxt file
-    handleWriteMessage(QString("Produced: %1").arg(fileName.c_str()));
+    handleWriteMessage(QString(" ! Produced: %1").arg(fileName.c_str()));
 }
 
 void ProcessingWindow::updateStateLabel(bool isBusy)
@@ -1494,6 +1515,7 @@ void ProcessingWindow::initHexitechProcessor()
     bEnableDbPxlsCorrector       = false;
     bWriteCsvFiles               = false;
     bEnableVector                = false;
+    bEnableDebugFrame            = false;
     // Configure Hexitech settings with default values
     configHexitechSettings();
 }
@@ -1522,4 +1544,5 @@ void ProcessingWindow::configHexitechSettings()
     HxtProcessor->setEnableDbPxlsCorrector( bEnableDbPxlsCorrector);
     HxtProcessor->setWriteCsvFiles( bWriteCsvFiles);
     HxtProcessor->setEnableVector( bEnableVector);
+    HxtProcessor->setEnableDebugFrame( bEnableDebugFrame);
 }

@@ -268,7 +268,7 @@ void MainWindow::readFiles()
             break;
          }
       }
-
+      qDebug() << "1"; Sleep( 500);
       if (allScripts)
       {
          for (int j = 0; j < fileNameList.size(); j++)
@@ -717,7 +717,7 @@ void MainWindow::processNow()
 
 void MainWindow::handleSpectrumFile(QString fileName)
 {
-    qDebug() << "MainWindow received spectrum file: " << fileName;
+    /*qDebug() << "MainWindow received spectrum file: " << fileName*/;
 }
 
 void MainWindow::save()
@@ -769,10 +769,18 @@ void MainWindow::readFiles(QStringList files)
           }
        }
     }
-    else
-    {
-        qDebug() << "MainWindow::readFiles() - Not updating the Visualisation Tab as requested by \"UpdateDisplay\"";
-    }
+//    else
+//    {
+//        qDebug() << "MainWindow::readFiles() - Not updating the Visualisation Tab as requested by \"UpdateDisplay\"";
+//    }
+}
+
+void MainWindow::readBuffer(unsigned short* buffer)
+{
+    qDebug() << "MainWindow received a buffer; Pretending to process it for 500 ms..";
+    Sleep(500);
+    // Release buffer back to HxtProcessing
+    emit returnHxtBuffer(buffer);
 }
 
 void MainWindow::sendActiveSliceToMatlab()

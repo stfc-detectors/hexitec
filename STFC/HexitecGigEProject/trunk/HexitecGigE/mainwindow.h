@@ -26,7 +26,7 @@
 #include "chargesharing.h"
 #include "mainviewer.h"
 #include "workspace.h"
-#include "keithleymainwindow.h"
+///#include "keithleymainwindow.h"
 #include "dataacquisitionfactory.h"
 #include "processingwindow.h"
 
@@ -104,6 +104,7 @@ signals:
    void executeShowImage();
    void startDAQ();
    void stopDAQ();
+   void returnHxtBuffer(unsigned short* hxtBuffer);  /// HexitecGigE Addition
 
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
@@ -129,6 +130,7 @@ public slots:
    void handleStartDAQ();
    void handleStopDAQ();
    void readFiles(QStringList files);
+   void readBuffer(unsigned short* buffer);   /// HexitecGigE Addition
    void readData(QString fileName);
    void sendActiveSliceToMatlab();
    void getActiveSliceFromMatlab();

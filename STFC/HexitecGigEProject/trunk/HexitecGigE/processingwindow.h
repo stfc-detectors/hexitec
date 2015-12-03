@@ -125,6 +125,7 @@ private:
    static bool bEnableDbPxlsCorrector;
    static bool bWriteCsvFiles;
    static bool bEnableVector;
+   static bool bEnableDebugFrame;
    /// [End]
    // Debug function:
    void dumpHexitechConfig();
@@ -161,6 +162,7 @@ private slots:
    void initialiseProcessingWindow();
 
    void displayHxtProcessingDatFiles(vector<string> fileNames);
+   void displayHxtProcessingBuffers(vector<unsigned short*> bufferNames);    /// HexitecGigE Added
    void displayHxtProcessingHxtFile(string fileName);
    void updateStateLabel(bool isBusy);
    void debugButtonPressed();
