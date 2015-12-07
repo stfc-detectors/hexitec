@@ -50,7 +50,6 @@ void DetectorMonitor::monitor()
 {
    if (monitoringEnabled)
    {
-      qDebug() << "monitoringEnabled";
       monitorEnvironmentalValues();
    }
 }
@@ -119,7 +118,6 @@ void DetectorMonitor::read()
    int status = -1;
 
    status = gigEDetector->getDetectorValues(&rh, &th, &tasic, &tdac, &t, &ik);
-   qDebug() << rh << t << tasic << tdac << t;
 
    if(!status)
    {
