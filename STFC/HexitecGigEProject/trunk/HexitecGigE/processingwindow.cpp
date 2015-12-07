@@ -75,8 +75,10 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
               reinterpret_cast<const QObject*>(mw), SLOT(readFiles(QStringList)) );
 
       /// HexitecGigE Addition: (The following 2 connections)
-      connect(HxtProcessor,                         SIGNAL(hexitechBufferToDisplay(unsigned short*)),
-              reinterpret_cast<const QObject*>(mw), SLOT(readBuffer(unsigned short*)));
+      // DSoFt: added filename to indicate when a new image/slice begins as this will change.
+      // This is a quick fix and should be reviewed.
+      connect(HxtProcessor,                         SIGNAL(hexitechBufferToDisplay(unsigned short*, QString)),
+              reinterpret_cast<const QObject*>(mw), SLOT(readBuffer(unsigned short*, QString)));
 
       connect(reinterpret_cast<const QObject*>(mw), SIGNAL(returnHxtBuffer(unsigned short*)),
               HxtProcessor,                         SLOT(handleReturnHxtBuffer(unsigned short*)));

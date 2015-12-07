@@ -127,6 +127,27 @@ Slice::Slice(QString name, QStringList fileNameList)
    postDataInit();
 
 }
+/*
+  Pretends to Constructs a slice from a buffer, but is currently using a hard-coded filename.
+  */
+Slice::Slice(QString name, unsigned short* buffer, QString fileName)
+{
+   preDataInit(name);
+/*
+   QString fileSuffix = QFileInfo(fileNameList[0]).suffix();
+   // This check is done twice
+   if (fileSuffix.contains("sb") || fileSuffix.contains("xmy"))
+      readXMY(fileNameList);
+   if (fileSuffix.contains("xy") || fileSuffix.contains("txt"))
+      readXY(fileNameList);
+
+   this->fileName = fileNameList[0];*/
+   readHXT(buffer);
+   this->fileName = fileName;
+   postDataInit();
+
+   qDebug() << "CREATE A SLICE FOR " << fileName;
+}
 
 /* Does the pre-data reading initializing which is common to all the constructors.
   */
@@ -971,6 +992,29 @@ bool Slice::readXMY(QStringList fileNames)
    emit writeMessage("size of commonX: " + QString::number(commonX.size()));
    return(true);
 }
+bool Slice::readHXT(unsigned short *buffer)
+{
+    struct HxtBuffer hxtBuffer;
+    unsigned int bufferSize = sizeof(hxtBuffer);
+    qDebug() << "Slice::readHXT hxtBuffer size = " << bufferSize;
+    memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
+    qDebug() << "Slice BUFFER label " << QString::fromStdString(hxtBuffer.hxtLabel);
+    qDebug() << "Slice BUFFER version " << QString::number(hxtBuffer.hxtVersion);
+    qDebug() << "Slice BUFFER hxtPrefixLength " << QString::number(hxtBuffer.filePrefixLength);
+    for (int i = 0; i < 9; i++)
+    {
+        qDebug() << i << QString::number(hxtBuffer.motorPositions[i]);
+    }
+    qDebug() << "Slice BUFFER filePrefix " << QString::fromStdString(hxtBuffer.filePrefix);
+    qDebug() << "Slice BUFFER dataTimeStamp " << QString::fromStdString(hxtBuffer.dataTimeStamp);
+    qDebug() << "Slice BUFFER nRows " << QString::number(hxtBuffer.nRows);
+    qDebug() << "Slice BUFFER nCols " << QString::number(hxtBuffer.nCols);
+    qDebug() << "Slice BUFFER nBins " << QString::number(hxtBuffer.nBins);
+
+/* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
+ */
+    return readHXT("C:\\karen\\STFC\\Technical\\DSoFt_New_Images\\xx.hxt");
+}
 
 bool Slice::readHXT(QString fileName)
 {
@@ -1801,6 +1845,23 @@ QVector<Slice *> Slice::readFileNameList(QStringList fileNameList)
 
    }
    return slices;
+}
+
+Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
+{
+   Slice *slice;
+   // If the extension of the first file contained sb xmy xy or txt then you pass ALL the
+   // file names to the Slice constructor to construct a single Slice.
+         qDebug() << "Slice::readFileBuffer(unsigned short* buffer, QString fileName)";
+         slice = new Slice(nextSliceName(), buffer, fileName);
+//        progress.setValue(i + 1);
+//         if (progress.wasCanceled())
+//            break;
+
+//      progress.update();
+//      progress.deleteLater();
+
+   return slice;
 }
 
 /* Returns true if the fileNameList is valid. This is taken to mean that one of:

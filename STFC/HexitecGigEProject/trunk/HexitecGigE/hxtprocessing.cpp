@@ -1454,6 +1454,7 @@ void HxtProcessing::dataCollectionFinished()
 
 int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
 {
+        string fileName;
     /// Execute processing of file(s) / buffer(s), depending upon setup
     //qDebug() << "HxtProcessing: ---=- 1156 -=--- BEGINNING buffer: " << mBufferNames.size() << " with: " << mValidFrames.size() << ". Manual file(s): " << mRawFileNames.size();
 
@@ -1484,7 +1485,8 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
     {
         /// Using the name of file, obtain mFilePrefix & timestamp (remove & re-add timestamp from file name???)
         /// Obtain variables used for Format Version 2 header entries
-        string fileName = mOutputFileNameDecodedFrame;
+        fileName = mOutputFileNameDecodedFrame;
+        qDebug() <<"PROCESSING FILE: " << QString::fromStdString(fileName);
         configHeaderEntries(fileName);
 
         // Use raw file path and prefix if user made corresponding selection
@@ -1594,7 +1596,10 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
             mHxtBuffers.erase(mHxtBuffers.begin());
 
             // Signal that processed data [inside RAM] is ready to be displayed in the GUI
-            emit hexitechBufferToDisplay(hxtBuffer);
+            // DSoFt: added filename to indicate when a new image/slice begins as this will change.
+            // This is a quick fix and should be reviewed.
+            qDebug() <<"emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName))";
+            emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName));
         }
         bWriteFiles = false;
     }

@@ -775,11 +775,15 @@ void MainWindow::readFiles(QStringList files)
 //    }
 }
 
-void MainWindow::readBuffer(unsigned short* buffer)
+void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
     qDebug() << "MainWindow received a buffer; Pretending to process it for 500 ms..";
-    Sleep(500);
+//    Sleep(500);
     // Release buffer back to HxtProcessing
+//    QStringList fileNameList = files;
+    Slice *slice = Slice::readFileBuffer(buffer, fileName);
+
+    initializeSlice(slice);
     emit returnHxtBuffer(buffer);
 }
 

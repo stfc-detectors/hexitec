@@ -130,7 +130,7 @@ public slots:
    void handleStartDAQ();
    void handleStopDAQ();
    void readFiles(QStringList files);
-   void readBuffer(unsigned short* buffer);   /// HexitecGigE Addition
+   void readBuffer(unsigned short* buffer, QString fileName);   /// HexitecGigE Addition
    void readData(QString fileName);
    void sendActiveSliceToMatlab();
    void getActiveSliceFromMatlab();

@@ -31,6 +31,7 @@ public:
    Slice(QString name, QObject *parent = 0);
    Slice(QString name, QString fileName);
    Slice(QString name, QStringList fileNameList);
+   Slice(QString name, unsigned short* buffer, QString fileName);
    Slice(QString name, QString varName, int dummy);
    Slice(QString name, int rows, int cols, int depth, double value);
 
@@ -58,6 +59,7 @@ public:
    Q_INVOKABLE QObject *plus(QObject *anotherSlice);
    Q_INVOKABLE QObject *plus(double value);
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
+   static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
    Q_INVOKABLE void sendToMatlab();
    Q_INVOKABLE void sendToMatlab(QString varName);
@@ -83,6 +85,27 @@ signals:
 
 private:
    enum XType {NONE, COMMON, UNIQUE};
+   struct HxtBuffer {
+       char hxtLabel[8];
+       quint64 hxtVersion;
+       int motorPositions[9];
+       int filePrefixLength;
+       char filePrefix[100];
+       char dataTimeStamp[13];
+       quint32 nRows;
+       quint32 nCols;
+       quint32 nBins;
+//       double allData[6401000];
+/* This is calculated from the maximum possible bins, rows and columns as follows:
+ * max bins = 1000, max rows = 80, max cols = 80 therefore:
+ * max channel data = 1000
+ * max spectrum = max bins * max rows * max cols
+ *     double channel[1000];
+ *     double spectrum[6400000];
+ * where these arrays start and end will be determined on reading the
+ * values from the buffer (proobably - tbc!!!)
+ * */
+   };
 
    // Variables
    QVector <double> binVoltage;
@@ -114,6 +137,7 @@ private:
    bool readDAT(QString);
    bool readEZD(QString);
    bool readHXT(QString);
+   bool readHXT(unsigned short *buffer);
    bool readHIF(QString);
    bool readXMY(QStringList);
    bool readXY(QStringList);
