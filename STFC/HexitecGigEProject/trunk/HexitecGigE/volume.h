@@ -15,8 +15,9 @@ private:
 public:
    Volume(QString name);
    void addSlice(Slice *slice);
-   int sliceCount();
    void removeSlice(Slice *slice);
+   void replaceSlice(int index, Slice *slice);
+   int sliceCount();
    Slice *sliceAt(int index);
 };
 

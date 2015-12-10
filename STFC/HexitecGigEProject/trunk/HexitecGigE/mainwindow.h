@@ -119,7 +119,7 @@ private slots:
    void testDevelopment();
    void getPrinComps();
    void externalChargeShare();
-   void initializeSlice(Slice *slice);
+   void initializeSlice(Slice *slice, int sliceNumber = -1);
    void save();
    // Called by processNowButton in processingWindow
    void processNow();

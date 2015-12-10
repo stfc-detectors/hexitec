@@ -310,15 +310,25 @@ void MainWindow::readFiles()
 /* This method does all the connecting of a new slice to its environment:
   connects signals, sets as active slice, adds it to scripting, adds to main viewer and thumb viewer.
   */
-void MainWindow::initializeSlice(Slice *slice)
+void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 {
    // This connect enables the new Slice to create another slice from scripting and emit this signal
    // to get to this point - see Slice::times().
-   connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
-   DataModel::instance()->setActiveSlice(slice);
-   emit addObject(slice);
-   MainViewer::instance()->showNewActiveSlice();
-   thumbViewer->addSlice(slice);
+   if (sliceNumber >= 0)
+   {
+      qDebug() << "MainWindow::initializeSlice adding a new slice" << sliceNumber;
+      connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
+      DataModel::instance()->setActiveSlice(slice);
+      emit addObject(slice);
+      MainViewer::instance()->showNewActiveSlice();
+      thumbViewer->addSlice(slice);
+   }
+   else
+   {
+      qDebug() << "MainWindow::initializeSlice setting active slice" << sliceNumber;
+      DataModel::instance()->setActiveSlice(slice);
+      MainViewer::instance()->showNewActiveSlice();
+   }
    update();
 }
 
@@ -777,14 +787,14 @@ void MainWindow::readFiles(QStringList files)
 
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
-    qDebug() << "MainWindow received a buffer; Pretending to process it for 500 ms..";
-//    Sleep(500);
-    // Release buffer back to HxtProcessing
-//    QStringList fileNameList = files;
-    Slice *slice = Slice::readFileBuffer(buffer, fileName);
+   int sliceNumber = -1;
+   qDebug() << "MainWindow received a buffer; Process it ";
+   Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
-    initializeSlice(slice);
-    emit returnHxtBuffer(buffer);
+   sliceNumber = slice->sliceToReplace();
+   qDebug() << "MainWindow::readBuffer sliceNumber = " << sliceNumber;
+   initializeSlice(slice, sliceNumber);
+   emit returnHxtBuffer(buffer);
 }
 
 void MainWindow::sendActiveSliceToMatlab()

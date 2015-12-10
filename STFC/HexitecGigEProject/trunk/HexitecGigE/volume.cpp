@@ -18,9 +18,17 @@ Volume::Volume(QString name)
    // emit addObject(this);
 }
 
+
 void Volume::addSlice(Slice *slice)
 {
    slices->append(slice);
+   int i = slices->count();
+   setParameter("Slice count", QVariant(slices->count()));
+}
+
+void Volume::replaceSlice(int index, Slice *slice)
+{
+   slices->replace(index, slice);
    int i = slices->count();
    setParameter("Slice count", QVariant(slices->count()));
 }

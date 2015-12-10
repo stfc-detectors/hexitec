@@ -49,6 +49,8 @@ public:
    int getGridSizeX();
    int getGridSizeY();
    QString getTitle();
+   QString getFileName();
+   int sliceToReplace();
    int getVoxelDataLen();
    QVector<double> getXData(int xPix, int yPix);
    QVector<double> getYData(int xPix, int yPix);
@@ -91,7 +93,7 @@ private:
        int motorPositions[9];
        int filePrefixLength;
        char filePrefix[100];
-       char dataTimeStamp[13];
+       char dataTimeStamp[16];
        quint32 nRows;
        quint32 nCols;
        quint32 nBins;
@@ -114,6 +116,7 @@ private:
    MatrixXd eigenWeights;
    MatrixXd eigenSpectra;
    QString fileName;
+   int childToReplace;
    int gridSizeX;
    int gridSizeY;
    double maxData;
@@ -127,12 +130,15 @@ private:
    // Methods
    void addParameters();
    void attach();
+   void replace(int sliceToReplace);
    Slice *clone(QString name);
    static QString nextSliceName();
+   static QString roleBackSliceName();
    bool makeCommonX(double);
    void myFFT(int, int, QVector <double> &, QVector <double> &);
    double *getData();
    void postDataInit();
+   void postDataInit(QString fileName);
    void preDataInit(QString name);
    bool readDAT(QString);
    bool readEZD(QString);

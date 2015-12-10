@@ -30,6 +30,7 @@ public:
    int childNumber() const;
    bool setData(int column, const QVariant &value);
    void appendChild(TreeItem *item);
+   void replaceChild(int childToReplace, TreeItem *item);
    void addParameter(QString name, int value);
    void addParameter(QString name, QString value);
    void setParameter(QString name, QVariant value);
@@ -39,7 +40,7 @@ protected:
 
    QString name;
    void init(const QVector<QVariant> &data, QModelIndex *parentIndex, QString name, ItemType type = NONE);
-
+   int init(const QVector<QVariant> &data, QModelIndex *parentIndex, QString name, QString fileName);
 private:
    QList<TreeItem*> childItems;
    QVector<QVariant> itemData;

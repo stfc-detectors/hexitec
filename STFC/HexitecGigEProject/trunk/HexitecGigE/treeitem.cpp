@@ -1,8 +1,9 @@
-
+#include <QDebug>
 #include <QStringList>
 
 #include "treeitem.h"
 #include "datamodel.h"
+#include "slice.h"
 
 TreeItem::TreeItem(QString name, ItemType type)
 {
@@ -24,15 +25,86 @@ TreeItem::TreeItem(const QVector<QVariant> &data, TreeItem *parent, QString name
 void TreeItem::init(const QVector<QVariant> &data, QModelIndex *parentIndex, QString name, TreeItem::ItemType type)
 {
    DataModel *dataModel = DataModel::instance();
+   TreeItem *childItem;
+   Slice *slice;
+   QString fileName;
 
    this->name = name;
    this->type = type;
    parentItem = dataModel->getItem(*parentIndex);
    itemData = data;
 
+   if (type == ItemType::SLICE)
+   {
+      int childCount = parentItem->childCount();
+      for  (int i = 0; i < childCount; i++)
+      {
+         childItem = parentItem->child(i);
+         if (childItem->getType() == ItemType::SLICE)
+         {
+            slice = dataModel->getSlice(parentItem->getName()+"."+childItem->getName());
+            fileName = slice->getFileName();
+         }
+      }
+   }
+
    dataModel->beginInsertRows(parentIndex->parent(), parentIndex->row()+1, parentIndex->row()+1);
    parentItem->appendChild(this);
    dataModel->endInsertRows();
+}
+
+int TreeItem::init(const QVector<QVariant> &data, QModelIndex *parentIndex, QString name, QString fileName)
+{
+   DataModel *dataModel = DataModel::instance();
+   TreeItem *childItem;
+   Slice *slice;
+   QString sliceName;
+   int sliceNumber = -1;
+   int i = 0;
+   int sliceToReplace = -1;
+   bool replaceSlice = false;
+
+   this->name = name;
+   this->type = ItemType::SLICE;
+   parentItem = dataModel->getItem(*parentIndex);
+   itemData = data;
+
+   int childCount = parentItem->childCount();
+   qDebug() << "NEW SLICE" << name << "childCount = " << childCount;
+   for  (i = 0; i < childCount; i++)
+   {
+      childItem = parentItem->child(i);
+      if (childItem->getType() == ItemType::SLICE)
+      {
+         sliceNumber++;
+         sliceName = childItem->getName();
+         slice = dataModel->getSlice(parentItem->getName() + "." + sliceName);
+         if (fileName == slice->getFileName())
+         {
+            qDebug() <<"FILENAMES ARE EQUAL!!! for sliceNumber " << sliceNumber << sliceName;
+            replaceSlice = true;
+            this->name = sliceName;
+            break;
+         }
+         qDebug() << "fileName:" << slice->getFileName();
+      }
+   }
+
+   if (replaceSlice)
+   {
+      qDebug() <<"Replace Slice " << sliceNumber;
+      sliceToReplace = sliceNumber;
+      parentItem->replaceChild(i, this);
+      slice = dataModel->getSlice(dataModel->index(i, 0, *parentIndex));
+      slice->setObjectName(sliceName);
+   }
+   else
+   {
+      dataModel->beginInsertRows(parentIndex->parent(), parentIndex->row()+1, parentIndex->row()+1);
+      parentItem->appendChild(this);
+      dataModel->endInsertRows();
+   }
+   return sliceNumber;
 }
 
 TreeItem::~TreeItem()
@@ -144,6 +216,11 @@ bool TreeItem::insertChildren(int position, int count, int columns)
 void TreeItem::appendChild(TreeItem *item)
 {
    childItems.append(item);
+}
+
+void TreeItem::replaceChild(int childNumber, TreeItem *item)
+{
+   childItems.replace(childNumber, item);
 }
 
 void TreeItem::addParameter(QString name, int value)

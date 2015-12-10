@@ -4,7 +4,6 @@ Slice class for 2Easy code
 S D M Jacques 24 Feb 2011
 */
 
-
 #include <QVector>
 #include <QFile>
 #include <QFileInfo>
@@ -70,7 +69,12 @@ Slice::Slice(QString name, QString varName, int dummy)
 
 QString Slice::getTitle()
 {
-   return QString(objectName()  + ", max value: " + QString::number(maxData));
+    return QString(objectName()  + ", max value: " + QString::number(maxData));
+}
+
+QString Slice::getFileName()
+{
+    return fileName;
 }
 
 /* Constructs a Slice from a single file of type ezd, exd or dat.
@@ -144,7 +148,7 @@ Slice::Slice(QString name, unsigned short* buffer, QString fileName)
    this->fileName = fileNameList[0];*/
    readHXT(buffer);
    this->fileName = fileName;
-   postDataInit();
+   postDataInit(fileName);
 
    qDebug() << "CREATE A SLICE FOR " << fileName;
 }
@@ -184,6 +188,31 @@ void Slice::postDataInit()
 
    attach();
    setProperty("objectName", objectName());
+   stats();
+}
+
+void Slice::postDataInit(QString fileName)
+{
+   childToReplace = -1;
+   addParameters();
+
+   QVector<QVariant> sliceData;
+   sliceData << objectName() << "Slice" << "" << "";
+   QModelIndex parentIndex = DataModel::instance()->getItemIndex("myVolume");
+   childToReplace = TreeItem::init(sliceData, &parentIndex, objectName(), fileName);
+
+   if (childToReplace >= 0)
+   {
+      roleBackSliceName();
+      setProperty("objectName", objectName());
+      qDebug() << "Slice::postDataInit objectName = " << objectName();
+      replace(childToReplace);
+   }
+   else
+   {
+      attach();
+      setProperty("objectName", objectName());
+   }
 
    stats();
 }
@@ -1786,8 +1815,6 @@ void Slice::myFFT(int flag, int N, QVector <double> &x1 , QVector  <double> &y1)
    }
 }
 
-
-
 /* Attaches the Slice to its parent Volume's data.
   */
 void Slice::attach()
@@ -1796,6 +1823,15 @@ void Slice::attach()
    {
       Volume *volume = static_cast<Volume *>(TreeItem::parent());
       volume->addSlice(this);
+   }
+}
+
+void Slice::replace(int sliceToReplace)
+{
+   if (TreeItem::parent()->getType() == TreeItem::VOLUME)
+   {
+      Volume *volume = static_cast<Volume *>(TreeItem::parent());
+      volume->replaceSlice(sliceToReplace, this);
    }
 }
 
@@ -1854,6 +1890,7 @@ Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
    // file names to the Slice constructor to construct a single Slice.
          qDebug() << "Slice::readFileBuffer(unsigned short* buffer, QString fileName)";
          slice = new Slice(nextSliceName(), buffer, fileName);
+         qDebug() << "NEW SLICE CRAEATED!!! \n";
 //        progress.setValue(i + 1);
 //         if (progress.wasCanceled())
 //            break;
@@ -1862,6 +1899,11 @@ Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
 //      progress.deleteLater();
 
    return slice;
+}
+
+int Slice::sliceToReplace()
+{
+   return childToReplace;
 }
 
 /* Returns true if the fileNameList is valid. This is taken to mean that one of:
@@ -1906,6 +1948,22 @@ QString Slice::nextSliceName()
       sliceAliasChar = 'a';
 
    return QString("Image_" + QString::fromLatin1(&sliceAliasChar, 1));
+}
+
+QString Slice::roleBackSliceName()
+{
+
+   // Step over the gap between 'Z' and 'a'
+   if (sliceAliasChar == 'a')
+   {
+      sliceAliasChar = 'Z';
+   }
+   else
+   {
+      sliceAliasChar--;
+   }
+   return QString("Image_" + QString::fromLatin1(&sliceAliasChar, 1));
+
 }
 
 /* Returns true if anOtherSlice is compatible with 'this' for operations such as 'add'.
