@@ -78,4 +78,29 @@ typedef enum {
 //const u8 kHxtFramePreambleLabel = 255;
 //const u8 kHxtRowMarkerLabel     = 192;
 
+/// HexitecGigE Addition
+
+typedef struct {
+    char hxtLabel[8];
+    u64 hxtVersion;
+    int motorPositions[9];
+    int filePrefixLength;
+    char filePrefix[100];
+    char dataTimeStamp[16]; // Don't mess with word boundary (only 13 chars needed tho')
+    u32 nRows;
+    u32 nCols;
+    u32 nBins;
+//
+    double allData[6401000];
+/* This is calculated from the maximum possible bins, rows and columns as follows:
+* max bins = 1000, max rows = 80, max cols = 80 therefore:
+* max channel data = 1000
+* max spectrum = max bins * max rows * max cols
+*     double channel[1000];
+*     double spectrum[6400000];
+* where these arrays start and end will be determined on reading the
+* values from the buffer (proobably - tbc!!!)
+* */
+} HxtBuffer;
+
 #endif /* HXTRAWDATATYPES_H_ */

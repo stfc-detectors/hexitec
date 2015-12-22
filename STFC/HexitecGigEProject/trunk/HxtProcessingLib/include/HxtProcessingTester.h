@@ -76,7 +76,11 @@ public:
     // Function supporting file format version 2
     void setFormatVersion(u64 formatVersion) { mFormatVersion = formatVersion; }
 
-    void setMotorPosition(double xPos, double yPos, double zPos, double rotPos, double aTimer, double xGal, double yGal, double zGal, double rotGal)
+    /// HexitecGigE Addition: Must be able to commit any changed settings onto dataProcessor object
+    ///                       the above set functions are not enough
+    void commitConfigChanges();
+
+    void setMotorPosition(int xPos, int yPos, int zPos, int rotPos, int aTimer, int xGal, int yGal, int zGal, int rotGal)
     {
         mX = xPos; mY = yPos; mZ = zPos;
         mRot = rotPos; mTimer = aTimer; mGalx = xGal;

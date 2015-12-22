@@ -76,6 +76,7 @@ public:
 
 	bool outputFrame(HxtFrame* pSubPixelFrame);
 	bool outputFrame(unsigned int aFrameIdx);
+    bool writeStructOutput(string aOutputFileName); /// HexitecGigE: To replace writePixelOutput() ?
 	bool writePixelOutput(string aOutputFileName);
 	bool writeSubPixelOutput(string aOutputFileName);
 	bool writeCsvFiles(void);
@@ -94,6 +95,7 @@ public:
     void updateFilePrefix(string filePrefix);
     void updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot);
     void updateTimeStamp(string timeStamp);
+    void updateFormatVersion(u64 formatVersion) { mFormatVersion = formatVersion; }
     ///
 
     // Access CSV file names
@@ -146,6 +148,8 @@ private:
 	}
 
     string mCsvFileName;
+
+    HxtBuffer mHxtBuffer;   /// HexitecGigE: to Replace contents going into file/buffer?
 
     unsigned int mRows;     // number of decoded pixel rows
 	unsigned int mCols;     // number of decoded pixel columns

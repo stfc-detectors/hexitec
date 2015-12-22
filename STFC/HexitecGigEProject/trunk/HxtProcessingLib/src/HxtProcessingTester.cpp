@@ -57,7 +57,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     gLogConfig->setLogFile(true, logFileStream.str());
     gLogConfig->setDebugLevel(mDebugLevel);
 
-    mFormatVersion = 1;
+    mFormatVersion = 3;
 
     // Initialise file format 2 related variables
     mX             = -65535;
@@ -69,7 +69,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mGaly          = -65535;
     mGalz          = -65535;
     mGalRot        = -65535;
-    mFilePrefix    = "-1";
+    mFilePrefix    = "prefix_";
     mDataTimeStamp = string("000000_000000");
 
     /// HexitecGigE Addition:
@@ -337,8 +337,16 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
         mRawFileNames.clear();
     }
     else
+    {
         dataProcessor->parseBuffer(mBufferNames, mValidFrames);
-        /// Clear/release buffer(s) parsed above
+        /// Clear/release buffer(s) parsed above - No?
+
+        ///DEBUGGING
+//        unsigned short *pBuffer = new unsigned short[sizeof HxtBuffer];
+//        memcpy(pBuffer, mBufferNames.at(0), sizeof HxtBuffer);
+//        dataProcessor->copyPixelOutput(pBuffer);
+        dataProcessor->copyPixelOutput(mBufferNames.at(0));
+    }
 
     if (bWriteFiles)
     {
@@ -349,7 +357,9 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
         if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
 
         // Write output files
-        dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
+        dataProcessor->writeStructOutput( string("E_10Dec_") + mOutputFileNameDecodedFrame);  /// Experimental - Struct to replace disparate vars
+//        dataProcessor->writePixelOutput( string("09Dec_") + mOutputFileNameDecodedFrame);
+//        dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);	/// The previous, proper function call
 
         // Write subpixel files if subpixel corrector enabled
         if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);
@@ -369,7 +379,13 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
     return 0;
 }
 
+void HxtProcessing::commitConfigChanges() {
 
+    dataProcessor->updateFormatVersion(mFormatVersion);
+    dataProcessor->updateMotorPositions(mX, mY, mZ, mRot, mTimer, mGalx, mGaly, mGalz, mGalRot);
+    dataProcessor->updateFilePrefix(mFilePrefix);
+    dataProcessor->updateTimeStamp(mDataTimeStamp);
+}
 
 /// printUsage - print usage string
 /// @arg aAppName string of application name
