@@ -70,7 +70,6 @@ int TreeItem::init(const QVector<QVariant> &data, QModelIndex *parentIndex, QStr
    itemData = data;
 
    int childCount = parentItem->childCount();
-   qDebug() << "NEW SLICE" << name << "childCount = " << childCount;
    for  (i = 0; i < childCount; i++)
    {
       childItem = parentItem->child(i);
@@ -81,21 +80,19 @@ int TreeItem::init(const QVector<QVariant> &data, QModelIndex *parentIndex, QStr
          slice = dataModel->getSlice(parentItem->getName() + "." + sliceName);
          if (fileName == slice->getFileName())
          {
-            qDebug() <<"FILENAMES ARE EQUAL!!! for sliceNumber " << sliceNumber << sliceName;
             replaceSlice = true;
             this->name = sliceName;
             break;
          }
-         qDebug() << "fileName:" << slice->getFileName();
       }
    }
 
    if (replaceSlice)
    {
-      qDebug() <<"Replace Slice " << sliceNumber;
       sliceToReplace = sliceNumber;
       parentItem->replaceChild(i, this);
       slice = dataModel->getSlice(dataModel->index(i, 0, *parentIndex));
+      setData(0, sliceName);
       slice->setObjectName(sliceName);
    }
    else

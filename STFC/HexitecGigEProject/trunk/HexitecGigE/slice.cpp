@@ -149,8 +149,6 @@ Slice::Slice(QString name, unsigned short* buffer, QString fileName)
    readHXT(buffer);
    this->fileName = fileName;
    postDataInit(fileName);
-
-   qDebug() << "CREATE A SLICE FOR " << fileName;
 }
 
 /* Does the pre-data reading initializing which is common to all the constructors.
@@ -204,8 +202,6 @@ void Slice::postDataInit(QString fileName)
    if (childToReplace >= 0)
    {
       roleBackSliceName();
-      setProperty("objectName", objectName());
-      qDebug() << "Slice::postDataInit objectName = " << objectName();
       replace(childToReplace);
    }
    else
@@ -1042,7 +1038,7 @@ bool Slice::readHXT(unsigned short *buffer)
 
 /* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
  */
-    return readHXT("C:\\karen\\STFC\\Technical\\DSoFt_New_Images\\xx.hxt");
+    return readHXT("C:\\karen\\STFC\\Technical\\DSoFt_New_Images\\V3Processing.hxt");
 }
 
 bool Slice::readHXT(QString fileName)
@@ -1084,7 +1080,7 @@ bool Slice::readHXT(QString fileName)
    file.read((char *) &hxtVersion, sizeof(hxtVersion));
 
    /// Check what format version the file has
-   if (hxtVersion == 2)
+   if (hxtVersion >= 2)
    {
        // Version 2, read in additional header entries
        file.read((char*)&mSSX, sizeof(mSSX));
@@ -1100,7 +1096,16 @@ bool Slice::readHXT(QString fileName)
 
         // Read file prefix character by character into stringstream object
         std::stringstream ss;
-        for(int k = 0; k < filePrefixLength; k++)
+
+        int charsToRead = filePrefixLength;
+		int timeStampLength = 13;
+        if (hxtVersion == 3)
+        {
+           charsToRead = 100;
+		   timeStampLength = 16;
+        }
+
+        for(int k = 0; k < charsToRead; k++)
         {
             //read string
             char c;
@@ -1109,10 +1114,9 @@ bool Slice::readHXT(QString fileName)
         }
         filePrefix = ss.str();
 
-//        file.read((char*)&dataTimeStamp, sizeof(dataTimeStamp));
         // Read timestamp character by character into stringstream object
         std::stringstream timeStampStream;
-        for (int l= 0; l < 13; l++)
+        for (int l= 0; l < timeStampLength; l++)
         {
             char c;
             file.read((char*)&c, sizeof(char));
@@ -1888,9 +1892,7 @@ Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
    Slice *slice;
    // If the extension of the first file contained sb xmy xy or txt then you pass ALL the
    // file names to the Slice constructor to construct a single Slice.
-         qDebug() << "Slice::readFileBuffer(unsigned short* buffer, QString fileName)";
          slice = new Slice(nextSliceName(), buffer, fileName);
-         qDebug() << "NEW SLICE CRAEATED!!! \n";
 //        progress.setValue(i + 1);
 //         if (progress.wasCanceled())
 //            break;

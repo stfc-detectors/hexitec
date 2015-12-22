@@ -198,6 +198,8 @@ private slots:
    void guiUnprocessedFilesInQueue(bool bFilesPresent);
    // Setup slot to communicate to HxtProcessing to discard all unprocessed raw files
    void clearUnprocessedFiles();
+   // Updated any config changes to HxtProcessing object
+   void handleHxtProcessingPrepSettings();
 };
 
 #endif // PROCESSINGWINDOW_H

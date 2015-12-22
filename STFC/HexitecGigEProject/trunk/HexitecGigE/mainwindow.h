@@ -99,6 +99,8 @@ signals:
    void manualProcessingAbandoned();
    // Signal to processingWindow->getHxtProcessor to remove unprocessed raw files
    void removeUnprocessedFiles(bool bRemoveFiles);
+   /// HexitechGigE Addition:
+   void hxtProcessingPrepSettings();
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void executeReturnBufferReady(unsigned char * transferBuffer);
    void executeShowImage();

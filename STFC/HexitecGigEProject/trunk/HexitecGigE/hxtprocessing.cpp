@@ -47,11 +47,11 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mEnableDebugFrame            = false;
     mDebugFrameDir               = "C:/temp/";
 
-    mFormatVersion = 2;
+    mFormatVersion = 3;
 
-    mFilePrefix    = "-1";
+    mFilePrefix    = "Def_prefix_";
     mDataTimeStamp = string("000000_000000");
-    mutexTimeout   = 100;  // Milliseconds duration to attempt acquiring a mutex lock
+    mutexTimeout   = 50;  // Milliseconds duration to attempt acquiring a mutex lock
 
     bPrefixEnabled      = false;
     bMotorEnabled       = false;
@@ -116,6 +116,8 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
 
     /// Determine size pool containing buffers (communicate with Visualisation tab, for displaying)
     numHxtBuffers = 10;
+    // Ensure memory etc only setup when prepSettings() called the first time
+    bFirstTime = true;
 }
 
 HxtProcessing::~HxtProcessing()
@@ -152,15 +154,17 @@ HxtProcessing::~HxtProcessing()
 
 void HxtProcessing::prepSettings()
 {
-    //qDebug() << "HxtProcessing::prepSettings() called ; mHX TBuffers empty?" << mHxtBuffers.empty() << " Size? "<< mHxtBuffers.size();
+    qDebug() << "HxtProcessing::prepSettings() called ";
 
-    // Setup pool of buffers - To send HXT file contents by RAM rather than file
-    for (int i=0; i < numHxtBuffers; i++)
+    if (bFirstTime)
     {
-        unsigned short* hxtBuffer = new unsigned short[59381];
-        mHxtBuffers.push_back(hxtBuffer);
+        // Setup pool of buffers - To send HXT file contents by RAM rather than file
+        for (int i=0; i < numHxtBuffers; i++)
+        {
+            unsigned short* hxtBuffer = new unsigned short[59381];
+            mHxtBuffers.push_back(hxtBuffer);
+        }
     }
-//    qDebug() << "is HX T buffer still empty? " << mHxtBuffers.empty() << " Size? " << mHxtBuffers.size();
     // Extract file path of hexitech file
     QFileInfo fileInfo(mOutputFileNameDecodedFrame.c_str());
     string filePath = fileInfo.absolutePath().toStdString();
@@ -174,6 +178,7 @@ void HxtProcessing::prepSettings()
     logFileStream << now->GetDateStamp();
     logFileStream << ".txt";
     delete(now);
+    qDebug() << "logFileStream.str: " << logFileStream.width();
 
     // Create new log configuration
     gLogConfig = new LogConfig( mAppName);
@@ -355,6 +360,7 @@ void HxtProcessing::prepSettings()
         LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
     }
 
+    bFirstTime = false;
 }
 
 void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
@@ -740,6 +746,7 @@ void HxtProcessing::run()
                     fileMutex.unlock();
                     // All Files to be manually processed dequeued: process them, signal gui when completed
                     bProcessFiles = true;
+                    bWriteToDisk = true;
                     //qDebug() << "3"; Sleep(1000);
                     executeProcessing(bProcessFiles, bWriteToDisk);    /// process (Manual) Files
                     emit hexitechSignalManualProcessingFinished();
@@ -1256,7 +1263,7 @@ void HxtProcessing::configHeaderEntries(string fileName)
     if (bPrefixEnabled)
         mFilePrefix = filePrefix;
     else
-        mFilePrefix = "-1";
+        mFilePrefix = "(blank)";
 
     // If data timestamp enabled use dateStrings
     if (bTimeStampEnabled)
@@ -1495,6 +1502,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
     }
     // Update with (possibly changed) values for  prefix, Motor position, timestamp
     dataProcessor->updateFilePrefix(mFilePrefix);
+    dataProcessor->updateTimeStamp(mDataTimeStamp);
 
     /// ----- Question-Mark: Ending ----- ///
 
@@ -1598,7 +1606,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
             // Signal that processed data [inside RAM] is ready to be displayed in the GUI
             // DSoFt: added filename to indicate when a new image/slice begins as this will change.
             // This is a quick fix and should be reviewed.
-            qDebug() <<"emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName))";
+            qDebug() <<"#############emit hexitechBufferToDisplay: hxtBuffer contains: " << *hxtBuffer;
             emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName));
         }
         bWriteFiles = false;
@@ -1612,6 +1620,16 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
     emit hexitechRunning(false);
 
     return 0;
+}
+
+void HxtProcessing::commitConfigChanges()
+{
+    //dataProcessor->updateFormatVersion(mFormatVersion);
+    dataProcessor->updateMotorPositions(mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ,
+                                        mPositions.mSSROT, mPositions.mTimer, mPositions.mGALX,
+                                        mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT);
+    dataProcessor->updateFilePrefix(mFilePrefix);
+    dataProcessor->updateTimeStamp(mDataTimeStamp);
 }
 
 

@@ -486,6 +486,13 @@ void ProcessingWindow::clearUnprocessedFiles()
     ui->dataProcessingComboBox->setCurrentText("Manual");   // Change data processing to Manual
 }
 
+void ProcessingWindow::handleHxtProcessingPrepSettings()
+{
+    qDebug() << "ProcessingWindow::handleHxtProcessingPrepSettings() called, next: HxtProc->prepSett().";
+    HxtProcessor->prepSettings();
+    qDebug() << "ProcessingWindow::handleHxtProcessingPrepSettings(), completed.";
+}
+
 void ProcessingWindow::dataProcessingComboBoxChanged(QString aString)
 {
     /// Communicate change of Data Processing to main window and INI file

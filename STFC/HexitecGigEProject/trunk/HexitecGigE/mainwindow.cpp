@@ -152,7 +152,6 @@ MainWindow::MainWindow()
    {
       HV *hv = VoltageSourceFactory::instance()->getHV();
       detectorControlForm->setHvName(hv->property("objectName").toString());
-      qDebug() <<"hv name = " << detectorControlForm->hvName;
       QString daqName = dataAcquisitionFactory->getDataAcquisition()->property("objectName").toString();
       dataAcquisitionForm->setDaqName(daqName);
       QString daqModelName = dataAcquisitionFactory->getDataAcquisitionModel()->property("objectName").toString();
@@ -183,6 +182,8 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
+   // Allow MainWindow signal to processWindow's HxtProcessor when config updated
+   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
 
    if (activeDAQ)
    {
@@ -314,7 +315,7 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 {
    // This connect enables the new Slice to create another slice from scripting and emit this signal
    // to get to this point - see Slice::times().
-   if (sliceNumber >= 0)
+   if (sliceNumber < 0)
    {
       qDebug() << "MainWindow::initializeSlice adding a new slice" << sliceNumber;
       connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
@@ -325,7 +326,7 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
    }
    else
    {
-      qDebug() << "MainWindow::initializeSlice setting active slice" << sliceNumber;
+      qDebug() << "MainWindow::initializeSlice replace slice, set active slice" << sliceNumber;
       DataModel::instance()->setActiveSlice(slice);
       MainViewer::instance()->showNewActiveSlice();
    }
@@ -788,7 +789,7 @@ void MainWindow::readFiles(QStringList files)
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
    int sliceNumber = -1;
-   qDebug() << "MainWindow received a buffer; Process it ";
+   qDebug() << "MainWindow received a buffer containing " << *buffer;
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->sliceToReplace();

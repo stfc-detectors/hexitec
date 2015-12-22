@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "volume.h"
 #include "volume.h"
 #include "datamodel.h"
@@ -14,7 +15,7 @@ Volume::Volume(QString name)
    addParameter("Slice count", 0);
 
    // These lines would make the Volume available to scripting, it would have to become a QObject too.
-   // setProperty("objectName", name);
+   //  setProperty("objectName", name);
    // emit addObject(this);
 }
 

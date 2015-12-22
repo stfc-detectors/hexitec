@@ -45,8 +45,10 @@ public:
 
     int checkConfigValid();
     /// HexitecGigE Addition:
-    ///  Need function to apply settings (just once), then the user may call executeProcessing() to their hearts content..
+    ///  Need function to apply settings
     void prepSettings();
+    // communicate changes onto dataProcessor (HxtRawDataProcessor) object:
+    void commitConfigChanges();
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -151,6 +153,7 @@ protected:
     vector<unsigned short*> mHxtBuffers;    /// Pool of buffers;signalled to Visualisation tab to be displayed
     unsigned int numHxtBuffers;
     bool mFirstBufferInCollection;
+    bool bFirstTime;                        // Prevent mHxtBuffers initialised more than once
     ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
     HxtPixelThreshold* pixelThreshold;
     HxtRawDataProcessor* dataProcessor;
