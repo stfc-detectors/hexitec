@@ -792,7 +792,7 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
    qDebug() << "MainWindow received a buffer containing " << *buffer;
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
-   sliceNumber = slice->sliceToReplace();
+   sliceNumber = slice->getSliceToReplace();
    qDebug() << "MainWindow::readBuffer sliceNumber = " << sliceNumber;
    initializeSlice(slice, sliceNumber);
    emit returnHxtBuffer(buffer);

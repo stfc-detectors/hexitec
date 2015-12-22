@@ -50,7 +50,7 @@ public:
    int getGridSizeY();
    QString getTitle();
    QString getFileName();
-   int sliceToReplace();
+   int getSliceToReplace();
    int getVoxelDataLen();
    QVector<double> getXData(int xPix, int yPix);
    QVector<double> getYData(int xPix, int yPix);
@@ -116,7 +116,7 @@ private:
    MatrixXd eigenWeights;
    MatrixXd eigenSpectra;
    QString fileName;
-   int childToReplace;
+   int sliceToReplace;
    int gridSizeX;
    int gridSizeY;
    double maxData;

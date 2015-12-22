@@ -191,21 +191,23 @@ void Slice::postDataInit()
 
 void Slice::postDataInit(QString fileName)
 {
-   childToReplace = -1;
+   sliceToReplace = -1;
    addParameters();
 
    QVector<QVariant> sliceData;
    sliceData << objectName() << "Slice" << "" << "";
    QModelIndex parentIndex = DataModel::instance()->getItemIndex("myVolume");
-   childToReplace = TreeItem::init(sliceData, &parentIndex, objectName(), fileName);
+   sliceToReplace = TreeItem::init(sliceData, &parentIndex, objectName(), fileName);
 
-   if (childToReplace >= 0)
+   if (sliceToReplace >= 0)
    {
+      qDebug() << "replacing the slice sliceToReplace = " << sliceToReplace;
       roleBackSliceName();
-      replace(childToReplace);
+      replace(sliceToReplace);
    }
    else
    {
+      qDebug() << "attaching a new slice sliceToReplace = " << sliceToReplace;
       attach();
       setProperty("objectName", objectName());
    }
@@ -1903,9 +1905,9 @@ Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
    return slice;
 }
 
-int Slice::sliceToReplace()
+int Slice::getSliceToReplace()
 {
-   return childToReplace;
+   return sliceToReplace;
 }
 
 /* Returns true if the fileNameList is valid. This is taken to mean that one of:

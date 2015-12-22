@@ -24,6 +24,7 @@ void Volume::addSlice(Slice *slice)
 {
    slices->append(slice);
    int i = slices->count();
+   qDebug() << "Volume::addSlice(Slice *slice) setting slice count = " << slices->count();
    setParameter("Slice count", QVariant(slices->count()));
 }
 

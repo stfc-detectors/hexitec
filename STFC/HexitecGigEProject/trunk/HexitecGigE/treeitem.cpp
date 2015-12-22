@@ -101,7 +101,7 @@ int TreeItem::init(const QVector<QVariant> &data, QModelIndex *parentIndex, QStr
       parentItem->appendChild(this);
       dataModel->endInsertRows();
    }
-   return sliceNumber;
+   return sliceToReplace;
 }
 
 TreeItem::~TreeItem()
