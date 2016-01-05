@@ -31,20 +31,6 @@ void FileWriter::initFilename(const QString directory, const QString file, bool 
    this->file = new QFile(filename);
 }
 
-int FileWriter::write(int number)
-{
-   int error = -1;
-/*
-   if (error = file->open(QIODevice::WriteOnly | QIODevice::Text))
-   {
-      QTextStream out(file);
-      out << number << "\n";
-   }
-   file->close();
-*/
-   return error;
-}
-
 int FileWriter::append(QString text)
 {
    int error = -1;

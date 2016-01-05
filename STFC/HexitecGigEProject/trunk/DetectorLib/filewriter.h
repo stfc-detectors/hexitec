@@ -9,7 +9,6 @@ class FileWriter : public QFile
 public:
     FileWriter(const QString directory, const QString file);
     FileWriter(const QString directory, const QString file, bool timestamp, bool islogfile);
-    int write(int number);
     int append(QString text);
 private:
     QFile *file;
