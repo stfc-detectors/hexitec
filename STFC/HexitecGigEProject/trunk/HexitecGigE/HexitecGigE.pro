@@ -148,7 +148,6 @@ FORMS += \
     scriptingWidget.ui \
     colormapeditor.ui \
     getvaluedialog.ui \
-#    keithleymainwindow.ui \
     offsetsdialog.ui \
     datacollectiondialog.ui \
     dpwarningdialog.ui \
