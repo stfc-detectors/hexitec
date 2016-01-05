@@ -201,13 +201,11 @@ void Slice::postDataInit(QString fileName)
 
    if (sliceToReplace >= 0)
    {
-      qDebug() << "replacing the slice sliceToReplace = " << sliceToReplace;
       roleBackSliceName();
       replace(sliceToReplace);
    }
    else
    {
-      qDebug() << "attaching a new slice sliceToReplace = " << sliceToReplace;
       attach();
       setProperty("objectName", objectName());
    }
