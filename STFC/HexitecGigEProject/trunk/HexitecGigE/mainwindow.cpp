@@ -577,7 +577,6 @@ void MainWindow::createMenus()
 
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
    QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
-   QAction *saveAction = new QAction(QIcon(":/images/WriteImage.png"), tr("&Save EZD..."), this);
    QAction *quitAct = new QAction(tr("&Quit"), this);
    QAction *aboutAct = new QAction(tr("&About"), this);
    QAction *aboutQtAct = new QAction(tr("About &Qt"), this);
@@ -589,7 +588,6 @@ void MainWindow::createMenus()
 
    deleteSliceAct->setText(tr("Clear active image"));
    readAction->setStatusTip(tr("Load data or scripts"));
-   saveAction->setStatusTip(tr("Save active slice"));
    quitAct->setStatusTip(tr("Quit the application"));
    aboutAct->setStatusTip(tr("Show the application's About box"));
    aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
@@ -598,7 +596,6 @@ void MainWindow::createMenus()
 
    connect(deleteSliceAct, SIGNAL(triggered()), this, SLOT(deleteActiveSlice()));
    connect(readAction, SIGNAL(triggered()), this, SLOT(readFiles()));
-   connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFiles()));
    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -614,7 +611,6 @@ void MainWindow::createMenus()
 //   this->fileMenu
    fileMenu->addAction(readAction);
    fileMenu->addAction(descriminateReadAct);
-   fileMenu->addAction(saveAction);
    fileMenu->addAction(deleteSliceAct);
    fileMenu->addSeparator();
    fileMenu->addAction(quitAct);
@@ -629,7 +625,6 @@ void MainWindow::createMenus()
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
    fileToolBar->addAction(descriminateReadAct);
-   fileToolBar->addAction(saveAction);
    fileToolBar->addAction(prinCompsAction);
 
    QAction *exportActiveSliceToMatlab = new QAction(QIcon(":/images/exportToMatlab.png"), tr(""),this);

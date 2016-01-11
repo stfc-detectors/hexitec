@@ -321,22 +321,18 @@ void  RenderArea::mouseDoubleClickEvent(QMouseEvent *event)
 
    if (imageData.width() == 0) return;  // TEMPORARY FIX
 
-   if (!holdState)
-      selectedPixels.resize(0);
-
    QPoint widgetPosition = (event->pos());
    QPoint pixel;
    pixel.setX( (int)((widgetPosition.x() - offsetX)/cellSizeX) ) ;
    pixel.setY( (int)((widgetPosition.y() - offsetY)/cellSizeY) );
+
    if (overPixel(pixel))
    {
+      if (!holdState)
+         selectedPixels.resize(0);
+
       selectedPixels.push_back(pixel);
       emit updatePlotter(currentPixel, true);
-   }
-   else
-   {
-      selectedPixels.resize(0);
-      emit updatePlotter();
    }
    update();
 }
@@ -539,7 +535,7 @@ void RenderArea::setMinimumColour(int minimum)
    if (minimum < axes.maxZ)
    {
       axes.minZ = minimum;
-      update();
+//      update();
    }
 }
 
