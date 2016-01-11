@@ -23,7 +23,7 @@ class GigEDetector : public QObject
 
 public:
 /* If change add a Mode be sure to add to modes variable. */
-enum Mode {CONTINUOUS, SOFT_TRIGGER, EXTERNAL_TRIGGER, FIXED, GIGE_DEFAULT, INVALID_MODE};
+enum Mode {CONTINUOUS, GIGE_DEFAULT, INVALID_MODE};
 /**********************************************************/
 enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
 enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
@@ -64,7 +64,6 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
 
 signals:
    void notifyState(GigEDetector::DetectorState state);
-   void notifyMode(GigEDetector::Mode mode);
    void writeError(QString message);
    void writeMessage(QString message);
    void executeCommand(GigEDetector::DetectorCommand, int, int);

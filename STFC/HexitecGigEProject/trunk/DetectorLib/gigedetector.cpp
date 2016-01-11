@@ -17,13 +17,13 @@
 static PUCHAR bufferReady;
 static PUCHAR returnBuffer;
 static ULONG validFrames;
-HexitecOperationMode operationMode = { AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
-                                                AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
-                                                AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
-                                                AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
-                                                AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
-                                                AS_CONTROL_DISABLED, 0 };
-HexitecSystemConfig	systemConfig = { 2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4 };
+HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
+                                      AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
+                                      AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
+                                      AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
+                                      AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
+                                      AS_CONTROL_DISABLED, 0 };
+HexitecSystemConfig	systemConfig = {2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4};
 
 static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
@@ -61,10 +61,9 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
-   qRegisterMetaType<GigEDetector::DetectorState>("GigE::Mode");
+//   qRegisterMetaType<GigEDetector::DetectorState>("GigE::Mode");
    qRegisterMetaType<HANDLE>("HANDLE");
    connectUp(parent);
-
 }
 
 GigEDetector::~GigEDetector()
@@ -155,7 +154,7 @@ int GigEDetector::initialiseConnection()
    CONST LPSTR deviceDescriptor = "";
    ULONG pleoraErrorCodeStrLen = STR_LENGTH;
    ULONG pleoraErrorDescriptionLen = STR_LENGTH;
-   ULONG	pleoraErrorCode = -1;
+   ULONG pleoraErrorCode = -1;
    CHAR pleoraErrorCodeStr[STR_LENGTH] = {0};
    CHAR pleoraErrorDescription[STR_LENGTH] = {0};
    GigEDeviceInfoStr deviceInfo = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
@@ -613,7 +612,6 @@ unsigned char *GigEDetector::getImage(int imageNumber)
 
 void GigEDetector::handleShowImage()
 {
-
    if (mode == GIGE_DEFAULT)
    {
       imageDestToPixmap();
@@ -627,10 +625,8 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
 
    status = 0;
    iniFile = new IniFile(aspectFilename);
-//   directory = iniFile->getString("Control-Settings/Toplevel Path");
-//   prefix = iniFile->getString("Control-Settings/Prefix");
-
    framesPerBuffer = iniFile->getInt("Control-Settings/Frames Per Buffer");
+
    if ((loggingInterval = iniFile->getInt("Control-Settings/Logging Interval")) != QVariant(INVALID))
    {
       this->loggingInterval = loggingInterval;
@@ -720,7 +716,7 @@ void GigEDetector::showError(const LPSTR context, long asError)
    ULONG pleoraErrorDescriptionLen = STR_LENGTH;
    CHAR asErrorMessage[STR_LENGTH] = { 0 };
    CHAR sysErrorMessage[STR_LENGTH] = { 0 };
-   ULONG	pleoraErrorCode = 0;
+   ULONG pleoraErrorCode = 0;
    CHAR	pleoraErrorCodeStr[STR_LENGTH] = { 0 };
    CHAR	pleoraErrorDescription[STR_LENGTH] = { 0 };
 
