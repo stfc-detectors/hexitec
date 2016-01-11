@@ -26,12 +26,7 @@ public:
    ~DataAcquisition();
    Q_INVOKABLE bool isBusy();
    Q_INVOKABLE char *getStatus();
-   Q_INVOKABLE bool isWaitingForTrigger();
-   Q_INVOKABLE bool isCollectingTriggered();
    Q_INVOKABLE void collectReducedImages();
-   Q_INVOKABLE void initTrigger();
-   Q_INVOKABLE void trigger();
-   Q_INVOKABLE void stopTrigger();
 protected:
    explicit DataAcquisition(QObject *parent = 0);
 private:
@@ -47,9 +42,7 @@ private:
    void configureDataCollection();
    void configureBasicCollection();
    void setDirectory(int repeatCount);
-   void initialiseTriggeredDataCollection();
    void performContinuousDataCollection();
-   void performTriggeredDataCollection();
    void performFixedDataCollection();
    void setDataAcquisitionTime(int nDaq);
    void performSingleBiasRefresh();
@@ -84,8 +77,6 @@ private:
    DataAcquisitionStatus::MinorStatus storedMinorStatus;
    double dataCollectionTime;
    bool busy;
-   bool waitingForTrigger;
-   bool collectingTriggered;
    QList <QObject *> rdaql;
    Reservation reservation;
    unsigned long long totalFramesAcquired;
@@ -115,9 +106,6 @@ public slots:
    void receiveState(GigEDetector::DetectorState detectorState);
    void handleCollectReducedImages();
    void handleCollectFixedImages();
-   void handleInitTrigger();
-   void handleTrigger();
-   void handleStopTrigger();
    void handleExecuteOffsets();
    void handleCancelOffsets();
    void handleExecuteReducedDataCollection();
@@ -129,7 +117,6 @@ public slots:
    void handleSetFingerTemperature(double temperature);
    void handleMonitorData(MonitorData *md);
    void positionChanged(Motor *motor, const QVariant & value);
-   void handleExternalTriggerReceived();
    void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void handleImageStarted(char *path, int frameSize);
    void handleImageComplete(unsigned long long framesAcquired);

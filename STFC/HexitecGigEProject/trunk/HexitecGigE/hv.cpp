@@ -32,21 +32,14 @@ void HV::initialise(QString detectorFilename)
     detectorIniFile = new IniFile(detectorFilename);
     vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
     vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
-    vbrTime = detectorIniFile->getInt("Bias_Voltage/Time Refresh_Voltage_Held");
+    vbrTime = detectorIniFile->getInt("Bias_Voltage/Time_Refresh_Voltage_Held");
     vbSettleTime = detectorIniFile->getInt("Bias_Voltage/Bias_Voltage_Settle_Time");
     currentLimit = detectorIniFile->getDouble("Bias_Voltage/Current_Limit");
     biasRefreshInterval = detectorIniFile->getInt("Bias_Voltage/Bias_Refresh_Interval");
     totalBiasRefreshTime = vbrTime + vbSettleTime;
-    //   biasRefreshInterval += totalBiasRefreshTime;
     voltage = vb;
     voltageAfterRefresh = voltage;
-/*    GPIBwrite(":SOUR:VOLT:LEV " + QString::number(voltage));
-    GPIBwrite(":SENS:FUNC \"CURR\""); // set the sense function to measure current
-    // The current limit was originally hard coded to 1e-6. This was used to set the current
-    // limit and the current measurement range. This value is now obtained from the ini file.
-    GPIBwrite(":SENS:CURR:PROT " + QString::number(currentLimit)); // set the current limit
-    GPIBwrite(":SENS:CURR:RANG " + QString::number(currentLimit)); // select the current measurement range
-*/
+
     off();
     if (vb < -500 || vb > 5)
     {
@@ -74,7 +67,6 @@ void HV::off()
 
 void HV::on(double voltage)
 {
-    qDebug() << "hv.on() called!";
     this->voltage = voltage;
     emit setHV(voltage);
     biasOnState = true;

@@ -43,7 +43,6 @@ private:
    void guiOffsetsPrep();
    void guiCollectingPrep();
    void guiCollecting();
-   void guiWaitingTrigger();
    void guiDetectorBusy();
    void guiBiasRefreshing();
 

@@ -82,7 +82,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::paintWidget(QPainter &painter)
 {
-   QImage splash(":/images/Hexitec_Logo50.png");
+   QImage splash(":/images/Hexitec_Logo10.png");
    if (imageData.width() == 0)
    {
       painter.drawImage(offsetX, offsetY, splash);

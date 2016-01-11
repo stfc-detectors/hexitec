@@ -26,15 +26,16 @@
 #include "hxtfilereader.h"
 #include "hexitecsofttrigger.h"
 #include "hardtrigger.h"
-#include "keithley.h"
 #include "dataacquisitionmodel.h"
 #include "serialport.h"
+#include "badinifiledialog.h"
 
 MainWindow::MainWindow()
 {
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
    MotionControlForm *motionControlform;
+   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
 
    QString version = "HexitecGigE Alpha";
    QString nonDAQVersion = "HexitecGigE Alpha (excluding DAQ)";
@@ -43,6 +44,18 @@ MainWindow::MainWindow()
 
    if (activeDAQ)
    {
+      if (settings->contains("aspectIniFilename"))
+      {
+
+         QFileInfo fileInfo = QFileInfo(settings->value("aspectIniFilename").toString());
+         if (!fileInfo.isReadable())
+         {
+            BadIniFileDialog *badIniFileDialog = new BadIniFileDialog();
+            badIniFileDialog->setWindowTitle("aspectIniFilename: " + settings->value("aspectIniFilename").toString());
+            badIniFileDialog->exec();
+            exit(1);
+         }
+      }
       setWindowTitle(version);
       setWindowIconText(version);
    }
@@ -535,7 +548,7 @@ void MainWindow::deleteExcessSlices()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About This App"),
-                      tr(//"<img src=:/images/Hexitec_Logo50.png>",
+                      tr(//"<img src=:/images/Hexitec_Logo10.png>",
                          "<B>2Easy</b> is designed for the purpose of exploring and manipulating hyperspectral image data. The software is part of an ongoing"
                          " collaboration and its development is currently supported by University of Manchester (UoM) under the EPSRC project entitled"
                          "<i> HEXITEC: Translation Grant. The Application of Colour X-ray Imaging </i> (EP/H046577/1); the project is led by Professor Cernik (UoM)"
@@ -550,8 +563,18 @@ void MainWindow::about()
 
 void MainWindow::createMenus()
 {
-   startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
-   stopDAQAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
+   if (activeDAQ)
+   {
+      startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
+      stopDAQAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
+      startDAQAct->setText("Start DAQ");
+      stopDAQAct->setText("Stop DAQ");
+      startDAQAct->setDisabled(true);
+      stopDAQAct->setDisabled(true);
+      connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
+      connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
+   }
+
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
    QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
    QAction *saveAction = new QAction(QIcon(":/images/WriteImage.png"), tr("&Save EZD..."), this);
@@ -564,8 +587,6 @@ void MainWindow::createMenus()
    readAction->setShortcuts(QKeySequence::New);
    quitAct->setShortcuts(QKeySequence::Quit);
 
-   startDAQAct->setText("Start DAQ");
-   stopDAQAct->setText("Stop DAQ");
    deleteSliceAct->setText(tr("Clear active image"));
    readAction->setStatusTip(tr("Load data or scripts"));
    saveAction->setStatusTip(tr("Save active slice"));
@@ -575,8 +596,6 @@ void MainWindow::createMenus()
    descriminateReadAct->setStatusTip(tr("Load data with charge descrinimation"));
    prinCompsAction ->setStatusTip(tr("Get Principle Components"));
 
-   connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
-   connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
    connect(deleteSliceAct, SIGNAL(triggered()), this, SLOT(deleteActiveSlice()));
    connect(readAction, SIGNAL(triggered()), this, SLOT(readFiles()));
    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFiles()));
@@ -893,11 +912,23 @@ bool MainWindow::checkDAQChoice()
 {
    bool activeDAQ = false;
 
-   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
-   if (settings.contains("DataAcquisition"))
+   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   if (settings->contains("DataAcquisition"))
    {
-      if (settings.value("DataAcquisition").toString() == "On")
+      if (settings->value("DataAcquisition").toString() == "On")
       {
+         if (settings->contains("hexitecGigEIniFilename"))
+         {
+
+            QFileInfo fileInfo = QFileInfo(settings->value("hexitecGigEIniFilename").toString());
+            if (!fileInfo.isReadable())
+            {
+               BadIniFileDialog *badIniFileDialog = new BadIniFileDialog();
+               badIniFileDialog->setWindowTitle("hexitecGigEIniFilename: " + settings->value("hexitecGigEIniFilename").toString());
+               badIniFileDialog->exec();
+               exit(1);
+            }
+         }
          activeDAQ = true;
       }
       else

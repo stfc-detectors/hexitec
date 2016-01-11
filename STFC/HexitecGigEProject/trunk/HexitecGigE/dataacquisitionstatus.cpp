@@ -81,9 +81,6 @@ void DataAcquisitionStatus::constructMinorMessage()
    case BIAS_REFRESHING:
       statusMessage += " : bias refreshing";
       break;
-   case WAITING_TRIGGER:
-      statusMessage += " : waiting for trigger";
-      break;
    case PAUSED:
       statusMessage += " : pausing";
       break;
@@ -105,9 +102,9 @@ void DataAcquisitionStatus::constructMinorMessage()
    case WAITING_DARK:
       statusMessage += " : waiting for user";
       break;
-   case TRIGGERING_STOPPED:
-      statusMessage += " : triggering stopped";
-      break;
+   case NOT_INITIALIZED:
+         statusMessage += " : detector not initialized";
+         break;
    default:
       break;
    }

@@ -35,8 +35,6 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigEDetector::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigEDetector::DetectorState");
    busy = false;
-   waitingForTrigger = false;
-   collectingTriggered = false;
    rdaql.append(this);
 }
 
@@ -155,11 +153,6 @@ void DataAcquisition::initHexitechProcessor()
 DataAcquisition::~DataAcquisition()
 {
    hv->off();
-   if (mode == GigEDetector::SOFT_TRIGGER || mode == GigEDetector::EXTERNAL_TRIGGER)
-   {
-      emit executeCommand(GigEDetector::STOP_TRIGGER, 0, 0);
-      Sleep(1000);
-   }
    emit executeCommand(GigEDetector::KILL, 0, 0);
    /* Stops crash on application exit.
       Increased following registered callback use.
@@ -181,16 +174,6 @@ char *DataAcquisition::getStatus()
    return status;//daqStatus.getMajorStatus() + "." + daqStatus.getMinorStatus();
 }
 
-bool DataAcquisition::isWaitingForTrigger()
-{
-   return waitingForTrigger;
-}
-
-bool DataAcquisition::isCollectingTriggered()
-{
-   return collectingTriggered;
-}
-
 void DataAcquisition::run()
 {
    if (mode == GigEDetector::GIGE_DEFAULT)
@@ -209,21 +192,14 @@ void DataAcquisition::run()
       changeDAQStatus(DataAcquisitionStatus::IDLE,
                       DataAcquisitionStatus::READY);
    }
-   else if (mode == GigEDetector::SOFT_TRIGGER ||
-            mode == GigEDetector::EXTERNAL_TRIGGER)
-   {
-      performTriggeredDataCollection();
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(daqStatus.getMajorStatus(),
-                      DataAcquisitionStatus::WAITING_TRIGGER);
-   }
-   else if (mode == GigEDetector::FIXED)
+/*   else if (mode == GigEDetector::FIXED)
    {
       performFixedDataCollection();
       // TODO : would emiting this to DataAcquisition be better for thread safety
       changeDAQStatus(DataAcquisitionStatus::IDLE,
                       daqStatus.getMinorStatus());
    }
+   */
 }
 
 void DataAcquisition::setDirectory(int repeatCount)
@@ -338,51 +314,6 @@ bool DataAcquisition::repeatPauseRequired(int repeatCount)
    }
 
    return repeatPauseRequiredFlag;
-}
-
-void DataAcquisition::initialiseTriggeredDataCollection()
-{
-   int ndaq = 0;
-
-   emit storeBiasSettings();
-   emit disableBiasRefresh();
-   setDataAcquisitionTime(0);
-   biasRefreshRequired = true;
-   setDirectory(0);
-   emit executeCommand(GigEDetector::COLLECT, 1, ndaq);
-}
-
-void DataAcquisition::performTriggeredDataCollection()
-{
-   int nDaq;
-
-   emit storeBiasSettings();
-   emit disableBiasRefresh();
-   collectingTriggered = true;
-
-   for (nDaq = 0; nDaq < splitDataCollections; nDaq++)
-   {
-      setDataAcquisitionTime(nDaq);
-
-      collecting = true;
-      if (mode == GigEDetector::SOFT_TRIGGER)
-      {
-         emit executeCommand(GigEDetector::TRIGGER, 1, 1); // Args 2 & 3 not used by GigEDetector
-      }
-
-      waitForCollectingDone();
-      daqStatus.setCurrentImage(nDaq + 1);
-      if (abortRequired())
-         break;
-
-      performSingleBiasRefresh();
-      if (abortRequired())
-         break;
-   }
-
-   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
-   emit restoreBiasSettings();
-   collectingTriggered = false;
 }
 
 void DataAcquisition::performFixedDataCollection()
@@ -567,6 +498,8 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
    switch (detectorState)
    {
    case GigEDetector::IDLE:
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::NOT_INITIALIZED);
       break;
    case GigEDetector::READY:
       if (daqStatus.getMajorStatus() == DataAcquisitionStatus::INITIALISING)
@@ -607,29 +540,9 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
                       DataAcquisitionStatus::COLLECTING_PREP);
       break;
    case GigEDetector::COLLECTING:
-      waitingForTrigger = false;
       changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
                       DataAcquisitionStatus::COLLECTING);
       break;
-   case GigEDetector::WAITING_TRIGGER:
-      waitingForTrigger = true;
-      changeDAQStatus(daqStatus.getMajorStatus(),
-                      DataAcquisitionStatus::WAITING_TRIGGER);
-      // restore bias refreshing after soft trigger initialisation.
-      if (biasRefreshRequired)
-      {
-         emit restoreBiasSettings();
-         biasRefreshRequired = false;
-      }
-      break;
-   case GigEDetector::TRIGGERING_STOPPED:
-      changeDAQStatus(daqStatus.getMajorStatus(),
-                      DataAcquisitionStatus::TRIGGERING_STOPPED);
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      DataAcquisitionStatus::READY);
-      waitingForTrigger = false;
-      break;
-
    }
 }
 
@@ -658,47 +571,10 @@ void DataAcquisition::handleCollectFixedImages()
    start();
 }
 
-void DataAcquisition::initTrigger()
-{
-   handleInitTrigger();
-}
-
-void DataAcquisition::handleInitTrigger()
-{
-   reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
-   if (reservation.getReserved().isEmpty())
-   {
-      qDebug() << "handleInitTrigger Could not reserve all objects, message = " << reservation.getMessage();
-   }
-   else
-   {
-      //qDebug() << "handleInitTrigger called.";
-      configureDataCollection();
-      initialiseTriggeredDataCollection();
-   }
-}
-
-void DataAcquisition::trigger()
-{
-   handleTrigger();
-}
-
-void DataAcquisition::handleExternalTriggerReceived()
-{
-   reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
-   if (reservation.getReserved().isEmpty())
-   {
-      qDebug() << "handleCollectReducedImages Could not reserve all objects, message = " << reservation.getMessage();
-   }
-   else
-   {
-      start();
-   }
-}
-
 void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
 {
-   if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
+//   if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
+   if (mode != GigEDetector::GIGE_DEFAULT)
    {
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
    }
@@ -723,37 +599,6 @@ void DataAcquisition::handleInitialiseDetector()
 {
    gigEDetector->initialiseConnection();
    emit enableMonitoring();
-}
-
-void DataAcquisition::handleTrigger()
-{
-   reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
-   if (reservation.getReserved().isEmpty())
-   {
-      qDebug() << "handleCollectReducedImages Could not reserve all objects, message = " << reservation.getMessage();
-   }
-   else
-   {
-      start();
-   }
-}
-
-void DataAcquisition::stopTrigger()
-{
-   handleStopTrigger();
-}
-
-void DataAcquisition::handleStopTrigger()
-{
-   reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
-   if (reservation.getReserved().isEmpty())
-   {
-      qDebug() << "handleCollectReducedImages Could not reserve all objects, message = " << reservation.getMessage();
-   }
-   else
-   {
-      emit executeCommand(GigEDetector::STOP_TRIGGER, 0, 0);
-   }
 }
 
 void DataAcquisition::handleExecuteOffsets()

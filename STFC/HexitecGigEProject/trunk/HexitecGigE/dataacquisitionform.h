@@ -30,7 +30,6 @@ public:
    explicit DataAcquisitionForm(QWidget *parent = 0);
    ~DataAcquisitionForm();
    QMainWindow *getMainWindow();
-   void setModes(QStringList modes);
    void setDaqName(QString daqName);
    void setDaqModelName(QString daqModelName);
 private:
@@ -56,11 +55,10 @@ private:
    void guiOffsetsPrep();
    void guiCollectingPrep();
    void guiCollecting();
-   void guiWaitingTrigger();
    void guiDetectorBusy();
-   void guiMode(int mode);
+   void guiMode();
    void guiBiasRefreshing();
-   void enableRepeats(int mode);
+   void enableRepeats();
    void disableRepeats();
    void disableGui();
    void enableLogfileParameters(bool enabled);
@@ -68,18 +66,15 @@ private:
 
 public slots:
    void handleMonitorData(MonitorData *md);
-   void handleModeChanged(GigEDetector::Mode mode);
+//   void handleModeChanged(GigEDetector::Mode mode);
    void handleDataChanged(DataAcquisitionDefinition dataAcquisitionDefinition);
-   void handleDataChanged(QString mode);
+//   void handleDataChanged(QString mode);
    void handleBiasRefreshed(QString time);
    void handleCollectingChanged(bool collectingOn);
    void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
 private slots:
-   void modeChanged(int mode);
+//   void modeChanged(int mode);
    void handleCollectImagesPressed();
-   void handleInitTriggerPressed();
-   void handleTriggerPressed();
-   void handleStopTriggerPressed();
    void handleAbortDAQPressed();
    void handleDataFilename();
    void handleLogFilename();
@@ -103,9 +98,6 @@ signals:
    void logFilenameChanged(DetectorFilename logFilename);
    void dataAcquisitionDefinitionChanged(DataAcquisitionDefinition dataAcquisitionDefinition);
    void collectImagesPressed();
-   void initTriggerPressed();
-   void triggerPressed();
-   void stopTriggerPressed();
    void getCurrentPressed();
    void registerCallbackPressed();
    void executeOffsets();

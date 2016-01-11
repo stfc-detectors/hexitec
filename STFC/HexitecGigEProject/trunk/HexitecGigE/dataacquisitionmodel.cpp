@@ -191,12 +191,6 @@ void DataAcquisitionModel::connectDataAcquisitionForm()
            this, SLOT(handleDataAcquisitionDefinitionChanged(DataAcquisitionDefinition)));
    connect(dataAcquisitionForm, SIGNAL(collectImagesPressed()),
            dataAcquisition, SLOT(handleCollectReducedImages()));
-   connect(dataAcquisitionForm, SIGNAL(initTriggerPressed()),
-           dataAcquisition, SLOT(handleInitTrigger()));
-   connect(dataAcquisitionForm, SIGNAL(triggerPressed()),
-           dataAcquisition, SLOT(handleTrigger()));
-   connect(dataAcquisitionForm, SIGNAL(stopTriggerPressed()),
-           dataAcquisition, SLOT(handleStopTrigger()));
    connect(dataAcquisitionForm, SIGNAL(abortDAQPressed()),
            dataAcquisition, SLOT(handleAbortDAQ()));
    connect(dataAcquisitionForm, SIGNAL(executeOffsets()),

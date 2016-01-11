@@ -9,7 +9,6 @@
         <file>images/Icon.png</file>
         <file>images/splash.png</file>
         <file>images/splash_sm.png</file>
-        <file>images/Hexitec_logo10.png</file>
         <file>images/zoomIn.png</file>
         <file>images/zoomOut.png</file>
         <file>images/test.png</file>
@@ -39,5 +38,8 @@
         <file>images/camera.png</file>
         <file>images/startDAQ.png</file>
         <file>images/stopDAQ.png</file>
+        <file>images/Hexitec_Logo10.png</file>
+        <file>images/Hexitec_Logo.png</file>
+        <file>images/Hexitec_Logo50.png</file>
     </qresource>
 </RCC>

@@ -81,7 +81,6 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    {
       aspectFilename = settings->value("aspectIniFilename").toString();
    }
-
    detectorFactory = DetectorFactory::instance();
    detectorFactory->createGigEDetector(aspectFilename, parent);
 

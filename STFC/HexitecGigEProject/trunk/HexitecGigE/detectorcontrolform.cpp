@@ -129,8 +129,7 @@ void DetectorControlForm::terminateDetector()
 void DetectorControlForm::initialiseFailed()
 {
    emit executeCommand(GigEDetector::CLOSE, 0, 0);
-   ui->initialiseConnection->setEnabled(true);
-   ui->terminateConnection->setEnabled(false);
+   guiIdle();
 }
 
 void DetectorControlForm::handleMonitorData(MonitorData *md)
@@ -187,12 +186,15 @@ void DetectorControlForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
    case DataAcquisitionStatus::IDLE:
       switch (status.getMinorStatus())
       {
-      case DataAcquisitionStatus::READY:
-         guiReady();
-         break;
-      case DataAcquisitionStatus::BIAS_REFRESHING:
-         guiBiasRefreshing();
-         break;
+         case DataAcquisitionStatus::READY:
+            guiReady();
+            break;
+         case DataAcquisitionStatus::BIAS_REFRESHING:
+            guiBiasRefreshing();
+            break;
+         case DataAcquisitionStatus::NOT_INITIALIZED:
+            guiIdle();
+            break;
       }
    case DataAcquisitionStatus::INITIALISING:
       switch (status.getMinorStatus())
@@ -228,12 +230,6 @@ void DetectorControlForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          break;
       case DataAcquisitionStatus::COLLECTING:
          guiCollecting();
-         break;
-      case DataAcquisitionStatus::WAITING_TRIGGER:
-         guiWaitingTrigger();
-         break;
-      case DataAcquisitionStatus::TRIGGERING_STOPPED:
-         guiReady();
          break;
       case DataAcquisitionStatus::DONE:
          guiReady();
@@ -302,8 +298,9 @@ void DetectorControlForm::guiInitialising()
 
 void DetectorControlForm::guiIdle()
 {
-   ui->initialiseConnection->setEnabled(false);
-   ui->terminateConnection->setEnabled(true);
+   ui->initialiseConnection->setEnabled(true);
+   ui->terminateConnection->setEnabled(false);
+   ui->setFingerTemperatureButton->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
 }
 
@@ -314,6 +311,7 @@ void DetectorControlForm::guiReady()
    ui->collectImages->setEnabled(true);
    ui->abortDAQ->setEnabled(false);
    ui->imageCount->setEnabled(true);
+   ui->setFingerTemperatureButton->setEnabled(true);
    if (!hvReservedByScripting && tAboveTdp)
    {
       ui->biasVoltageButton->setEnabled(true);
@@ -344,11 +342,6 @@ void DetectorControlForm::guiCollecting()
 {
    guiDetectorBusy();
    ui->abortDAQ->setEnabled(true);
-}
-
-void DetectorControlForm::guiWaitingTrigger()
-{
-   guiDetectorBusy();
 }
 
 void DetectorControlForm::guiDetectorBusy()

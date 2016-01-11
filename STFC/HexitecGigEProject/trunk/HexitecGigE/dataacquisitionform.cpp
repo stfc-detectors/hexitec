@@ -40,11 +40,7 @@ QMainWindow *DataAcquisitionForm::getMainWindow()
 
 void DataAcquisitionForm::connectSignals()
 {
-   connect(ui->mode, SIGNAL(currentIndexChanged(int)), this, SLOT(modeChanged(int)));
    connect(ui->collectImages, SIGNAL(pressed()), this, SLOT(handleCollectImagesPressed()));
-   connect(ui->initTrigger, SIGNAL(pressed()), this, SLOT(handleInitTriggerPressed()));
-   connect(ui->trigger, SIGNAL(pressed()), this, SLOT(handleTriggerPressed()));
-   connect(ui->stopTrigger, SIGNAL(pressed()), this, SLOT(handleStopTriggerPressed()));
    connect(ui->abortDAQ, SIGNAL(pressed()), this, SLOT(handleAbortDAQPressed()));
    connect(ui->dataFileTimestamp, SIGNAL(stateChanged(int)), this, SLOT(handleDataFilename()));
    connect(ui->dataFileDirectory, SIGNAL(textChanged(QString)), this, SLOT(handleDataFilename()));
@@ -130,21 +126,6 @@ void DataAcquisitionForm::handleCollectImagesPressed()
    emit collectImagesPressed();
 }
 
-void DataAcquisitionForm::handleInitTriggerPressed()
-{
-   emit initTriggerPressed();
-}
-
-void DataAcquisitionForm::handleTriggerPressed()
-{
-   emit triggerPressed();
-}
-
-void DataAcquisitionForm::handleStopTriggerPressed()
-{
-   emit stopTriggerPressed();
-}
-
 void DataAcquisitionForm::handleAbortDAQPressed()
 {
    emit abortDAQPressed();
@@ -198,7 +179,7 @@ void DataAcquisitionForm::handleDataAcquisitionDefinition()
    dataAcquisitionDefinition.setDuration(microSeconds);
    dataAcquisitionDefinition.setRepeatInterval(ui->repeatInterval->value() * 1000.0);
    dataAcquisitionDefinition.setRepeatCount(ui->repeatCount->value());
-   enableRepeats(ui->mode->currentIndex());
+   enableRepeats();
    emit dataAcquisitionDefinitionChanged(dataAcquisitionDefinition);
 }
 
@@ -235,28 +216,6 @@ void DataAcquisitionForm::handleMonitorData(MonitorData *md)
    }
 }
 
-void DataAcquisitionForm::setModes(QStringList modes)
-{
-   ui->mode->addItems(modes);
-   ui->mode->addItem(invalidItemText);
-}
-
-void DataAcquisitionForm::modeChanged(int mode)
-{
-   //qDebug() << "DataAcquisitionForm::modeChanged(int mode): " << mode;
-   ui->mode->setCurrentIndex(mode);
-   if (ui->mode->currentText() != invalidItemText)
-   {
-       qDebug() <<"Change GUI sensitivity here!";
-       disableGui();
-   }
-}
-
-void DataAcquisitionForm::handleModeChanged(GigEDetector::Mode mode)
-{
-   ui->mode->setCurrentIndex(mode);
-}
-
 void DataAcquisitionForm::handleDataChanged(DataAcquisitionDefinition dataAcquisitionDefinition)
 {
    QString directory = dataAcquisitionDefinition.getDataFilename()->getDirectory();
@@ -281,27 +240,6 @@ void DataAcquisitionForm::handleDataChanged(DataAcquisitionDefinition dataAcquis
    ui->duration->setValue(dataAcquisitionDefinition.getDuration()/1000);
    ui->repeatCount->setValue(dataAcquisitionDefinition.getRepeatCount());
    ui->repeatInterval->setValue(dataAcquisitionDefinition.getRepeatInterval()/1000);
-}
-
-void DataAcquisitionForm::handleDataChanged(QString mode)
-{
-   //qDebug() <<"Scripting causing handleDataChanged with mode: " << mode;
-   int count = ui->mode->count();
-
-   for (int i = 0; i < count; i++)
-   {
-      if (mode == ui->mode->itemText(i))
-      {
-         if (mode != ui->mode->currentText())
-         {
-            operatedForScripting = true;
-            //qDebug() << "Scripting wants GUI to control mode change.";
-            disableGui();
-            ui->mode->setCurrentIndex(i);
-         }
-         break;
-      }
-   }
 }
 
 void DataAcquisitionForm::prepareForOffsets()
@@ -340,8 +278,6 @@ void DataAcquisitionForm::dataCollectionDialogRejected()
 void DataAcquisitionForm::guiBiasRefreshing()
 {
    ui->collectImages->setEnabled(false); // Disable data collection during bias refresh
-   ui->trigger->setEnabled(false); // Disable triggering during bias refresh
-   ui->initTrigger->setEnabled(false); // Disable initialise trigger during bias refresh
 }
 
 void DataAcquisitionForm::handleBiasRefreshed(QString time)
@@ -359,24 +295,33 @@ void DataAcquisitionForm::handleCollectingChanged(bool collectingOn)
 
 void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStatus status)
 {
+   int progress = 0;
+   int currImg = status.getCurrentImage();
+   int daqImgs = status.getDaqImages();
+
    ui->state->setText(status.getMessage());
    switch (status.getMajorStatus())
    {
    case DataAcquisitionStatus::IDLE:
       switch (status.getMinorStatus())
       {
-      case DataAcquisitionStatus::READY:
-         if (!operatedForScripting)
-         {
-            guiReady();
-         }
-         break;
-      case DataAcquisitionStatus::BIAS_REFRESHING:
-         if (!operatedForScripting)
-         {
-            guiBiasRefreshing();
-         }
-         break;
+         case DataAcquisitionStatus::READY:
+           if (!operatedForScripting)
+            {
+               guiReady();
+            }
+            break;
+         case DataAcquisitionStatus::BIAS_REFRESHING:
+            if (!operatedForScripting)
+            {
+               guiBiasRefreshing();
+            }
+            break;
+         case DataAcquisitionStatus::NOT_INITIALIZED:
+            if (!operatedForScripting)
+            {
+               guiIdle();
+            }
       }
    case DataAcquisitionStatus::INITIALISING:
       switch (status.getMinorStatus())
@@ -406,14 +351,15 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
       }
       break;
    case DataAcquisitionStatus::ACQUIRING_DATA:
-      int progress = 100;
-      int currImg = status.getCurrentImage();
-      int daqImgs = status.getDaqImages();
-      if (currImg > 0 && daqImgs > 0)
+      if (daqImgs > 0)
       {
          if (currImg <= daqImgs)
          {
             progress = 100 * status.getCurrentImage() / status.getDaqImages();
+         }
+         else
+         {
+            progress = 100;
          }
       }
       ui->progressBar->setValue(progress);
@@ -447,19 +393,7 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
       case DataAcquisitionStatus::COLLECTING:
          guiCollecting();
          break;
-      case DataAcquisitionStatus::WAITING_TRIGGER:
-         if (!operatedForScripting)
-         {
-            guiWaitingTrigger();
-         }
-         break;
-      case DataAcquisitionStatus::TRIGGERING_STOPPED:
-         if (!operatedForScripting)
-         {
-            guiReady();
-         }
-         break;
-      case DataAcquisitionStatus::DONE:
+     case DataAcquisitionStatus::DONE:
          if (!operatedForScripting)
          {
             guiReady();
@@ -480,21 +414,20 @@ void DataAcquisitionForm::guiInitialising()
 {
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
-   ui->initTrigger->setEnabled(false);
 }
 
 void DataAcquisitionForm::guiIdle()
 {
    ui->abortDAQ->setEnabled(false);
+   ui->collectImages->setEnabled(false);
+   emit disableMainWindowActions();
 }
 
 void DataAcquisitionForm::guiReady()
 {
-   int mode = ui->mode->currentIndex();
-
    emit enableMainWindowActions();
-   guiMode(ui->mode->currentIndex());
-   enableRepeats(mode);
+   guiMode();
+   enableRepeats();
    enableLogfileParameters(!loggingEnabled);
 }
 
@@ -522,26 +455,6 @@ void DataAcquisitionForm::guiCollecting()
 {
    guiDetectorBusy();
    ui->abortDAQ->setEnabled(true);
-   ui->trigger->setEnabled(false);
-   ui->stopTrigger->setEnabled(false);
-}
-
-void DataAcquisitionForm::guiWaitingTrigger()
-{
-   int mode = ui->mode->currentIndex();
-   guiDetectorBusy();
-
-   if (mode == GigEDetector::SOFT_TRIGGER)
-   {
-       ui->trigger->setEnabled(true);
-   }
-   else
-   {
-       ui->trigger->setEnabled(false);
-   }
-
-   ui->stopTrigger->setEnabled(true);
-   ui->initTrigger->setEnabled(false);
 }
 
 void DataAcquisitionForm::guiDetectorBusy()
@@ -550,7 +463,6 @@ void DataAcquisitionForm::guiDetectorBusy()
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
 
-   ui->mode->setEnabled(false);
    ui->collectImages->setEnabled(false);
    ui->offsetsButton->setEnabled(false);
    ui->dataFileDirectory->setEnabled(false);
@@ -562,8 +474,6 @@ void DataAcquisitionForm::guiDetectorBusy()
    ui->logFileTimestamp->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
    ui->duration->setEnabled(false);
-   ui->trigger->setEnabled(false);
-   ui->initTrigger->setEnabled(false);
    disableRepeats();
 }
 
@@ -573,15 +483,13 @@ void DataAcquisitionForm::disableGui()
    ui->abortDAQ->setEnabled(false);
 }
 
-void DataAcquisitionForm::guiMode(int mode)
+void DataAcquisitionForm::guiMode()
 {
    ui->abortDAQ->setEnabled(false);
-   ui->trigger->setEnabled(false);
-   ui->mode->setEnabled(true);
    ui->loggingEnabled->setEnabled(true);
    disableRepeats();
 
-   mode = GigEDetector::CONTINUOUS;
+   int mode = GigEDetector::CONTINUOUS;
    switch (mode)
    {
    case GigEDetector::CONTINUOUS:
@@ -592,33 +500,9 @@ void DataAcquisitionForm::guiMode(int mode)
       ui->dataFilePrefix->setEnabled(true);
       ui->dataFileTimestamp->setEnabled(true);
       ui->offsetsButton->setEnabled(true);
-      ui->initTrigger->setEnabled(false);
-      ui->stopTrigger->setEnabled(false);
-      enableRepeats(mode);
+      enableRepeats();
       break;
-   case GigEDetector::SOFT_TRIGGER:
-      ui->collectImages->setEnabled(false);
-      ui->duration->setEnabled(true);
-      ui->dataFileDirectory->setEnabled(true);
-      ui->dataFileDirectoryButton->setEnabled(true);
-      ui->dataFilePrefix->setEnabled(true);
-      ui->dataFileTimestamp->setEnabled(true);
-      ui->offsetsButton->setEnabled(true);
-      ui->initTrigger->setEnabled(true);
-      ui->stopTrigger->setEnabled(false);
-      break;
-   case GigEDetector::EXTERNAL_TRIGGER:
-      ui->collectImages->setEnabled(false);
-      ui->duration->setEnabled(true);
-      ui->dataFileDirectory->setEnabled(true);
-      ui->dataFileDirectoryButton->setEnabled(true);
-      ui->dataFilePrefix->setEnabled(true);
-      ui->dataFileTimestamp->setEnabled(true);
-      ui->offsetsButton->setEnabled(true);
-      ui->initTrigger->setEnabled(true);
-      ui->stopTrigger->setEnabled(false);
-      break;
-   case GigEDetector::FIXED:
+
    case GigEDetector::GIGE_DEFAULT:
    case GigEDetector::INVALID_MODE:
       ui->collectImages->setEnabled(false);
@@ -628,13 +512,11 @@ void DataAcquisitionForm::guiMode(int mode)
       ui->dataFilePrefix->setEnabled(false);
       ui->dataFileTimestamp->setEnabled(false);
       ui->offsetsButton->setEnabled(false);
-      ui->initTrigger->setEnabled(false);
-      ui->stopTrigger->setEnabled(false);
       break;
    }
 }
 
-void DataAcquisitionForm::enableRepeats(int mode)
+void DataAcquisitionForm::enableRepeats()
 {
    ui->repeatCount->setEnabled(true);
    if (ui->repeatCount->value() > 1)

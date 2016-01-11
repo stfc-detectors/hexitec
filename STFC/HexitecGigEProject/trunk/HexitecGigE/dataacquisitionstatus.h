@@ -20,7 +20,8 @@ public:
                      OFFSETS,
                      OFFSETS_PREP,
                      WAITING_DARK,
-                     TRIGGERING_STOPPED};
+                     TRIGGERING_STOPPED,
+                     NOT_INITIALIZED};
 
    DataAcquisitionStatus(MajorStatus majorStatus = DataAcquisitionStatus::IDLE,
                          MinorStatus minorStatus = DataAcquisitionStatus::READY);
