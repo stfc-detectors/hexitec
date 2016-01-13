@@ -22,7 +22,7 @@ class RenderArea : public QWidget
     Q_OBJECT
 
 private:
-
+   bool showColorBars;
 public:
     RenderArea(QWidget *parent = 0);
 
@@ -104,6 +104,7 @@ public slots:
     void setNMean(double);
     void setMinimumColour(int);
     void setMaximumColour(int);
+    void colorBarsToggle();
 
 protected:
     void paintEvent(QPaintEvent *event);

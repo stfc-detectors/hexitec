@@ -41,5 +41,6 @@
         <file>images/Hexitec_Logo10.png</file>
         <file>images/Hexitec_Logo.png</file>
         <file>images/Hexitec_Logo50.png</file>
+        <file>images/HEXITEC_mini.ico</file>
     </qresource>
 </RCC>

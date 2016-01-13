@@ -32,6 +32,7 @@ RenderArea::RenderArea(QWidget *parent) :
    axes.maxZ = 255.0;
    maxColor = 255.0;
    zMode = 0;
+   showColorBars = true;
 
    overPixelState = false;
    overColorBarState = false;
@@ -505,6 +506,22 @@ void RenderArea::renderChannel(double value, Slice *slice)
       this->stats();
       this->autoScaleZ();
    }
+}
+
+void RenderArea::colorBarsToggle()
+{
+   qDebug() <<"Toggling the colourBars";
+   showColorBars = ! showColorBars;
+   if (showColorBars)
+   {
+      this->colorBarOn();
+      this->axes.autoScaleZ = true;
+   }
+   else
+   {
+      this->colorBarOff();
+   }
+   update();
 }
 
 void RenderArea::setColorBar(bool colorBar)

@@ -27,20 +27,24 @@ QToolBar *MainViewer::createToolbar()
    QAction *renderZoomInAct = new QAction(QIcon(":/images/zoomIn.png"), tr(""),this);
    QAction *renderZoomOutAct = new QAction(QIcon(":/images/zoomOut.png"), tr(""),this);
    QAction *renderGridToggle = new QAction(QIcon(":/images/grid.png"), tr(""),this);
+   QAction *colorBarsToggle = new QAction(QIcon(":/images/lockSTAR.png"), tr(""),this);
    QAction *cycleColorMap = new QAction(QIcon(":/images/colorWheel.png"), tr(""),this);
 
    renderZoomInAct->setText("Zoom In");
    renderZoomOutAct->setText("Zoom Out");
+   colorBarsToggle->setText(tr("Toggle Colour Bars"));
    renderGridToggle->setText(tr("Toggle Grid"));
 
    renderToolBar->addAction(renderZoomInAct);
    renderToolBar->addAction(renderZoomOutAct);
    renderToolBar->addAction(renderGridToggle);
+   renderToolBar->addAction(colorBarsToggle);
    renderToolBar->addAction(cycleColorMap);
 
    connect(renderZoomInAct, SIGNAL(triggered()), renderArea, SLOT(zoomIn()));
    connect(renderZoomOutAct, SIGNAL(triggered()), renderArea, SLOT(zoomOut()));
    connect(renderGridToggle, SIGNAL(triggered()), renderArea, SLOT(gridToggle()));
+   connect(colorBarsToggle, SIGNAL(triggered()), renderArea, SLOT(colorBarsToggle()));
    connect(cycleColorMap, SIGNAL(triggered()), renderArea, SLOT(cycleColorMap()));
 
    return renderToolBar;

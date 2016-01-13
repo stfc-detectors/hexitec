@@ -64,7 +64,7 @@ MainWindow::MainWindow()
       setWindowTitle(nonDAQVersion);
       setWindowIconText(nonDAQVersion);
    }
-   setWindowIcon(QIcon(":/images/Icon.ico"));
+   setWindowIcon(QIcon(":/images/HEXITEC_mini.ico"));
    setMinimumSize(705,730);
    setUnifiedTitleAndToolBarOnMac(true);
    createMenus();
@@ -580,8 +580,6 @@ void MainWindow::createMenus()
    QAction *quitAct = new QAction(tr("&Quit"), this);
    QAction *aboutAct = new QAction(tr("&About"), this);
    QAction *aboutQtAct = new QAction(tr("About &Qt"), this);
-   QAction *descriminateReadAct = new QAction(QIcon(":/images/ReadColorImage.png"), tr(""),this);
-   QAction *prinCompsAction = new QAction(QIcon(":/images/Components-icon.png"), tr(""),this);
 
    readAction->setShortcuts(QKeySequence::New);
    quitAct->setShortcuts(QKeySequence::Quit);
@@ -591,17 +589,12 @@ void MainWindow::createMenus()
    quitAct->setStatusTip(tr("Quit the application"));
    aboutAct->setStatusTip(tr("Show the application's About box"));
    aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-   descriminateReadAct->setStatusTip(tr("Load data with charge descrinimation"));
-   prinCompsAction ->setStatusTip(tr("Get Principle Components"));
 
    connect(deleteSliceAct, SIGNAL(triggered()), this, SLOT(deleteActiveSlice()));
    connect(readAction, SIGNAL(triggered()), this, SLOT(readFiles()));
    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-   connect(descriminateReadAct, SIGNAL(triggered()), this, SLOT(externalChargeShare()));
-   connect(prinCompsAction , SIGNAL(triggered()), this, SLOT(getPrinComps()));
-
 
    /*QMenu **/fileMenu = menuBar()->addMenu(tr("&File"));
    viewMenu = menuBar()->addMenu(tr("&View"));
@@ -610,7 +603,6 @@ void MainWindow::createMenus()
    // Must make fileMenu a class number
 //   this->fileMenu
    fileMenu->addAction(readAction);
-   fileMenu->addAction(descriminateReadAct);
    fileMenu->addAction(deleteSliceAct);
    fileMenu->addSeparator();
    fileMenu->addAction(quitAct);
@@ -624,8 +616,6 @@ void MainWindow::createMenus()
    fileToolBar->addAction(stopDAQAct);
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
-   fileToolBar->addAction(descriminateReadAct);
-   fileToolBar->addAction(prinCompsAction);
 
    QAction *exportActiveSliceToMatlab = new QAction(QIcon(":/images/exportToMatlab.png"), tr(""),this);
    exportActiveSliceToMatlab->setText(tr("Export active slice to Matlab"));
