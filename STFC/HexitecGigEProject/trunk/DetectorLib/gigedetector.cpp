@@ -112,7 +112,7 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
-//   qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
+   qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
    if (mode == CONTINUOUS)
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
@@ -644,6 +644,7 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
    sensorConfig.WaitClockCol = 1;
    sensorConfig.WaitClockRow = 8;
 
+//   !!! Column configuration through the GigE.dll is failing and always returns 80 for xRes!
    sensorConfig.SetupRow = initSetupRegister("Row");
    sensorConfig.SetupCol = initSetupRegister("Column");
 
