@@ -150,10 +150,10 @@ protected:
     bool mEnableCallback;
     vector<unsigned short*> mBufferNames;
     vector<unsigned long>  mValidFrames;
-    vector<unsigned short*> mHxtBuffers;    /// Pool of buffers;signalled to Visualisation tab to be displayed
+    vector<HxtBuffer*> mHxtBuffers;    /// Pool of buffers;signalled to Visualisation tab to be displayed
     unsigned int numHxtBuffers;
     bool mFirstBufferInCollection;
-    bool bFirstTime;                        // Prevent mHxtBuffers initialised more than once
+    bool bFirstTime;                        // Prevent mHxtBuffers initialised more than once - NOT YET implemented! ['15 Dec 11]
     ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
     HxtPixelThreshold* pixelThreshold;
     HxtRawDataProcessor* dataProcessor;

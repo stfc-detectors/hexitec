@@ -25,7 +25,6 @@
 #include <QPair>
 #include "hxtfilereader.h"
 #include "hexitecsofttrigger.h"
-#include "hardtrigger.h"
 #include "dataacquisitionmodel.h"
 #include "serialport.h"
 #include "badinifiledialog.h"
@@ -195,8 +194,8 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-   // Allow MainWindow signal to processWindow's HxtProcessor when config updated
-   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
+   // Allow MainWindow signal to processWindow's HxtProcessor when config updated - NOT YET implemented [Dec 11]
+   //connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
 
    if (activeDAQ)
    {

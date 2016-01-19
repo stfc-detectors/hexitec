@@ -144,7 +144,7 @@ HxtProcessing::~HxtProcessing()
     if (momCorrector != 0) delete momCorrector;
     delete momentumContents;
     // Free pool of buffers
-    vector<unsigned short*>::iterator bufferIterator;
+    vector<HxtBuffer*>::iterator bufferIterator;
     for (bufferIterator = mHxtBuffers.begin(); bufferIterator != mHxtBuffers.end(); bufferIterator++)
     {
         /*delete [] bufferIterator*/;   /// Revisit this..
@@ -161,13 +161,14 @@ void HxtProcessing::prepSettings()
         // Setup pool of buffers - To send HXT file contents by RAM rather than file
         for (int i=0; i < numHxtBuffers; i++)
         {
-            unsigned short* hxtBuffer = new unsigned short[59381];
+            HxtBuffer* hxtBuffer = new HxtBuffer;
             mHxtBuffers.push_back(hxtBuffer);
         }
     }
     // Extract file path of hexitech file
     QFileInfo fileInfo(mOutputFileNameDecodedFrame.c_str());
     string filePath = fileInfo.absolutePath().toStdString();
+
 
     // Obtain date stamp, save logging to the same folder as processed file
     DateStamp* now = new DateStamp();
@@ -521,6 +522,9 @@ void HxtProcessing::run()
     mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 515;
     mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 516;
     float discWritingInterval = 1.0, timeSinceLastDiscOp = 0.0;
+
+//    discWritingInterval = 0.1;
+//    qDebug() << " ***  DON'T FORGET TO RESTORE: HxtProcessing.CPP::run    deskWritingInterval = 0.1 seconds (not 1.0 seconds)";
 
     // Initialise timer tracking whether we are idling
     mIdleTimer->start();
@@ -1263,7 +1267,7 @@ void HxtProcessing::configHeaderEntries(string fileName)
     if (bPrefixEnabled)
         mFilePrefix = filePrefix;
     else
-        mFilePrefix = "(blank)";
+        mFilePrefix = "(blank )";
 
     // If data timestamp enabled use dateStrings
     if (bTimeStampEnabled)
@@ -1371,9 +1375,10 @@ void HxtProcessing::setManualProcessing(bool bManualEnabled)
 }
 
 void HxtProcessing::handleReturnHxtBuffer(unsigned short *buffer)
+//void HxtProcessing::handleReturnHxtBuffer(HxtBuffer *buffer)
 {
-    qDebug() << "HxtProcessing Returning buffer from the Visualisation tab";
-    mHxtBuffers.push_back(buffer);
+    qDebug() << "HxtProcessing Returning buffer from the Visualisation tab, address: " << (void*)buffer;
+    mHxtBuffers.push_back((HxtBuffer *) buffer);
 }
 
 void HxtProcessing::savePrefix(bool bPrefixChecked)
@@ -1558,7 +1563,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
 
         // Processing of file(s)?
 //        if (bProcessFiles)
-        {   qDebug() << "Time to process file(s)..";
+//        {   qDebug() << "Time to process file(s).. [JUST FILES]";
             // Write output files
             dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
 
@@ -1587,7 +1592,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
 //        }
 //        else    //Processing of buffer(s)
 //        {
-            qDebug() << "Time to process the buffers ";
+//            qDebug() << "Time to process the buffers [ONLY]";
             /// Checkat least 1 buffer available before proceeding
             if (mHxtBuffers.empty())
             {
@@ -1596,19 +1601,52 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
                 return -1;
             }
             // Copy "output files" into buffer
-            unsigned short* hxtBuffer = 0;
-            hxtBuffer = mHxtBuffers.at(0);
-            dataProcessor->copyPixelOutput(hxtBuffer);
+            HxtBuffer* hxtBuffer = 0;
 
-            // Erase element 0 from vector
-            mHxtBuffers.erase(mHxtBuffers.begin());
+            hxtBuffer = *mHxtBuffers.begin();
+            qDebug() << " * " << (void*)(hxtBuffer)  << " <- HxtProcessing.cpp:1607 (hxtBuffer)";
+            dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
+
+            /// --- 3 blocks of debug code
+//            qDebug() << "       DEBUGGING, let's look inside hxtBuffer (local copy)";
+//            qDebug() << " * " << (hxtBuffer)  << " <- HxtProcessing.cpp:1611 (hxtBuffer)";
+//            qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
+//            qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
+//            qDebug() << "  (local copy) hxtBuffer hxtPrefixLength " << QString::number( ((HxtBuffer*)hxtBuffer)->filePrefixLength);
+
+//            for (int i = 0; i < 3; i++)
+//            {
+//                qDebug() << i << QString::number( ((HxtBuffer*)hxtBuffer)->motorPositions[i]);
+//            }
+//            qDebug() << "  (local copy) hxtBuffer filePrefix " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->filePrefix) << " @ " << &( ((HxtBuffer*)hxtBuffer)->filePrefix);
+//            qDebug() << "  (local copy) hxtBuffer dataTimeStamp " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->dataTimeStamp);
+//            qDebug() << "  (local copy) hxtBuffer nRows " << QString::number( ((HxtBuffer*)hxtBuffer)->nRows);
+//            qDebug() << "  (local copy) hxtBuffer nCols " << QString::number( ((HxtBuffer*)hxtBuffer)->nCols);
+//            qDebug() << "  (local copy) hxtBuffer nBins " << QString::number( ((HxtBuffer*)hxtBuffer)->nBins) << " @ " << &( ((HxtBuffer*)hxtBuffer)->nBins);
+
+//            qDebug() << " --------- Histogram's bin start values & Histograms: [HxtProcessing.CPP:1627 - And here's hxtBuffer when returned from copyPixelOutput()] ----------";
+//            int k = 0;
+//            for (int i = 0; i < 6; i++)
+//            {
+//                qDebug() << " L" << i << " = " <<((HxtBuffer*)hxtBuffer)->allData[i] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[i];
+//                k = 1000 + i;
+//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k];
+//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+1] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+1];
+//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+2] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+2];
+//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+3];
+//            }
+            /// ---
 
             // Signal that processed data [inside RAM] is ready to be displayed in the GUI
             // DSoFt: added filename to indicate when a new image/slice begins as this will change.
             // This is a quick fix and should be reviewed.
-            qDebug() <<"#############emit hexitechBufferToDisplay: hxtBuffer contains: " << *hxtBuffer;
-            emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName));
-        }
+            qDebug() <<"emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName))";
+            emit hexitechBufferToDisplay( (unsigned short*)hxtBuffer, QString::fromStdString(fileName));
+
+            //// Erasing element 0 from vector safe?
+            qDebug() << "Erasing element 0 from mHxtBuffer vector, address: " << (void*)hxtBuffer;
+            mHxtBuffers.erase(mHxtBuffers.begin());
+//        }
         bWriteFiles = false;
     }
 
