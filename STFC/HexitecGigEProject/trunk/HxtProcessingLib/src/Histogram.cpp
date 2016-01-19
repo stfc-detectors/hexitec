@@ -9,6 +9,9 @@
 #include <iostream>
 #include "Histogram.h"
 
+//#include <QDebug>
+#include "HxtRawDataTypes.h"
+
 /// Histogram constructor - creates and initialises to zero
 /// a histogram with a specified number of bins between
 /// start and end values
@@ -193,24 +196,34 @@ void Histogram::BinaryWriteContent(std::ofstream& aOutFile) {
 
 }
 
-void Histogram::BinaryCopyBins(char* aHxtBuffer) {
+int Histogram::BinaryCopyBins(char* aBuffer) {
 
-    unsigned short* pBuffer = (unsigned short*) aHxtBuffer;
+    double* pBuffer = (double*) aBuffer;
+
+    int numberBytesCopied = -1;
+    numberBytesCopied = mBins * sizeof(double);
+
     for (unsigned int iBin = 0; iBin < mBins; iBin++) {
         double binStart = this->GetBinStart(iBin);
-        memcpy(pBuffer, (char*)&binStart, sizeof(binStart));
+        memcpy((void*)pBuffer, (void*)&binStart, sizeof(binStart));
         pBuffer++;
     }
-
+    return numberBytesCopied;
 }
 
-void Histogram::BinaryCopyContent(char* aHxtBuffer) {
+int Histogram::BinaryCopyContent(char* aBuffer) {
 
-    unsigned short* pBuffer = (unsigned short*) aHxtBuffer;
+    double* pBuffer = (double*) aBuffer;
+
+    int numberBytesCopied = 0;
+
     for (unsigned int iBin = 0; iBin < mBins; iBin++) {
+
         double content = (double)this->GetBinContent(iBin);
-        memcpy(pBuffer, (char*)&content, sizeof(content));
+        memcpy(pBuffer, (void*)&content, sizeof(content));
         pBuffer++;
+        numberBytesCopied += 8;
     }
 
+    return numberBytesCopied;
 }

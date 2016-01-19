@@ -40,8 +40,8 @@ public:
 	void BinaryWriteBins(std::ofstream& aOutFile);
 	void BinaryWriteContent(std::ofstream& aOutFile);
     /// HexitecGigE Added:
-    void BinaryCopyBins(char* aHxtBuffer);
-    void BinaryCopyContent(char* aHxtBuffer);
+    int BinaryCopyBins(char* aBuffer);
+    int BinaryCopyContent(char* aBuffer);
 private:
 
 	double mStart, mBinsInterval;
