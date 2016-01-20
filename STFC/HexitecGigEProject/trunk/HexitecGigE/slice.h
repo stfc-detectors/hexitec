@@ -22,6 +22,11 @@ S D M Jacques 24 Feb 2011
 #include "Dense"
 using namespace Eigen;
 
+static const int MAX_BINS = 1000;
+static const int MAX_ROWS = 80;
+static const int MAX_COLS = 80;
+static const int MAX_SPECTRUM_SIZE = MAX_BINS * MAX_ROWS * MAX_COLS;
+
 class Slice : public QObject, public TreeItem, public Reservable
 {
    Q_OBJECT
@@ -97,8 +102,9 @@ private:
        quint32 nRows;
        quint32 nCols;
        quint32 nBins;
-       double channel[1000];
-       double spectrum[6400];
+       double channel[MAX_BINS];
+       double *spectrum;
+//       double spectrum[64000];
 //       double allData[6401000];
 /* This is calculated from the maximum possible bins, rows and columns as follows:
  * max bins = 1000, max rows = 80, max cols = 80 therefore:

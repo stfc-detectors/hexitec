@@ -1016,30 +1016,25 @@ bool Slice::readXMY(QStringList fileNames)
 bool Slice::readHXT(unsigned short *buffer)
 {
     struct HxtBuffer hxtBuffer;
-    unsigned int bufferSize = sizeof(hxtBuffer);
+    hxtBuffer.spectrum = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
+    double *spectrumPointer;
+    spectrumPointer = hxtBuffer.spectrum;
     Voxel *voxelPointer;
 
+    unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
     qDebug() << "Slice::readHXT hxtBuffer size = " << bufferSize;
     memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
-    qDebug() << "Slice BUFFER label " << QString::fromStdString(hxtBuffer.hxtLabel);
-    qDebug() << "Slice BUFFER version " << QString::number(hxtBuffer.hxtVersion);
-    qDebug() << "Slice BUFFER hxtPrefixLength " << QString::number(hxtBuffer.filePrefixLength);
-    for (int i = 0; i < 9; i++)
-    {
-        qDebug() << i << QString::number(hxtBuffer.motorPositions[i]);
-    }
-    qDebug() << "Slice BUFFER filePrefix " << QString::fromStdString(hxtBuffer.filePrefix);
-    qDebug() << "Slice BUFFER dataTimeStamp " << QString::fromStdString(hxtBuffer.dataTimeStamp);
-    qDebug() << "Slice BUFFER nRows " << QString::number(hxtBuffer.nRows);
-    qDebug() << "Slice BUFFER nCols " << QString::number(hxtBuffer.nCols);
-    qDebug() << "Slice BUFFER nBins " << QString::number(hxtBuffer.nBins);
+    memcpy((void *) spectrumPointer, (void *) (buffer + bufferSize/sizeof(unsigned short)), 6400000 * sizeof(double));
+
+    gridSizeX = hxtBuffer.nRows;
+    gridSizeY = hxtBuffer.nCols;
 
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) &(hxtBuffer.channel), hxtBuffer.nBins * sizeof(double));
+    memcpy((void *) spectrumPointer, (void *) &(hxtBuffer.channel), hxtBuffer.nBins * sizeof(double));
 
     contentVoxel.resize(hxtBuffer.nRows);
     Voxel *v = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
-    qDebug() << "Allocated voxels " << sizeof(*v)/sizeof(Voxel);
 
     int currentVoxel = 0;
     for (int iRow = 0; iRow < hxtBuffer.nRows; iRow++)
@@ -1047,24 +1042,22 @@ bool Slice::readHXT(unsigned short *buffer)
        contentVoxel[iRow].resize(hxtBuffer.nCols);
        for (int iCol = 0; iCol < hxtBuffer.nCols; iCol++)
        {
-           voxelPointer = &v[currentVoxel++];
+           voxelPointer = &v[currentVoxel];
            voxelPointer->contentXData.resize(hxtBuffer.nBins);
            voxelPointer->contentYData.resize(hxtBuffer.nBins);
            contentVoxel[iRow][iCol] = voxelPointer;
-           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) &(hxtBuffer.spectrum), hxtBuffer.nBins * sizeof(double));
+           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (spectrumPointer), hxtBuffer.nBins * sizeof(double));
+           currentVoxel++;
+           spectrumPointer += hxtBuffer.nBins;
        }
     }
 
     qDebug() <<"Finished vector loop!!!!!";
-/* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
- */
-//    voxelDataLen = hxtBuffer.nBins;
-//    zeroStats();
-//    xType = COMMON;
-    /* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
-     */
-//    return (true);
-    return readHXT("C:\\karen\\STFC\\Technical\\DSoFt_New_Images\\V3Processing.hxt");
+    voxelDataLen = hxtBuffer.nBins;
+    zeroStats();
+    xType = COMMON;
+    free(hxtBuffer.spectrum);
+    return (true);
 }
 
 bool Slice::readHXT(QString fileName)
