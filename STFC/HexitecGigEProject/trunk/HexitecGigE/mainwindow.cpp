@@ -25,6 +25,7 @@
 #include <QPair>
 #include "hxtfilereader.h"
 #include "hexitecsofttrigger.h"
+#include "hardtrigger.h"
 #include "dataacquisitionmodel.h"
 #include "serialport.h"
 #include "badinifiledialog.h"
@@ -194,8 +195,8 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
    connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-   // Allow MainWindow signal to processWindow's HxtProcessor when config updated - NOT YET implemented [Dec 11]
-   //connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
+   // Allow MainWindow signal to processWindow's HxtProcessor when config updated
+   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
 
    if (activeDAQ)
    {
@@ -792,7 +793,7 @@ void MainWindow::readFiles(QStringList files)
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
    int sliceNumber = -1;
-   qDebug() << "MainWindow received a buffer containing " << *buffer;
+   qDebug() << "MainWindow received a buffer containing " << *buffer << fileName;
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->getSliceToReplace();

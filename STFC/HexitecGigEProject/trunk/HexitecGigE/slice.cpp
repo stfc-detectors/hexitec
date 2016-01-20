@@ -137,17 +137,11 @@ Slice::Slice(QString name, QStringList fileNameList)
 Slice::Slice(QString name, unsigned short* buffer, QString fileName)
 {
    preDataInit(name);
-/*
-   QString fileSuffix = QFileInfo(fileNameList[0]).suffix();
-   // This check is done twice
-   if (fileSuffix.contains("sb") || fileSuffix.contains("xmy"))
-      readXMY(fileNameList);
-   if (fileSuffix.contains("xy") || fileSuffix.contains("txt"))
-      readXY(fileNameList);
 
-   this->fileName = fileNameList[0];*/
+   qDebug() << "BEFORE readHXT: filename: " << fileName;
    readHXT(buffer);
    this->fileName = fileName;
+
    postDataInit(fileName);
 }
 
@@ -198,6 +192,7 @@ void Slice::postDataInit(QString fileName)
    sliceData << objectName() << "Slice" << "" << "";
    QModelIndex parentIndex = DataModel::instance()->getItemIndex("myVolume");
    sliceToReplace = TreeItem::init(sliceData, &parentIndex, objectName(), fileName);
+   qDebug() <<"sliceToReplace: " << sliceToReplace;
 
    if (sliceToReplace >= 0)
    {
@@ -1017,10 +1012,13 @@ bool Slice::readXMY(QStringList fileNames)
    emit writeMessage("size of commonX: " + QString::number(commonX.size()));
    return(true);
 }
+
 bool Slice::readHXT(unsigned short *buffer)
 {
     struct HxtBuffer hxtBuffer;
     unsigned int bufferSize = sizeof(hxtBuffer);
+    Voxel *voxelPointer;
+
     qDebug() << "Slice::readHXT hxtBuffer size = " << bufferSize;
     memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
     qDebug() << "Slice BUFFER label " << QString::fromStdString(hxtBuffer.hxtLabel);
@@ -1036,8 +1034,36 @@ bool Slice::readHXT(unsigned short *buffer)
     qDebug() << "Slice BUFFER nCols " << QString::number(hxtBuffer.nCols);
     qDebug() << "Slice BUFFER nBins " << QString::number(hxtBuffer.nBins);
 
+    commonX.resize(hxtBuffer.nBins);
+    memcpy((void *) &commonX[0], (void *) &(hxtBuffer.channel), hxtBuffer.nBins * sizeof(double));
+
+    contentVoxel.resize(hxtBuffer.nRows);
+    Voxel *v = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
+    qDebug() << "Allocated voxels " << sizeof(*v)/sizeof(Voxel);
+
+    int currentVoxel = 0;
+    for (int iRow = 0; iRow < hxtBuffer.nRows; iRow++)
+    {
+       contentVoxel[iRow].resize(hxtBuffer.nCols);
+       for (int iCol = 0; iCol < hxtBuffer.nCols; iCol++)
+       {
+           voxelPointer = &v[currentVoxel++];
+           voxelPointer->contentXData.resize(hxtBuffer.nBins);
+           voxelPointer->contentYData.resize(hxtBuffer.nBins);
+           contentVoxel[iRow][iCol] = voxelPointer;
+           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) &(hxtBuffer.spectrum), hxtBuffer.nBins * sizeof(double));
+       }
+    }
+
+    qDebug() <<"Finished vector loop!!!!!";
 /* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
  */
+//    voxelDataLen = hxtBuffer.nBins;
+//    zeroStats();
+//    xType = COMMON;
+    /* This is cheating to check the visualisation happens - TODO use structure from hxtBuffer
+     */
+//    return (true);
     return readHXT("C:\\karen\\STFC\\Technical\\DSoFt_New_Images\\V3Processing.hxt");
 }
 
@@ -1826,6 +1852,7 @@ void Slice::attach()
    if (TreeItem::parent()->getType() == TreeItem::VOLUME)
    {
       Volume *volume = static_cast<Volume *>(TreeItem::parent());
+      qDebug() << "attaching the Slice";
       volume->addSlice(this);
    }
 }

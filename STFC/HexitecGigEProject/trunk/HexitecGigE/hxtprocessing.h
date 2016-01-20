@@ -115,6 +115,7 @@ signals:
     void hexitechFilesToDisplay(QStringList filesList);
     // DSoFt: added filename to indicate when a new image/slice begins as this will change.
     // This is a quick fix and should be reviewed.
+//    void hexitechBufferToDisplay(HxtBuffer* hxtBuffer, QString fileName);      /// HexitecGigE Added
     void hexitechBufferToDisplay(unsigned short* hxtBuffer, QString fileName);      /// HexitecGigE Added
     void hexitechSpectrumFile(QString spectrumFile);
     void hexitechConsumedFiles(vector<string> fileNames);

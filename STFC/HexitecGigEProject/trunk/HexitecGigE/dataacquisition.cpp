@@ -573,7 +573,6 @@ void DataAcquisition::handleCollectFixedImages()
 
 void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
 {
-//   if (mode != GigEDetector::FIXED && mode != GigEDetector::GIGE_DEFAULT)
    if (mode != GigEDetector::GIGE_DEFAULT)
    {
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);

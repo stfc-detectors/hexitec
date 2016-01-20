@@ -97,6 +97,8 @@ private:
        quint32 nRows;
        quint32 nCols;
        quint32 nBins;
+       double channel[1000];
+       double spectrum[6400];
 //       double allData[6401000];
 /* This is calculated from the maximum possible bins, rows and columns as follows:
  * max bins = 1000, max rows = 80, max cols = 80 therefore:

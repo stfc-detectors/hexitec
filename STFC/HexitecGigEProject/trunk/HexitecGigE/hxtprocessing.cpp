@@ -1375,10 +1375,9 @@ void HxtProcessing::setManualProcessing(bool bManualEnabled)
 }
 
 void HxtProcessing::handleReturnHxtBuffer(unsigned short *buffer)
-//void HxtProcessing::handleReturnHxtBuffer(HxtBuffer *buffer)
 {
     qDebug() << "HxtProcessing Returning buffer from the Visualisation tab, address: " << (void*)buffer;
-    mHxtBuffers.push_back((HxtBuffer *) buffer);
+    mHxtBuffers.push_back((HxtBuffer*)buffer);
 }
 
 void HxtProcessing::savePrefix(bool bPrefixChecked)
@@ -1641,6 +1640,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
             // DSoFt: added filename to indicate when a new image/slice begins as this will change.
             // This is a quick fix and should be reviewed.
             qDebug() <<"emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName))";
+//            emit hexitechBufferToDisplay( (HxtBuffer*)hxtBuffer, QString::fromStdString(fileName));
             emit hexitechBufferToDisplay( (unsigned short*)hxtBuffer, QString::fromStdString(fileName));
 
             //// Erasing element 0 from vector safe?

@@ -15,6 +15,7 @@ whether the RenderArea is active and if not it will switch off mouse tracking.
 #include <QMouseEvent>
 #include "mainwindow.h"
 #include <QString>
+#include <QDebug>
 
 RenderArea::RenderArea(QWidget *parent) :
    QWidget(parent)
@@ -552,6 +553,7 @@ void RenderArea::setMinimumColour(int minimum)
    if (minimum < axes.maxZ)
    {
       axes.minZ = minimum;
+	  qDebug() << "RenderArea:: update commented out!";
 //      update();
    }
 }
