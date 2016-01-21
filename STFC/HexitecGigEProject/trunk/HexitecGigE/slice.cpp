@@ -1016,26 +1016,31 @@ bool Slice::readXMY(QStringList fileNames)
 bool Slice::readHXT(unsigned short *buffer)
 {
     struct HxtBuffer hxtBuffer;
-    hxtBuffer.spectrum = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
-    double *spectrumPointer;
-    spectrumPointer = hxtBuffer.spectrum;
+    hxtBuffer.allData = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
+    double *allDataPointer;
+    allDataPointer = hxtBuffer.allData;
     Voxel *voxelPointer;
+    unsigned short *tmpBuffer;
 
     unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
-    qDebug() << "Slice::readHXT hxtBuffer size = " << bufferSize;
+    qDebug() << "Slice::readHXT processing a hxtBuffer allocated bytes:" << MAX_SPECTRUM_SIZE * sizeof(double);
     memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
-    memcpy((void *) spectrumPointer, (void *) (buffer + bufferSize/sizeof(unsigned short)), 6400000 * sizeof(double));
+
+    tmpBuffer = buffer + bufferSize/sizeof(unsigned short);
+    bufferSize = ((hxtBuffer.nBins * hxtBuffer.nRows * hxtBuffer.nCols) + hxtBuffer.nBins) * sizeof(double);
+    memcpy((void *) allDataPointer, (void *) tmpBuffer, bufferSize);
 
     gridSizeX = hxtBuffer.nRows;
     gridSizeY = hxtBuffer.nCols;
 
     commonX.resize(hxtBuffer.nBins);
-    memcpy((void *) &commonX[0], (void *) &(hxtBuffer.channel), hxtBuffer.nBins * sizeof(double));
-    memcpy((void *) spectrumPointer, (void *) &(hxtBuffer.channel), hxtBuffer.nBins * sizeof(double));
+    memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
     contentVoxel.resize(hxtBuffer.nRows);
     Voxel *v = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
 
+    qDebug() << "Voxels created.";
+    allDataPointer += hxtBuffer.nBins;
     int currentVoxel = 0;
     for (int iRow = 0; iRow < hxtBuffer.nRows; iRow++)
     {
@@ -1046,9 +1051,9 @@ bool Slice::readHXT(unsigned short *buffer)
            voxelPointer->contentXData.resize(hxtBuffer.nBins);
            voxelPointer->contentYData.resize(hxtBuffer.nBins);
            contentVoxel[iRow][iCol] = voxelPointer;
-           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (spectrumPointer), hxtBuffer.nBins * sizeof(double));
+           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
            currentVoxel++;
-           spectrumPointer += hxtBuffer.nBins;
+           allDataPointer += hxtBuffer.nBins;
        }
     }
 
@@ -1056,7 +1061,7 @@ bool Slice::readHXT(unsigned short *buffer)
     voxelDataLen = hxtBuffer.nBins;
     zeroStats();
     xType = COMMON;
-    free(hxtBuffer.spectrum);
+    free(hxtBuffer.allData);
     return (true);
 }
 

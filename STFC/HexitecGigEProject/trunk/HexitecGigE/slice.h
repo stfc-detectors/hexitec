@@ -25,7 +25,7 @@ using namespace Eigen;
 static const int MAX_BINS = 1000;
 static const int MAX_ROWS = 80;
 static const int MAX_COLS = 80;
-static const int MAX_SPECTRUM_SIZE = MAX_BINS * MAX_ROWS * MAX_COLS;
+static const int MAX_SPECTRUM_SIZE = MAX_BINS * MAX_ROWS * MAX_COLS + MAX_BINS;
 
 class Slice : public QObject, public TreeItem, public Reservable
 {
@@ -102,8 +102,9 @@ private:
        quint32 nRows;
        quint32 nCols;
        quint32 nBins;
-       double channel[MAX_BINS];
-       double *spectrum;
+       double *allData;
+//       double channel[MAX_BINS];
+//       double *spectrum;
 //       double spectrum[64000];
 //       double allData[6401000];
 /* This is calculated from the maximum possible bins, rows and columns as follows:
