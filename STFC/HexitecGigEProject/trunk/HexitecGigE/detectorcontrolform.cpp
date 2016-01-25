@@ -285,7 +285,7 @@ void DetectorControlForm::handleBiasRefreshed(QString time)
 
 void DetectorControlForm::setPixmap(QPixmap pixmap)
 {
-   ui->imageLabel->setPixmap(pixmap);
+   ui->imageLabel->setPixmap(pixmap.scaled(240, 240));
 }
 
 void DetectorControlForm::guiInitialising()
