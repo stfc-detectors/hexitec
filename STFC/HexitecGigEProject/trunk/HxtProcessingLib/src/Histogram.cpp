@@ -9,7 +9,6 @@
 #include <iostream>
 #include "Histogram.h"
 
-//#include <QDebug>
 #include "HxtRawDataTypes.h"
 
 /// Histogram constructor - creates and initialises to zero
@@ -184,7 +183,6 @@ void Histogram::BinaryWriteBins(std::ofstream& aOutFile) {
 		double binStart = this->GetBinStart(iBin);
 		aOutFile.write((char*)&binStart, sizeof(binStart));
 	}
-
 }
 
 void Histogram::BinaryWriteContent(std::ofstream& aOutFile) {
@@ -193,7 +191,6 @@ void Histogram::BinaryWriteContent(std::ofstream& aOutFile) {
 		double content = (double)this->GetBinContent(iBin);
 		aOutFile.write((char*)&content, sizeof(content));
 	}
-
 }
 
 int Histogram::BinaryCopyBins(char* aBuffer) {

@@ -28,30 +28,54 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
                                          int timer,
                                          int galx, int galy, int galz, int galrot,
                                          string filePrefix, string dataTimeStamp, bool enableCallback) :
-                            mRows(aRows),
-                            mCols(aCols),
+//                            mRows(aRows),
+//                            mHxtBuffer.nCols(aCols),
                             mPixels(aRows * aCols),
                             mSubPixelRows(aRows*3),
                             mSubPixelCols(aCols*3),
                             mSubPixelPixels(mSubPixelRows*mSubPixelCols),
                             mHistoStart(aHistoStart),
                             mHistoEnd(aHistoEnd),
-                            mHistoBins(aHistoBins),
+//                            mHistoBins(aHistoBins),
                             mPixelThreshold(new double[aRows * aCols]),
-                            mFormatVersion(formatVersion),
-                            mSSX(ssx),
-                            mSSY(ssy),
-                            mSSZ(ssz),
-                            mSSROT(ssrot),
-                            mTimer(timer),
-                            mGALX(galx),
-                            mGALY(galy),
-                            mGALZ(galz),
-                            mGALROT(galrot),
-                            mFilePrefix(filePrefix),
-                            mDataTimeStamp(dataTimeStamp),
+//                            mFormatVersion(formatVersion),
+//                            mSSX(ssx),
+//                            mSSY(ssy),
+//                            mSSZ(ssz),
+//                            mSSROT(ssrot),
+//                            mTimer(timer),
+//                            mGALX(galx),
+//                            mGALY(galy),
+//                            mGALZ(galz),
+//                            mGALROT(galrot),
+//                            mFilePrefix(filePrefix),
+//                            mDataTimeStamp(dataTimeStamp),
                             mCallbackAvailable(enableCallback)
 {
+    ///Populate mHxtBuffer struct
+    strncpy(mHxtBuffer.hxtLabel, "HEXITECH", 8);
+    mHxtBuffer.hxtVersion = formatVersion;
+    mHxtBuffer.motorPositions[0] = ssx;
+    mHxtBuffer.motorPositions[1] = ssy;
+    mHxtBuffer.motorPositions[2] = ssz;
+    mHxtBuffer.motorPositions[3] = ssrot;
+    mHxtBuffer.motorPositions[4] = timer;
+    mHxtBuffer.motorPositions[5] = galx;
+    mHxtBuffer.motorPositions[6] = galy;
+    mHxtBuffer.motorPositions[7] = galz;
+    mHxtBuffer.motorPositions[8] = galrot;
+    strncpy(mHxtBuffer.filePrefix, filePrefix.c_str(), filePrefix.size());
+    mHxtBuffer.filePrefixLength = filePrefix.size();
+    strncpy(mHxtBuffer.dataTimeStamp, dataTimeStamp.c_str(), dataTimeStamp.size());
+    mHxtBuffer.nRows = aRows;
+    mHxtBuffer.nCols = aCols;
+    mHxtBuffer.nBins = aHistoBins;
+    /* Using string copy above is unwieldy, but accessing struct e.g.:
+     * char hxtLabel[8] = "HEXITECH";
+     *  Results in:
+     * cannot convert from 'const char [8]' to 'char [8]'.. (And the Internet is broken :-p)
+     */
+
     if (mDebug) LOG(gLogConfig, logDEBUG2) << "HxtRawDataProcessor constructor";
     // Debugging, verbose output disabled by default
     mDebug = false;
@@ -71,29 +95,29 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     mFileTimer = new Timer();
 
     // Create global raw and corrected histograms  - ONLY needed for debugging
-    mGlobalRawHisto = new Histogram(mHistoStart, mHistoEnd, mHistoBins);
-    mGlobalDecodedHisto = new Histogram(mHistoStart, mHistoEnd, mHistoBins);
-    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHistoBins);
+    mGlobalRawHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+    mGlobalDecodedHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
 
     // Create pair of decoded frame stores. These are defined to be bigger than the real
     // size in each dimension by two pixels to allow for pixel addressing starting from
     // one and to give an empty guard band around which we can do searches for charge sharing etc
-    mDecodedFrame[0] = new HxtDecodedFrame(mRows, mCols);
-    mDecodedFrame[1] = new HxtDecodedFrame(mRows, mCols);
+    mDecodedFrame[0] = new HxtDecodedFrame(mHxtBuffer.nRows, mHxtBuffer.nBins);
+    mDecodedFrame[1] = new HxtDecodedFrame(mHxtBuffer.nRows, mHxtBuffer.nBins);
 
     // Create subpixel frame here
     mSubPixelFrame = new HxtFrame(mSubPixelRows, mSubPixelCols);
 
     // Decoded Frame: Create histogram for each pixel and initialize pixel thresholds to zero
     for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
-        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHistoBins);
+        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
         mPixelHistogram.push_back(pixelHisto);
         mPixelThreshold[iPixel] = 0.0;
     }
 
     // SubPixels Frame: Create histogram for each pixel and initialize pixel thresholds to zero
     for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHistoBins);
+        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
         mSubPixelHistogram.push_back(pixelHisto);
     }
 
@@ -134,31 +158,6 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     }
     /// For debugging purposes:
     mFrameNumber = 0;    mDebugFrames = false;    mDebugFrameDir = "C:/temp/";
-    ///Populate mHxtBuffer struct
-//    char testing[8];
-//    testing = "testing";    // cannot convert from 'const char [8]' to 'char [8]'
-    strncpy(mHxtBuffer.hxtLabel, "HEXITECH", 8);
-    mHxtBuffer.hxtVersion = formatVersion;
-    mHxtBuffer.motorPositions[0] = ssx;
-    mHxtBuffer.motorPositions[1] = ssy;
-    mHxtBuffer.motorPositions[2] = ssz;
-    mHxtBuffer.motorPositions[3] = ssrot;
-    mHxtBuffer.motorPositions[4] = timer;
-    mHxtBuffer.motorPositions[5] = galx;
-    mHxtBuffer.motorPositions[6] = galy;
-    mHxtBuffer.motorPositions[7] = galz;
-    mHxtBuffer.motorPositions[8] = galrot;
-    strncpy(mHxtBuffer.filePrefix, filePrefix.c_str(), filePrefix.size());
-    mHxtBuffer.filePrefixLength = filePrefix.size();
-    strncpy(mHxtBuffer.dataTimeStamp, dataTimeStamp.c_str(), dataTimeStamp.size());
-    mHxtBuffer.nRows = aRows;
-    mHxtBuffer.nCols = aCols;
-    mHxtBuffer.nBins = aHistoBins;
-    /* Using string copy above is unwieldy, but accessing struct e.g.:
-     * char hxtLabel[8] = "HEXITECH";
-     *  Results in:
-     * cannot convert from 'const char [8]' to 'char [8]'.. (And the Internet is broken :-p)
-     */
 }
 
 /// Destructor for HxtRawDataProcessor - deletes histogram objects etc
@@ -360,7 +359,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
             //if (mRowIdx >0) break; /// DEBUGGING
 
             // Sanity check row and column indices
-            if (((unsigned int)mRowIdx > mRows) || ((unsigned int)colIdx > mCols)) {
+            if (((unsigned int)mRowIdx > mHxtBuffer.nRows) || ((unsigned int)colIdx > mHxtBuffer.nCols)) {
 
                 if (mDebug) LOG(gLogConfig, logERROR) << "Illegal row (" << mRowIdx << ") or column (" << colIdx << ") index on decoded column data line";
 
@@ -488,7 +487,7 @@ bool HxtRawDataProcessor::parseBuffer(unsigned short *aBufferName, unsigned long
     // Track pixel number within current frame
     u16 pixelNumber = 0, reorderedPixel = 0;
     // Calculate amount of data accessible within buffer
-    int bufferSize = (frameLength * mRows * mCols /** 2*/);     /// frameLength = number of frames in buffer; 2 bytes to each pixel
+    int bufferSize = (frameLength * mHxtBuffer.nRows * mHxtBuffer.nCols);     /// frameLength = number of frames in buffer; 2 bytes to each pixel
     unsigned short * pBuffer = 0;
     pBuffer = aBufferName;
     // Loop over buffer until frameLength pixels read
@@ -640,8 +639,8 @@ bool HxtRawDataProcessor::processFrame(unsigned int currentFrameIdx, unsigned in
 //        else
 //            aFrameIdx = 1;
 
-//        for (unsigned int iRow = 0; iRow < 5/*mRows*/; iRow++) {
-//            for (unsigned int iCol = 0; iCol < mCols; iCol++) {
+//        for (unsigned int iRow = 0; iRow < 5/*mHxtBuffer.nRows*/; iRow++) {
+//            for (unsigned int iCol = 0; iCol < mHxtBuffer.nCols; iCol++) {
 //                double pixelValue = mDecodedFrame[aFrameIdx]->getPixel(iRow, iCol);
 //                cout << "   [" << setw(2) << (iRow*80)+iCol << "]=" << setw(3) << pixelValue;
 //                }
@@ -711,11 +710,11 @@ bool HxtRawDataProcessor::debugWriteFrame(unsigned int aFrameIdx, string fileDes
 //    debugStream.write(mDataTimeStamp.c_str(), mDataTimeStamp.size());
 
 //    // Continue writing header information that is common to both format versions
-//    debugStream.write((const char*)&mHistoBins, sizeof(mHistoBins));
+//    debugStream.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));
     unsigned int counting = 0;
     // Write Each pixel to file
-    for (unsigned int iRow = 0; iRow < mRows; iRow++) {
-        for (unsigned int iCol = 0; iCol < mCols; iCol++) {
+    for (unsigned int iRow = 0; iRow < mHxtBuffer.nRows; iRow++) {
+        for (unsigned int iCol = 0; iCol < mHxtBuffer.nCols; iCol++) {
             double pixelValue = mDecodedFrame[aFrameIdx]->getPixel(iRow, iCol);
             if (pixelValue > 0.0)
                 counting++;
@@ -740,12 +739,12 @@ bool HxtRawDataProcessor::outputFrame(unsigned int aFrameIdx)
 {
     if (mDebug) LOG(gLogConfig, logDEBUG1) << "Outputting frame " << mDecodedFrame[aFrameIdx]->getFrameIndex() << " to histograms";
 
-    for (unsigned int iRow = 0; iRow < mRows; iRow++) {
-        for (unsigned int iCol = 0; iCol < mCols; iCol++) {
+    for (unsigned int iRow = 0; iRow < mHxtBuffer.nRows; iRow++) {
+        for (unsigned int iCol = 0; iCol < mHxtBuffer.nCols; iCol++) {
             double correctedPixelValue = mDecodedFrame[aFrameIdx]->getPixel(iRow, iCol);
             if (correctedPixelValue != 0.0) {
                 mGlobalDecodedHisto->Fill(correctedPixelValue);
-                unsigned int pixelAddress = (iRow * mCols) + iCol;
+                unsigned int pixelAddress = (iRow * mHxtBuffer.nCols) + iCol;
                 mPixelHistogram[pixelAddress]->Fill(correctedPixelValue);
             }
         }
@@ -850,7 +849,7 @@ bool HxtRawDataProcessor::writeStructOutput(string aOutputPixelFileName) {
     ofstream pixelFile;
     pixelFile.open(aOutputPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
     if (!pixelFile.is_open()) {
-        LOG(gLogConfig, logERROR) << "Failed to open output file " << aOutputPixelFileName;
+        LOG(gLogConfig, logERROR) << "(1) Failed to open output file " << aOutputPixelFileName;
         return false;
     }
 
@@ -863,7 +862,7 @@ bool HxtRawDataProcessor::writeStructOutput(string aOutputPixelFileName) {
     int dataSize = ((8*sizeof(char)) + sizeof(u64) + (9*sizeof(int)) +
                     sizeof(int) + 100 + 16 + (3*sizeof(u32)) );
     pixelFile.write((const char*)&(mHxtBuffer.hxtLabel), dataSize);
-    LOG(gLogConfig, logNOTICE) << " writeStruct      dataSize: " << dataSize << " fileFormat: " << mFormatVersion;
+    //LOG(gLogConfig, logNOTICE) << " writeStruct      dataSize: " << dataSize << " fileFormat: " << mHxtBuffer.hxtVersion;
 
     // Write histogram bins to file -   Remains unchanged (?)
     mPixelHistogram[0]->BinaryWriteBins(pixelFile);
@@ -886,7 +885,7 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
     ofstream pixelFile;
     pixelFile.open(aOutputPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
     if (!pixelFile.is_open()) {
-        LOG(gLogConfig, logERROR) << "Failed to open output file " << aOutputPixelFileName;
+        LOG(gLogConfig, logERROR) << "(2) Failed to open output file " << aOutputPixelFileName;
         return false;
     }
 
@@ -894,40 +893,39 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
     size_t periodPosn = aOutputPixelFileName.find(".");
     mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
 
-    bool bExtraDebug = false;//true;
+    bool bExtraDebug = false;   //true;
 
     // Write binary file header
 
-    string label("HEXITECH");
-    pixelFile.write(label.c_str(), label.length());     if (bExtraDebug) qDebug()  << "write label:       " << label.c_str() << " size: " << label.length();
+    pixelFile.write(mHxtBuffer.hxtLabel, sizeof(mHxtBuffer.hxtLabel));     if (bExtraDebug) qDebug()  << "write mHxtBuffer.hxtLabel:       " << mHxtBuffer.hxtLabel << " size: " << sizeof(mHxtBuffer.hxtLabel);
 
-    pixelFile.write((const char*)&mFormatVersion, sizeof(u64));     if (bExtraDebug) qDebug()  << "write mFormatVer: " << mFormatVersion << " size: " << sizeof(u64);
+    pixelFile.write((const char*)&mHxtBuffer.hxtVersion, sizeof(u64));     if (bExtraDebug) qDebug()  << "write mFormatVer: " << mHxtBuffer.hxtVersion << " size: " << sizeof(u64);
 
     // Include File Prefix/Motor Positions/Data Time Stamp - if format version > 1
-    if (mFormatVersion > 1)
+    if (mHxtBuffer.hxtVersion > 1)
     {
         /// motor order: mSSX, mSSY, mSSZ, mSSROT, mTimer, mGALX, mGALY, mGALZ, mGALROT
-        pixelFile.write((const char*)&mSSX, sizeof(mSSX));     if (bExtraDebug) qDebug()  << "write mSSX:      " << mSSX << " size: " << sizeof(mSSX);
-        pixelFile.write((const char*)&mSSY, sizeof(mSSY));     if (bExtraDebug) qDebug()  << "write mSSY:      " << mSSY;
-        pixelFile.write((const char*)&mSSZ, sizeof(mSSZ));     if (bExtraDebug) qDebug()  << "write mSSZ:      " << mSSZ;
-        pixelFile.write((const char*)&mSSROT, sizeof(mSSROT));   if (bExtraDebug) qDebug()  << "write mSSROT:    " << mSSROT;
-        pixelFile.write((const char*)&mTimer, sizeof(mTimer));   if (bExtraDebug) qDebug()  << "write mTimer:    " << mTimer;
-        pixelFile.write((const char*)&mGALX, sizeof(mGALX));     if (bExtraDebug) qDebug()  << "write mGALX:      " << mGALX;
-        pixelFile.write((const char*)&mGALY, sizeof(mGALY));     if (bExtraDebug) qDebug()  << "write mGALY:      " << mGALY;
-        pixelFile.write((const char*)&mGALZ, sizeof(mGALZ));     if (bExtraDebug) qDebug()  << "write mGALZ:      " << mGALZ;
-        pixelFile.write((const char*)&mGALROT, sizeof(mGALROT)); if (bExtraDebug) qDebug()  << "write mGALROT: " << mGALROT;
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[0], sizeof(mHxtBuffer.motorPositions[0]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[0]:      " << mHxtBuffer.motorPositions[0] << " size: " << sizeof(mHxtBuffer.motorPositions[0]);
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[1], sizeof(mHxtBuffer.motorPositions[1]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[1]:      " << mHxtBuffer.motorPositions[1];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[2], sizeof(mHxtBuffer.motorPositions[2]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[2]:      " << mHxtBuffer.motorPositions[2];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[3], sizeof(mHxtBuffer.motorPositions[3]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[3]:      " << mHxtBuffer.motorPositions[3];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[4], sizeof(mHxtBuffer.motorPositions[4]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[4]:      " << mHxtBuffer.motorPositions[4];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[5], sizeof(mHxtBuffer.motorPositions[5]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[5]:      " << mHxtBuffer.motorPositions[5];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[6], sizeof(mHxtBuffer.motorPositions[6]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[6]:      " << mHxtBuffer.motorPositions[6];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[7], sizeof(mHxtBuffer.motorPositions[7]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[7]:      " << mHxtBuffer.motorPositions[7];
+        pixelFile.write((const char*)&mHxtBuffer.motorPositions[8], sizeof(mHxtBuffer.motorPositions[8]));  if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[8]:      " << mHxtBuffer.motorPositions[8];
 
-        // Determine length of mFilePrefix string
-        int filePrefixSize = (int)mFilePrefix.size();
+        // Determine length of File Prefix
+        int filePrefixSize = mHxtBuffer.filePrefixLength;
 
         // Write prefix length, followed by prefix itself
         pixelFile.write((const char*)&filePrefixSize, sizeof(filePrefixSize));     if (bExtraDebug) qDebug()  << "write filePrefixSize: " << filePrefixSize << " size: " << filePrefixSize;
 
         size_t prefixLen = 0; size_t stampLen = 0;
-        if (mFormatVersion == 2)
+        if (mHxtBuffer.hxtVersion == 2)
         {
-            prefixLen = mFilePrefix.size();
-            stampLen  = mDataTimeStamp.size();
+            prefixLen = filePrefixSize;
+            stampLen  = sizeof(mHxtBuffer.dataTimeStamp);
         }
         else    // Version 3; fixed lengths: prefix=100,timeStamp=16
         {
@@ -935,13 +933,13 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
             stampLen  = 16;
         }
 
-        pixelFile.write(mFilePrefix.c_str(), prefixLen);     if (bExtraDebug) qDebug()  << "write mFilePrefix: " << mFilePrefix.c_str() << " size: " << prefixLen;
-        pixelFile.write(mDataTimeStamp.c_str(), stampLen);   if (bExtraDebug) qDebug()  << "write mDataTimeStamp: " << mDataTimeStamp.c_str() << " size: " << stampLen;
+        pixelFile.write(mHxtBuffer.filePrefix, prefixLen);     if (bExtraDebug) qDebug()  << "write mHxtBuffer.filePrefix: " << mHxtBuffer.filePrefix << " size: " << prefixLen;
+        pixelFile.write(mHxtBuffer.dataTimeStamp, stampLen);   if (bExtraDebug) qDebug()  << "write mHxtBuffer.dataTimeStamp: " << mHxtBuffer.dataTimeStamp << " size: " << stampLen;
     }
     // Continue writing header information that is common to both format versions
-    pixelFile.write((const char*)&mRows, sizeof(mRows));     if (bExtraDebug) qDebug()  << "write mRows: " << mRows << " size: " << sizeof(mRows);
-    pixelFile.write((const char*)&mCols, sizeof(mCols));     if (bExtraDebug) qDebug()  << "write mCols: " << mCols << " size: " << sizeof(mCols);
-    pixelFile.write((const char*)&mHistoBins, sizeof(mHistoBins));     if (bExtraDebug) qDebug()  << "write mHistoBins: " << mHistoBins << " size: " << sizeof(mHistoBins);
+    pixelFile.write((const char*)&mHxtBuffer.nRows, sizeof(mHxtBuffer.nRows));     if (bExtraDebug) qDebug()  << "write mHxtBuffer.nRows: " << mHxtBuffer.nRows << " size: " << sizeof(mHxtBuffer.nRows);
+    pixelFile.write((const char*)&mHxtBuffer.nCols, sizeof(mHxtBuffer.nCols));     if (bExtraDebug) qDebug()  << "write mHxtBuffer.nCols: " << mHxtBuffer.nCols << " size: " << sizeof(mHxtBuffer.nCols);
+    pixelFile.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));     if (bExtraDebug) qDebug()  << "write mHxtBuffer.nBins: " << mHxtBuffer.nBins << " size: " << sizeof(mHxtBuffer.nBins);
 
     // Write histogram bins to file
     mPixelHistogram[0]->BinaryWriteBins(pixelFile);
@@ -968,7 +966,7 @@ bool HxtRawDataProcessor::copyPixelOutput(unsigned short* aHxtBuffer) {
 
     ///  Calculate size of Buffer sections: Header, Bins
     int hxtBufferHeaderSize = (char*)&(mHxtBuffer.allData[0]) - (char*)(mHxtBuffer.hxtLabel);
-    int sizeBins = mHistoBins *sizeof(double);
+    int sizeBins = mHxtBuffer.nBins *sizeof(double);
 
     /// Calculate pointers for Binary Bins, Binary Contents
     char* pCharBufferAddress = (char*)(aHxtBuffer);
@@ -1017,21 +1015,22 @@ bool HxtRawDataProcessor::copyPixelOutput(unsigned short* aHxtBuffer) {
 //        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)aHxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)aHxtBuffer)->allData[k+3];
 //    }
 
-    LOG(gLogConfig, logINFO) << "Copied processed HXT contents to buffer (WORKING progress)";
+    LOG(gLogConfig, logINFO) << "Copied processed HXT contents to buffer";
 
     return true;
 }
 
 
-unsigned int HxtRawDataProcessor::calculateCurrentHeaderSize(string label)
+unsigned int HxtRawDataProcessor::calculateCurrentHeaderSize()
 {
-    /// Calculate the size of the header
+    /// Calculate the size of the header - currently untested !
     unsigned int headerSize = 0;
-    headerSize += (int)label.length();
-    headerSize += sizeof(mFormatVersion);
-    headerSize += sizeof(mRows);
-    headerSize += sizeof(mCols);
-    headerSize += sizeof(mHistoBins);
+    headerSize= (char*) &mHxtBuffer.allData[0] - (char*) mHxtBuffer.hxtLabel;
+//    headerSize += (int)label.length();
+//    headerSize += sizeof(mFormatVersion);
+//    headerSize += sizeof(mHxtBuffer.nRows);
+//    headerSize += sizeof(mHxtBuffer.nCols);
+//    headerSize += sizeof(mHxtBuffer.nBins);
     return headerSize;
 }
 
@@ -1039,27 +1038,16 @@ unsigned int HxtRawDataProcessor::calculateCurrentHeaderSize(string label)
 unsigned int HxtRawDataProcessor::calculateBodySize()
 {
     /// Calculate the size of the written file without the header portion
-    return (sizeof(double) * mHistoBins + sizeof(double) * mHistoBins * mPixels);
+    return (sizeof(double) * mHxtBuffer.nBins + sizeof(double) * mHxtBuffer.nBins * mPixels);
 }
 
 void HxtRawDataProcessor::updateFilePrefix(string filePrefix)
 {
-    mFilePrefix = filePrefix;
     strncpy(mHxtBuffer.filePrefix, filePrefix.c_str(), filePrefix.size());
 }
 
 void HxtRawDataProcessor::updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot)
 {
-    mSSX    = ssx;
-    mSSY    = ssy;
-    mSSZ    = ssz;
-    mSSROT  = ssrot;
-    mTimer  = timer;
-    mGALX   = galx;
-    mGALY   = galy;
-    mGALZ   = galz;
-    mGALROT = galrot;
-    /// mHxtBuffer to replace
     mHxtBuffer.motorPositions[0] = ssx;
     mHxtBuffer.motorPositions[1] = ssy;
     mHxtBuffer.motorPositions[2] = ssz;
@@ -1073,7 +1061,6 @@ void HxtRawDataProcessor::updateMotorPositions(int ssx, int ssy, int ssz, int ss
 
 void HxtRawDataProcessor::updateTimeStamp(string timeStamp)
 {
-    mDataTimeStamp = timeStamp;
     strncpy(mHxtBuffer.dataTimeStamp, timeStamp.c_str(), timeStamp.size());
 }
 
@@ -1081,16 +1068,16 @@ void HxtRawDataProcessor::updateTimeStamp(string timeStamp)
 void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
 {
     // Construct frame containing 1 = dead pixel, 0 = fine pixel
-    HxtFrame* deadPixelFrame = new HxtFrame(mRows, mCols);
+    HxtFrame* deadPixelFrame = new HxtFrame(mHxtBuffer.nRows, mHxtBuffer.nCols);
 
     // Create vector to track dead pixels
     vector<hxtPixel> deadPixels;
 
     // Initialise array of flags
-    for (unsigned int iRow = 0; iRow < mRows; iRow++)
+    for (unsigned int iRow = 0; iRow < mHxtBuffer.nRows; iRow++)
     {
         // Iterate over columns
-        for (unsigned int iCol = 0; iCol < mCols; iCol++)
+        for (unsigned int iCol = 0; iCol < mHxtBuffer.nCols; iCol++)
         {
             // Is this pixel dead?
             if ( mPixelHistogram[pixelAddress(iRow, iCol)]->GetTotalAboveThreshold(aThreshold) == 0 ) {
@@ -1136,7 +1123,7 @@ void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
             rowStart = 0;
             rowEnd   = 1;
         }
-        else if (iRow == (mRows-1)) {
+        else if (iRow == (mHxtBuffer.nRows-1)) {
             // pixel is last in row; Only need previous row
             rowStart = -1;
             rowEnd   = 0;
@@ -1153,7 +1140,7 @@ void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
             colStart = 0;
             colEnd   = 1;
         }
-        else if (iCol == (mCols-1)) {
+        else if (iCol == (mHxtBuffer.nCols-1)) {
             // pixel in last column
             colStart = -1;
             colEnd   = 0;
@@ -1167,7 +1154,7 @@ void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
         unsigned int neighbourPixelAddress = 0;
 
         // Loop over rows and columns immediately surrounding dead pixel
-        for (unsigned int iBin = 0; iBin < mHistoBins; iBin++)
+        for (unsigned int iBin = 0; iBin < mHxtBuffer.nBins; iBin++)
         {
             // Iterate over rows
             for (int iMiniRow = rowStart; iMiniRow <= rowEnd; iMiniRow++)
@@ -1228,21 +1215,18 @@ bool HxtRawDataProcessor::writeSubPixelOutput(string aOutputSubPixelFileName) {
     ofstream subPixelFile;
     subPixelFile.open(aOutputSubPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
     if (!subPixelFile.is_open()) {
-        LOG(gLogConfig, logERROR) << "Failed to open output file " << aOutputSubPixelFileName;
+        LOG(gLogConfig, logERROR) << "(3) Failed to open output file " << aOutputSubPixelFileName;
         return false;
     }
 
     // Write binary file header
-    string label("HEXITECH");
-    subPixelFile.write(label.c_str(), label.length());
+    subPixelFile.write(mHxtBuffer.hxtLabel, sizeof(mHxtBuffer.hxtLabel));
 
-
-//    u64 formatVersion = 1;
-    subPixelFile.write((const char*)&mFormatVersion, sizeof(u64));
+    subPixelFile.write((const char*)&mHxtBuffer.hxtVersion, sizeof(u64));
 
     subPixelFile.write((const char*)&mSubPixelRows, sizeof(mSubPixelRows));
     subPixelFile.write((const char*)&mSubPixelCols, sizeof(mSubPixelCols));
-    subPixelFile.write((const char*)&mHistoBins, sizeof(mHistoBins));
+    subPixelFile.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));
 
     // Write histogram bins to file
     mSubPixelHistogram[0]->BinaryWriteBins(subPixelFile);

@@ -391,33 +391,33 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
     dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
 
     qDebug() << "----------------\n       DEBUGGING, let's look inside hxtBuffer (local copy)";
-    qDebug() << " * " << (hxtBuffer) << " <- HxtProcessingTester.cpp:400 (hxtBuffer)";
-    qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
-    qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
-    qDebug() << "  (local copy) hxtBuffer hxtPrefixLength " << QString::number( ((HxtBuffer*)hxtBuffer)->filePrefixLength);
+//    qDebug() << " * " << (hxtBuffer) << " <- HxtProcessingTester.cpp:400 (hxtBuffer)";
+//    qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
+//    qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
+//    qDebug() << "  (local copy) hxtBuffer hxtPrefixLength " << QString::number( ((HxtBuffer*)hxtBuffer)->filePrefixLength);
 
-    for (int i = 0; i < 3; i++)
-    {
-        qDebug() << i << QString::number( ((HxtBuffer*)hxtBuffer)->motorPositions[i]);
-    }
-    qDebug() << "  (local copy) hxtBuffer filePrefix " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->filePrefix) << " @ " << &( ((HxtBuffer*)hxtBuffer)->filePrefix);
-    qDebug() << "  (local copy) hxtBuffer dataTimeStamp " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->dataTimeStamp);
-    qDebug() << "  (local copy) hxtBuffer nRows " << QString::number( ((HxtBuffer*)hxtBuffer)->nRows);
-    qDebug() << "  (local copy) hxtBuffer nCols " << QString::number( ((HxtBuffer*)hxtBuffer)->nCols);
-    qDebug() << "  (local copy) hxtBuffer nBins " << QString::number( ((HxtBuffer*)hxtBuffer)->nBins) << " @ " << &( ((HxtBuffer*)hxtBuffer)->nBins);
+//    for (int i = 0; i < 3; i++)
+//    {
+//        qDebug() << i << QString::number( ((HxtBuffer*)hxtBuffer)->motorPositions[i]);
+//    }
+//    qDebug() << "  (local copy) hxtBuffer filePrefix " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->filePrefix) << " @ " << &( ((HxtBuffer*)hxtBuffer)->filePrefix);
+//    qDebug() << "  (local copy) hxtBuffer dataTimeStamp " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->dataTimeStamp);
+//    qDebug() << "  (local copy) hxtBuffer nRows " << QString::number( ((HxtBuffer*)hxtBuffer)->nRows);
+//    qDebug() << "  (local copy) hxtBuffer nCols " << QString::number( ((HxtBuffer*)hxtBuffer)->nCols);
+//    qDebug() << "  (local copy) hxtBuffer nBins " << QString::number( ((HxtBuffer*)hxtBuffer)->nBins) << " @ " << &( ((HxtBuffer*)hxtBuffer)->nBins);
 
-    /// Bin start values appear to be fine - Check the contents next?
-    qDebug() << " --------- Histogram's bin start values: [HxtProcessingTester.CPP:438 - And here's hxtBuffer when returned from copyPixelOutput()] ----------";
-    int k = 0;
-    for (int i = 0; i < 12; i++)
-    {
-        qDebug() << " L" << i << " = " <<((HxtBuffer*)hxtBuffer)->allData[i] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[i];
-        k = 1000 + i;
-        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k];
-        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+1] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+1];
-        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+2] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+2];
-        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+3];
-    }
+//    /// Bin start values appear to be fine - Check the contents next?
+//    qDebug() << " --------- Histogram's bin start values: [HxtProcessingTester.CPP:438 - And here's hxtBuffer when returned from copyPixelOutput()] ----------";
+//    int k = 0;
+//    for (int i = 0; i < 12; i++)
+//    {
+//        qDebug() << " L" << i << " = " <<((HxtBuffer*)hxtBuffer)->allData[i] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[i];
+//        k = 1000 + i;
+//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k];
+//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+1] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+1];
+//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+2] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+2];
+//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+3];
+//    }
 
     ///
 

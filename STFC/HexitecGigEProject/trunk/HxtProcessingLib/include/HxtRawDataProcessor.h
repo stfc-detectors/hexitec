@@ -87,7 +87,7 @@ public:
 	HxtFrame* getSubPixelFrame();
 
     // Debugging functions - may be useful in the future?
-    unsigned int calculateCurrentHeaderSize(string label);
+    unsigned int calculateCurrentHeaderSize();
     unsigned int calculateBodySize();
 
     /// Set and control header entries introduced by Format Version 2
@@ -95,7 +95,7 @@ public:
     void updateFilePrefix(string filePrefix);
     void updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot);
     void updateTimeStamp(string timeStamp);
-    void updateFormatVersion(u64 formatVersion) { mFormatVersion = formatVersion; }
+    void updateFormatVersion(u64 formatVersion) { mHxtBuffer.hxtVersion = formatVersion; }
     ///
 
     // Access CSV file names
@@ -140,19 +140,20 @@ private:
     ///
     // getPixelThreshold - inline function to retreive pixel threshold indexed by row and column
 	inline double getPixelThreshold(unsigned int aRow, unsigned int aCol) {
-		return mPixelThreshold[(aRow * mCols) + aCol];
+        return mPixelThreshold[(aRow * mHxtBuffer.nCols) + aCol];
 	}
 
 	virtual inline unsigned int pixelAddress(int aRow, int aCol) {
-		return ((aRow * mCols) + aCol);
+        return ((aRow * mHxtBuffer.nCols) + aCol);
 	}
 
     string mCsvFileName;
 
     HxtBuffer mHxtBuffer;   /// HexitecGigE: to Replace contents going into file/buffer?
 
-    unsigned int mRows;     // number of decoded pixel rows
-	unsigned int mCols;     // number of decoded pixel columns
+    /// Rows and Columns moved into mHxtBuffer
+//    unsigned int mRows;     // number of decoded pixel rows
+//	unsigned int mHxtBuffer.nCols;     // number of decoded pixel columns
 	unsigned int mPixels;   // number of decoded pixels in sensor
 
 	unsigned int mSubPixelRows;     // number of subpixel rows
@@ -161,17 +162,13 @@ private:
 
 	double       mHistoStart; // histogram start value
 	double       mHistoEnd;   // histogram end value
-	unsigned int mHistoBins;  // number of bins in histogram
+    //unsigned int mHistoBins;  // number of bins in histogram - Replaced by mHxtBuffer.nBins
 
 	unsigned int   mFramesDetected;       // number of frames detected in parser
 	unsigned int   mEventsDetected;       // number of events detected in parser
 	unsigned int   mEventsAboveThreshold; // number of events above threshold
 
-//	bool           mReadNextLine ;        // flag if parser should read next line at next pass
-//	bool           mAtStartOfFiles;       // flag if parser as at start of file list
     int            mRowIdx;               // current pixel row index within current frame
-//	hxtParserState mNextParserState;      // next state of parser, i.e. what sort of line to detect
-//	hxtRawLine     mPartialFrameHeader;   // raw line to hold partial frame header that spans file boundary
 
 	unsigned int   mCorrectedFramesWritten;   // number of frames written to output histograms
 	unsigned int   mSubPixelFramesWritten;   // number of frames written to output histograms
@@ -211,20 +208,20 @@ private:
     u16* mRawData;
 
     // File format version
-    u64 mFormatVersion;
+//    u64 mFormatVersion;
 
     // Variables to save filename prefix, motor position and timestamp
-    int mSSX;
-    int mSSY;
-    int mSSZ;
-    int mSSROT;
-    int mTimer;
-    int mGALX;
-    int mGALY;
-    int mGALZ;
-    int mGALROT;
-    string mFilePrefix;
-    string mDataTimeStamp;
+//    int mSSX;
+//    int mSSY;
+//    int mSSZ;
+//    int mSSROT;
+//    int mTimer;
+//    int mGALX;
+//    int mGALY;
+//    int mGALZ;
+//    int mGALROT;
+//    string mFilePrefix;
+//    string mDataTimeStamp;
 
     // Record CSV file names to enables external access
     string mRawCsvFileName;
