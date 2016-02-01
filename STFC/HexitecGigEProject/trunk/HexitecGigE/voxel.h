@@ -16,6 +16,7 @@ class Voxel : public QObject
 public:
     Voxel();
     Voxel(int size, double value = 0.0);
+    ~Voxel();
     QVector <double> contentXData;
     QVector <double> contentYData;
 

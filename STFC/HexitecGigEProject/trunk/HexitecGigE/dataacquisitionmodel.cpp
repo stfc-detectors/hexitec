@@ -171,8 +171,8 @@ void DataAcquisitionModel::connectDataAcquisitionModel()
 {
    connect(this, SIGNAL(dataChanged(DataAcquisitionDefinition)),
            dataAcquisitionForm, SLOT(handleDataChanged(DataAcquisitionDefinition)));
-   connect(this, SIGNAL(dataChanged(QString)),
-           dataAcquisitionForm, SLOT(handleDataChanged(QString)));
+//   connect(this, SIGNAL(dataChanged(QString)),
+//           dataAcquisitionForm, SLOT(handleDataChanged(QString)));
    connect(this, SIGNAL(daqDurationChanged(double)),
            dataAcquisitionForm, SLOT(handleDaqDurationChanged(double)));
    connect(this, SIGNAL(biasVoltageChanged(bool)),

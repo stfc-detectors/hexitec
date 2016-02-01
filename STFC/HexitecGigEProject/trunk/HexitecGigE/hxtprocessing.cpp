@@ -83,41 +83,40 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mAppName = aAppName;
     mFirstBufferInCollection = false;
 
-    pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    pixelThreshold = 0;
     // Create new raw data processor instance
-    dataProcessor = new HxtRawDataProcessor(kHxtSensorRows, kHxtSensorCols, mHistoStartVal, mHistoEndVal, mHistoBins,
-                                                                 mFormatVersion,
-                                                                 mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ, mPositions.mSSROT,
-                                                                 mPositions.mTimer,
-                                                                 mPositions.mGALX, mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT,
-                                                                 mFilePrefix, mDataTimeStamp, mEnableCallback);
+    dataProcessor = 0; 
     // 1. Induced Noise Corrector
-    inCorrector = new HxtFrameInducedNoiseCorrector(mInducedNoiseThreshold);
+    inCorrector = 0;
     // 2. Calibration
     // Create pointer to Gradients file
-    gradientsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    gradientsContents = 0;
     // Create pointer to Intercepts file
-    interceptsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    interceptsContents = 0;
     cabCorrector = 0;
     // 3. CS Addition / O R / CS Discriminator
     // 3.1 subpixel
     // Create subpixel corrector
-    subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
+    subCorrector = 0;
     // 3.2 CS Addition
-    csdCorrector = new HxtFrameChargeSharingDiscCorrector();
+    csdCorrector = 0;
     // 4. Incomplete Data
-    idCorrector = new HxtFrameIncompleteDataCorrector();
+    idCorrector = 0;
     // 5. Momentum
     // Create pointer to Momentum file
-    momentumContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    momentumContents = 0;
     momCorrector = 0;
     // x. Development purposes only, check for pixels read out more than once
-    dbpxlCorrector = new HxtFrameDoublePixelsCorrector();
+    dbpxlCorrector = 0;
+
+    gLogConfig = 0;
 
     /// Determine size pool containing buffers (communicate with Visualisation tab, for displaying)
     numHxtBuffers = 10;
     // Ensure memory etc only setup when prepSettings() called the first time
     bFirstTime = true;
+    // How often (in seconds) should data be written to disc?
+    mDiscWritingInterval = 1.0;
 }
 
 HxtProcessing::~HxtProcessing()
@@ -126,10 +125,12 @@ HxtProcessing::~HxtProcessing()
     // Signal to run() to shut down
     bThreadRunning = false;
     sleep(1);
-    // Close log configuration and any associated files
-    gLogConfig->close();
-    delete gLogConfig;
-
+    if (gLogConfig!= 0)
+    {
+        // Close log configuration and any associated files
+        gLogConfig->close();
+        delete gLogConfig;
+    }
     //// Delete objects
     delete dataProcessor;
     delete idCorrector;
@@ -158,28 +159,32 @@ void HxtProcessing::prepSettings()
 
     if (bFirstTime)
     {
+       qDebug() << "HxtProcessing::prepSettings() called FIRST TIME!!!" << sizeof(HxtBuffer) << numHxtBuffers;
         // Setup pool of buffers - To send HXT file contents by RAM rather than file
         for (int i=0; i < numHxtBuffers; i++)
         {
             HxtBuffer* hxtBuffer = new HxtBuffer;
             mHxtBuffers.push_back(hxtBuffer);
         }
+        bFirstTime = false;
     }
-    // Extract file path of hexitech file
-    QFileInfo fileInfo(mOutputFileNameDecodedFrame.c_str());
-    string filePath = fileInfo.absolutePath().toStdString();
 
-
+    if (gLogConfig != 0)
+    {
+//        qDebug() << "HxtProcessing::prepSettings() Deleting previous gLogConfig pointer";
+        gLogConfig->close();
+        delete gLogConfig;
+    }
+//    qDebug() << "      !!   HxtProcessing::prepSettings() About to place hexitech log file in: " << mFilePath.c_str() << " i.e. member variable: mFilePath.";
     // Obtain date stamp, save logging to the same folder as processed file
     DateStamp* now = new DateStamp();
     logFileStream.clear();
     logFileStream.str("");
-    logFileStream << filePath;
+    logFileStream << mFilePath;
     logFileStream << "/hexitech_log_";
     logFileStream << now->GetDateStamp();
     logFileStream << ".txt";
     delete(now);
-    qDebug() << "logFileStream.str: " << logFileStream.width();
 
     // Create new log configuration
     gLogConfig = new LogConfig( mAppName);
@@ -226,7 +231,8 @@ void HxtProcessing::prepSettings()
     LOG(gLogConfig, logINFO) << "Writing to log file " << logFileStream.str();
 
     // Load a threshold file
-    HxtPixelThreshold* pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    if (pixelThreshold != 0) delete pixelThreshold;
+    pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
     if (mGlobalThreshold != -1.0) {
         pixelThreshold->setGlobalThreshold(mGlobalThreshold);
     }
@@ -234,7 +240,14 @@ void HxtProcessing::prepSettings()
         pixelThreshold->loadThresholds(mThresholdFileName);
     }
 
-    /// More staff copied in from ::executeProcessing() ... ///
+    // Create new raw data processor instance
+    if (dataProcessor != 0) delete dataProcessor;
+    dataProcessor = new HxtRawDataProcessor(kHxtSensorRows, kHxtSensorCols, mHistoStartVal, mHistoEndVal, mHistoBins,
+                                                                 mFormatVersion,
+                                                                 mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ, mPositions.mSSROT,
+                                                                 mPositions.mTimer,
+                                                                 mPositions.mGALX, mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT,
+                                                                 mFilePrefix, mDataTimeStamp, mEnableCallback);
 
     /// DEBUGGING frame by frame [redundant later on]
     dataProcessor->setDebugFrameDir("U:/BInMe/debug_frames/");
@@ -270,7 +283,8 @@ void HxtProcessing::prepSettings()
     // Create and register frame correctors with raw data processor if enabled
 
     // 1. Induced Noise Corrector
-    HxtFrameInducedNoiseCorrector* inCorrector = new HxtFrameInducedNoiseCorrector(mInducedNoiseThreshold);
+    if (inCorrector != 0) delete inCorrector;
+    inCorrector = new HxtFrameInducedNoiseCorrector(mInducedNoiseThreshold);
     // Register it, enable debug if needed
     if (mDebugLevel) inCorrector->setDebug(true);
     if (mEnableInCorrector) {
@@ -281,10 +295,14 @@ void HxtProcessing::prepSettings()
     // 2. Calibration
 
     // Create pointer to Gradients file
-    HxtPixelThreshold* gradientsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    if (gradientsContents != 0) delete gradientsContents;
+    gradientsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
     // Create pointer to Intercepts file
-    HxtPixelThreshold* interceptsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    HxtFrameCalibrationCorrector* cabCorrector = 0;
+    if (interceptsContents != 0) delete interceptsContents;
+    interceptsContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+
+    if (cabCorrector != 0)   delete cabCorrector;
+    cabCorrector = 0;
 
     // Load Gradients file and Intercepts file contents to memory
     if (mEnableCabCorrector) {
@@ -308,7 +326,8 @@ void HxtProcessing::prepSettings()
     dataProcessor->setCsaCorrector(mEnableCsaspCorrector);
 
     // Create subpixel corrector
-    HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
+    if (subCorrector != 0) delete subCorrector;
+    subCorrector = new HxtFrameChargeSharingSubPixelCorrector();
     // Register it, enable debug if needed
     if (mDebugLevel) subCorrector->setDebug(true);
     if (mEnableCsaspCorrector) {
@@ -317,7 +336,8 @@ void HxtProcessing::prepSettings()
     }
 
     // 3.2 CS Addition
-    HxtFrameChargeSharingDiscCorrector* csdCorrector = new HxtFrameChargeSharingDiscCorrector();
+    if (csdCorrector!= 0) delete csdCorrector;
+    csdCorrector = new HxtFrameChargeSharingDiscCorrector();
     if (mDebugLevel) csdCorrector->setDebug(true);
     if (mEnableCsdCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(csdCorrector));
@@ -325,7 +345,8 @@ void HxtProcessing::prepSettings()
     }
 
     // 4. Incomplete Data
-    HxtFrameIncompleteDataCorrector* idCorrector = new HxtFrameIncompleteDataCorrector();
+    if (idCorrector != 0) delete idCorrector;
+    idCorrector = new HxtFrameIncompleteDataCorrector();
     if (mDebugLevel) idCorrector->setDebug(true);
     if (mEnableIdCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(idCorrector));
@@ -335,8 +356,9 @@ void HxtProcessing::prepSettings()
     // 5. Momentum
 
     // Create pointer to Momentum file
-    HxtPixelThreshold* momentumContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
-    HxtFrameMomentumCorrector* momCorrector = 0;
+    if (momentumContents != 0) delete momentumContents;
+    momentumContents = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
+    if (momCorrector != 0) momCorrector = 0;
 
     // Load Momentum file contents to memory
     if (mEnableMomCorrector) {
@@ -354,14 +376,23 @@ void HxtProcessing::prepSettings()
 
 
     // x. Development purposes only, check for pixels read out more than once
-    HxtFrameDoublePixelsCorrector* dbpxlCorrector = new HxtFrameDoublePixelsCorrector();
+    if (dbpxlCorrector != 0) delete dbpxlCorrector;
+    dbpxlCorrector = new HxtFrameDoublePixelsCorrector();
     if (mEnableDbPxlsCorrector)  {
         if (mDebugLevel) dbpxlCorrector->setDebug(true);
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(dbpxlCorrector));
         LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
     }
 
-    bFirstTime = false;
+}
+
+void HxtProcessing::setTargetDirectory(string aFileName)
+{
+    QFileInfo fileInfo(aFileName.c_str());
+    mFilePath = fileInfo.absolutePath().toStdString();
+
+//    qDebug() << "HxtProcessing::setTargetDirectory() afileName: '" << aFileName.c_str()s << "'producing mFilePath: '" << mFilePath.c_str() << "'";
+
 }
 
 void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
@@ -373,8 +404,12 @@ void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
     * raw image. New filenames for processed data can be created by adding any
     * extension (except .bin) to this filename.
     */
-   qDebug() << "hxtProcessing::pushRawFileName() with " << aFileName.c_str()
-               << "frameSize (bytes) = " << frameSize;
+//   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
+//               << "frameSize (bytes) = " << frameSize;
+
+   // Setup file path before calling prepSettings() (which instantiates the logger)
+   this->setTargetDirectory(aFileName);
+   this->prepSettings();
 
    /// HexitecGigE Addition, Check file has .hxt file ending - It always should have
    if ( aFileName.find(".") > 250)
@@ -508,7 +543,7 @@ void HxtProcessing::run()
     emit hexitechSignalError("HxtProcessing Thread up and running.");
 
     /// Call prepSettings function before may begin
-    prepSettings();
+//    prepSettings();
 
     // Local variable to track status of fileQueue, motorQueue, bProcessQueueContents
     bool bFileQueueEmpty = true, bMotorQueueEmpty = true, bProcessTheQueue = false;
@@ -521,9 +556,9 @@ void HxtProcessing::run()
     // Start and stop timer to give it a sane (~0) value
     mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 515;
     mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 516;
-    float discWritingInterval = 1.0, timeSinceLastDiscOp = 0.0;
+    float timeSinceLastDiscOp = 0.0;
 
-//    discWritingInterval = 0.1;
+//    mDiscWritingInterval = 0.1;
 //    qDebug() << " ***  DON'T FORGET TO RESTORE: HxtProcessing.CPP::run    deskWritingInterval = 0.1 seconds (not 1.0 seconds)";
 
     // Initialise timer tracking whether we are idling
@@ -812,8 +847,8 @@ void HxtProcessing::run()
                     mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 801;
                     timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
                     qDebug() << " ** [Condition:EveryNewFile] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                             << (timeSinceLastDiscOp > discWritingInterval) << "Boolean: " << bWriteToDisk;
-                    if (timeSinceLastDiscOp > discWritingInterval)
+                             << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk << " mdiscWritingInterval: " << mDiscWritingInterval;
+                    if (timeSinceLastDiscOp > mDiscWritingInterval)
                     {
                         bWriteToDisk = true;
                         timeSinceLastDiscOp = 0;
@@ -901,8 +936,8 @@ void HxtProcessing::run()
                     mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 890;
                     timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
                     qDebug() << " ** [Condition:MotorPos'n] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                             << (timeSinceLastDiscOp > discWritingInterval) << "Boolean: " << bWriteToDisk;
-                    if (timeSinceLastDiscOp > discWritingInterval)
+                             << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk;
+                    if (timeSinceLastDiscOp > mDiscWritingInterval)
                     {
                         bWriteToDisk = true;
                         timeSinceLastDiscOp = 0;
@@ -965,8 +1000,8 @@ void HxtProcessing::run()
                         mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 954;
                         timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
                         qDebug() << " ** [Condition:WholeQ?] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                                 << (timeSinceLastDiscOp > discWritingInterval) << "Boolean: " << bWriteToDisk;
-                        if (timeSinceLastDiscOp > discWritingInterval)
+                                 << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk;
+                        if (timeSinceLastDiscOp > mDiscWritingInterval)
                         {
                             bWriteToDisk = true;
                             timeSinceLastDiscOp = 0;
@@ -1185,12 +1220,10 @@ int HxtProcessing::checkConfigValid()
     if (!mMomentumFile.empty())
     {
         qDebug() << "DEBUG: mMomentumFile specified.";
-        mEnableMomCorrector = true;
     }
     else
     {
         qDebug() << "DEBUG: mMomentumFile NOT specified.";
-        mEnableMomCorrector = false;
     }
 
     // Cannot specify both global threshold and threshold file
@@ -1334,7 +1367,6 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
     // Second timestamp is found by looking beyond the first timestamp:
     size_t fileTimestamp = fileName.find(dateString, pathTimestamp+1);
 
-    //qDebug() << "__________________________________________________________";
     // Obtain path and file prefix but without the "_" character at the end (hence -1)
     string pathAndPrefix = fileName.substr(0, fileTimestamp-1);
     //qDebug() << "pathAndPrefix: " << pathAndPrefix.c_str() << "\nfileName: " << fileName.c_str();
@@ -1349,9 +1381,6 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
         mOutputFileNameSubPixelFrame = pathAndPrefix + "_SubResolution" + "_" + string(dateString) + ".hxt";
     }
     qDebug() << "::obtainRaw..() Before: " << beforeString.c_str() << " after: " << mOutputFileNameDecodedFrame.c_str();
-
-//    qDebug() << "dateString: " << dateString.c_str() << "\nmOutputFileNameDecodedFrame: " << mOutputFileNameDecodedFrame.c_str() <<
-//            "\nmOutputFileNameSubPixelFrame: " << mOutputFileNameSubPixelFrame.c_str();
 }
 
 void HxtProcessing::clearMotorPositions()
@@ -1374,7 +1403,7 @@ void HxtProcessing::setManualProcessing(bool bManualEnabled)
     bManualProcessingEnabled = bManualEnabled;
 }
 
-void HxtProcessing::handleReturnHxtBuffer(unsigned short *buffer)
+void HxtProcessing::handleReturnHxtBuffer(unsigned short* buffer)
 {
     qDebug() << "HxtProcessing Returning buffer from the Visualisation tab, address: " << (void*)buffer;
     mHxtBuffers.push_back((HxtBuffer*)buffer);
@@ -1427,6 +1456,11 @@ void HxtProcessing::processingVetoed(bool bProcessingOverruled)
 void HxtProcessing::removeFiles(bool bRemoveFiles)
 {
     bRemoveUnprocessedFiles = bRemoveFiles;
+}
+
+void HxtProcessing::handleHxtProcessingPrepSettings()
+{
+    prepSettings();
 }
 
 void HxtProcessing::handleDataAcquisitionStatusChanged(DataAcquisitionStatus status)

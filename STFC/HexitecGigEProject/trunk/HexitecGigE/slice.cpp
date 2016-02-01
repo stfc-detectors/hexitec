@@ -224,6 +224,12 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
    postDataInit();
 }
 
+Slice::~Slice()
+{
+   delete[](voxels);
+   qDebug() << "Deleting a slice";
+}
+
 /*
   This method and ones() are really meant for use in scripts and they should be static. However
   static methods can't easily be called from QML so you need some other instance of Slice to use
@@ -1037,7 +1043,7 @@ bool Slice::readHXT(unsigned short *buffer)
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
     contentVoxel.resize(hxtBuffer.nRows);
-    Voxel *v = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
+    voxels = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
 
     qDebug() << "Voxels created.";
     allDataPointer += hxtBuffer.nBins;
@@ -1047,7 +1053,7 @@ bool Slice::readHXT(unsigned short *buffer)
        contentVoxel[iRow].resize(hxtBuffer.nCols);
        for (int iCol = 0; iCol < hxtBuffer.nCols; iCol++)
        {
-           voxelPointer = &v[currentVoxel];
+           voxelPointer = &voxels[currentVoxel];
            voxelPointer->contentXData.resize(hxtBuffer.nBins);
            voxelPointer->contentYData.resize(hxtBuffer.nBins);
            contentVoxel[iRow][iCol] = voxelPointer;
@@ -1058,9 +1064,11 @@ bool Slice::readHXT(unsigned short *buffer)
     }
 
     qDebug() <<"Finished vector loop!!!!!";
+
     voxelDataLen = hxtBuffer.nBins;
     zeroStats();
     xType = COMMON;
+
     free(hxtBuffer.allData);
     return (true);
 }
@@ -1860,7 +1868,9 @@ void Slice::replace(int sliceToReplace)
    if (TreeItem::parent()->getType() == TreeItem::VOLUME)
    {
       Volume *volume = static_cast<Volume *>(TreeItem::parent());
+      Slice *sliceToDelete = volume->sliceAt(sliceToReplace);
       volume->replaceSlice(sliceToReplace, this);
+      delete(sliceToDelete);
    }
 }
 

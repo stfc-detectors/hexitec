@@ -40,6 +40,8 @@ public:
    Slice(QString name, QString varName, int dummy);
    Slice(QString name, int rows, int cols, int depth, double value);
 
+   ~Slice();
+
    // Methods (in alphabetical order)
    Slice *add(Slice *anOtherSlice);
    Slice *add(double value);
@@ -119,6 +121,7 @@ private:
    };
 
    // Variables
+   Voxel *voxels;
    QVector <double> binVoltage;
    QVector <double> commonX;
    QVector < QVector <Voxel *> > contentVoxel;

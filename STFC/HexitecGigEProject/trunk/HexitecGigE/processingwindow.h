@@ -87,6 +87,7 @@ private:
    QStringList frequencyOptions;
    QStringList updateDisplayOptions;
    QStringList yesNoOptions;
+   QStringList calibrationOptions;
    QStringList chargeSharingCorrectionOptions;
    QStringList trueFalseOptions;
 
@@ -109,6 +110,7 @@ private:
    static unsigned int iInterpolationThreshold;
    static double dInducedNoiseThreshold;
    static double dGlobalThreshold;
+   static double dDiscWritingInterval;
    static string sThresholdFileName;
    static string sOutputFileNameDecodedFrame;
    static string sOutputFileNameSubPixelFrame;
@@ -179,8 +181,10 @@ private slots:
    void chargeSharingCorrectionComboBoxChanged(QString aString);
    void hxtFileLineEditChanged(QString newPrefixString);
    void hxtFileSaveButtonPressed();
+   void momentumBrowseButtonPressed();
    void gradientsBrowseButtonPressed();
    void interceptsBrowseButtonPressed();
+   void momentumPathLineEditChanged(QString momentumFile);
    void gradientsPathLineEditChanged(QString gradientsFile);
    void interceptsPathLineEditChanged(QString interceptsFile);
    void startBinLineEditChanged(QString aString);
@@ -198,8 +202,6 @@ private slots:
    void guiUnprocessedFilesInQueue(bool bFilesPresent);
    // Setup slot to communicate to HxtProcessing to discard all unprocessed raw files
    void clearUnprocessedFiles();
-   // Updated any config changes to HxtProcessing object
-   void handleHxtProcessingPrepSettings();
 };
 
 #endif // PROCESSINGWINDOW_H

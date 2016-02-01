@@ -37,6 +37,10 @@ Voxel::Voxel(int size, double value)
    }
 }
 
+Voxel::~Voxel()
+{
+}
+
 double Voxel::getMax()
 {
    return maxY;

@@ -25,7 +25,6 @@
 #include <QPair>
 #include "hxtfilereader.h"
 #include "hexitecsofttrigger.h"
-#include "hardtrigger.h"
 #include "dataacquisitionmodel.h"
 #include "serialport.h"
 #include "badinifiledialog.h"
@@ -252,7 +251,6 @@ void MainWindow::readFiles()
    char *mf = "Matlab Files (*.m)";
 
    QString filter = tr(df) + ";;" + tr(sf) + ";;" + tr(mf);
-
    QStringList files = QFileDialog::getOpenFileNames(this,
                                                      tr("Select Files for Reading"),
                                                      readDir,
@@ -282,7 +280,7 @@ void MainWindow::readFiles()
             break;
          }
       }
-      qDebug() << "1"; Sleep( 500);
+
       if (allScripts)
       {
          for (int j = 0; j < fileNameList.size(); j++)
@@ -701,7 +699,7 @@ void MainWindow::processNow()
 
     QString currentDirectory = QString("");
 
-    QStringList hxtFileNames = QFileDialog::getOpenFileNames(this, tr("Select HXT File(s)"), currentDirectory, tr("Data Files (*.dat)") );
+    QStringList hxtFileNames = QFileDialog::getOpenFileNames(this, tr("Select HXT File(s)"), currentDirectory, tr("Data Files (*.bin)") );
 
     // Enable bManualProcessingEnabled in HxtProcessor (member of processingWindow) before
     //  communicating the file(s) selected in hxtFileNames, that are to be manually processed
@@ -717,6 +715,10 @@ void MainWindow::processNow()
             qDebug() << "Selected file: " << (*fileIterator).toStdString().c_str();
         }
         /// DEBUG END
+
+        // User decided to process selected file(s); Ensure config updated before processing
+        emit hxtProcessingPrepSettings();
+
         // Hand over file(s) to HxtProcessor to process them
         processingWindow->setRawFilesToProcess(hxtFileNames);
     }
@@ -793,7 +795,7 @@ void MainWindow::readFiles(QStringList files)
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
    int sliceNumber = -1;
-   qDebug() << "MainWindow received a buffer containing " << *buffer << fileName;
+   qDebug() << "MainWindow received a buffer (" << (void *)buffer << ")  with a filename: " << fileName/*.toStdString()*/;
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->getSliceToReplace();

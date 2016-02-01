@@ -25,6 +25,9 @@
 
 #include "inifile.h"
 #include "dataacquisitionstatus.h"
+// For debugging purposes:
+#include <QDebug>
+
 
 using namespace std;
 
@@ -47,8 +50,10 @@ public:
     /// HexitecGigE Addition:
     ///  Need function to apply settings
     void prepSettings();
+    void setTargetDirectory(string aFileName);
     // communicate changes onto dataProcessor (HxtRawDataProcessor) object:
     void commitConfigChanges();
+    void setDiscWritingInterval(float aDiscWritingInterval) { mDiscWritingInterval = aDiscWritingInterval; }
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -115,7 +120,6 @@ signals:
     void hexitechFilesToDisplay(QStringList filesList);
     // DSoFt: added filename to indicate when a new image/slice begins as this will change.
     // This is a quick fix and should be reviewed.
-//    void hexitechBufferToDisplay(HxtBuffer* hxtBuffer, QString fileName);      /// HexitecGigE Added
     void hexitechBufferToDisplay(unsigned short* hxtBuffer, QString fileName);      /// HexitecGigE Added
     void hexitechSpectrumFile(QString spectrumFile);
     void hexitechConsumedFiles(vector<string> fileNames);
@@ -139,6 +143,8 @@ private slots:
     // DataAcquisitionForm signalling (via MainWindow) that data collection finished
     void handleDataAcquisitionStatusChanged(DataAcquisitionStatus);
     void pushImageComplete(unsigned long long framesAcquired);
+    // Update any config changes to HxtProcessing object
+    void handleHxtProcessingPrepSettings();
 
 protected:
     // Go through fileQueue looking for any motor position changes
@@ -148,6 +154,7 @@ protected:
 
     /// HexitecGigE Addition:
     string mAppName;
+    string mFilePath;
     bool mEnableCallback;
     vector<unsigned short*> mBufferNames;
     vector<unsigned long>  mValidFrames;
@@ -155,6 +162,7 @@ protected:
     unsigned int numHxtBuffers;
     bool mFirstBufferInCollection;
     bool bFirstTime;                        // Prevent mHxtBuffers initialised more than once - NOT YET implemented! ['15 Dec 11]
+    float mDiscWritingInterval;
     ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
     HxtPixelThreshold* pixelThreshold;
     HxtRawDataProcessor* dataProcessor;
