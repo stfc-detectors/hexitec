@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>697</width>
-    <height>355</height>
+    <width>703</width>
+    <height>378</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,16 +106,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QDoubleSpinBox" name="duration">
-     <property name="decimals">
-      <number>2</number>
-     </property>
-     <property name="maximum">
-      <double>999999.989999999990687</double>
-     </property>
-    </widget>
-   </item>
    <item row="6" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
@@ -128,6 +118,45 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="2" column="2">
+    <widget class="QDoubleSpinBox" name="duration">
+     <property name="decimals">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <double>999999.989999999990687</double>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QLabel" name="secondsLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>seconds</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QSpinBox" name="repeatCount">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>999</number>
+     </property>
+    </widget>
    </item>
    <item row="1" column="5" colspan="4">
     <widget class="QCheckBox" name="dataFileTimestamp">
@@ -256,32 +285,10 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="secondsLabel">
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
+   <item row="3" column="1" colspan="2">
+    <widget class="QLabel" name="estimatedDurationLabel">
      <property name="text">
-      <string>seconds</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QSpinBox" name="repeatCount">
-     <property name="minimumSize">
-      <size>
-       <width>50</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>999</number>
+      <string>Estimated DAQ Duration</string>
      </property>
     </widget>
    </item>
@@ -324,13 +331,6 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1" colspan="2">
-    <widget class="QLabel" name="estimatedDurationLabel">
-     <property name="text">
-      <string>Estimated DAQ Duration</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1" colspan="4">
     <widget class="QLineEdit" name="dataFileDirectory">
      <property name="minimumSize">
@@ -353,19 +353,6 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
-   </item>
-   <item row="4" column="3">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item row="1" column="1" colspan="4">
     <widget class="QLineEdit" name="dataFilePrefix">
@@ -465,6 +452,32 @@
        </property>
       </widget>
      </item>
+     <item row="8" column="1" colspan="3">
+      <widget class="QLineEdit" name="logFilePrefix"/>
+     </item>
+     <item row="0" column="6" colspan="2">
+      <widget class="QLabel" name="state">
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>Idle</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1" colspan="3">
+      <widget class="QLineEdit" name="logFileDirectory"/>
+     </item>
+     <item row="1" column="5" alignment="Qt::AlignRight">
+      <widget class="QLabel" name="progressBarLabel">
+       <property name="text">
+        <string>Image Progress</string>
+       </property>
+      </widget>
+     </item>
      <item row="6" column="4">
       <widget class="QCheckBox" name="loggingEnabled">
        <property name="minimumSize">
@@ -487,32 +500,6 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="1" colspan="3">
-      <widget class="QLineEdit" name="logFileDirectory"/>
-     </item>
-     <item row="1" column="5" alignment="Qt::AlignRight">
-      <widget class="QLabel" name="progressBarLabel">
-       <property name="text">
-        <string>Image Progress</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6" colspan="2">
-      <widget class="QLabel" name="state">
-       <property name="frameShape">
-        <enum>QFrame::Box</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-       <property name="text">
-        <string>Idle</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1" colspan="3">
-      <widget class="QLineEdit" name="logFilePrefix"/>
-     </item>
      <item row="3" column="3">
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
@@ -525,25 +512,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item row="7" column="4">
-      <widget class="QPushButton" name="logFileDirectoryButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>23</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>23</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Save Directory</string>
-       </property>
-      </widget>
      </item>
      <item row="8" column="4">
       <widget class="QCheckBox" name="logFileTimestamp">
@@ -592,10 +560,49 @@
        </property>
       </widget>
      </item>
+     <item row="7" column="4">
+      <widget class="QPushButton" name="logFileDirectoryButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>23</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>23</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Save Directory</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0" colspan="2">
       <widget class="QLabel" name="biasLastRefreshedLabel">
        <property name="text">
         <string>Bias last refreshed at</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="logFilePrefixLabel">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>Log File Prefix</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QLabel" name="dewPointLabel">
+       <property name="text">
+        <string>Dew Point</string>
        </property>
       </widget>
      </item>
@@ -631,36 +638,28 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="logFilePrefixLabel">
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
+     <item row="2" column="2">
+      <widget class="QLabel" name="housingHumidity">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>17</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>17</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="text">
-        <string>Log File Prefix</string>
+        <string/>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QLabel" name="dewPointLabel">
-       <property name="text">
-        <string>Dew Point</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="logFileDirectoryLabel">
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="text">
-        <string>Log File Directory</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       <property name="margin">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -709,28 +708,16 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QLabel" name="housingHumidity">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>17</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>17</height>
-        </size>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
+     <item row="7" column="0">
+      <widget class="QLabel" name="logFileDirectoryLabel">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string/>
+        <string>Log File Directory</string>
        </property>
-       <property name="margin">
-        <number>1</number>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -738,6 +725,13 @@
       <widget class="QLabel" name="fingerTemperatureLabel">
        <property name="text">
         <string>Finger Temperature</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5" alignment="Qt::AlignRight">
+      <widget class="QLabel" name="progressBarLabel_2">
+       <property name="text">
+        <string>DAQ Progress</string>
        </property>
       </widget>
      </item>
@@ -763,13 +757,6 @@
        </property>
        <property name="margin">
         <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="5" alignment="Qt::AlignRight">
-      <widget class="QLabel" name="progressBarLabel_2">
-       <property name="text">
-        <string>DAQ Progress</string>
        </property>
       </widget>
      </item>
@@ -825,6 +812,29 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="4" column="0">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="9">
+    <widget class="QCheckBox" name="saveRaw">
+     <property name="text">
+      <string>Save Raw</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

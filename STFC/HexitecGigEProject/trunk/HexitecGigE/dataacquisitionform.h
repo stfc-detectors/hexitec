@@ -80,6 +80,7 @@ private slots:
    void handleLogFilename();
    void setDataDirectory();
    void setLogDirectory();
+   void handleSaveRawChanged(bool saveRaw);
    void handleDataAcquisitionDefinition();
    void prepareForOffsets();
    void prepareForDataCollection();
@@ -108,6 +109,7 @@ signals:
    void createLogFile(DetectorFilename *logFilename);
    void enableMainWindowActions();
    void disableMainWindowActions();
+   void saveRawChanged(bool saveRaw);
 };
 
 #endif // DATAACQUISITIONFORM_H

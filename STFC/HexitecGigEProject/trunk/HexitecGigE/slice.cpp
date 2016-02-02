@@ -131,9 +131,7 @@ Slice::Slice(QString name, QStringList fileNameList)
    postDataInit();
 
 }
-/*
-  Pretends to Constructs a slice from a buffer, but is currently using a hard-coded filename.
-  */
+
 Slice::Slice(QString name, unsigned short* buffer, QString fileName)
 {
    preDataInit(name);
@@ -227,7 +225,7 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 Slice::~Slice()
 {
    delete[](voxels);
-   qDebug() << "Deleting a slice";
+   commonX.clear();
 }
 
 /*

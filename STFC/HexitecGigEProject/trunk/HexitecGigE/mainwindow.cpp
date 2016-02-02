@@ -547,16 +547,12 @@ void MainWindow::about()
 {
    QMessageBox::about(this, tr("About This App"),
                       tr(//"<img src=:/images/Hexitec_Logo10.png>",
-                         "<B>2Easy</b> is designed for the purpose of exploring and manipulating hyperspectral image data. The software is part of an ongoing"
-                         " collaboration and its development is currently supported by University of Manchester (UoM) under the EPSRC project entitled"
-                         "<i> HEXITEC: Translation Grant. The Application of Colour X-ray Imaging </i> (EP/H046577/1); the project is led by Professor Cernik (UoM)"
-                         " <p> Karen Ackroyd and Steve Kinder of DSoft Solutions have made significant contributions to the development of this code.  Other contributors include Chris Egan (UoM)."
-                         "  The code makes use of some 3rd part software including the charge-discrimination program <I>Hexitec</i> by Tim Nicholls of STFC Rutherford Appleton Laboratory. "
-                         " The <I>Hexitec</i> software was further enhanced and subsequently integrated through the Processing tab by Christian Angelsen, also of STFC Rutherford Appleton Laboratory."
-                         "  This is an under-development version (2.2.030412) and is not for distribution. "
-                         "For futher information about this project please use the contact below  "
-                         "<p><i>Dr Simon Jacques (UoM) Principal Developer; April 2012</i> <p>"
-                         "<a href='simon.jacques@gmail.com?subject=2Easy'>Contact:</a> simon.jacques@gmail.com"));
+                         "The HEXITEC Gig E software is designed to control and readout the data from the HEXITEC detector. "
+                         " The software will collect, process and display the hyperspectral data collected from HEXITEC. "
+                         " <p> This work was designed and funded by the Science & Technology Facilities Council, UK "
+                         "and builds upon the work conducted throughout the HEXITEC collaboration through the EPSRC funded "
+                         "grants (EP/D048737/1 and EP/H046577/1). </p>"
+                         "<p>For more information please contact Matt Wilson - matt.wilson@stfc.ac.uk.</p>"));
 }
 
 void MainWindow::createMenus()
@@ -577,7 +573,6 @@ void MainWindow::createMenus()
    QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
    QAction *quitAct = new QAction(tr("&Quit"), this);
    QAction *aboutAct = new QAction(tr("&About"), this);
-   QAction *aboutQtAct = new QAction(tr("About &Qt"), this);
 
    readAction->setShortcuts(QKeySequence::New);
    quitAct->setShortcuts(QKeySequence::Quit);
@@ -586,13 +581,11 @@ void MainWindow::createMenus()
    readAction->setStatusTip(tr("Load data or scripts"));
    quitAct->setStatusTip(tr("Quit the application"));
    aboutAct->setStatusTip(tr("Show the application's About box"));
-   aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
 
    connect(deleteSliceAct, SIGNAL(triggered()), this, SLOT(deleteActiveSlice()));
    connect(readAction, SIGNAL(triggered()), this, SLOT(readFiles()));
    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-   connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
    /*QMenu **/fileMenu = menuBar()->addMenu(tr("&File"));
    viewMenu = menuBar()->addMenu(tr("&View"));
@@ -607,7 +600,6 @@ void MainWindow::createMenus()
 
    menuBar()->addSeparator();
    helpMenu->addAction(aboutAct);
-   helpMenu->addAction(aboutQtAct);
 
    QToolBar *fileToolBar = addToolBar(tr("File"));
    fileToolBar->addAction(startDAQAct);
@@ -796,11 +788,13 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
    int sliceNumber = -1;
    qDebug() << "MainWindow received a buffer (" << (void *)buffer << ")  with a filename: " << fileName/*.toStdString()*/;
+
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->getSliceToReplace();
    qDebug() << "MainWindow::readBuffer sliceNumber = " << sliceNumber;
    initializeSlice(slice, sliceNumber);
+
    emit returnHxtBuffer(buffer);
 }
 

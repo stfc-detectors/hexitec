@@ -749,6 +749,32 @@
     </rect>
    </property>
   </widget>
+  <widget class="QCheckBox" name="saveHxt">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>180</y>
+     <width>89</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save HXT</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="saveCsv">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>206</y>
+     <width>89</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save CSV</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

@@ -171,8 +171,6 @@ void DataAcquisitionModel::connectDataAcquisitionModel()
 {
    connect(this, SIGNAL(dataChanged(DataAcquisitionDefinition)),
            dataAcquisitionForm, SLOT(handleDataChanged(DataAcquisitionDefinition)));
-//   connect(this, SIGNAL(dataChanged(QString)),
-//           dataAcquisitionForm, SLOT(handleDataChanged(QString)));
    connect(this, SIGNAL(daqDurationChanged(double)),
            dataAcquisitionForm, SLOT(handleDaqDurationChanged(double)));
    connect(this, SIGNAL(biasVoltageChanged(bool)),
@@ -203,6 +201,8 @@ void DataAcquisitionModel::connectDataAcquisitionForm()
            dataAcquisition, SLOT(handleCancelReducedDataCollection()));
    connect(dataAcquisitionForm, SIGNAL(createLogFile(DetectorFilename *)),
            detectorMonitor, SLOT(createLogFile(DetectorFilename *)));
+   connect(dataAcquisitionForm, SIGNAL(saveRawChanged(bool)),
+           gigEDetector, SLOT(handleSaveRawChanged(bool)));
 }
 
 void DataAcquisitionModel::connectHV()

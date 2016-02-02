@@ -25,6 +25,7 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    ui->duration->setSingleStep(0.01);
 
    connectSignals();
+   handleSaveRawChanged(true);
 //   handleDataAcquisitionDefinition();
 }
 
@@ -42,6 +43,7 @@ void DataAcquisitionForm::connectSignals()
 {
    connect(ui->collectImages, SIGNAL(pressed()), this, SLOT(handleCollectImagesPressed()));
    connect(ui->abortDAQ, SIGNAL(pressed()), this, SLOT(handleAbortDAQPressed()));
+   connect(ui->saveRaw, SIGNAL(toggled(bool)), this, SLOT(handleSaveRawChanged(bool)));
    connect(ui->dataFileTimestamp, SIGNAL(stateChanged(int)), this, SLOT(handleDataFilename()));
    connect(ui->dataFileDirectory, SIGNAL(textChanged(QString)), this, SLOT(handleDataFilename()));
    connect(ui->dataFilePrefix, SIGNAL(textChanged(QString)), this, SLOT(handleDataFilename()));
@@ -197,6 +199,11 @@ void DataAcquisitionForm::setLogDirectory()
     */
    QString destination = QFileDialog::getExistingDirectory(this, tr("Open Directory"), logFilename->getDirectory(), QFileDialog::ShowDirsOnly);
    ui->logFileDirectory->setText(destination);
+}
+
+void DataAcquisitionForm::handleSaveRawChanged(bool saveRaw)
+{
+   emit saveRawChanged(saveRaw);
 }
 
 void DataAcquisitionForm::handleMonitorData(MonitorData *md)
@@ -465,6 +472,7 @@ void DataAcquisitionForm::guiDetectorBusy()
 
    ui->collectImages->setEnabled(false);
    ui->offsetsButton->setEnabled(false);
+   ui->saveRaw->setEnabled(false);
    ui->dataFileDirectory->setEnabled(false);
    ui->dataFilePrefix->setEnabled(false);
    ui->dataFileDirectoryButton->setEnabled(false);
@@ -500,6 +508,7 @@ void DataAcquisitionForm::guiMode()
       ui->dataFilePrefix->setEnabled(true);
       ui->dataFileTimestamp->setEnabled(true);
       ui->offsetsButton->setEnabled(true);
+      ui->saveRaw->setEnabled(true);
       enableRepeats();
       break;
 
@@ -512,6 +521,7 @@ void DataAcquisitionForm::guiMode()
       ui->dataFilePrefix->setEnabled(false);
       ui->dataFileTimestamp->setEnabled(false);
       ui->offsetsButton->setEnabled(false);
+      ui->saveRaw->setEnabled(false);
       break;
    }
 }
