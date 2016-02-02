@@ -21,6 +21,7 @@ void FileWriter::initFilename(const QString directory, const QString file, bool 
    filename.append(file);
    if (timestamp)
    {
+      filename.append("_");
       filename.append(QDateTime::currentDateTime().toString("yyMMdd_hhmmss"));
    }
    if (islogfile)

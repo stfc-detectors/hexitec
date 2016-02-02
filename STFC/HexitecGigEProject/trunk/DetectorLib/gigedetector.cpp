@@ -56,6 +56,7 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    targetTemperature = 20.0;
    hvSetPoint = 0;
    appendTimestamp = false;
+   saveRaw = true;
 
    readIniFile(this->aspectFilename);
 
@@ -113,7 +114,7 @@ void GigEDetector::handleReturnBufferReady()
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
    qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
-   if (mode == CONTINUOUS)
+   if ((saveRaw) && (mode == CONTINUOUS))
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
       outFile.write((const char *)returnBuffer, validFrames * frameSize);
@@ -145,7 +146,13 @@ void GigEDetector::handleSetHV(double voltage)
 
 void GigEDetector::handleAppendTimestamp(bool appendTimestamp)
 {
-   this->appendTimestamp = appendTimestamp;
+    this->appendTimestamp = appendTimestamp;
+}
+
+void GigEDetector::handleSaveRawChanged(bool saveRaw)
+{
+    qDebug() << "GigEDetector::handleSaveRawChanged with:" <<saveRaw;
+    this->saveRaw = saveRaw;
 }
 
 int GigEDetector::initialiseConnection()
@@ -341,12 +348,12 @@ void GigEDetector::getImages(int count, int ndaq)
 void GigEDetector::setGetImageParams()
 {
    QString path;
-   char processingFilename[256];
 
    path = directory + "/" + prefix;
 
    if (timestampOn)
    {
+      path += "_";
       path += QDateTime::currentDateTime().toString("yyMMdd_hhmmss");
    }
 
@@ -360,8 +367,8 @@ void GigEDetector::setGetImageParams()
       QDir().mkpath(directory);
    }
 
-   outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
-   outFile.close();
+//   outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
+//   outFile.close();
 
    imgCntAverage = 1;
 }
@@ -558,6 +565,7 @@ void GigEDetector::imageDestToPixmap()
 
       image.setColorTable(colorTable);
       imagePixmap = QPixmap::fromImage(image);
+      free(imageDest);
       emit imageAcquired(imagePixmap);
    }
 }

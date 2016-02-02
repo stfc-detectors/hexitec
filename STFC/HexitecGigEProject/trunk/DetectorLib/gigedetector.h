@@ -92,6 +92,7 @@ public slots:
    void handleSetTargetTemperature(double targetTemperature);
    void handleSetHV(double voltage);
    void handleAppendTimestamp(bool appendTimestamp);
+   void handleSaveRawChanged(bool saveRaw);
 
 private:
    QThread *gigEDetectorThread;
@@ -101,6 +102,7 @@ private:
    int frameSize;
    std::ofstream outFile;
    bool appendTimestamp;
+   bool saveRaw;
    QString errorMessage;
 
    WindowsEvent *bufferReadyEvent;
@@ -120,7 +122,8 @@ private:
    int count;
    QString directory;
    QString prefix;
-   char pathString[256];
+   char pathString[1024];
+   char processingFilename[1024];
    // Data acquisition time in mSecs
    double dataAcquisitionDuration;
    unsigned char xRes, xResAcquiredImage;
