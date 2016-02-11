@@ -6,7 +6,6 @@
 #include <QFile>
 #include <QVariant>
 #include <QThread>
-#include <QDebug>
 #include "reservable.h"
 
 class HexitecSoftTrigger : public QThread, public Reservable

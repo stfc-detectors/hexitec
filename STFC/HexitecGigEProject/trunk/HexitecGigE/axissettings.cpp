@@ -1,6 +1,5 @@
 #include "axissettings.h"
 #include <cmath>
-#include <QDebug>
 
 AxisSettings::AxisSettings()
 {

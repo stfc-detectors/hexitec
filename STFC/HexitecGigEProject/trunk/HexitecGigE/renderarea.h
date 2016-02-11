@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE bool isDynamic() {return dynamicState;}
     void setDynamicStateOn() {dynamicState = true;}
     void setDynamicStateOff() {dynamicState = false;}
+    void setMouseEnabled(bool enabled);
     void setOffset(int, int);
     void setCellSize(int);
     void setCellSize(int, int);
@@ -83,6 +84,7 @@ signals:
     void updatePlotter();
     void updatePlotter(QPoint, bool);
     void updatePlotter(QVector <QPoint> &, bool);
+    void updatePlotter(double *summedImage, int numberOfBins);
     void writeMessage(QString);
     void writeWarning(QString);
     void writeError(QString);
@@ -118,6 +120,7 @@ protected:
 
 private:
     bool dynamicState;
+    bool mouseEnabled;
     bool overPixelState;
     bool overColorBarState;
     int cellSizeX;

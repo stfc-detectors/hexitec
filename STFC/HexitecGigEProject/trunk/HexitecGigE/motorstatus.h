@@ -4,7 +4,6 @@
 #include <QString>
 #include <QList>
 #include <bitset>
-#include <QDebug>
 
 class MotorStatus
 {

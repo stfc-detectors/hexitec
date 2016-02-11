@@ -96,6 +96,7 @@ MainWindow::MainWindow()
    connect(plotter, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
 
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter()), plotter, SLOT(updatePlotter()));
+   connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(double *, int)), plotter, SLOT(updatePlotter(double *, int)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QPoint, bool)), plotter, SLOT(updatePlotter(QPoint, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QVector <QPoint> &, bool)), plotter, SLOT(updatePlotter(QVector <QPoint> &, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
@@ -328,7 +329,6 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
    // to get to this point - see Slice::times().
    if (sliceNumber < 0)
    {
-      qDebug() << "MainWindow::initializeSlice adding a new slice" << sliceNumber;
       connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
       DataModel::instance()->setActiveSlice(slice);
       emit addObject(slice);
@@ -337,7 +337,6 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
    }
    else
    {
-      qDebug() << "MainWindow::initializeSlice replace slice, set active slice" << sliceNumber;
       DataModel::instance()->setActiveSlice(slice);
       MainViewer::instance()->showNewActiveSlice();
    }
@@ -789,11 +788,12 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
    int sliceNumber = -1;
    qDebug() << "MainWindow received a buffer (" << (void *)buffer << ")  with a filename: " << fileName/*.toStdString()*/;
 
+   MainViewer::instance()->getRenderArea()->setMouseEnabled(false);
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->getSliceToReplace();
-   qDebug() << "MainWindow::readBuffer sliceNumber = " << sliceNumber;
    initializeSlice(slice, sliceNumber);
+   //MainViewer::instance()->getRenderArea()->setMouseEnabled(true);
 
    emit returnHxtBuffer(buffer);
 }

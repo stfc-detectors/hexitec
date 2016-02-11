@@ -5,7 +5,6 @@
 #include <QObject>
 #include <QVariant>
 #include <QThread>
-#include <QDebug>
 #include "motorlimits.h"
 #include "motorstatus.h"
 #include "reservable.h"

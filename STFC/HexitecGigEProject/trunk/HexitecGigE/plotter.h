@@ -37,6 +37,7 @@ public:
     void setDynamicStateOn() {dynamicState = true;}
     void setDynamicStateOff() {dynamicState = false;}
     QVector <Curve *> curve;  // privatise ??
+    Curve *summedCurve;
     QVector <AxisSettings> zoomStack;   // privatise ??
     int currentZoom;  // privatise ??
     void setAxisSettings(const AxisSettings &settings);   // privatise ??
@@ -63,6 +64,7 @@ public:
     void title(QString value) { plotTitle = value;}
     void xLabel(QString value) { xPlotLabel = value; }
     void yLabel(QString value) { yPlotLabel = value; }
+    void summedYLabel(QString value) { summedYPlotLabel = value; }
     int autoSetCurveColors(Curve *newCurve);
     void tidyCurves();
 
@@ -71,6 +73,7 @@ public:
     QString title() { return plotTitle; }
     QString xLabel() { return xPlotLabel; }
     QString yLabel() { return yPlotLabel; }
+    QString summedYLabel() { return summedYPlotLabel; }
 
 
 protected:
@@ -104,12 +107,15 @@ public slots:
     void updatePlotter();
     void updatePlotter(QPoint, bool);
     void updatePlotter(QVector <QPoint> &, bool);
-    // void addCurveData(QVector <double> &);
+    void updatePlotter(double *, int);
+    void addSummedCurveData(double *, int);
     void addCurveData(QVector <double> &, bool);
     // void addCurveData(QVector <double> &, QVector <double> &);
     void addCurveData(QVector <double> &, QVector <double> &, bool);
     void addCurveData(QVector <double> &xData, QVector <double> &yData,
                                QString imageName, QPoint p, QColor color, bool parentHold);
+    void paintCurve(Curve *curve, QPainterPath *path);
+    void paintSummedCurve(QPainterPath *path);
     void setAxesAccepted();
     void setAxesRejected();
     void setAxesApplied();
@@ -137,6 +143,7 @@ private:
     QString plotTitle;
     QString xPlotLabel;
     QString yPlotLabel;
+    QString summedYPlotLabel;
     QPoint toolTipPoint;
     // pixel definitions
     int leftMargin;

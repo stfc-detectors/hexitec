@@ -7,7 +7,6 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QDebug>
 #include <sstream>
 #include <string>
 #include <stdio.h>

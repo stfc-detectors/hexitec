@@ -2,8 +2,6 @@
 #include "ui_colormapeditor.h"
 #include "parameters.h"
 
-#include <QDebug>
-
 ColorMapEditor::ColorMapEditor(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ColorMapEditor)

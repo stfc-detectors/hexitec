@@ -136,7 +136,6 @@ Slice::Slice(QString name, unsigned short* buffer, QString fileName)
 {
    preDataInit(name);
 
-   qDebug() << "BEFORE readHXT: filename: " << fileName;
    readHXT(buffer);
    this->fileName = fileName;
 
@@ -190,7 +189,6 @@ void Slice::postDataInit(QString fileName)
    sliceData << objectName() << "Slice" << "" << "";
    QModelIndex parentIndex = DataModel::instance()->getItemIndex("myVolume");
    sliceToReplace = TreeItem::init(sliceData, &parentIndex, objectName(), fileName);
-   qDebug() <<"sliceToReplace: " << sliceToReplace;
 
    if (sliceToReplace >= 0)
    {
@@ -600,6 +598,11 @@ int Slice::getGridSizeX()
 int Slice::getGridSizeY()
 {
    return gridSizeY;
+}
+
+int Slice::getNumberOfBins()
+{
+   return numberOfBins;
 }
 
 int Slice::getVoxelDataLen()
@@ -1036,34 +1039,40 @@ bool Slice::readHXT(unsigned short *buffer)
 
     gridSizeX = hxtBuffer.nRows;
     gridSizeY = hxtBuffer.nCols;
+    numberOfBins = hxtBuffer.nBins;
 
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
-    contentVoxel.resize(hxtBuffer.nRows);
-    voxels = new Voxel[hxtBuffer.nRows * hxtBuffer.nCols];
+    contentVoxel.resize(gridSizeX);
+    voxels = new Voxel[gridSizeX * gridSizeY];
+    summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
-    qDebug() << "Voxels created.";
-    allDataPointer += hxtBuffer.nBins;
+    allDataPointer += numberOfBins;
     int currentVoxel = 0;
-    for (int iRow = 0; iRow < hxtBuffer.nRows; iRow++)
+    int iRow;
+    int iCol;
+    int iBin;
+    for (iRow = 0; iRow < gridSizeX; iRow++)
     {
-       contentVoxel[iRow].resize(hxtBuffer.nCols);
-       for (int iCol = 0; iCol < hxtBuffer.nCols; iCol++)
+       contentVoxel[iRow].resize(gridSizeY);
+       for (iCol = 0; iCol < gridSizeY; iCol++)
        {
            voxelPointer = &voxels[currentVoxel];
-           voxelPointer->contentXData.resize(hxtBuffer.nBins);
-           voxelPointer->contentYData.resize(hxtBuffer.nBins);
+           voxelPointer->contentXData.resize(numberOfBins);
+           voxelPointer->contentYData.resize(numberOfBins);
            contentVoxel[iRow][iCol] = voxelPointer;
-           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
+           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (allDataPointer), numberOfBins * sizeof(double));
+           for (iBin = 0; iBin < numberOfBins; iBin++)
+           {
+              summedImageY[iBin] += voxelPointer->contentYData[iBin];
+           }
            currentVoxel++;
-           allDataPointer += hxtBuffer.nBins;
+           allDataPointer += numberOfBins;
        }
     }
 
-    qDebug() <<"Finished vector loop!!!!!";
-
-    voxelDataLen = hxtBuffer.nBins;
+    voxelDataLen = numberOfBins;
     zeroStats();
     xType = COMMON;
 
@@ -1128,11 +1137,11 @@ bool Slice::readHXT(QString fileName)
         std::stringstream ss;
 
         int charsToRead = filePrefixLength;
-		int timeStampLength = 13;
+        int timeStampLength = 13;
         if (hxtVersion == 3)
         {
            charsToRead = 100;
-		   timeStampLength = 16;
+           timeStampLength = 16;
         }
 
         for(int k = 0; k < charsToRead; k++)
@@ -1856,7 +1865,6 @@ void Slice::attach()
    if (TreeItem::parent()->getType() == TreeItem::VOLUME)
    {
       Volume *volume = static_cast<Volume *>(TreeItem::parent());
-      qDebug() << "attaching the Slice";
       volume->addSlice(this);
    }
 }
@@ -1881,6 +1889,11 @@ void Slice::detach()
       Volume *volume = static_cast<Volume *>(TreeItem::parent());
       volume->removeSlice(this);
    }
+}
+
+double *Slice::getSummedImageY()
+{
+   return summedImageY;
 }
 
 /* This takes over responsibilities which were previously in MainWindow.

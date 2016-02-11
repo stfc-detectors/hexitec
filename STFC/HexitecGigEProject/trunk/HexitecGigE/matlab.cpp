@@ -81,7 +81,6 @@ void matlab::checkConnection()
 {
    if (activeMatlab)
    {
-       qDebug() <<"Matlab 2";
        Sleep(2000);
       if (engEvalString(engine, "hostid") != 0)
       {
@@ -154,7 +153,6 @@ bool matlab::evalString(QString string)
 
    if (activeMatlab)
    {
-       qDebug() <<"Matlab 3";
        Sleep(2000);
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.
       Engine *localEngine = engOpen(NULL);
@@ -197,7 +195,6 @@ int matlab::sendVectorToMatlab(QVector <double> &vector, QString varName)
    int status = SUCCESS, k= 0;
    if (activeMatlab)
    {
-       qDebug() <<"Matlab 4";
        Sleep(2000);
       mainThreadFlag = true;
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.
@@ -246,7 +243,6 @@ int matlab::sendArrayToMatlab(int *dimensions, double *data, QString varName)
    int status = SUCCESS;
    if (activeMatlab)
    {
-       qDebug() <<"Matlab 5";
        Sleep(2000);
       mainThreadFlag = true;
       // Temporary fix - open a new connection to the engine in case we are in a separate thread.

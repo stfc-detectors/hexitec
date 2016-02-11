@@ -1,6 +1,5 @@
 #include "newportxpsmotor.h"
 #include "dataacquisition.h"
-#include <QDebug>
 #include <QSettings>
 
 NewportXpsMotor::NewportXpsMotor(QString name, int id, QObject *parent):Motor(name, parent)

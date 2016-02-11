@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QStringList>
 
 #include "treeitem.h"

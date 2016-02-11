@@ -1,4 +1,3 @@
-#include <QDebug>
 #include "displaylegendsdialog.h"
 #include "ui_displaylegendsdialog.h"
 

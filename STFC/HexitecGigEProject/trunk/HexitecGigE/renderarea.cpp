@@ -21,6 +21,7 @@ RenderArea::RenderArea(QWidget *parent) :
    QWidget(parent)
 {
    setDynamicStateOff();
+   setMouseEnabled(false);
    toolDisplayOff();
    showHexitec_Logo = false;
    cellSizeX = 1;
@@ -73,6 +74,12 @@ RenderArea::RenderArea(QWidget *parent) :
 
    // display
    update();
+   setMouseEnabled(true);
+}
+
+void RenderArea::setMouseEnabled(bool enabled)
+{
+   mouseEnabled = enabled;
 }
 
 
@@ -252,6 +259,9 @@ void RenderArea::mouseMoveEvent(QMouseEvent *event)
    if (!dynamicState)
       return;
 
+   if (!mouseEnabled)
+      return;
+
    if (imageData.width() == 0) return;  // TEMPORARY FIX
 
    // need a if visible statement here
@@ -291,6 +301,9 @@ void RenderArea::wheelEvent(QWheelEvent *event)
    if (!dynamicState)
       return;
 
+   if (!mouseEnabled)
+      return;
+
    if (imageData.width() == 0)
       return;  // TEMPORARY FIX
 
@@ -309,6 +322,9 @@ void  RenderArea::mousePressEvent(QMouseEvent *)
    if (!dynamicState)
       return;
 
+   if (!mouseEnabled)
+      return;
+
    if (imageData.width() == 0)
       return;  // TEMPORARY FIX
 }
@@ -316,6 +332,9 @@ void  RenderArea::mousePressEvent(QMouseEvent *)
 void  RenderArea::mouseDoubleClickEvent(QMouseEvent *event)
 {
    if (!dynamicState)
+      return;
+
+   if (!mouseEnabled)
       return;
 
    if (insideRectArea(colorBarBox, event->pos()) & colorMapEditor->isHidden())
@@ -478,6 +497,7 @@ AxisSettings RenderArea::getAxes()
 
 void RenderArea::renderSum(Slice *slice)
 {
+   qDebug() <<"RenderArea::renderSum called";
    this->imageData.resize(slice->getGridSizeX(), slice->getGridSizeY());
    this->imageData = slice->sumImage();
    if (this->axes.autoScaleZ)
@@ -485,6 +505,11 @@ void RenderArea::renderSum(Slice *slice)
       this->stats();
       this->autoScaleZ();
    }
+   if (slice->getSummedImageY() != NULL)
+   {
+      emit updatePlotter(slice->getSummedImageY(), slice->getNumberOfBins());
+   }
+
 }
 
 void RenderArea::renderSum(int min, int max, Slice *slice)
@@ -511,7 +536,6 @@ void RenderArea::renderChannel(double value, Slice *slice)
 
 void RenderArea::colorBarsToggle()
 {
-   qDebug() <<"Toggling the colourBars";
    showColorBars = ! showColorBars;
    if (showColorBars)
    {

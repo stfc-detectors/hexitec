@@ -1,5 +1,3 @@
-#include<QDebug>
-
 #include "setaxesdialog.h"
 #include "ui_setaxesdialog.h"
 

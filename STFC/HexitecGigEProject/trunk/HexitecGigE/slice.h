@@ -53,8 +53,10 @@ public:
    static bool fileNameListValid(QStringList fileNameList);
    SArray<double> channelImage(double value);
    void detach();
+   double *getSummedImageY();
    int getGridSizeX();
    int getGridSizeY();
+   int getNumberOfBins();
    QString getTitle();
    QString getFileName();
    int getSliceToReplace();
@@ -125,12 +127,14 @@ private:
    QVector <double> binVoltage;
    QVector <double> commonX;
    QVector < QVector <Voxel *> > contentVoxel;
+   double *summedImageY;
    MatrixXd eigenWeights;
    MatrixXd eigenSpectra;
    QString fileName;
    int sliceToReplace;
    int gridSizeX;
    int gridSizeY;
+   int numberOfBins;
    double maxData;
    double meanData;
    double minData;

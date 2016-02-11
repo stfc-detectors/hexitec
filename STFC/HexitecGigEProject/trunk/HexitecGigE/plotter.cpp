@@ -35,6 +35,10 @@ Plotter::Plotter(QWidget *parent) :
     toolTip = new QString("");
     this->setToolTip(*toolTip);
 
+    summedCurve = new Curve();
+    summedCurve->xData.resize(1000);
+    summedCurve->yData.resize(1000);
+
     foreach (QString colorName, colorList)
     {
         QColor color = QColor(colorName);
@@ -79,8 +83,9 @@ Plotter::Plotter(QWidget *parent) :
     wheelValue = 0;
     // labels
     title("");
-    xLabel("x");
-    yLabel("y");
+    xLabel("Bins");
+    yLabel("Pixel Y");
+    summedYLabel("Sum Y");
     // margins
     setMargins(55, 45, 35, 45);
     // mouse
@@ -161,20 +166,10 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
     axesBox.setBottom(height() - bottomMargin);
     axesBox.setTop(topMargin);
 
-    // bomb out if no data
-    if (curve.isEmpty())
-    {
-        painter.setOpacity(0.7);
-        painter.drawImage(axesBox.left() + axesBox.width() - image.width() - 5, axesBox.top() + 5, image);
-        painter.setOpacity(1.0);
-        return;
-    }
-
     // pen attributes
     painter.setPen(Qt::NoBrush);
     painter.setFont(QFont("Arial", 9));
     painter.setPen(QColor(0,0,0));
-    //    painter.setFont(QFont("Arial", 10, QFont::Bold));
 
     // draw the axis
     if (showAxes)
@@ -202,23 +197,37 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
                 painter.setPen(QColor(Qt::lightGray));
                 painter.drawLine(axesBox.left(), y, axesBox.right(), y);
             }
-            painter.setPen(QColor(0,0,0));
+            painter.setPen(colors.at(1));
             painter.drawLine(axesBox.left() - 5, y, axesBox.left(), y);
             painter.drawText(axesBox.left() - 58, y - 10, leftMargin - 5, 20, Qt::AlignRight | Qt::AlignVCenter, QString::number(label));
         }
         // add axis labels
-        QRect rectXLabel(leftMargin, axesBox.bottom() + 20 , axesBox.width(), bottomMargin - 20);
+        painter.setPen(QColor(0,0,0));
+        QRect rectXLabel(leftMargin, axesBox.bottom() + 25 , axesBox.width(), bottomMargin - 25);
         painter.drawText(rectXLabel, Qt::AlignHCenter | Qt::TextWordWrap, xLabel());
-        //    painter.drawRect(rectXLabel);
 
-        QRect rectYLabel(leftMargin/10, topMargin, leftMargin - 40, axesBox.height());
-        painter.drawText(rectYLabel, Qt::AlignVCenter | Qt::TextWordWrap, yLabel());
-        //    painter.drawRect(rectYLabel);
+        painter.setPen(colors.at(1));
+        QRect rectYLabel(leftMargin/10, topMargin - 20, leftMargin, axesBox.height());
+        painter.drawText(rectYLabel, Qt::AlignTop | Qt::AlignRight, yLabel());
+
+        painter.setPen(QColor(0,0,0));
+        QRect rectSummedYLabel(leftMargin + axesBox.width(), topMargin - 20, axesBox.width(), axesBox.height());
+        painter.drawText(rectSummedYLabel, Qt::AlignTop, summedYLabel());
+
+        double summedSpanY = (summedCurve->maxYData - summedCurve->minYData);
+        for (int j = 0; j <= 5; ++j)
+        {
+            int y = axesBox.bottom() - (j * (axesBox.height() - 1) / 5);
+            double label = summedCurve->minYData + (j * summedSpanY / 5);
+
+            painter.drawLine(axesBox.right() + 5, y, axesBox.right(), y);
+            painter.drawText(axesBox.right() + 10, y - 10, rightMargin + 5, 20, Qt::AlignLeft | Qt::AlignVCenter, QString::number(label));
+        }
     }
+    painter.setPen(QColor(0,0,0));
 
     // tool status
     {
-        //
         if (!zoomStack[currentZoom].autoScaleX && !zoomStack[currentZoom].autoScaleY)
         {
             QImage lockSmall(":/images/lockSmall.png");
@@ -237,7 +246,7 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         if (holdState)
         {
             QImage holdSmall(":/images/holdSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top() + 27, holdSmall);
+            painter.drawImage(axesBox.right() + 10, axesBox.bottom() + 15, holdSmall);
         }
         if (xExploreState)
         {
@@ -253,37 +262,38 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
     }
 
     // draw the bounding frame
+    painter.setPen(QColor(0,0,0));
     painter.drawRect(axesBox.adjusted(0, 1, -1, 0));
 
     // set the title
-    QRect titleBar (axesBox.left()-10, axesBox.top()-20, axesBox.width()+10, axesBox.top());
+    QRect titleBar (axesBox.left()-10, axesBox.top()-30, axesBox.width()+10, axesBox.top());
+    painter.setPen(colors.at(colorIndex));
     painter.drawText(titleBar, Qt::AlignHCenter | Qt::TextWordWrap , title());
+    painter.setPen(QColor(0,0,0));
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setClipRect(axesBox);
     // define these for speed
+
+    QPainterPath summedPath;
+    scaleX = ((double) axesBox.width())/(summedCurve->maxXData - summedCurve->minXData);
+    scaleY = ((double) axesBox.height())/(summedCurve->maxYData - summedCurve->minYData);
+
+    summedCurve->curvePen.setBrush(QColor(Qt::black));
+    paintSummedCurve(&summedPath);
+    painter.strokePath(summedPath, summedCurve->curvePen);
+
     scaleX = ((double) axesBox.width()) / (zoomStack[currentZoom].spanX());
     scaleY = ((double) axesBox.height()) / (zoomStack[currentZoom].spanY());
-    double x, y;
+
     for (int j = 0 ; j < curve.size() ; ++j)
     {
         QPainterPath path;
-        y = (curve[j]->yData[0]-zoomStack[currentZoom].minY) * scaleY;
-        x = (curve[j]->xData[0]-zoomStack[currentZoom].minX) * scaleX;
-        path.moveTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
-        for (int i = 0 ; i <  curve[j]->xData.size(); ++i )
-        {
-            if (curve[j]->xData[i] < zoomStack[currentZoom].minX)
-                continue;
-            if (curve[j]->xData[i] > zoomStack[currentZoom].maxX)
-                continue;
-            y = (curve[j]->yData[i]+curve[j]->offset-zoomStack[currentZoom].minY) * scaleY;
-            x = (curve[j]->xData[i]-zoomStack[currentZoom].minX) * scaleX;
-            path.lineTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
-            //            path.lineTo((int) x + axesBox.left(), (int) y * -1.0 + axesBox.bottom());
-        }
+        paintCurve(curve[j], &path);
         painter.strokePath(path, curve[j]->curvePen);
     }
+
+    double x,y;
 
     if (xExploreState)
     {
@@ -297,7 +307,6 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         else // need to chane this so that it displays a rectangle
             painter.drawLine((int) x + axesBox.left(), axesBox.bottom(), (int) x + axesBox.left(), axesBox.top());
 
-        //QRect spinBoxPos( (int) x + axesBox.left(), axesBox.top() + 5, 35, 20);
         QRect spinBoxPos(axesBox.right() + 5, axesBox.top() + 81, 35, 20);
         channelExplorerSpinBox->setGeometry(spinBoxPos);
         channelExplorerSpinBox->show();
@@ -324,6 +333,40 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
     painter.setOpacity(1.0);
 }
 
+void Plotter::paintCurve(Curve *curve, QPainterPath *path)
+{
+   double x, y;
+
+   y = (curve->yData[0]-zoomStack[currentZoom].minY) * scaleY;
+   x = (curve->xData[0]-zoomStack[currentZoom].minX) * scaleX;
+   path->moveTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
+   for (int i = 0 ; i <  curve->xData.size(); ++i )
+   {
+       if (curve->xData[i] < zoomStack[currentZoom].minX)
+           continue;
+       if (curve->xData[i] > zoomStack[currentZoom].maxX)
+           continue;
+       y = (curve->yData[i]+curve->offset-zoomStack[currentZoom].minY) * scaleY;
+       x = (curve->xData[i]-zoomStack[currentZoom].minX) * scaleX;
+       path->lineTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
+   }
+}
+
+void Plotter::paintSummedCurve(QPainterPath *path)
+{
+   double x,y;
+
+   y = (summedCurve->yData[0]-summedCurve->minYData) * scaleY;
+   x = (summedCurve->xData[0]-summedCurve->minXData) * scaleX;
+   path->moveTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
+   for (int i = 0 ; i <  summedCurve->xData.size(); ++i )
+   {
+       y = (summedCurve->yData[i]+summedCurve->minYData) * scaleY;
+       x = (summedCurve->xData[i]-summedCurve->minXData) * scaleX;
+       path->lineTo((int) x + axesBox.left(), (int) y * -1.0 + height() - bottomMargin);
+   }
+}
+
 void Plotter::mouseMoveEvent(QMouseEvent *event)
 {
     if (curve.isEmpty()) return;
@@ -341,7 +384,6 @@ void Plotter::mouseMoveEvent(QMouseEvent *event)
         mouseAxesPos = pixelToAxes(mousePosition);
         if (xExploreState && !xExploreFreeze)
         {
-            //            selChannel = (int) floor( mouseAxesPos.x() + 0.5 ) ;
             if (channelExplorerSpinBox->value() ==  0)
                 emit renderChannel(mouseAxesPos.x());  // should really return mouseAxesPos here and delete selChannel stuff
             else
@@ -369,7 +411,6 @@ void Plotter::mouseMoveEvent(QMouseEvent *event)
 void Plotter::mousePressEvent(QMouseEvent *event)
 {
     if (curve.isEmpty()) return;
-    //    mouseButtonPressed = !mouseButtonPressed;
 
     if (!inSideAxes(event->pos()))
         return;
@@ -381,9 +422,6 @@ void Plotter::mousePressEvent(QMouseEvent *event)
         rubberBandRect.setBottomRight(event->pos());
     }
 
-/*    if (event->button() == Qt::RightButton)
-        zoomOut();
-*/
     update();
 }
 
@@ -431,7 +469,6 @@ void Plotter::mouseDoubleClickEvent(QMouseEvent *event)
         if (inSideAxes(event->pos()) )
         {
             QPointF mouseAxesPos = pixelToAxes(event->pos());
-            //            selChannel = (int) floor( t.x() + 0.5 ) ;
             if (channelExplorerSpinBox->value() ==  0)
                 emit renderChannel(mouseAxesPos.x());  // should really return mouseAxesPos here and delete selChannel stuff
             else
@@ -487,7 +524,6 @@ void Plotter::mouseReleaseEvent(QMouseEvent *)
         newSettings.maxY = q.y() ;
     }
 
-    //   emit writeMessage( QString::number(q.x()) + ", " + QString::number(q.y()) + ", "  + QString::number(r.x()) + ", "  + QString::number(r.y()) );
     newSettings.autoScaleX = false;
     newSettings.autoScaleY = false;
 
@@ -503,8 +539,6 @@ void Plotter::mouseReleaseEvent(QMouseEvent *)
 
 QPointF Plotter::pixelToAxes (QPointF pixelPos)
 {
-    //   scaleX = ((double) axesBox.width()) / (zoomStack[currentZoom].spanX());
-    //   scaleY = ((double) axesBox.height()) / (zoomStack[currentZoom].spanY());
 
     QPointF axesPos;
     axesPos.setX((double) (pixelPos.x() - leftMargin) / scaleX + zoomStack[currentZoom].minX);
@@ -572,27 +606,15 @@ void Plotter::setMargins(int value)
     bottomMargin = value;
 }
 
-/*void Plotter::addCurveData(QVector <double> &yData)
+void Plotter::addSummedCurveData(double *yData, int numberOfBins)
 {
-    Curve *newCurve = new Curve();
-    newCurve->xData.resize(yData.size());
-    newCurve->yData.resize(yData.size());
-    for (int i = 0 ; i < yData.size(); ++i )
+    for (int i = 0 ; i < numberOfBins; ++i )
     {
-        newCurve->xData[i] = (double) i;
-        newCurve->yData[i] = yData[i];
+        summedCurve->xData[i] = (double) i;
+        summedCurve->yData[i] = yData[i];
     }
-    newCurve->stats();
-
-    tidyCurves();
-    curve.push_back(newCurve);
-    autoSetCurveColors();
-
-    doAutoScale();
-    if (zoomStack[currentZoom].autoScaleY && !zoomStack[currentZoom].autoScaleX)
-        doAutoScaleY();
-    zoomStack[currentZoom].adjust();
-}*/
+    summedCurve->stats();
+}
 
 void Plotter::addCurveData(QVector <double> &yData, bool parentHold)
 {
@@ -670,7 +692,6 @@ void Plotter::addCurveData(QVector <double> &xData, QVector <double> &yData,
     tidyCurves();
     autoSetCurveColors(newCurve);
     newCurve->legends(imageName, p, color);
-//    displayLegendsDialog->addLegend(imageName, p, color);
     curve.push_back(newCurve);
 
     if (zoomStack[currentZoom].autoScaleX && zoomStack[currentZoom].autoScaleY)
@@ -756,11 +777,13 @@ void Plotter::holdPlot()
 void Plotter::tidyCurves()
 {
     for (int i = 0 ; i < curve.size(); ++i)
+    {
         if (!curve[i]->isHeld())
         {
            curve.remove(i);
            colorIndex--;
         }
+    }
 }
 
 QMainWindow *Plotter::getMainWindow()
@@ -896,7 +919,6 @@ void Plotter::testDevelopment()
 
 void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
 {
-
    if (wasDoubleClicked && !isVisible())
    {
      // This used to make the plot visible again. Needs new version since tabs added. Restore asap.
@@ -914,6 +936,7 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
    if (sizeIsGood)
    {
       title(slice->objectName() + " coordinates (" + QString::number(p.x()+1) + "," + QString::number(p.y()+1) + ")" );
+      addSummedCurveData(slice->getSummedImageY(), slice->getNumberOfBins());
       addCurveData(slice->getXData(p.x(), p.y()), slice->getYData(p.x(), p.y()),
                    slice->objectName(), p, colors.at(colorIndex), wasDoubleClicked);
       if (wasDoubleClicked)
@@ -926,6 +949,14 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
       this->tidyCurves();
    }
    this->update();
+}
+
+void Plotter::updatePlotter(double *summedCurveY, int numberOfBins)
+{
+   tidyCurves();
+   addSummedCurveData(summedCurveY, numberOfBins);
+   this->update();
+   MainViewer::instance()->getRenderArea()->setMouseEnabled(true);
 }
 
 void Plotter::updatePlotter()
