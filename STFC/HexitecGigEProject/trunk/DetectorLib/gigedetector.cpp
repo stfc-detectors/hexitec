@@ -19,7 +19,7 @@ static PUCHAR returnBuffer;
 static ULONG validFrames;
 HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
-                                      AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
+                                      AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, 0 };
@@ -195,6 +195,7 @@ int GigEDetector::initialiseConnection()
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
+
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                               &xRes, &yRes, &frameTime, &collectDcTime, 1000);
    showError( "ConfigureDetector", status);
@@ -209,6 +210,8 @@ int GigEDetector::initialiseConnection()
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
    showError( "ConfigureDetector", status);
 
+   status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
+   showError("SetDAC", status);
 
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
    updateState(READY);
@@ -249,7 +252,6 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
     *hv = hvOut;
-
 /*
     *rh = 20.0;
     *th = 25.0;
