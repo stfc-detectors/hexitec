@@ -24,6 +24,7 @@
 #include "curve.h"
 #include "setaxesdialog.h"
 #include "displaylegendsdialog.h"
+#include "inifile.h"
 
 class Plotter : public QWidget
 {
@@ -152,6 +153,7 @@ private:
     int bottomMargin;
     double scaleX;
     double scaleY;
+    int maxBins;
 
     QPointF pixelToAxes (QPointF);
     QPointF axesToPixel (QPointF);
@@ -181,6 +183,7 @@ private:
     QAction *displayPlotValueAction;
     SetAxesDialog *setAxesDialog;
     DisplayLegendsDialog *displayLegendsDialog;
+    IniFile *twoEasyIniFile;
 
 private slots:
     void CESpinBoxCallBack();

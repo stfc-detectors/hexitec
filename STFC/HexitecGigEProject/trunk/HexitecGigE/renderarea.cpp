@@ -497,7 +497,6 @@ AxisSettings RenderArea::getAxes()
 
 void RenderArea::renderSum(Slice *slice)
 {
-   qDebug() <<"RenderArea::renderSum called";
    this->imageData.resize(slice->getGridSizeX(), slice->getGridSizeY());
    this->imageData = slice->sumImage();
    if (this->axes.autoScaleZ)

@@ -13,6 +13,8 @@ whether the RenderArea is active and if not it will switch off mouse tracking.
 #include "mainwindow.h"
 #include <math.h>
 #include <QPoint>
+#include "parameters.h"
+#include <QSettings>
 
 Plotter::Plotter(QWidget *parent) :
     QWidget(parent)
@@ -35,9 +37,23 @@ Plotter::Plotter(QWidget *parent) :
     toolTip = new QString("");
     this->setToolTip(*toolTip);
 
+    QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+    QString twoEasyFilename = Parameters::twoEasyIniFilename;
+    int maxBins;
+
+    if (settings.contains("hexitecGigEIniFilename"))
+    {
+       twoEasyFilename = settings.value("hexitecGigEIniFilename").toString();
+    }
+    twoEasyIniFile = new IniFile(twoEasyFilename);
+
+    if ((maxBins = twoEasyIniFile->getInt("Processing/Maximum_Bins")) != QVariant(INVALID))
+    {
+       this->maxBins = maxBins;
+    }
     summedCurve = new Curve();
-    summedCurve->xData.resize(1000);
-    summedCurve->yData.resize(1000);
+    summedCurve->xData.resize(this->maxBins);
+    summedCurve->yData.resize(this->maxBins);
 
     foreach (QString colorName, colorList)
     {
@@ -159,6 +175,8 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
     QImage image(":/images/Hexitec_logo10.png");
+    double spanX;
+    int numXTicks;
 
     // define the axis boundaries
     axesBox.setLeft(leftMargin);
@@ -174,10 +192,20 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
     // draw the axis
     if (showAxes)
     {
-        for (int i = 0; i <= zoomStack[currentZoom].numXTicks; ++i)
+       if (currentZoom == 0)
+       {
+          spanX = summedCurve->maxXData - summedCurve->minXData;
+          numXTicks = 4;
+       }
+       else
+       {
+          spanX = zoomStack[currentZoom].spanX();
+          numXTicks = zoomStack[currentZoom].numXTicks;
+       }
+        for (int i = 0; i <= numXTicks; ++i)
         {
-            int x = axesBox.left() + (i * (axesBox.width() - 1) / zoomStack[currentZoom].numXTicks);
-            double label = zoomStack[currentZoom].minX + (i * zoomStack[currentZoom].spanX() / zoomStack[currentZoom].numXTicks);
+            int x = axesBox.left() + (i * (axesBox.width() - 1) / numXTicks);
+            double label = zoomStack[currentZoom].minX + (i * spanX / numXTicks);
             if (showGridLines)
             {
                 painter.setPen(QColor(Qt::lightGray));
