@@ -103,7 +103,7 @@ Plotter::Plotter(QWidget *parent) :
     yLabel("Pixel Y");
     summedYLabel("Sum Y");
     // margins
-    setMargins(55, 45, 35, 45);
+    setMargins(55, 80, 35, 45);
     // mouse
     mouseButtonPressed = false;
     mouseDoubleClicked = false;
@@ -213,6 +213,8 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
             }
             painter.setPen(QColor(0,0,0));
             painter.drawLine(x, axesBox.bottom(), x, axesBox.bottom() + 5);
+            painter.setFont(QFont("Arial", 8));
+
             painter.drawText(x - 50, axesBox.bottom() + 8, 100, 15, Qt::AlignHCenter | Qt::AlignTop, QString::number(label));
         }
 
@@ -229,8 +231,21 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
             painter.drawLine(axesBox.left() - 5, y, axesBox.left(), y);
             painter.drawText(axesBox.left() - 58, y - 10, leftMargin - 5, 20, Qt::AlignRight | Qt::AlignVCenter, QString::number(label));
         }
-        // add axis labels
+
         painter.setPen(QColor(0,0,0));
+        double summedSpanY = (summedCurve->maxYData - summedCurve->minYData);
+
+        for (int j = 0; j <= 5; ++j)
+        {
+            int y = axesBox.bottom() - (j * (axesBox.height() - 1) / 5);
+            double label = summedCurve->minYData + (j * summedSpanY / 5);
+
+            painter.drawLine(axesBox.right() + 5, y, axesBox.right(), y);
+            painter.drawText(axesBox.right() + 10, y - 10, rightMargin + 5, 20, Qt::AlignLeft | Qt::AlignVCenter, QString::number(label));
+        }
+        // add axis labels
+        painter.setFont(QFont("Arial", 9));
+
         QRect rectXLabel(leftMargin, axesBox.bottom() + 25 , axesBox.width(), bottomMargin - 25);
         painter.drawText(rectXLabel, Qt::AlignHCenter | Qt::TextWordWrap, xLabel());
 
@@ -241,16 +256,6 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         painter.setPen(QColor(0,0,0));
         QRect rectSummedYLabel(leftMargin + axesBox.width(), topMargin - 20, axesBox.width(), axesBox.height());
         painter.drawText(rectSummedYLabel, Qt::AlignTop, summedYLabel());
-
-        double summedSpanY = (summedCurve->maxYData - summedCurve->minYData);
-        for (int j = 0; j <= 5; ++j)
-        {
-            int y = axesBox.bottom() - (j * (axesBox.height() - 1) / 5);
-            double label = summedCurve->minYData + (j * summedSpanY / 5);
-
-            painter.drawLine(axesBox.right() + 5, y, axesBox.right(), y);
-            painter.drawText(axesBox.right() + 10, y - 10, rightMargin + 5, 20, Qt::AlignLeft | Qt::AlignVCenter, QString::number(label));
-        }
     }
     painter.setPen(QColor(0,0,0));
 
@@ -259,32 +264,32 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         if (!zoomStack[currentZoom].autoScaleX && !zoomStack[currentZoom].autoScaleY)
         {
             QImage lockSmall(":/images/lockSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top(), lockSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top(), lockSmall);
         }
         if (zoomStack[currentZoom].autoScaleX && !zoomStack[currentZoom].autoScaleY)
         {
             QImage lockYSmall(":/images/lockYSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top(), lockYSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top(), lockYSmall);
         }
         if (!zoomStack[currentZoom].autoScaleX && zoomStack[currentZoom].autoScaleY)
         {
             QImage lockXSmall(":/images/lockXSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top(), lockXSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top(), lockXSmall);
         }
         if (holdState)
         {
             QImage holdSmall(":/images/holdSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.bottom() + 15, holdSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top() + 27, holdSmall);
         }
         if (xExploreState)
         {
             QImage exploreSmall(":/images/exploreSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top() + 54, exploreSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top() + 54, exploreSmall);
         }
         if (sumState)
         {
             QImage sumSmall(":/images/SumSmall.png");
-            painter.drawImage(axesBox.right() + 10, axesBox.top() + 54, sumSmall);
+            painter.drawImage(axesBox.right() + 50, axesBox.top() + 54, sumSmall);
         }
 
     }
@@ -335,10 +340,10 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
         else // need to chane this so that it displays a rectangle
             painter.drawLine((int) x + axesBox.left(), axesBox.bottom(), (int) x + axesBox.left(), axesBox.top());
 
-        QRect spinBoxPos(axesBox.right() + 5, axesBox.top() + 81, 35, 20);
+        QRect spinBoxPos(axesBox.right() + 50, axesBox.top() + 81, 35, 20);
         channelExplorerSpinBox->setGeometry(spinBoxPos);
         channelExplorerSpinBox->show();
-        QRect spinBoxPos2(axesBox.right() + 5, axesBox.top() + 108, 35, 20);
+        QRect spinBoxPos2(axesBox.right() + 50, axesBox.top() + 108, 35, 20);
         backgroundRemoveSpinBox->setGeometry(spinBoxPos2);
         backgroundRemoveSpinBox->show();
     }

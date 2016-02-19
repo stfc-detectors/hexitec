@@ -77,7 +77,8 @@ SOURCES += main.cpp \
     displaylegendsdialog.cpp \
     parameters.cpp \
     hv.cpp \
-    badinifiledialog.cpp
+    badinifiledialog.cpp \
+    progressform.cpp
 
 HEADERS += mainwindow.h \
     voxel.h \
@@ -142,7 +143,8 @@ HEADERS += mainwindow.h \
     displaylegendsdialog.h \
     parameters.h \
     hv.h \
-    badinifiledialog.h
+    badinifiledialog.h \
+    progressform.h
 
 FORMS += \
     gridsizequery.ui \
@@ -160,7 +162,8 @@ FORMS += \
     processingwindow.ui \
     setaxesdialog.ui \
     displaylegendsdialog.ui \
-    badinifiledialog.ui
+    badinifiledialog.ui \
+    progressform.ui
 
 RESOURCES += \
     HexitecGigE.qrc

@@ -8,6 +8,7 @@
 #include <QObject>
 #include "detectorcontrolform.h"
 #include "dataacquisitionform.h"
+#include "progressform.h"
 #include "gigedetector.h"
 #include "detectormonitor.h"
 #include "hv.h"
@@ -28,16 +29,19 @@ class DataAcquisitionModel : public QObject, public Reservable
 private:
    explicit DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionForm,
                                  DetectorControlForm *detectorControlForm,
+                                 ProgressForm *progressForm,
                                  QObject *parent = 0);
    static DataAcquisitionModel *damInstance;
    DataAcquisitionForm *dataAcquisitionForm;
    DetectorControlForm *detectorControlForm;
+   ProgressForm *progressForm;
    HV *hv;
    GigEDetector *gigEDetector;
    DetectorMonitor *detectorMonitor;
    DataAcquisition *dataAcquisition;
    DataAcquisitionDefinition dataAcquisitionDefinition;
    ObjectReserver *objectReserver;
+   double daqCollectionDuration;
    double daqDuration;
    QList <QObject *> rdaqml;
 
@@ -55,7 +59,8 @@ private:
    void changeDaqDuration();
 
 public:
-   static DataAcquisitionModel *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent = 0);
+   static DataAcquisitionModel *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                         ProgressForm *progressForm, QObject *parent = 0);
    static DataAcquisitionModel *getInstance();
    ~DataAcquisitionModel();
    DataAcquisitionDefinition *getDataAcquisitionDefinition();
@@ -65,6 +70,9 @@ public:
    Q_INVOKABLE void setTimestampOn(bool timestampOn);
    Q_INVOKABLE QString getDirectory();
    QList<QObject *> getReserveList();
+   double getDaqCollectionDuration();
+   double getDaqDuration();
+
 
 signals:
    void dataChanged(DataAcquisitionDefinition dataAcquisitionDefinition);

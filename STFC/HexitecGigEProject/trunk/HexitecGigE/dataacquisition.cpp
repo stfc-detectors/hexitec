@@ -225,6 +225,7 @@ void DataAcquisition::performContinuousDataCollection()
    emit disableBiasRefresh();
    emit disableMonitoring();
 //   waitForMonitoringDone();
+   dataAcquisitionModel = DataAcquisitionModel::getInstance();
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -242,6 +243,7 @@ void DataAcquisition::performContinuousDataCollection()
          setDataAcquisitionTime(nDaq);
          collecting = true;
 
+         emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000);
          emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
          nDaqOverall++;
 

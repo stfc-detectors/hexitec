@@ -1704,6 +1704,11 @@ void HxtProcessing::commitConfigChanges()
     dataProcessor->updateTimeStamp(mDataTimeStamp);
 }
 
+float hexitech::HxtProcessing::getDiscWritingInterval()
+{
+   return mDiscWritingInterval;
+}
+
 
 char* baseName(char* aPath) {
 #if defined(OS_WIN)

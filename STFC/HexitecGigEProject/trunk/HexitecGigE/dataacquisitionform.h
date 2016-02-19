@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QWidget>
-#include<QTime>
+#include <QTime>
 
 #include "monitordata.h"
 #include "gigedetector.h"

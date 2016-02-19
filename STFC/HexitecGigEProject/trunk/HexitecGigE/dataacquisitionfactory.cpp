@@ -7,7 +7,8 @@
 
 DataAcquisitionFactory *DataAcquisitionFactory::dafInstance = 0;
 
-DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent)
+DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                               ProgressForm *progressForm, QObject *parent)
 {
    QString aspectFilename = Parameters::aspectIniFilename;
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
@@ -87,7 +88,7 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    dataAcquisition = DataAcquisition::instance();
    dataAcquisition->setProperty("objectName", "daq");
 
-   dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm);
+   dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm, progressForm);
    dataAcquisitionModel->setProperty("objectName", "daqModel");
    connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
            SLOT(addObject(QObject*, bool, bool)));
@@ -136,11 +137,12 @@ DataAcquisitionFactory::~DataAcquisitionFactory()
    delete motorFactory;
 }
 
-DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent)
+DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                                         ProgressForm *progressForm, QObject *parent)
 {
    if (dafInstance == 0)
    {
-      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm, parent);
+      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm, progressForm, parent);
    }
 
    return dafInstance;

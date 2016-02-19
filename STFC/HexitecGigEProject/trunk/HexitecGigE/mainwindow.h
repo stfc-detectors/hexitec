@@ -29,6 +29,7 @@
 ///#include "keithleymainwindow.h"
 #include "dataacquisitionfactory.h"
 #include "processingwindow.h"
+#include "progressform.h"
 
 class HexitecSoftTrigger;
 class HardTrigger;
@@ -51,6 +52,7 @@ private:
    void createStatusBar();
    void createMainViewer();
    void createPlotter();
+   void createProgressViewer();
    void createThumbViewer();
    void createWorkSpace();
    void createApplicationOutput();
@@ -67,6 +69,7 @@ private:
    KeithleyMainWindow *keithleyMainWindow();
    ////
    ThumbViewer *thumbViewer;
+   ProgressForm *progressForm;
    Plotter *plotter;
    ScriptingWidget *scripting ;
    Workspace *workspace;
@@ -107,7 +110,7 @@ signals:
    void startDAQ();
    void stopDAQ();
    void returnHxtBuffer(unsigned short* hxtBuffer);  /// HexitecGigE Addition
-
+   void updateProgress(double elapsed);
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
    void readFiles();

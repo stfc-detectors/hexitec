@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProgressForm</class>
+ <widget class="QWidget" name="ProgressForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>138</width>
+    <height>174</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>142</width>
+    <height>183</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="6" column="1">
+    <widget class="QLabel" name="currentTimeFormattedLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (formatted)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="CurrentExposureLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Current exposure time:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="daqTimeFormattedLabel">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (formatted)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="daqTimeSecsLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (secs)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="currentTimeSecsLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (secs)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="totalExposureLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Total exposure time:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="label">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Remaining exposure:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QLabel" name="remainingTimeFormattedLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (formatted)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QLabel" name="remainingTimeSecsLabel">
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>12</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>13</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Time (secs)</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

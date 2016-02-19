@@ -224,6 +224,7 @@ Slice::~Slice()
 {
    delete[](voxels);
    commonX.clear();
+   free(summedImageY);
 }
 
 /*

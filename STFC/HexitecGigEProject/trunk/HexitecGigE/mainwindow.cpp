@@ -157,7 +157,7 @@ MainWindow::MainWindow()
    processingWindow = ProcessingWindow::instance(this);
    if (activeDAQ)
    {
-      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm, this);
+      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm, progressForm, this);
       motionControlform = new MotionControlForm();
    }
 
@@ -206,6 +206,7 @@ MainWindow::MainWindow()
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
       connect(this, SIGNAL(executeShowImage()),
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
+      connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
    }
 
    emit initialiseProcessingWindow();
@@ -225,6 +226,7 @@ QMainWindow *MainWindow::createVisualisation()
 
    // MainViewer and ThumbViewer are children of visualisation
    createMainViewer();
+   createProgressViewer();
    createThumbViewer();
 
    // Temporarily plotter and workspace are placed inside another tabs widget which is attached to visualisation.
@@ -334,11 +336,14 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
       emit addObject(slice);
       MainViewer::instance()->showNewActiveSlice();
       thumbViewer->addSlice(slice);
+      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
+
    }
    else
    {
       DataModel::instance()->setActiveSlice(slice);
       MainViewer::instance()->showNewActiveSlice();
+      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
    }
    update();
 }
@@ -653,6 +658,21 @@ void MainWindow::createThumbViewer()
    QMainWindow *thumbWindow = thumbViewer->getMainWindow();
    dock->setWidget(thumbWindow) ;
    thumbWindow->setParent(dock) ;
+}
+
+void MainWindow::createProgressViewer()
+{
+   progressForm = new ProgressForm(visualisation);
+
+   QDockWidget *dock = new QDockWidget(tr("ProgressViewer"), visualisation);
+   dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::RightDockWidgetArea);
+   dock->setMinimumHeight(175);
+   dock->setMaximumWidth(120);
+   visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
+//   viewMenu->addAction(dock->toggleViewAction());
+   QMainWindow *progressWindow = progressForm->getMainWindow();
+   dock->setWidget(progressWindow) ;
+   progressWindow->setParent(dock) ;
 }
 
 void MainWindow::createWorkSpace()

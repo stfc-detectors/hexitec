@@ -54,6 +54,7 @@ public:
     // communicate changes onto dataProcessor (HxtRawDataProcessor) object:
     void commitConfigChanges();
     void setDiscWritingInterval(float aDiscWritingInterval) { mDiscWritingInterval = aDiscWritingInterval; }
+    float getDiscWritingInterval();
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }

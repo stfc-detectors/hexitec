@@ -3,11 +3,13 @@
 #include "detectorfactory.h"
 #include "dataacquisition.h"
 #include "processingwindow.h"
+#include "progressform.h"
 
 DataAcquisitionModel *DataAcquisitionModel::damInstance = 0;
 
 DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionForm,
                                            DetectorControlForm *detectorControlForm,
+                                           ProgressForm *progressForm,
                                            QObject *parent) :
    QObject(parent)
 {
@@ -16,6 +18,7 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
 
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
+   this->progressForm = progressForm;
 
    hv = VoltageSourceFactory::instance()->getHV();
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
@@ -41,11 +44,13 @@ DataAcquisitionModel::~DataAcquisitionModel()
 {
 }
 
-DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, QObject *parent)
+DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                                     ProgressForm *progressForm, QObject *parent)
 {
    if (damInstance == 0)
    {
-      damInstance = new DataAcquisitionModel(dataAcquisitionForm, detectorControlForm, parent);
+      damInstance = new DataAcquisitionModel(dataAcquisitionForm, detectorControlForm,
+                                             progressForm, parent);
    }
 
    return damInstance;
@@ -59,6 +64,16 @@ DataAcquisitionModel *DataAcquisitionModel::getInstance()
 QList<QObject *> DataAcquisitionModel::getReserveList()
 {
    return rdaqml;
+}
+
+double DataAcquisitionModel::getDaqCollectionDuration()
+{
+   return daqCollectionDuration;
+}
+
+double DataAcquisitionModel::getDaqDuration()
+{
+   return daqDuration;
 }
 
 void DataAcquisitionModel::connectDetectorMonitor()
@@ -122,6 +137,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorMonitor, SLOT(disableMonitoring()));
    connect(dataAcquisition, SIGNAL(imageComplete(unsigned long long)),
            ProcessingWindow::getHxtProcessor(), SLOT(pushImageComplete(unsigned long long)));
+   connect(dataAcquisition, SIGNAL(imageStarting(double)),
+           progressForm, SLOT(handleImageStarting(double)));
 
 }
 
@@ -306,6 +323,7 @@ void DataAcquisitionModel::changeDaqDuration()
    bool biasOn = hv->getBiasOnState();
 
    daqDuration = dataAcquisitionDefinition.getDuration();
+   daqCollectionDuration = repeatCount * daqDuration;
    splitDataCollections = ceil(((double) daqDuration) / ((double ) hv->getBiasRefreshInterval()));
 
    // If bias on add number of bias refreshes per collection
@@ -313,7 +331,6 @@ void DataAcquisitionModel::changeDaqDuration()
    {
       daqDuration += (splitDataCollections * biasRefreshTime);
    }
-
    // Add pause time
    daqDuration += repeatInterval;
 
