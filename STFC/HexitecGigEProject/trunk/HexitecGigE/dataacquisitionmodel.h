@@ -60,7 +60,8 @@ private:
 
 public:
    static DataAcquisitionModel *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                         ProgressForm *progressForm, QObject *parent = 0);
+                                         ProgressForm *progressForm,
+                                         QObject *parent = 0);
    static DataAcquisitionModel *getInstance();
    ~DataAcquisitionModel();
    DataAcquisitionDefinition *getDataAcquisitionDefinition();

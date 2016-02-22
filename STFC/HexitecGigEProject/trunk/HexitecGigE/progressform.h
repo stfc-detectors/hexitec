@@ -1,14 +1,14 @@
 #ifndef PROGRESSFORM_H
 #define PROGRESSFORM_H
 
-#include <QWidget>
 #include <QMainWindow>
+#include <QWidget>
 #include <QTime>
 
 namespace Ui {
 class ProgressForm;
 }
-const int secs_in_day = 86400;
+const int s_in_day = 86400;
 
 class ProgressForm : public QWidget
 {
@@ -23,9 +23,9 @@ private:
    Ui::ProgressForm *ui;
    QMainWindow *mainWindow;
    QString formattedText;
+   double daqCollectionTime;
    double collectionTime;
    double remainingTime;
-   double daqCollectionTime;
    QString formattedTime(double daqDuration);
    QString prepend0(QString input, int number);
    void updateTimes();

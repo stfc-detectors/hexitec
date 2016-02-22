@@ -77,7 +77,7 @@ SOURCES += main.cpp \
     displaylegendsdialog.cpp \
     parameters.cpp \
     hv.cpp \
-    badinifiledialog.cpp \
+    badinifiledialog.cpp \  
     progressform.cpp
 
 HEADERS += mainwindow.h \

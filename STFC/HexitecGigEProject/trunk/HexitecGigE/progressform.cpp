@@ -28,7 +28,7 @@ void ProgressForm::handleImageStarting(double daqCollectionTime)
    remainingTime = daqCollectionTime;
 
    ui->daqTimeFormattedLabel->setText(formattedTime(daqCollectionTime));
-   ui->daqTimeSecsLabel->setText("Seconds:" + QString::number(daqCollectionTime));
+//   ui->daqTimeSecsLabel->setText("Seconds:" + QString::number(daqCollectionTime));
 
    updateTimes();
 }
@@ -52,17 +52,17 @@ void ProgressForm::handleUpdateProgress(double progressTime)
 void ProgressForm::updateTimes()
 {
    ui->currentTimeFormattedLabel->setText(formattedTime(collectionTime));
-   ui->currentTimeSecsLabel->setText("Seconds:" + QString::number(collectionTime));
+//   ui->currentTimeSecsLabel->setText("Seconds:" + QString::number(collectionTime));
 
    ui->remainingTimeFormattedLabel->setText(formattedTime(remainingTime));
-   ui->remainingTimeSecsLabel->setText("Seconds:" + QString::number(remainingTime));
+//   ui->remainingTimeSecsLabel->setText("Seconds:" + QString::number(remainingTime));
 }
 
 QString ProgressForm::formattedTime(double daqDuration)
 {
    QString formattedText;
    long daqDurationSeconds = floor(daqDuration);
-   long days = daqDurationSeconds / secs_in_day;
+   long days = daqDurationSeconds / s_in_day;
    long hundredths = floor((daqDuration - daqDurationSeconds) * 100 + 0.5);
    if (days > 0)
    {
@@ -92,4 +92,5 @@ QString ProgressForm::prepend0(QString input, int number)
 
    return input;
 }
+
 

@@ -665,9 +665,9 @@ void MainWindow::createProgressViewer()
    progressForm = new ProgressForm(visualisation);
 
    QDockWidget *dock = new QDockWidget(tr("ProgressViewer"), visualisation);
-   dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::RightDockWidgetArea);
+   dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
    dock->setMinimumHeight(175);
-   dock->setMaximumWidth(120);
+//   dock->setMaximumWidth(120);
    visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
 //   viewMenu->addAction(dock->toggleViewAction());
    QMainWindow *progressWindow = progressForm->getMainWindow();
