@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DisplayLegendsDialog</class>
+ <widget class="QDialog" name="DisplayLegendsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>240</width>
+    <height>188</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Display Legends</string>
+  </property>
+  <widget class="QTreeWidget" name="plotLegends">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>311</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="indentation">
+    <number>12</number>
+   </property>
+   <property name="columnCount">
+    <number>3</number>
+   </property>
+   <attribute name="headerDefaultSectionSize">
+    <number>80</number>
+   </attribute>
+   <attribute name="headerMinimumSectionSize">
+    <number>20</number>
+   </attribute>
+   <attribute name="headerStretchLastSection">
+    <bool>false</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string notr="true">Image</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string notr="true">Pixel X</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string notr="true">Pixel Y</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
