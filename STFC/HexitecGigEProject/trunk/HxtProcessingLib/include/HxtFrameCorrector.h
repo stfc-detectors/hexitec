@@ -33,7 +33,11 @@ public:
         return mEventsCorrected;
     }
 
-	string getName(void) const
+    /// HexitecGigE Addition:
+    void resetNumEventsCorrected() { mEventsCorrected = 0; }
+    /// ------
+
+    string getName(void) const
 	{
 		return mName;
 	}

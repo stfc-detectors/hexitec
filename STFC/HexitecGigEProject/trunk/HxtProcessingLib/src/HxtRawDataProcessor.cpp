@@ -198,6 +198,82 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
     delete [] mPixelTable;
 }
 
+void HxtRawDataProcessor::resetHistograms() {
+
+    bool bDebug = false;
+    if (bDebug)
+    {
+        LOG(gLogConfig, logINFO) << "PRE-RESET: Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
+        LOG(gLogConfig, logINFO) << "PRE-RESET: Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
+        LOG(gLogConfig, logINFO) << "PRE-RESET: Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
+        LOG(gLogConfig, logINFO) << "PRE-RESET: Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
+    }
+
+    vector<HxtFrameCorrector*>::iterator correctorIterator;
+    for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
+        if (bDebug) {
+            const unsigned int nCorrected = (*correctorIterator)->getNumEventsCorrected();
+            LOG(gLogConfig, logINFO) << "PRE-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
+        }
+        /// Reset number of events as we go along in this loop..
+        (*correctorIterator)->resetNumEventsCorrected();
+    }
+
+    /// Begin by freeing histograms' memory
+    delete mGlobalRawHisto;
+    delete mGlobalDecodedHisto;
+    delete mGlobalSubPixelHisto;
+
+    // Delete histogram objects
+    for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
+        delete mPixelHistogram[iPixel];
+    }
+    mPixelHistogram.clear();
+
+    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+        delete mSubPixelHistogram[iPixel];
+    }
+    mSubPixelHistogram.clear();
+
+    /// Recreate histograms
+
+    // Create global raw and corrected histograms  - ONLY needed for debugging
+    mGlobalRawHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+    mGlobalDecodedHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+
+    // Decoded Frame: Create histogram for each pixel
+    for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
+        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+        mPixelHistogram.push_back(pixelHisto);
+    }
+
+    // SubPixels Frame: Create histogram for each pixel
+    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+        mSubPixelHistogram.push_back(pixelHisto);
+    }
+
+    /// Reset variables associated with a histogram
+    mFramesDetected = 0;
+    mCorrectedFramesWritten = 0;
+    mEventsDetected = 0;
+    mEventsAboveThreshold = 0;
+
+    if (bDebug)
+    {
+        LOG(gLogConfig, logINFO) << "POST-RESET: Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
+        LOG(gLogConfig, logINFO) << "POST-RESET: Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
+        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
+        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
+
+        for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
+            const unsigned int nCorrected = (*correctorIterator)->getNumEventsCorrected();
+            LOG(gLogConfig, logINFO) << "POST-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
+        }
+    }
+}
+
 /// setDebug - enable debug output
 /// @param aDebug set to true to enable debug output
 void HxtRawDataProcessor::setDebug(bool aDebug) {
@@ -856,6 +932,23 @@ bool HxtRawDataProcessor::writeStructOutput(string aOutputPixelFileName) {
     // Make a note of filename, to be used by CSV file  shortly - TEMP ADDITION ??
     size_t periodPosn = aOutputPixelFileName.find(".");
     mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
+
+    /// Well, this block turn out to be redundant..:
+//    //Toggle for more information about what written into the file's header:
+//    bool bExtraDebug = true;
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.hxtLabel:       " << mHxtBuffer.hxtLabel;
+
+//    if (bExtraDebug) qDebug()  << "write mFormatVer: " << mHxtBuffer.hxtVersion;
+
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[0]:      " << mHxtBuffer.motorPositions[0];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[1]:      " << mHxtBuffer.motorPositions[1];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[2]:      " << mHxtBuffer.motorPositions[2];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[3]:      " << mHxtBuffer.motorPositions[3];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[4]:      " << mHxtBuffer.motorPositions[4];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[5]:      " << mHxtBuffer.motorPositions[5];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[6]:      " << mHxtBuffer.motorPositions[6];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[7]:      " << mHxtBuffer.motorPositions[7];
+//    if (bExtraDebug) qDebug()  << "write mHxtBuffer.motorPositions[8]:      " << mHxtBuffer.motorPositions[8];
 
     /// Copy HxBuffer's hxtLabel through nBins in one fell sweep
     // Calculate size of the size in bytes:

@@ -82,7 +82,7 @@ public:
 	bool writeCsvFiles(void);
     /// HexitecGigE Added: (Support copying .HXT contents to buffer, not file)
     bool copyPixelOutput(unsigned short* aHxtBuffer);
-
+    void resetHistograms();
 
 	HxtFrame* getSubPixelFrame();
 
