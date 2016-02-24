@@ -184,9 +184,11 @@ private slots:
    void momentumBrowseButtonPressed();
    void gradientsBrowseButtonPressed();
    void interceptsBrowseButtonPressed();
+   void globalThresholdBrowseButtonPressed();
    void momentumPathLineEditChanged(QString momentumFile);
    void gradientsPathLineEditChanged(QString gradientsFile);
    void interceptsPathLineEditChanged(QString interceptsFile);
+   void globalThresholdPathLineEditChanged(QString globalThresholdFile);
    void startBinLineEditChanged(QString aString);
    void endBinLineEditChanged(QString aString);
    void binWidthLineEditChanged(QString aString);

@@ -44,7 +44,8 @@ public:
 
     void pushRawFileName(string aFileName, int frameSize); // Add raw filename onto fileQueue queue
     void pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames); // Add transfer buffer onto queue
-    int executeProcessing(bool bProcessFiles, bool & bWriteFiles);
+    int executeProcessing(bool bProcessFiles);
+    int updateVisualisationTabAndHxtFile();
 
     int checkConfigValid();
     /// HexitecGigE Addition:
@@ -55,6 +56,16 @@ public:
     void commitConfigChanges();
     void setDiscWritingInterval(float aDiscWritingInterval) { mDiscWritingInterval = aDiscWritingInterval; }
     float getDiscWritingInterval();
+	/// HexitecGigE functions to support run()
+    bool performManualProcessing();
+    bool prepareSingleProcessing(bool &bProcessTheQueue);
+    void clearAllQueues();
+    bool prepareMotorPositionProcessing(/**/ int *numberOfBuffersToProcess);
+    bool prepareWholeQueueProcessing(bool bProcessTheQueue);
+    /// Pure debugging purposes only, will soon be removed:
+    bool bDebug;
+    int dummyFrameCounter;
+    void checkQueueLengths(int &motorSize, int &bufferSize, int &fileSize, int &framesSize);
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -164,6 +175,9 @@ protected:
     bool mFirstBufferInCollection;
     bool bFirstTime;                        // Prevent mHxtBuffers initialised more than once - NOT YET implemented! ['15 Dec 11]
     float mDiscWritingInterval;
+    float mTimeSinceLastDiscOp;
+    string deduceNewHxtFileName(string fileName);
+    string createDataTimeStampString();
     ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
     HxtPixelThreshold* pixelThreshold;
     HxtRawDataProcessor* dataProcessor;
@@ -180,7 +194,7 @@ protected:
     ///
     Timer* mProcessingTimer;
     Timer* mDiscWritingTimer;
-    Timer* mIdleTimer;
+//    Timer* mIdleTimer;
     string mDebugFrameDir;
     bool mEnableDebugFrame;
     /// DEBUGGING PURPOSES:

@@ -189,7 +189,8 @@ MainWindow::MainWindow()
    connect(this, SIGNAL(initialiseProcessingWindow()), processingWindow, SLOT(initialiseProcessingWindow()));
 
    // Allow processingWindow to signal when User may (not) be allowed to collect data
-   connect(processingWindow, SIGNAL(updateMainWindowDataTakingSignal(bool)), fileMenu->actions().at(1), SLOT(setEnabled(bool)));
+//   connect(processingWindow, SIGNAL(updateMainWindowDataTakingSignal(bool)), fileMenu->actions().at(1), SLOT(setEnabled(bool)));
+   qDebug() <<"mainwindow.cpp:192 updateMainWindowDataTakingIn(Bool) Commented out - User May Now Access deleteSliceAct Component Freely?";
    // Allow MainWindow signal to processingWindow if manual processing has begun/been abandoned
    connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));

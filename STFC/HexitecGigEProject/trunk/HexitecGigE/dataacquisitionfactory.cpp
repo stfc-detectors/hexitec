@@ -8,8 +8,7 @@
 DataAcquisitionFactory *DataAcquisitionFactory::dafInstance = 0;
 
 DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                               ProgressForm *progressForm,
-                                               QObject *parent)
+                                               ProgressForm *progressForm, QObject *parent)
 {
    QString aspectFilename = Parameters::aspectIniFilename;
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
@@ -139,8 +138,7 @@ DataAcquisitionFactory::~DataAcquisitionFactory()
 }
 
 DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                                         ProgressForm *progressForm,
-                                                         QObject *parent)
+                                                         ProgressForm *progressForm, QObject *parent)
 {
    if (dafInstance == 0)
    {

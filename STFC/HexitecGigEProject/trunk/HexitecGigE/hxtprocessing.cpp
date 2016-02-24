@@ -7,7 +7,6 @@
 
 #include "HxtProcessing.h"
 
-// This makes QT a dependency for this project:
 #include <QDebug>
 // Regular expressions:
 #include <regex>
@@ -49,7 +48,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
 
     mFormatVersion = 3;
 
-    mFilePrefix    = "Def_prefix_";
+    mFilePrefix    = "(blank)             ";
     mDataTimeStamp = string("000000_000000");
     mutexTimeout   = 50;  // Milliseconds duration to attempt acquiring a mutex lock
 
@@ -79,7 +78,6 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     ///     ---------
     mProcessingTimer  = new Timer();    // Time how long to process a received buffer/file from the Q
     mDiscWritingTimer = new Timer();    // Used to time  when to write histograms to disc/pass to visualisation tab
-    mIdleTimer        = new Timer();    // Time how long idling on empty buffers (Allow processing of  unprocessed remnants)
     mAppName = aAppName;
     mFirstBufferInCollection = false;
 
@@ -155,13 +153,10 @@ HxtProcessing::~HxtProcessing()
 
 void HxtProcessing::prepSettings()
 {
-    qDebug() << "HxtProcessing::prepSettings() called ";
-
     if (bFirstTime)
     {
-       qDebug() << "HxtProcessing::prepSettings() called FIRST TIME!!!" << sizeof(HxtBuffer) << numHxtBuffers;
         // Setup pool of buffers - To send HXT file contents by RAM rather than file
-        for (int i=0; i < numHxtBuffers; i++)
+        for (unsigned int i=0; i < numHxtBuffers; i++)
         {
             HxtBuffer* hxtBuffer = new HxtBuffer;
             mHxtBuffers.push_back(hxtBuffer);
@@ -404,8 +399,8 @@ void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
     * raw image. New filenames for processed data can be created by adding any
     * extension (except .bin) to this filename.
     */
-//   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
-//               << "frameSize (bytes) = " << frameSize;
+   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
+               << "frameSize (bytes) = " << frameSize;
 
    // Setup file path before calling prepSettings() (which instantiates the logger)
    this->setTargetDirectory(aFileName);
@@ -437,22 +432,8 @@ void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, 
    // Recast unsigned char pointer to unsigned short pointer (2 bytes, = 1 pixel)
    unsigned short* newBuffer = reinterpret_cast<unsigned short*>(transferBuffer);
 
-//   /// DEBUGGING  PURPOSES: Is pixel  reordering correct?
-//   if (bReordering)
-//   {
-//       unsigned short *pBuffer = newBuffer;
-//       for (unsigned int i=0; i < 80*5; i++)
-//       {
-//           cout << "   [" << setw(2) << i << "]=" << setw(3) <<  *pBuffer;
-//           pBuffer++;
-//           if ((i!= 0) && (i  % 79 == 0))
-//               cout << endl << "=========================== i:" << i << " ===========================" << endl;
-//       }
-////       bReordering = false;s
-////       Sleep(1000);
-//       qDebug() << "- - - - DEBUGGING PURPOSES: finished";
-//   }
-//   /// - - - - - - - - - - - - -    - - - - - - - - - - - - -///
+//   qDebug() << "    ::pushTransferBuffer() transferBuffer: " << (long*)transferBuffer << " containing: " << validFrames << " frames.";
+
    int iDebug = 0;
    if (bufferMutex.tryLock(mutexTimeout))
    {
@@ -476,10 +457,6 @@ void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, 
        /*qDebug() << "::pushTr'rBuffer() Added: " << transferBuffer << " to bufferQ and " << validFrames << " onto framesQ."*/;
    else
        qDebug() << "pushTr'rBuffer() failed to add 1/several of buffer & frames  onto respective Queues";
-
-   /// For testing purposes only, this will be handed using a callback function later on:
-   /*TODO: Move: */emit returnBufferReady(transferBuffer, validFrames)/**/;
-
 }
 
 void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)
@@ -494,6 +471,10 @@ void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)
     else
         emit hexitechSignalError("HxtProcessing::pushMotorPositions() - Unable to acquire mutex lock!");
 
+//    qDebug() <<" -=- HxtProcessing::pushMotorPositions() -=-"
+//            << " mSSX: " << newPositions->mSSX  << " mSSY: " << newPositions->mSSY << " mSSZ: " << newPositions->mSSZ
+//            << " mSSROT: " << newPositions->mSSROT << " mGALX: " << newPositions->mGALX << " mGALY: " << newPositions->mGALY
+//            << " mGALZ: " << newPositions->mGALZ << " GALROT: " << newPositions->mGALROT << " mTimer: " << newPositions->mTimer;
     delete newPositions;
     newPositions = 0;
 }
@@ -542,494 +523,624 @@ void HxtProcessing::run()
     /// Thread's main function - Periodically check queues, processing them when specified condition met
     emit hexitechSignalError("HxtProcessing Thread up and running.");
 
-    /// Call prepSettings function before may begin
-//    prepSettings();
-
     // Local variable to track status of fileQueue, motorQueue, bProcessQueueContents
     bool bFileQueueEmpty = true, bMotorQueueEmpty = true, bProcessTheQueue = false;
-    bool bBufferQueueEmpty  = false, bFramesQueueEmpty = false, bProcessFiles = false;
+    bool bBufferQueueEmpty  = false;
     int currentCondition = -1;
-    unsigned long newFrameSize = -1;
 
-    /// Make decision to write to disk, tied to a Timer (e.g. once/second etc)
-    bool bWriteToDisk = false;//true;
-    // Start and stop timer to give it a sane (~0) value
-    mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 515;
-    mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 516;
-    float timeSinceLastDiscOp = 0.0;
+    // Start and stop timer to give it a sane (~0.0) value
+    mDiscWritingTimer->start();
+    mDiscWritingTimer->stop();
 
-//    mDiscWritingInterval = 0.1;
-//    qDebug() << " ***  DON'T FORGET TO RESTORE: HxtProcessing.CPP::run    deskWritingInterval = 0.1 seconds (not 1.0 seconds)";
-
-    // Initialise timer tracking whether we are idling
-    mIdleTimer->start();
-    mIdleTimer->stop();
-
-    float idleThreshold = 3.0, timeSinceLastCollection = 0.0;
+    bDebug = false; /// Debugging purposes only
 
     while (bThreadRunning)
     {
-        // Check if bProcessQueueContents set
-        if (qContentsMutex.tryLock(mutexTimeout))
-        {
-            // If bProcessQueueContents set, update local variable bProcessTheQueue then clear bProcessQueueContents
-            if (bProcessQueueContents)
-            {
-                bProcessTheQueue = bProcessQueueContents;
-                bProcessQueueContents = false;
-            }
-            qContentsMutex.unlock();
-        }
-        else
-        {
-            emit hexitechSignalError("HxtProcessing Unable to acquire queue contents mutex lock!");
-            qDebug() << "HxtProcessing::run() I am unable to acquire queue contents mutex lock!";
-        }
-
-//        int fileNumbers = 0, motorNumbers = 0, bufferNumbers = 0;        /// DEBUGGING information:
-
-        // Wait while either fileQueue, motorQueue, bufferQueue empty; Or break if bProcessTheQueue (bProcessQueueContents) is set
+        /// Setup infinite loop - break condition later on (dependent upon Queue(s), Etc)
         do
         {
-            // If User pressed Clear Unprocessed button while queue empty, reset the Boolean variable
-            if (bRemoveUnprocessedFiles)
+
+            // Check if bProcessQueueContents set
+            if (qContentsMutex.tryLock(mutexTimeout))
+            {
+                // If bProcessQueueContents set, update local variable bProcessTheQueue then clear bProcessQueueContents
+                if (bProcessQueueContents)
+                {
+                    bProcessTheQueue = bProcessQueueContents;
+                    bProcessQueueContents = false;
+                }
+                qContentsMutex.unlock();
+            }
+            else
+                emit hexitechSignalError("HxtProcessing Unable to acquire queue contents mutex lock!");
+
+            if (bRemoveUnprocessedFiles)                // If User pressed Clear Unprocessed button while queue empty, reset the Boolean variable
                 bRemoveUnprocessedFiles = false;
 
-            // Sleep then recheck whether both queues still empty
-            Sleep(1);   /// Reduced from 500 to 1 ms for improved performance
+            if (!bThreadRunning)                        // Exit function when GUI is shut down
+                return;
 
-            // Check if fileQueue's empty
-            if (fileMutex.tryLock(mutexTimeout))
+            Sleep(1);                                   // Sleep then recheck whether queues still empty
+
+            if (fileMutex.tryLock(mutexTimeout))        // Check if fileQueue's empty?
             {
                 bFileQueueEmpty = fileQueue.isEmpty();
-//                fileNumbers = fileQueue.size();         /// DEBUGGING info
                 fileMutex.unlock();
             }
             else
                 emit hexitechSignalError("HxtProcessing Unable to acquire File mutex lock!");
 
-            // Check if motorQueue's empty
-            if (motorMutex.tryLock(mutexTimeout))
+            if (motorMutex.tryLock(mutexTimeout))       // Check if motorQueue's empty?
             {
                 bMotorQueueEmpty = motorQueue.isEmpty();
-//                motorNumbers = motorQueue.size();         /// DEBUGGING info
                 motorMutex.unlock();
             }
             else
                 emit hexitechSignalError("HxtProcessing Unable to acquire Motor mutex lock!");
 
-            /// Check if bufferQueue's empty    -    HexitecGigE Addition
-            if (bufferMutex.tryLock(mutexTimeout))
+            if (bufferMutex.tryLock(mutexTimeout))      /// Check if bufferQueue's empty?
             {
                 bBufferQueueEmpty = bufferQueue.isEmpty();
-//                bufferNumbers = bufferQueue.size();         /// DEBUGGING info
                 bufferMutex.unlock();
             }
             else
                 emit hexitechSignalError("HxtProcessing Unable to acquire Buffer mutex lock!");
 
-            // Exit function when GUI is shut down
-            if (!bThreadRunning)
-                return;
-        }
-        while ( ((bFileQueueEmpty || bMotorQueueEmpty) && (!bProcessTheQueue)) && ((bBufferQueueEmpty || bMotorQueueEmpty) && (!bProcessTheQueue)) );
-                //((bFileQueueEmpty || bMotorQueueEmpty || bBufferQueueEmpty) && (!bProcessTheQueue));   /// HexitecGigE  Addition
-
-        /// Received something on the Queue(s) - Start the timer
-//        mProcessingTimer->start();
-
-//        qDebug() << " *1* 292 fileNumbers: " << fileNumbers << " motorNumbers: " <<motorNumbers << " bufferNumbers:" << bufferNumbers
-//                 << "bProcessTheQ: " << bProcessTheQueue<< "(!bProcessTheQ=" << bProcessTheQueue << ") LOGIC: " <<
-//                    ( ((bFileQueueEmpty || bMotorQueueEmpty) && (!bProcessTheQueue)) && ((bBufferQueueEmpty || bMotorQueueEmpty) && (!bProcessTheQueue)) );	/// DEBUGGING Info
-
-         /// Remove this block?? Or Add bufferQueue to play safe??
-
-        // If bProcessTheQueue is true but queue(s) empty then the daq has been re-initialised
-        /// This block still needed... (For now?)
-        //   Clear bProcessTheQueue without processing the queue
-        if (bProcessTheQueue)
-        {
-            if(bFileQueueEmpty || bMotorQueueEmpty)
+            if ( !bMotorQueueEmpty && (!bFileQueueEmpty || !bBufferQueueEmpty) )   // Break out and process the Queue (if Boolean set)
             {
-                // bProcessTheQueue set prematurely, reset and re-run inner loop
-                bProcessTheQueue = false;
-                continue;
+                break;
+            }
+            else if (bProcessTheQueue)
+            {
+                break;              ///  Break if Motor Queue not empty, provided that either of File or Buffer Queue  also not empty
             }
         }
+        while( 1);
 
-        // Obtain targetCondition value
-        if (processingMutex.tryLock(mutexTimeout))
+        // Tell processing tab we are no longer idling - Once per image collection
+        if (mTimeSinceLastDiscOp > 0.0)
+            emit hexitechRunning(true);
+
+//        // The following two lines are required by the nested if (bProcessTheQueue) if (motorSize <1)
+//        int motorSize = -1, bufferSize = -1, fileSize = -1, framesSize = -1;
+//        checkQueueLengths(motorSize, bufferSize, fileSize, framesSize);
+
+//        // DEBUGGING stuff:
+//        qDebug() << " DEBUGGING: [Beyond while() loop]  motorSize (" << motorSize << ") bufferSize (" << bufferSize
+//                 << ") framesSize: (" << framesSize << ") fileSize: (" << fileSize << ")"
+//                 << " mTimeSinceLastDiscOp: " << mTimeSinceLastDiscOp;
+
+        if (bProcessTheQueue)
+        {
+            // Whether Queue(s) empty or not - Ensure unwritten buffer(s) "flushed" to disk and Visualisation tab
+            mTimeSinceLastDiscOp += mDiscWritingInterval;
+            // Tell processing tab we (very soon will be) idle
+            emit hexitechRunning(false);
+        }
+
+        /// First off, catch choices were no processing to be performed
+
+        if (bRemoveUnprocessedFiles)    // User clicked clearedUnprocessedButton in processingwindow's tab
+        {
+            clearAllQueues();    /// bRemoveUnprocessedFiles cleared within this function
+            continue;
+        }
+        if (bDontDisplayProcessedData && (!bManualProcessingEnabled))   // User selected manual (i.e. no) processing
+        {
+            if (bProcessTheQueue)
+            {
+//                qDebug() << " bProcessTheQueue while user has selected a manual processing - Clearing bProcessTheQ.. Before clearing the queues themselves";
+                bProcessTheQueue = false;
+            }
+            else
+                /*qDebug() << " (bDontDisplayProcessedData && (!bManualProcessingEnabled)) evaluated to true, but bProcessTheQueue  isn't set so only clearing the queues next"*/;
+            clearAllQueues();
+            continue;
+        }
+
+        /// Ok, processing selected - decide what kind  (of processing), then if it's been fulfilled
+
+        if (processingMutex.tryLock(mutexTimeout))        // Obtain targetCondition value
         {
             currentCondition = targetCondition;
             processingMutex.unlock();
         }
         else
-        {
             emit hexitechSignalError("HxtProcessing Error: Unable to acquire processing mutex lock!");
-        }
 
-        // Signal to ProcessingWindow that queue contains unprocessed raw file(s),
-        //   UNLESS: It's manual processing, or It's conditionEveryNewFile, or It's bDontDisplayProcessedData (Update Display: Manual)
-        //    (either of these scenarios mean these raw file(s) will imminently be processed)
-        if ((!bManualProcessingEnabled) && (currentCondition != conditionEveryNewFile) && (!bDontDisplayProcessedData))
+
+        // Did the user select Raw file(s) to be processed manually?
+        if (bManualProcessingEnabled)
         {
-            emit hexitechUnprocessedFiles(true);
+            performManualProcessing();
         }
-
-        // If User selected Manual Processing but didn't press ProcessNow button,
-        //  or, pressed the clearUnprocessed button,
-        //  then clear the queues without processing them
-
-        if ((bDontDisplayProcessedData && (!bManualProcessingEnabled))  // User selected Update Display: Manual
-                || bRemoveUnprocessedFiles)                             // User clicked Clear Unprocessed Button
+        else
         {
+            // Some type of Automatic Processing - Start the Timer
+            mDiscWritingTimer->start();
 
-            /// Clearing bufferQueue added; Clearing fileQueue no longer needed?
+            if (currentCondition == conditionEveryNewFile)         /// HexitecGigE: filenames replaced by buffers
+            {
+                prepareSingleProcessing(bProcessTheQueue);
 
-            // Clear bufferQueue
-            if (bufferMutex.tryLock(mutexTimeout))
-            {
-                // Report Buffers before discarding them
-                QQueue<unsigned short*>::iterator bufferIterator = bufferQueue.begin();
-                for ( ; bufferIterator != bufferQueue.end(); bufferIterator++)
-                    emit hexitechSignalError(QString("Ignoring Buffer: %1").arg( (unsigned long)*bufferIterator ));
-                    ///qDebug() << "Qsize: " << bufferQueue.size()  << " clear bufferQueue: emit signal buffer  " << (unsigned long)*bufferIterator << " released?";
-                // Discard file(s), unlock mutex
-                bufferQueue.clear();
-                bufferMutex.unlock();
             }
-            else
+            else    /// Condition is a change of motor position {conditionMotorAnyStep, conditionMotorPositionStep, conditionMotorTimeStep}
             {
-                hexitechSignalError("HxtProcessing Skipping Buffers Error: Unable to acquire buffer mutex lock!");
-                break;
-            }
 
-            // Clear framesQueue
-            if (framesMutex.tryLock(mutexTimeout))
-            {
-                // Report frames (per buffer) before discarding them
-                QQueue<unsigned long>::iterator framesIterator = framesQueue.begin();
-                for ( ; framesIterator != framesQueue.end(); framesIterator++)
-                    emit hexitechSignalError(QString("Ignoring Frames: %1").arg( (unsigned long)*framesIterator ));
-                    ////qDebug() << "Qsize:" << framesQueue.size() << " clear framesQueue: emit signal frames  " << (unsigned long)*framesIterator << " released?";
-                // Discard frames, unlock mutex
-                framesQueue.clear();
-                framesMutex.unlock();
-            }
-            else
-            {
-                hexitechSignalError("HxtProcessing Skipping Framess Error: Unable to acquire frames mutex lock!");
-                break;
-            }
+                if (bProcessTheQueue)   /// Set when  image collection finished - So process the lot, no more data arriving before next user-GUI interaction
+                {
+                    if (bDebug) qDebug() << "targetCondition was motor change but no (other) position changed before Image Collection completed.";
+                    if (bDebug) qDebug() << " ! no mPosition changed, bProcessTheQueue set. Clear it & call prepareWholeQueueProcessing()";
+                    // Call with argument = false, to grab everything of the queues
+                    mTimeSinceLastDiscOp += mDiscWritingInterval;
+                    bProcessTheQueue = false;
+                    prepareWholeQueueProcessing(bProcessTheQueue);
 
-            // Clear fileQueue
-            if (fileMutex.tryLock(mutexTimeout))
-            {
-                // Report filenames before discarding them
-                QQueue<string>::iterator fileIterator = fileQueue.begin();
-                for ( ; fileIterator != fileQueue.end(); fileIterator++)
-                    emit hexitechSignalError(QString("Ignoring: %1").arg(string(*fileIterator).c_str()));
-                // Discard file(s), unlock mutex
-                fileQueue.clear();
-                fileMutex.unlock();
-            }
-            else
-            {
-                hexitechSignalError("HxtProcessing Skipping Raw Files Error: Unable to acquire file mutex lock!");
-                break;
-            }
+//                    if (bDebug)
+//                        bDebug = false;
+                }
+                else
+                {
+                    int numberOfBuffersToProcess = -1;
 
-            // Clear motorQueue
+                    // Has motorPositions changed?
+                    if (this->checkQueueForMotorChanges(currentCondition, &numberOfBuffersToProcess))
+                    {
+                        /* Desired motorPosition change DID happen */
+                        if (bDebug) {qDebug() << "HxtProcessing::run() - Desired mover position change detected ! \n" <<
+                                    "------------------------------------------------------------------------------------------------------------" <<
+                                    "\n   Time to reset histograms..";}
+
+                        prepareMotorPositionProcessing(&numberOfBuffersToProcess);
+                        dataProcessor->resetHistograms();
+                    }
+                    else
+                    {
+                        /* motorPosition change DIDN'T occur  - HOWEVER, we cannot empty the queue every time
+                         *      or we will never see a motor step changing. SOLUTION: Always leave last item in the queue alone */
+
+                        bool bProcessContentsSoFar = true;  /// Need not change bool, because the processing of the entire queue's handled by bProcessTheQueue (set when image collection finished)
+
+                        prepareWholeQueueProcessing(bProcessContentsSoFar);    // bProcessTheQueue = bProcessContentsSoFar here
+                    }
+                }
+
+            }  // End of else (i.e. not conditionEveryNewFile)
+
+        } // End of else (if bManualProcessingEnabled)
+
+    }   // End of while (bThreadRunning)
+}
+
+bool HxtProcessing::prepareSingleProcessing(bool &bProcessTheQueue)
+{
+    if (bProcessTheQueue)
+    {
+        bProcessTheQueue = false;
+    }
+    else
+    {
+        if (bufferMutex.tryLock(mutexTimeout))
+        {
+            unsigned short* newBuffer = bufferQueue.dequeue();
+            bufferMutex.unlock();
+            
+            mBufferNames.push_back(newBuffer);
+
             if (motorMutex.tryLock(mutexTimeout))
             {
-                motorQueue.clear();
+                mPositions = motorQueue.dequeue();
                 motorMutex.unlock();
             }
             else
             {
-                hexitechSignalError("HxtProcessing Skipping Motor Pos'n Error: Unable to acquire motor mutex lock!");
-                break;
+                emit hexitechSignalError("EveryNewFile Processing Error: Cannot acquire motor mutex lock!");
+                return false;
             }
 
-            //  User pressed Clear Unprocessed button? Reset bool value, Signal raw files discarded
-            if (bRemoveUnprocessedFiles)
+            if (framesMutex.tryLock(mutexTimeout))
             {
-                bRemoveUnprocessedFiles = false;
-                emit hexitechUnprocessedFiles(false);
-            }
-
-            // Reset queues' boolean variables and wait for new files
-            bFileQueueEmpty = true;
-            bMotorQueueEmpty = true;
-            bBufferQueueEmpty = true;   /// HexitecGigE Addition
-            continue;
-        }
-
-        // Was ProcessNowButton pressed?
-        if (bManualProcessingEnabled)                   /// Remains unchanged (?)
-        {
-            // Confirm all files in queue should be manually processed
-            if (this->confirmOnlyManualFilesInQueue())
-            {
-                // Process all files manually
-                if (fileMutex.tryLock(mutexTimeout))
-                {
-                    while (!fileQueue.empty())
-                    {
-                        string newFile = fileQueue.dequeue();
-                        //qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
-                        mRawFileNames.push_back(newFile);
-                        qDebug() << "HxtProcessing Manual adding file: " << newFile.substr(0, 10).c_str() <<
-                                    ".." << newFile.substr( newFile.length() -31, newFile.length()).c_str();
-                    }
-                    fileMutex.unlock();
-                    // All Files to be manually processed dequeued: process them, signal gui when completed
-                    bProcessFiles = true;
-                    bWriteToDisk = true;
-                    //qDebug() << "3"; Sleep(1000);
-                    executeProcessing(bProcessFiles, bWriteToDisk);    /// process (Manual) Files
-                    emit hexitechSignalManualProcessingFinished();
-                    // Reset manual processing until user presses ProcessNow button again
-                    bManualProcessingEnabled = false;
-                }
-                else
-                {
-                    emit hexitechSignalError("Manual Processing Error: Cannot acquire file mutex lock!");
-                    break;
-                }
-                // Clear motor positions Queue
-                if (motorMutex.tryLock(mutexTimeout))
-                {
-                    motorQueue.clear();
-                    motorMutex.unlock();
-                }
-                else
-                {
-                    hexitechSignalError("HxtProcessing Skipping Motor Pos'n Error: Unable to acquire motor mutex lock!");
-                    break;
-                }
+                long newFrameSize = framesQueue.dequeue();
+                mValidFrames.push_back(newFrameSize);
+                framesMutex.unlock();
             }
             else
             {
-                emit hexitechSignalError("Manual Processing Error: Detected file(s) that should be Automatically processed!");
-                qDebug() << "*!*      Manual Processing Error: Detected file(s) that should be automatically processed!         *";
-                break;
-            }
-        }
-        else if (currentCondition == conditionEveryNewFile)         /// HexitecGigE: filenames replaced by buffers
-        {
-            // Process 1 buffer at a time
-            if (bufferMutex.tryLock(mutexTimeout))
-            {
-                unsigned short* newBuffer = bufferQueue.dequeue();
-                bufferMutex.unlock();
-                ///qDebug() << "HxtProcessing 475 EveryNewFile adding buffer: " << (unsigned long*)*newBuffer;
-                mBufferNames.push_back(newBuffer);
-
-                if (motorMutex.tryLock(mutexTimeout))
-                {
-                    mPositions = motorQueue.dequeue();
-                    motorMutex.unlock();
-                }
-                else
-                {
-                    emit hexitechSignalError("EveryNewFile Processing Error: Cannot acquire motor mutex lock!");
-                    break;
-                }
-
-                if (framesMutex.tryLock(mutexTimeout))
-                {
-                    newFrameSize = framesQueue.dequeue();
-                    mValidFrames.push_back(newFrameSize);
-                    framesMutex.unlock();
-                    bProcessFiles = false;  // Process this buffer
-                    // Time to write data to disk?
-                    mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 801;
-                    timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
-                    qDebug() << " ** [Condition:EveryNewFile] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                             << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk << " mdiscWritingInterval: " << mDiscWritingInterval;
-                    if (timeSinceLastDiscOp > mDiscWritingInterval)
-                    {
-                        bWriteToDisk = true;
-                        timeSinceLastDiscOp = 0;
-                    }
-                    mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 810;
-                    executeProcessing(bProcessFiles, bWriteToDisk);    /// process 1 Buffer
-                }
-                else
-                {
-                    emit hexitechSignalError("EveryNewFile Processing Error: Cannot acquire frames mutex lock!");
-                    break;
-                }
-            }
-            else
-            {
-                emit hexitechSignalError("EveryNewFile Error: Cannot acquire buffer mutex lock!");
-                break;
+                emit hexitechSignalError("EveryNewFile Processing Error: Cannot acquire frames mutex lock!");
+                return false;
             }
         }
         else
         {
-            /// Has Motor Positions changed?
-            if (bufferMutex.tryLock(mutexTimeout))
+            emit hexitechSignalError("EveryNewFile Error: Cannot acquire buffer mutex lock!");
+            return false;
+        }
+    }
+
+    bool bProcessFiles = false;  // true = file, false = buffer
+    executeProcessing(bProcessFiles);    /// process 1 Buffer
+
+    return true;
+}
+
+bool HxtProcessing::prepareMotorPositionProcessing(/*bool bProcessTheQueue,*/ int *numberOfBuffersToProcess)
+{
+//    if (bDebug) qDebug() << "HxtProcessing::prepareMotorPositionProcessing() called by run() [Process buffer(s) accordingly] - bQ(" << bufferQueue.size()
+//             << ") mQ(" << motorQueue.size() << ") mF(" << framesQueue.size() << ")";
+
+    // Depending upon numberOfBuffersToProcess, add buffer(s) onto mBufferNames
+    if (bufferMutex.tryLock(mutexTimeout))
+    {
+        int numberBuffersInQueue = bufferQueue.size();
+        int buffersDequeuedCount = 0;
+        unsigned short* newBuffer;
+        unsigned long newFrameSize;
+
+        // Signal if this processing will leave any unprocessed buffers the queue
+        if (numberBuffersInQueue > *numberOfBuffersToProcess)
+            emit hexitechUnprocessedFiles(true);            // Yes buffers will remain
+        else
+            emit hexitechUnprocessedFiles(false);           // No buffers will remain
+
+        if (motorMutex.tryLock(mutexTimeout))
+        {
+            if (framesMutex.tryLock(mutexTimeout))
             {
-                int numberBuffersInQueue = bufferQueue.size();
-                bufferMutex.unlock();
-                int numberOfBuffersToProcess = -1, buffersDequeuedCount = 0;
-                unsigned short* newBuffer;
-                unsigned long newFrameSize;
-
-                if (this->checkQueueForMotorChanges(currentCondition, &numberOfBuffersToProcess))         /// Only bufferQueue
+                if (bDebug) qDebug() << "HxtProcessing::prepareMotorPositionProcessing() Adding " << *numberOfBuffersToProcess << " buffer(s).";
+                while(buffersDequeuedCount < *numberOfBuffersToProcess)
                 {
-                    // Signal if this processing will leave any unprocessed buffers the queue
-                    if (numberBuffersInQueue > numberOfBuffersToProcess)
-                        emit hexitechUnprocessedFiles(true);            // Yes buffers will remain
-                    else
-                        emit hexitechUnprocessedFiles(false);           // No buffers will remain
-
-                    // Depending upon numberOfBuffersToProcess, add buffer(s) onto mBufferNames
-                    if (bufferMutex.tryLock(mutexTimeout))
-                    {
-                        if (motorMutex.tryLock(mutexTimeout))
-                        {
-                            if (framesMutex.tryLock(mutexTimeout))
-                            {
-                                while(buffersDequeuedCount < numberOfBuffersToProcess)
-                                {
-                                    newBuffer = bufferQueue.dequeue();
-                                    mBufferNames.push_back(newBuffer);
-                                    mPositions = motorQueue.dequeue();
-                                    newFrameSize = framesQueue.dequeue();
-                                    mValidFrames.push_back(newFrameSize);
-                                    qDebug() << "Motor Changes: Adding buffer: " << (unsigned long)*newBuffer << " with: " << newFrameSize << "frames";
-                                    buffersDequeuedCount++;
-                                }
-                                // Check whether framesQueue empty, then release mutex
-                                bFramesQueueEmpty = framesQueue.isEmpty();
-                                framesMutex.unlock();
-                            }
-                            else
-                            {
-                                emit hexitechSignalError("Motor Changes Error: Unable to acquire frames mutex lock!");
-                            }
-                            // Check whether motorQueue empty, then release mutex
-                            bMotorQueueEmpty = motorQueue.isEmpty();
-                            motorMutex.unlock();
-                        }
-                        else
-                        {
-                            emit hexitechSignalError("Motor Changes Error: Unable to acquire motor mutex lock!");
-                            break;
-                        }
-                        // Check whether bufferQueue empty, then release mutex
-                        bBufferQueueEmpty = bufferQueue.isEmpty();
-                        bufferMutex.unlock();
-                    }
-                    else
-                    {
-                        emit hexitechSignalError("Motor Changes Error: (2) Unable to acquire buffer mutex lock!");
-                        break;
-                    }
-                    // Process buffer(s)
-                    bProcessFiles = false;  // Process this buffer
-                    // Time to write data to disk?
-                    mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 890;
-                    timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
-                    qDebug() << " ** [Condition:MotorPos'n] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                             << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk;
-                    if (timeSinceLastDiscOp > mDiscWritingInterval)
-                    {
-                        bWriteToDisk = true;
-                        timeSinceLastDiscOp = 0;
-                    }
-                    mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 899;
-                    executeProcessing(bProcessFiles, bWriteToDisk);        /// Process Buffer(s) [MotorPos'n]
-                    continue;
+                    newBuffer = bufferQueue.dequeue();
+                    mBufferNames.push_back(newBuffer);
+                    mPositions = motorQueue.dequeue();
+                    newFrameSize = framesQueue.dequeue();
+                    mValidFrames.push_back(newFrameSize);
+//                        qDebug() << "Motor Changes: Adding buffer: " << (unsigned long)*newBuffer << " with: " << newFrameSize << "frames";
+                    buffersDequeuedCount++;
                 }
-                else    // MotorPositions unchanged
-                {
-                    // No motor position changes found matching currentCondition - has GUI signalled
-                    //      that all buffers in the queue should be processed?
-                    if (bProcessTheQueue)        /// HexitecGigE Modification
-                    {
-                        // Process the queue
-                        if (bufferMutex.tryLock(mutexTimeout))
-                        {
-                            if (framesMutex.tryLock(mutexTimeout))
-                            {
-                                numberOfBuffersToProcess = bufferQueue.size();
-                                while (buffersDequeuedCount < numberOfBuffersToProcess)
-                                {
-                                    newBuffer = bufferQueue.dequeue();
-                                    mBufferNames.push_back(newBuffer);
-                                    newFrameSize = framesQueue.dequeue();
-                                    mValidFrames.push_back(newFrameSize);
-                                    emit hexitechSignalError(QString("Processing buffer: %1 (%2)").arg((unsigned long)*newBuffer, newFrameSize));
-                                    qDebug() << "Processing the Queue: Adding buffer: " << newBuffer << "containing:" << newFrameSize;
-                                    buffersDequeuedCount++;
-                                }
-                                framesMutex.unlock();
-                            }
-                            else
-                            {
-                                hexitechSignalError("HxtProcessing Processing the Queue Error: Unable to acquire frames mutex lock!");
-                            }
-                            bufferMutex.unlock();
-                        }
-                        else
-                        {
-                            hexitechSignalError("HxtProcessing Processing the Queue Error: Unable to acquire buffer mutex lock!");
-                            break;
-                        }
+                framesMutex.unlock();
+                /// Because motor position change to occurred, must ensure data written to file now (and Visualisation tab updated)
+                mTimeSinceLastDiscOp += mDiscWritingInterval;
 
-                        // Obtain first set of motor positions, then clear remainder of motorQueue
-                        if (motorMutex.tryLock(mutexTimeout))
-                        {
-                            mPositions = motorQueue.dequeue();
-                            motorQueue.clear();
-                            motorMutex.unlock();
-                        }
-                        else
-                        {
-                            hexitechSignalError("HxtProcessing Processing the Queue Error: Unable to acquire motor mutex lock!");
-                            break;
-                        }
-                        // Process buffer(s)
-                        bProcessFiles = false;  // Process this buffer
-                        // Time to write data to disk?
-                        mDiscWritingTimer->stop();//        qDebug() << " ! ! mdiscWritingTimer-->stop() line: " << 954;
-                        timeSinceLastDiscOp += mDiscWritingTimer->elapsed();        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings        if (timeSinceLastDiscOp > 5) timeSinceLastDiscOp = 0.0; // Avoid spurious timings
-                        qDebug() << " ** [Condition:WholeQ?] timeSinceLastDiscOp: " << timeSinceLastDiscOp << " timer elapsed: " <<  mDiscWritingTimer->elapsed() << " logic: "
-                                 << (timeSinceLastDiscOp > mDiscWritingInterval) << "Boolean: " << bWriteToDisk;
-                        if (timeSinceLastDiscOp > mDiscWritingInterval)
-                        {
-                            bWriteToDisk = true;
-                            timeSinceLastDiscOp = 0;
-                        }
-                        mDiscWritingTimer->start();//        qDebug() << " ! ! mdiscWritingTimer-->start() line: " << 963;
-                        executeProcessing(bProcessFiles, bWriteToDisk);    /// Process Buffer(s)  [WholeQ?]
-
-                        // Signal that no unprocessed buffers remains in bufferQueue
-                        emit hexitechUnprocessedFiles(false);
-
-                        // Clear bProcessTheQueue bool before next loop iteration
-                        bProcessTheQueue = false;
-                    }
-                }
+//                if (bDebug) qDebug() << "   ::PerformMotorPositionProcessing() have doped up mTimeSinceLastDiscOp = " << mTimeSinceLastDiscOp;
             }
             else
-                emit hexitechSignalError("Motor Changes Error: (1) Unable to acquire buffer mutex lock!");
+            {
+                emit hexitechSignalError("HxtProcessing::prepareMotorPositionProcessing() Error: Unable to acquire frames mutex lock!");
+                return false;
+            }
+            motorMutex.unlock();
         }
-        // Assume both queues empty until nested while loop performs checks again
-        bFileQueueEmpty = true;
-        bMotorQueueEmpty = true;
-        bBufferQueueEmpty = true;
-        bFramesQueueEmpty = true;
-//        /// stop the timer and wait for next Q item
-//        mProcessingTimer->stop();
-//        qDebug() << "That Took " << mProcessingTimer->elapsed() << " secs overall to do "  << newFrameSize << " frames. Data rate: "
-//                 << (6400 * 2 * newFrameSize) / mProcessingTimer->elapsed();
-    }   // End of while (bThreadRunning)
+        else
+        {
+            emit hexitechSignalError("HxtProcessing::prepareMotorPositionProcessing() Error: Unable to acquire motor mutex lock!");
+            return false;
+        }
+        bufferMutex.unlock();
+    }
+    else
+    {
+        emit hexitechSignalError("HxtProcessing::prepareMotorPositionProcessing() Error: Unable to acquire buffer mutex lock!");
+        return false;
+    }
+//    }
+    bool bProcessFiles = false;  // Process buffer
+    executeProcessing(bProcessFiles);        /// Process Buffer(s) [MotorPos'n Changed]
+//    qDebug() << "   ::PerformMotorPositionProcessing() Having called executeProcessing, time to change the .HXT file name.";
+//    qDebug() << "Before:       mOutputFileNameDecodedFrame = " << mOutputFileNameDecodedFrame.c_str();
+    mOutputFileNameDecodedFrame = deduceNewHxtFileName(mOutputFileNameDecodedFrame);
+//    qDebug() << "After:        mOutputFileNameDecodedFrame = " << mOutputFileNameDecodedFrame.c_str();
+    return true;
+}
+
+string HxtProcessing::deduceNewHxtFileName(string fileName)
+{
+    string emptyString = "";
+
+    // Create typedef to store results from regex operations
+    typedef match_results<const char*> cmatch;
+    bool bOk = false;
+    cmatch dateResults;
+
+    string dateString  = string("");
+
+    // Check for date ("YYMMDD_HHMMSS") within raw file name
+    // e.g.:
+    //  "Hexitec_140317_11383.hxt" ->
+    //  dateString: "140317_113831"
+
+    regex dateStringRx("([0-9]{6}[-_][0-9]{6})");
+    bOk = regex_search(fileName.c_str(), dateResults, dateStringRx);
+    // If regular expression search successful, obtain date and file prefix
+    if (bOk)
+    {
+        dateString = dateResults[1];
+    }
+    else
+    {
+        regex dateStringSecond("([0-9]{8}[-_][0-9]{6})[a-zA-Z0-9_]+");
+        //regex dateStringSecond("([0-9]{8}[-_][0-9]{6})[a-zA-Z0-9_]+\\.hxt");
+        bOk = regex_search(fileName.c_str(), dateResults, dateStringSecond);
+        if (bOk)
+        {
+            dateString = dateResults[1];
+            // Reduce "_YYYYMMDD_HHMMSS" down to "_YYMMDD_HHMMSS_"
+            //  e.g.  "_20140317_113831"   ->   "_140317_113831"
+            dateString =   "_" + dateString.substr(3, dateString.length());
+        }
+        else
+        {
+            qDebug() << "   Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor "
+                     << "\"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
+            // Locate  where file extension begins
+            size_t fileExtension = fileName.find(".hxt");
+
+            /// Repeating some of the code below..
+
+            // Obtain date stamp, save logging to the same folder as processed file
+            DateStamp* now = new DateStamp();
+            string dString = now->GetDateStamp();
+            delete(now);
+
+            // Date format: "2016-02-10_10-36-27", Remove -'s characters
+            regex removeUnderscoreRx("[-]");
+            dString = regex_replace(dString, removeUnderscoreRx, emptyString);
+
+            // Reduce year from YYYY -> YY; e.g. 2016 -> 16
+            string dFinishedString = dString.substr(2,dString.size());
+
+            string absolutePathNoTimestamp = fileName.substr(0, fileExtension);
+
+            string newCompleteFileName = absolutePathNoTimestamp + dFinishedString + ".hxt";
+            qDebug() << "   Our candidates new file name: " << newCompleteFileName.c_str() << " (original file had no timestamp, but this one does)";
+            return newCompleteFileName;
+            /// -----
+        }
+    }
+
+
+    // First timestamp is the path:
+    size_t pathTimestamp = fileName.find(dateString);
+
+    // Obtain path and file prefix without timestamp
+    string absolutePathWithoutTimestamp = fileName.substr(0, pathTimestamp);
+//    qDebug() << "What you want == absolutePathWithoutTimestamp: " << absolutePathWithoutTimestamp.c_str() << " pathTimestamp: " << pathTimestamp <<
+//                " Sanity check, emptyString: " << emptyString.c_str()  << " Containing " << emptyString.size() << " character(s)";
+
+    // Obtain date stamp, save logging to the same folder as processed file
+    DateStamp* now = new DateStamp();
+    string dString = now->GetDateStamp();
+    delete(now);
+
+    // Date format: "2016-02-10_10-36-27", Remove -'s characters
+    regex removeUnderscoreRx("[-]");
+    dString = regex_replace(dString, removeUnderscoreRx, emptyString);
+    // Reduce year from YYYY -> YY; e.g. 2016 -> 16
+    string dFinishedString = dString.substr(2,dString.size());
+
+    string newCompleteFileName = absolutePathWithoutTimestamp + dFinishedString + ".hxt";
+//    qDebug() << "   Our candidates new file name: " << newCompleteFileName.c_str();
+    return newCompleteFileName;
+}
+
+bool HxtProcessing::performManualProcessing()
+{
+    qDebug() << "HxtProcessing::performManualProcessing() called by run() [Manual processing to be done]";
+
+    bool bUpdateFileName = true;
+    // Setup debugging purposes
+    int motorSize = -1, bufferSize = -1, fileSize = -1, framesSize = -1;
+    checkQueueLengths(motorSize, bufferSize, fileSize, framesSize);
+
+    // DEBUGGING stuff:
+    qDebug() << " DEBUGGING:  motorSize (" << motorSize << ") bufferSize (" << bufferSize
+             << ") framesSize: (" << framesSize << ") fileSize: (" << fileSize << ")";
+
+    if (this->confirmOnlyManualFilesInQueue())
+    {
+        // Process all files manually
+        if (fileMutex.tryLock(mutexTimeout))
+        {
+            while (!fileQueue.empty())
+            {
+                string newFile = fileQueue.dequeue();
+                qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
+                mRawFileNames.push_back(newFile);
+                /// Grab file name of first file & use as .HXT filename
+                if (bUpdateFileName)
+                {
+                    size_t fileExtensionPosn = newFile.find(".bin");
+                    string fileNameWithoutExtension = newFile.substr( 0, fileExtensionPosn);
+                    string fileNameWithHxt          = fileNameWithoutExtension + ".hxt";
+                    mOutputFileNameDecodedFrame     = fileNameWithHxt;
+                    bUpdateFileName = false;
+                }
+            }
+            fileMutex.unlock();
+            // All Files to be manually processed dequeued: process them, signal gui when completed
+            bool bProcessFiles = true;
+
+            executeProcessing(bProcessFiles);    /// process (Manual) Files
+            emit hexitechSignalManualProcessingFinished();
+            // Reset manual processing until user presses ProcessNow button again
+            bManualProcessingEnabled = false;
+        }
+        else
+        {
+            emit hexitechSignalError("HxtProcessing::performManualProcessing() Error: Cannot acquire file mutex lock!");
+        }
+        // Clear motor positions Queue
+        if (motorMutex.tryLock(mutexTimeout))
+        {
+            motorQueue.clear();
+            motorMutex.unlock();
+        }
+        else
+        {
+            hexitechSignalError("HxtProcessing::performManualProcessing() Error: Unable to acquire motor mutex lock!");
+        }
+    }
+    else
+    {
+        emit hexitechSignalError("HxtProcessing::performedManualProcessing() Error - Detected file(s) that should have been Automatically processed!");
+    }
+
+    bManualProcessingEnabled = false;
+    return true;
+}
+
+void HxtProcessing::clearAllQueues()
+{
+    qDebug() << "HxtProcessing::clearAllQueues() called by run() [Clearing all the queues]   !!!";
+    // Return buffer(s), frames from bufferQueue, framesQueue respectively
+    if (bufferMutex.tryLock(mutexTimeout))
+    {
+        // Clear framesQueue
+        if (framesMutex.tryLock(mutexTimeout))
+        {
+            // Report Buffers before discarding them
+            QQueue<unsigned short*>::iterator bufferIterator = bufferQueue.begin();
+            QQueue<unsigned long>::iterator framesIterator = framesQueue.begin();
+            for ( ; bufferIterator != bufferQueue.end(); bufferIterator++)
+            {
+                emit hexitechSignalError(QString("Ignoring Buffer: %1").arg( (unsigned long)*bufferIterator ));
+                qDebug() << "Qsize: " << bufferQueue.size()  << " clear bufferQueue: emit signal buffer  " << (unsigned long)*bufferIterator << " released?";
+                emit returnBufferReady(reinterpret_cast<unsigned char*>(*bufferIterator), *framesIterator);
+                framesIterator++;
+            }
+            // Discard frames, unlock mutex
+            framesQueue.clear();
+            framesMutex.unlock();
+        }
+        else
+            hexitechSignalError("HxtProcessing::clearAllQueues() Framess Error: Unable to acquire frames mutex lock!");
+
+        // Discard buffer(s), unlock mutex
+        bufferQueue.clear();
+        bufferMutex.unlock();
+    }
+    else
+        hexitechSignalError("HxtProcessing::clearAllQueues() Buffers Error: Unable to acquire buffer mutex lock!");
+
+    // Clear fileQueue
+    if (fileMutex.tryLock(mutexTimeout))
+    {
+        // Report filenames before discarding them
+        QQueue<string>::iterator fileIterator = fileQueue.begin();
+        for ( ; fileIterator != fileQueue.end(); fileIterator++)
+            emit hexitechSignalError(QString("Ignoring File: %1").arg(string(*fileIterator).c_str()));
+        // Discard file(s), unlock mutex
+        fileQueue.clear();
+        fileMutex.unlock();
+    }
+    else
+        hexitechSignalError("HxtProcessing::clearAllQueues() Files Error: Unable to acquire file mutex lock!");
+
+    // Clear motorQueue
+    if (motorMutex.tryLock(mutexTimeout))
+    {
+        motorQueue.clear();
+        motorMutex.unlock();
+    }
+    else
+        hexitechSignalError("HxtProcessing::clearAllQueues() Motor Pos'n Error: Unable to acquire motor mutex lock!");
+
+    //  User pressed Clear Unprocessed button? Reset bool value, Signal raw files discarded
+    if (bRemoveUnprocessedFiles)
+    {
+        bRemoveUnprocessedFiles = false;
+        emit hexitechUnprocessedFiles(false);
+    }
+
+}
+
+bool HxtProcessing::prepareWholeQueueProcessing(bool bProcessTheQueue)
+{
+    int queueOffset = 0;
+    if (bProcessTheQueue)
+        queueOffset = 1;    /// How many items left on the Queue? (Either leave the last/grab all)
+
+    int buffersDequeuedCount = 0, numberOfBuffersToProcess = 0;
+    unsigned short* newBuffer;
+    unsigned long newFrameSize;
+
+    // Process the queue
+    if (bufferMutex.tryLock(mutexTimeout))
+    {
+        if (framesMutex.tryLock(mutexTimeout))
+        {
+            numberOfBuffersToProcess = bufferQueue.size();
+
+            if (motorMutex.tryLock(mutexTimeout))
+            {
+//                qDebug() << "Processing the whole Queue: Adding " << numberOfBuffersToProcess - queueOffset << " buffer(s)"
+//                         << "numberOfBuffersToProcess: " << numberOfBuffersToProcess;
+                while (buffersDequeuedCount < (numberOfBuffersToProcess - queueOffset))
+                {
+                    newBuffer = bufferQueue.dequeue();
+                    mBufferNames.push_back(newBuffer);
+                    newFrameSize = framesQueue.dequeue();
+                    mValidFrames.push_back(newFrameSize);
+                    mPositions = motorQueue.dequeue();
+                    //emit hexitechSignalError(QString("Processing buffer: %1 (%2)").arg((unsigned long)*newBuffer, newFrameSize));
+                    buffersDequeuedCount++;
+                }
+                motorMutex.unlock();
+            }
+            else
+            {
+                hexitechSignalError("HxtProcessing::prepareWholeQueueProcessing() Error: Unable to acquire motor mutex lock!");
+                return false;
+            }
+            framesMutex.unlock();
+        }
+        else
+        {
+            hexitechSignalError("HxtProcessing::prepareWholeQueueProcessing() Error: Unable to acquire frames mutex lock!");
+        }
+        bufferMutex.unlock();
+    }
+    else
+    {
+        hexitechSignalError("HxtProcessing::prepareWholeQueueProcessing() Error: Unable to acquire buffer mutex lock!");
+        return false;
+    }
+
+//    qDebug() << "HxtProcessing::prepareWholeQueueProcessing() Just adjusted the motor Q - bQ(" << bufferQueue.size()
+//             << ") mQ(" << motorQueue.size() << ") mF(" << framesQueue.size() << ")";
+
+    // Process buffer(s)
+    bool bProcessFiles = false;  // Process this buffer
+    executeProcessing(bProcessFiles);    /// Process (all) Buffer(s)  [WholeQ?]
+
+    // Signal that no unprocessed buffers remains in bufferQueue
+    emit hexitechUnprocessedFiles(false);
+
+    return true;
+}
+
+void HxtProcessing::checkQueueLengths(int & motorSize, int &bufferSize, int &fileSize, int &framesSize)
+{
+    if (motorMutex.tryLock(mutexTimeout))
+    {
+        motorSize = motorQueue.size();
+        motorMutex.unlock();
+    }
+    if (bufferMutex.tryLock(mutexTimeout))
+    {
+        bufferSize = bufferQueue.size();
+        bufferMutex.unlock();
+    }
+    if (framesMutex.tryLock(mutexTimeout))
+    {
+        framesSize = framesQueue.size();
+        framesMutex.unlock();
+    }
+    if (fileMutex.tryLock(mutexTimeout))
+    {
+        fileSize = fileQueue.size();
+        fileMutex.unlock();
+    }
+
 }
 
 bool HxtProcessing::checkQueueForMotorChanges(int currentCondition, int *numberOfFilesToProcess)
@@ -1267,30 +1378,10 @@ void HxtProcessing::dumpSettings()
 
 void HxtProcessing::configHeaderEntries(string fileName)
 {
-    /// Prepare Format Version 2 header entries
-    /// (file prefix, motor positions, timestamp)
+    /// Prepare Format Version 3 header entries
+    /// (Only file prefix set up here the space)
 
-    // Create typedef to store results from regex operations
-    typedef match_results<const char*> cmatch;
-    bool bOk = false;
-    cmatch dateResults;
-
-    string dateString  = string("");
     string filePrefix  = string("");
-
-    // Check for date of format "YYMMDD_HHMMSS" within raw file name
-    // e.g.:
-    //     "Hexitec_140317_113831_reduced_0000.dat" -> dateString: "140317_113831"
-    // Or: "20110315_173830_reduced_0000.dat"       -> dateString: "110315_173830"
-
-    regex dateRegexFirst("([0-9]{6}[-_][0-9]{6})[a-zA-Z0-9_]+\\.dat");
-    bOk = regex_search(fileName.c_str(), dateResults, dateRegexFirst);
-    // If regular expression search successful, obtain date and file prefix
-    if (bOk)
-        dateString = dateResults[1];
-    // Silently fail if no dateString in name:
-//    else
-//        emit hexitechSignalError("HxtProcessing: Raw filename's missing timestamp in format \"YYMMDD_HHMMSS\" or \"YYYYMMDD_HHHMMSS\" !");
 
     // Capture entire prefix (e.g. discard .dat from "Hexitec_140317_113831_reduced_0000.dat")
     QFileInfo fileInfo(fileName.c_str());
@@ -1300,17 +1391,12 @@ void HxtProcessing::configHeaderEntries(string fileName)
     if (bPrefixEnabled)
         mFilePrefix = filePrefix;
     else
-        mFilePrefix = "(blank )";
-
-    // If data timestamp enabled use dateStrings
-    if (bTimeStampEnabled)
-        mDataTimeStamp = string(dateString).substr(0, 13);  // Only accept 13 chars to avoid hosing the GUI..
-    else
-        mDataTimeStamp = string("000000_000000");
+        mFilePrefix = "(blank)             ";
 
     /// Debugging purposes:
-//    qDebug() << "*3* configHeaderEntries() dateString: " << dateString.c_str() << "(" << dateString.length() << "). filePrefix: "
-//             << filePrefix.c_str() << "(" << filePrefix.length()  << ").";
+//    qDebug() << "*1* configHeaderEntries() fileName: " << fileName.c_str ();
+//    qDebug() << "*2* configHeaderEntries() bPrefixEnabled: " << bPrefixEnabled << " bTimeStampEnabled: " << bTimeStampEnabled;
+//    qDebug() << "*3* configHeaderEntries() filePrefix: " << filePrefix.c_str() << "(" << filePrefix.length()  << ").";
 //    qDebug() << "*4* configHeaderEntries() mFilePrefix: " << mFilePrefix.c_str();
 //    qDebug() << "*5* configHeaderEntries() mDataTimeStamp: " << mDataTimeStamp.c_str() << "(" << mDataTimeStamp.length() << ").";
 //    qDebug() << "*6* configHeaderEntries() mOutputFileD..Frame: " << mOutputFileNameDecodedFrame.c_str();
@@ -1358,7 +1444,8 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
         else
         {
             emit hexitechSignalError("obtainRawFilePathAndPrefix() Raw filename's missing timestamp in format \"YYMMDD_HHMMSS\" or \"YYYYMMDD_HHHMMSS\" !");
-            qDebug() << "HxtProcessing::obtainRawFilePathAndPrefix() - Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor \"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
+            qDebug() << "HxtProcessing::obtainRawFilePathAndPrefix() - Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor "
+                     << "\"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
             return;
         }
     }
@@ -1405,7 +1492,7 @@ void HxtProcessing::setManualProcessing(bool bManualEnabled)
 
 void HxtProcessing::handleReturnHxtBuffer(unsigned short* buffer)
 {
-    qDebug() << "HxtProcessing Returning buffer from the Visualisation tab, address: " << (void*)buffer;
+    //qDebug() << "HxtProcessing Returning buffer from the Visualisation tab, address: " << (void*)buffer;
     mHxtBuffers.push_back((HxtBuffer*)buffer);
 }
 
@@ -1497,20 +1584,10 @@ void HxtProcessing::dataCollectionFinished()
 
 }
 
-int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
+int HxtProcessing::executeProcessing(bool bProcessFiles)
 {
-        string fileName;
-    /// Execute processing of file(s) / buffer(s), depending upon setup
-    //qDebug() << "HxtProcessing: ---=- 1156 -=--- BEGINNING buffer: " << mBufferNames.size() << " with: " << mValidFrames.size() << ". Manual file(s): " << mRawFileNames.size();
-
-    if (mFirstBufferInCollection)
-    {
-        // Signal to GUI processing has begun
-        emit hexitechRunning(true);
-        mFirstBufferInCollection = false;
-    }
-
-    /// ----- Question-Mark: Should remove this block away from here? ----- ///
+    string fileName;
+    /// Execute processing of file(s) / buffer(s), depending upon bProcessFiles selection (true=file(s), otherwise buffer(s))
 
     /// Setup mDataTimeStamp, mFilePrefix, processed filename and file's path
     ///     This is a stupid duplication, courtesy to the irate compiler..
@@ -1531,18 +1608,13 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
         /// Using the name of file, obtain mFilePrefix & timestamp (remove & re-add timestamp from file name???)
         /// Obtain variables used for Format Version 2 header entries
         fileName = mOutputFileNameDecodedFrame;
-        qDebug() <<"PROCESSING FILE: " << QString::fromStdString(fileName);
+//        qDebug() <<"PROCESSING FILE: " << QString::fromStdString(fileName);
         configHeaderEntries(fileName);
 
         // Use raw file path and prefix if user made corresponding selection
         if (bUseRawFileEnabled)
             obtainRawFilePathAndPrefix(fileName);
     }
-    // Update with (possibly changed) values for  prefix, Motor position, timestamp
-    dataProcessor->updateFilePrefix(mFilePrefix);
-    dataProcessor->updateTimeStamp(mDataTimeStamp);
-
-    /// ----- Question-Mark: Ending ----- ///
 
     // A new hexitech file will be produced before this function is finished
     //  Signal to mainwindow to remove any excess image Slice(s) in preparation
@@ -1552,161 +1624,148 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool & bWriteFiles)
     if (bProcessFiles)
         emit hexitechConsumedFiles(mRawFileNames);
     else
-    {
-        //qDebug() << "no complaints from Q connect now.. ??";
         emit hexitechConsumedBuffers( mBufferNames);
-    }
 
     /// Parse the specified raw file(s)/buffer(s)
     if (bProcessFiles)
     {
+//        qDebug() << "HxtProcessing::executeProcessing() - Time to parse raw file(s) ";
         dataProcessor->parseFile(mRawFileNames);
         // Clear filenames
         mRawFileNames.clear();
+        updateVisualisationTabAndHxtFile();
     }
     else
     {
-        dataProcessor->parseBuffer(mBufferNames, mValidFrames);
-        // Release all the buffers
-        ///  TODO:  Implement Callback & Move into HxtRawDataProcessor
-        vector<unsigned short*>::iterator bufferIterator;
-        vector<unsigned long>::iterator   frameIterator;
-        frameIterator = mValidFrames.begin();
-        for (bufferIterator = mBufferNames.begin(); bufferIterator != mBufferNames.end(); bufferIterator++)
+        if (!mBufferNames.empty())
         {
-            emit returnBufferReady(reinterpret_cast<unsigned char*>(*bufferIterator), *frameIterator);
-            //emit returnBufferReady(transferBuffer, validFrames);
-            ////qDebug() << "HxtProcessing: 1391 releasing  buffer: " << (unsigned long*)(*bufferIterator) << " with: " << *frameIterator;
-            frameIterator++;
+            dataProcessor->parseBuffer(mBufferNames, mValidFrames);
+            // Release all the buffers
+            ///  TODO:  Implement Callback & Move into HxtRawDataProcessor - No longer necessary (?)
+            vector<unsigned short*>::iterator bufferIterator;
+            vector<unsigned long>::iterator   frameIterator;
+            frameIterator = mValidFrames.begin();
+            for (bufferIterator = mBufferNames.begin(); bufferIterator != mBufferNames.end(); bufferIterator++)
+            {
+                emit returnBufferReady(reinterpret_cast<unsigned char*>(*bufferIterator), *frameIterator);
+                //emit returnBufferReady(transferBuffer, validFrames);
+//                qDebug() << "HxtProcessing: 1705 releasing  buffer: " << (unsigned long*)(*bufferIterator) << " with: " << *frameIterator;
+                frameIterator++;
+            }
+            /// Clear both buffer and frames vectors
+            mBufferNames.clear();
+            mValidFrames.clear();
         }
-        /// Clear both buffer and frames vectors
-        mBufferNames.clear();
-        mValidFrames.clear();
+
+        mDiscWritingTimer->stop();
+        mTimeSinceLastDiscOp += mDiscWritingTimer->elapsed();
+//        qDebug() << "  ~~~~~  HxtProcessing::executeProcessing() mTimeSinceLastDiscOp: " << mTimeSinceLastDiscOp << "s (Just added: " << mDiscWritingTimer->elapsed() <<
+//                    "s) [mDiscWritingInterval: " << mDiscWritingInterval << "s] ~~~~~";
+
+        // Time to write files/send file or a buffer to visualisation thread?
+        if ( mTimeSinceLastDiscOp > mDiscWritingInterval)
+        {
+            mTimeSinceLastDiscOp = 0.0;
+            /// Call function to right to disc and update  Visualise tab
+            /// ..
+            updateVisualisationTabAndHxtFile();
+            LOG(gLogConfig, logNOTICE) << "Process data pushed to Visualisation Tab, HXT file";
+        }
     }
 
-//    qDebug() << "hxtProc:execProc() bwriteFiles: " << bWriteFiles << " bProcessFiles: " << bProcessFiles;
-    // Time to write files/send file or a buffer to visualisation thread?
-    if (bWriteFiles)
+    return 0;
+}
+
+int HxtProcessing::updateVisualisationTabAndHxtFile()
+{
+    //qDebug() << "HxtProcessing::updateVisualise...File() ! ";
+
+    // Update with (possibly changed) values for  prefix, Motor position, timestamp
+    commitConfigChanges();
+
+    // Flush last frames through processor to output
+    dataProcessor->flushFrames();       /// Independent of file/buffer selection
+
+    // Interpolate pixel histograms if enabled
+    if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
+
+    // Write output files
+    dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
+
+    // Signal produced Hxt filename
+    emit hexitechProducedFile(mOutputFileNameDecodedFrame);
+
+    /// Checkat least 1 buffer available before proceeding
+    if (mHxtBuffers.empty())
     {
-        // Flush last frames through processor to output
-        dataProcessor->flushFrames();       /// Independent of file/buffer selection
-
-        // Interpolate pixel histograms if enabled
-        if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
-
-        // Processing of file(s)?
-//        if (bProcessFiles)
-//        {   qDebug() << "Time to process file(s).. [JUST FILES]";
-            // Write output files
-            dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);
-
-            // Signal produced Hxt filename
-            emit hexitechProducedFile(mOutputFileNameDecodedFrame);
-
-            // Write subpixel file(s)? - To become redundant?
-            if (mEnableCsaspCorrector)
-            {
-                dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);
-                emit hexitechProducedFile(mOutputFileNameSubPixelFrame);
-            }
-
-            // Write CSV diagnostic histograms(s) - Visualisation thread to do this
-            if (mWriteCsvFiles)
-            {
-                dataProcessor->writeCsvFiles();
-                // Obtain filename of summed spectrum; signal it to processingwindow
-                string sSpectrumFile = dataProcessor->getCorCsvFileName();
-                QString spectrumFile = QString::fromStdString(sSpectrumFile);
-                emit hexitechSpectrumFile(spectrumFile);
-            }
-
-//            // Signal that processed data [inside FILE] is ready to be displayed in the GUI - Redundant
-//            //emit hexitechFilesToDisplay(  (QStringList() << QString::fromStdString(mOutputFileNameDecodedFrame)) );
-//        }
-//        else    //Processing of buffer(s)
-//        {
-//            qDebug() << "Time to process the buffers [ONLY]";
-            /// Checkat least 1 buffer available before proceeding
-            if (mHxtBuffers.empty())
-            {
-                emit hexitechSignalError("HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)");
-                qDebug() << "HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)";
-                return -1;
-            }
-            // Copy "output files" into buffer
-            HxtBuffer* hxtBuffer = 0;
-
-            hxtBuffer = *mHxtBuffers.begin();
-            qDebug() << " * " << (void*)(hxtBuffer)  << " <- HxtProcessing.cpp:1607 (hxtBuffer)";
-            dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
-
-            /// --- 3 blocks of debug code
-//            qDebug() << "       DEBUGGING, let's look inside hxtBuffer (local copy)";
-//            qDebug() << " * " << (hxtBuffer)  << " <- HxtProcessing.cpp:1611 (hxtBuffer)";
-//            qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
-//            qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
-//            qDebug() << "  (local copy) hxtBuffer hxtPrefixLength " << QString::number( ((HxtBuffer*)hxtBuffer)->filePrefixLength);
-
-//            for (int i = 0; i < 3; i++)
-//            {
-//                qDebug() << i << QString::number( ((HxtBuffer*)hxtBuffer)->motorPositions[i]);
-//            }
-//            qDebug() << "  (local copy) hxtBuffer filePrefix " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->filePrefix) << " @ " << &( ((HxtBuffer*)hxtBuffer)->filePrefix);
-//            qDebug() << "  (local copy) hxtBuffer dataTimeStamp " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->dataTimeStamp);
-//            qDebug() << "  (local copy) hxtBuffer nRows " << QString::number( ((HxtBuffer*)hxtBuffer)->nRows);
-//            qDebug() << "  (local copy) hxtBuffer nCols " << QString::number( ((HxtBuffer*)hxtBuffer)->nCols);
-//            qDebug() << "  (local copy) hxtBuffer nBins " << QString::number( ((HxtBuffer*)hxtBuffer)->nBins) << " @ " << &( ((HxtBuffer*)hxtBuffer)->nBins);
-
-//            qDebug() << " --------- Histogram's bin start values & Histograms: [HxtProcessing.CPP:1627 - And here's hxtBuffer when returned from copyPixelOutput()] ----------";
-//            int k = 0;
-//            for (int i = 0; i < 6; i++)
-//            {
-//                qDebug() << " L" << i << " = " <<((HxtBuffer*)hxtBuffer)->allData[i] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[i];
-//                k = 1000 + i;
-//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k];
-//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+1] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+1];
-//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+2] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+2];
-//                qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+3];
-//            }
-            /// ---
-
-            // Signal that processed data [inside RAM] is ready to be displayed in the GUI
-            // DSoFt: added filename to indicate when a new image/slice begins as this will change.
-            // This is a quick fix and should be reviewed.
-            qDebug() <<"emit hexitechBufferToDisplay(hxtBuffer, QString::fromStdString(fileName))";
-//            emit hexitechBufferToDisplay( (HxtBuffer*)hxtBuffer, QString::fromStdString(fileName));
-            emit hexitechBufferToDisplay( (unsigned short*)hxtBuffer, QString::fromStdString(fileName));
-
-            //// Erasing element 0 from vector safe?
-            qDebug() << "Erasing element 0 from mHxtBuffer vector, address: " << (void*)hxtBuffer;
-            mHxtBuffers.erase(mHxtBuffers.begin());
-//        }
-        bWriteFiles = false;
+        emit hexitechSignalError("HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)");
+        qDebug() << "HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)";
+        return -1;
     }
+    // Copy "output files" into buffer
+    HxtBuffer* hxtBuffer = 0;
 
-    LOG(gLogConfig, logNOTICE) << "Finished";
+    hxtBuffer = *mHxtBuffers.begin();
+    //qDebug() << " * " << (void*)(hxtBuffer)  << " <- HxtProcessing.cpp:1607 (hxtBuffer)";
+    dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
 
-    /// Better place to signal processing completed than here?
-    ///     (Will be signalling this A LOT during longer image collection..)
-    // Signal to GUI processing completed
-    emit hexitechRunning(false);
+
+    // Signal that processed data [inside RAM] is ready to be displayed in the GUI
+    // DSoFt: added filename to indicate when a new image/slice begins as this will change.
+    // This is a quick fix and should be reviewed.
+
+//        emit hexitechBufferToDisplay( (HxtBuffer*)hxtBuffer, QString::fromStdString(fileName));
+    emit hexitechBufferToDisplay( (unsigned short*)hxtBuffer, QString::fromStdString(mOutputFileNameDecodedFrame));
+
+    //// Erasing element 0 from vector safe?
+    //qDebug() << "Erasing element 0 from mHxtBuffer vector, address: " << (void*)hxtBuffer;
+    mHxtBuffers.erase(mHxtBuffers.begin());
 
     return 0;
 }
 
 void HxtProcessing::commitConfigChanges()
 {
-    //dataProcessor->updateFormatVersion(mFormatVersion);
-    dataProcessor->updateMotorPositions(mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ,
-                                        mPositions.mSSROT, mPositions.mTimer, mPositions.mGALX,
-                                        mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT);
-    dataProcessor->updateFilePrefix(mFilePrefix);
+    /// Communicate motor position, file prefix and timestamp according to user selection(s)
+    if (!bMotorEnabled)
+    {
+        int dummyPos = positionUninitialised;
+        dataProcessor->updateMotorPositions(dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos);
+    }
+    else
+    {
+        dataProcessor->updateMotorPositions(mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ, mPositions.mSSROT, mPositions.mTimer,
+                                            mPositions.mGALX, mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT);
+    }
+
+    dataProcessor->updateFilePrefix(mFilePrefix);   // ConfigHeaderEntries() sets mFilePrefix; So update regardless if bFilePrefix = true/false
+    if (bTimeStampEnabled)
+        mDataTimeStamp = createDataTimeStampString();
+    // saveTimeStamp() clear mDataTimeStamp if unselected by user
     dataProcessor->updateTimeStamp(mDataTimeStamp);
 }
 
 float hexitech::HxtProcessing::getDiscWritingInterval()
 {
    return mDiscWritingInterval;
+}
+
+string HxtProcessing::createDataTimeStampString()
+{
+    // Obtain date stamp, save logging to the same folder as processed file
+    DateStamp* now = new DateStamp();
+    string dString = now->GetDateStamp();
+    delete(now);
+
+    // Date format: "2016-02-10_10-36-27", Remove -'s characters
+    regex removeUnderscoreRx("[-]");
+    string emptyString = "";
+    dString = regex_replace(dString, removeUnderscoreRx, emptyString);
+
+    // Reduce year from YYYY -> YY; e.g. 2016 -> 16
+    string dateTimeString = dString.substr(2,dString.size());
+    qDebug() << " ! dateTimeString = " << dateTimeString.c_str();
+    return dateTimeString;
 }
 
 

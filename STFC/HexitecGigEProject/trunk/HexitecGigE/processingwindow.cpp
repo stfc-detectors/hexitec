@@ -143,12 +143,13 @@ ProcessingWindow::ProcessingWindow(MainWindow *mw, QWidget *parent) :
    connect(ui->processNowButton,        SIGNAL(clicked()), reinterpret_cast<const QObject*>(mw),   SLOT(processNow()));
    connect(ui->clearUnprocessedButton,  SIGNAL(clicked()),      this, SLOT(clearUnprocessedFiles()));
 
-   connect(ui->debugButton,            SIGNAL(clicked()), this, SLOT(debugButtonPressed()));
-   connect(ui->gradientsBrowseButton,  SIGNAL(clicked()), this, SLOT(gradientsBrowseButtonPressed()));
-   connect(ui->momentumBrowseButton,   SIGNAL(clicked()), this, SLOT(momentumBrowseButtonPressed()));
-   connect(ui->interceptsBrowseButton, SIGNAL(clicked()), this, SLOT(interceptsBrowseButtonPressed()));
-   connect(ui->loadSettingsButton,     SIGNAL(clicked()), this, SLOT(loadSettingsButtonPressed()));
-   connect(ui->saveSettingsButton,     SIGNAL(clicked()), this, SLOT(saveSettingsButtonPressed()));
+   connect(ui->debugButton,                 SIGNAL(clicked()), this, SLOT(debugButtonPressed()));
+   connect(ui->gradientsBrowseButton,       SIGNAL(clicked()), this, SLOT(gradientsBrowseButtonPressed()));
+   connect(ui->momentumBrowseButton,        SIGNAL(clicked()), this, SLOT(momentumBrowseButtonPressed()));
+   connect(ui->globalThresholdBrowseButton, SIGNAL(clicked()), this, SLOT(globalThresholdBrowseButtonPressed()));
+   connect(ui->interceptsBrowseButton,      SIGNAL(clicked()), this, SLOT(interceptsBrowseButtonPressed()));
+   connect(ui->loadSettingsButton,          SIGNAL(clicked()), this, SLOT(loadSettingsButtonPressed()));
+   connect(ui->saveSettingsButton,          SIGNAL(clicked()), this, SLOT(saveSettingsButtonPressed()));
 
    /// Create options and populate GUI's ComboBoxes accordingly
 
@@ -216,6 +217,8 @@ ProcessingWindow::ProcessingWindow(MainWindow *mw, QWidget *parent) :
 
    // How often should files be processed
    currentCondition = conditionNoneMet;
+
+   ui->sameAsRawFileCheckBox->hide();
 }
 
 ProcessingWindow::~ProcessingWindow()
@@ -274,7 +277,7 @@ void ProcessingWindow::handleWriteMessage(QString message)
 void ProcessingWindow::initialiseProcessingWindow()
 {
     /// Enables mainwindow.cpp to signal to ProcessingWindow to initialise
-    /// itself using default settings from 2Easy.ini - Gui crashes
+    /// itself using default settings from HexitecGigE.ini - Gui crashes
     /// if these functions are called from the CTOR directly
 
     // Ensure default values communicated to HxtProcessor
@@ -400,6 +403,8 @@ void ProcessingWindow::guiAutomaticProcessingChosen()
     ui->interceptsBrowseButton->setEnabled(false);
     ui->momentumPathLineEdit->setEnabled(false);
     ui->momentumBrowseButton->setEnabled(false);
+    ui->globalThresholdPathLineEdit->setEnabled(false);
+    ui->globalThresholdBrowseButton->setEnabled(false);
     ui->loadSettingsButton->setEnabled(false);
     ui->saveSettingsButton->setEnabled(false);
 }
@@ -445,6 +450,8 @@ void ProcessingWindow::guiManualProcessingChosen()
     ui->interceptsBrowseButton->setEnabled(true);
     ui->momentumPathLineEdit->setEnabled(true);
     ui->momentumBrowseButton->setEnabled(true);
+    ui->globalThresholdPathLineEdit->setEnabled(true);
+    ui->globalThresholdBrowseButton->setEnabled(true);
     ui->loadSettingsButton->setEnabled(true);
     ui->saveSettingsButton->setEnabled(true);
 }
@@ -693,7 +700,7 @@ void ProcessingWindow::calibrationComboBoxChanged(QString aString)
     HxtProcessor->setEnableMomCorrector(bEnableMomCorrector);
     HxtProcessor->setEnableCabCorrector(bEnableCabCorrector);
 
-    // Reload gui's Spectrum Options with default values from 2Easy.ini file
+    // Reload gui's Spectrum Options with default values from HexitecGigE.ini file
     //      but not during GUI initialisation
     if (!bSuppressLoadSettingsInfo)
         reloadSpectrumOptionsDefaultValues();
@@ -812,7 +819,7 @@ void ProcessingWindow::hxtFileLineEditChanged(QString newPrefixString)
     }
     else
     {
-        // It's a new filename, update HxtProcessing object and 2Easy.ini file object
+        // It's a new filename, update HxtProcessing object and HexitecGigE.ini file object
         sOutputFileNameDecodedFrame = newPrefixFilename;
         HxtProcessor->setOutputFileNameDecodedFrame( sOutputFileNameDecodedFrame);
         hexitechIniFile->setParameter("Processing/DecodedFrameFilename", QVariant(sOutputFileNameDecodedFrame.c_str()));
@@ -836,7 +843,7 @@ void ProcessingWindow::hxtFileSaveButtonPressed()
     {
         // Update GUI and HxtProcessing settings
         ui->hxtFileLineEdit->setText( newHxtFilename);
-        // Check file name valid and communicate changed name onto 2Easy.ini, HxtProcessing
+        // Check file name valid and communicate changed name onto HexitecGigE.ini, HxtProcessing
         emit hxtFileLineEditChanged( newHxtFilename);
     }
 }
@@ -868,6 +875,35 @@ void ProcessingWindow::momentumPathLineEditChanged(QString momentumFile)
     }
     else
         handleWriteError("Error: Invalid filename specified for \"Momentum File\"");
+}
+
+void ProcessingWindow::globalThresholdBrowseButtonPressed()
+{
+   /* Get a valid GlobalThreshold absolute filename */
+   QString currentDirectory = QString("");
+
+   QString newGlobalThresholdFilename = QFileDialog::getOpenFileName(this, tr("Open Global Threshold Values File"), currentDirectory,
+                                                               tr("Global Threshold Values Files (*.txt)") );
+   // New filename selected?
+   if (!newGlobalThresholdFilename.toStdString().empty())
+   {
+       // Update GUI and HxtProcessing settings
+       emit globalThresholdPathLineEditChanged(newGlobalThresholdFilename);
+   }
+}
+
+void ProcessingWindow::globalThresholdPathLineEditChanged(QString globalThresholdFile)
+{
+    /// Use new globalThreshold file name if it exists
+    if (fileExists(globalThresholdFile.toStdString().c_str()))
+    {
+        ui->globalThresholdPathLineEdit->setText(globalThresholdFile);
+        sThresholdFileName = globalThresholdFile.toStdString();
+        HxtProcessor->setThresholdFileName(sThresholdFileName);
+        // Need not call hexitechIniFile->setParameter() - saveSettingsButton handles this
+    }
+    else
+        handleWriteError("Error: Invalid filename specified for \"Global Threshold File\"");
 }
 
 void ProcessingWindow::gradientsBrowseButtonPressed()
@@ -1028,7 +1064,7 @@ void ProcessingWindow::updateCalibrationFileEntry(QString gradientsFile, QString
 
 bool ProcessingWindow::split(const string &sCalibrationFiles, string* sGradient, string* sIntercept)
 {
-    /// Extract Gradients and Intercepts filename from key "Calibration File" entry of 2Easy.ini file
+    /// Extract Gradients and Intercepts filename from key "Calibration File" entry of HexitecGigE.ini file
     stringstream sStreamFile(sCalibrationFiles);
     string sFilename;
     bool errorOk = true;
@@ -1586,15 +1622,12 @@ bool ProcessingWindow::sanityCheckQString(QStringList aList, QString aString)
 bool ProcessingWindow::fileExists(const char *filename)
 {
     /// Check that filename exists
-//    string sFileName  = string(filename);
     struct stat buf;
-    if (stat(filename, &buf) != -1) //sFileName.c_))
+    if (stat(filename, &buf) != -1)
     {
         return true;
     }
     return false;
-//    ifstream ifile(filename);
-//    return ifile;
 }
 
 string ProcessingWindow::validateFileName(QString* qsKeyName, QString* qsKeyValue)

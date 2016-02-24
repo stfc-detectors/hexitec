@@ -44,9 +44,8 @@ DataAcquisitionModel::~DataAcquisitionModel()
 {
 }
 
-DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm, 
-                                                     ProgressForm *progressForm,
-                                                     QObject *parent)
+DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
+                                                     ProgressForm *progressForm, QObject *parent)
 {
    if (damInstance == 0)
    {
