@@ -26,15 +26,12 @@
 #include "chargesharing.h"
 #include "mainviewer.h"
 #include "workspace.h"
-///#include "keithleymainwindow.h"
 #include "dataacquisitionfactory.h"
 #include "processingwindow.h"
 #include "progressform.h"
 
 class HexitecSoftTrigger;
 class HardTrigger;
-class Keithley;
-class KeithleyMainWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -56,9 +53,10 @@ private:
    void createThumbViewer();
    void createWorkSpace();
    void createApplicationOutput();
-   void checkKeithleyConfiguration();
+//   void checkKeithleyConfiguration();
    void closeEvent(QCloseEvent *event);
    bool checkDAQChoice();
+   void writeCsv(QString filename, QVector<double> col0, int *col1, int numberOfBins);
    QAction *startDAQAct;
    QAction *stopDAQAct;
 
@@ -66,7 +64,7 @@ private:
    QMainWindow *visualisation;
    QMainWindow *dataAcquisitionWindow;
    ////
-   KeithleyMainWindow *keithleyMainWindow();
+//   KeithleyMainWindow *keithleyMainWindow();
    ////
    ThumbViewer *thumbViewer;
    ProgressForm *progressForm;
@@ -79,8 +77,8 @@ private:
    QMenu *fileMenu;
    HexitecSoftTrigger *hexitecSoftTrigger;
    HardTrigger *hardTrigger;
-   Keithley *keithley;
-   bool keithleyPresent;
+//   Keithley *keithley;
+//   bool keithleyPresent;
    // Variables needed by hexitech.exe integration
    bool bHexitechProcessingBusy;
    bool bUpdateVisualisationTab;
@@ -88,6 +86,7 @@ private:
    QString readDir;
    QString readFilter;
    bool activeDAQ;
+   std::ofstream outFile;
 
 signals:
    void addObject(QObject *object, bool scripting = TRUE, bool gui = TRUE);

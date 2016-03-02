@@ -807,16 +807,33 @@ void MainWindow::readFiles(QStringList files)
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
    int sliceNumber = -1;
-   qDebug() << "MainWindow received a buffer (" << (void *)buffer << ")  with a filename: " << fileName/*.toStdString()*/;
 
    MainViewer::instance()->getRenderArea()->setMouseEnabled(false);
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
 
    sliceNumber = slice->getSliceToReplace();
    initializeSlice(slice, sliceNumber);
-   //MainViewer::instance()->getRenderArea()->setMouseEnabled(true);
 
    emit returnHxtBuffer(buffer);
+   writeCsv(fileName, slice->getXData(0, 0), (int *)slice->getSummedImageY(), slice->getNumberOfBins());
+}
+
+void MainWindow::writeCsv(QString fileName, QVector<double> col0, int *col1, int numberOfBins)
+{
+   stringstream outputText(stringstream::out);
+
+   for (unsigned int i = 0; i < numberOfBins; i++)
+   {
+      outputText << (int)col0[i] << "," << col1[i] << std::endl;
+   }
+
+   fileName.replace(".hxt", ".csv");
+   QByteArray ba = fileName.toLatin1();
+   const char *fileNameChars = ba.data();
+   outFile.open(fileNameChars, std::ofstream::trunc);
+   outFile.write(outputText.str().c_str(), outputText.str().length());
+   outFile.close();
+
 }
 
 void MainWindow::sendActiveSliceToMatlab()
@@ -868,7 +885,7 @@ void MainWindow::testDevelopment()
 
    initializeSlice(DataModel::instance()->getActiveSlice()->backProject());
 }
-
+/*
 void MainWindow::checkKeithleyConfiguration()
 {
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
@@ -885,7 +902,7 @@ void MainWindow::checkKeithleyConfiguration()
       }
    }
 }
-
+*/
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

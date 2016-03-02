@@ -1670,7 +1670,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles)
             /// Call function to right to disc and update  Visualise tab
             /// ..
             updateVisualisationTabAndHxtFile();
-            LOG(gLogConfig, logNOTICE) << "Process data pushed to Visualisation Tab, HXT file";
+//            LOG(gLogConfig, logNOTICE) << "Process data pushed to Visualisation Tab, HXT file";
         }
     }
 
