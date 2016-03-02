@@ -78,7 +78,7 @@ bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, H
 			// Was this pixel read out more than once?
 			if ( pixelHit > 1 )
 			{
-				LOG(gLogConfig, logINFO) << "Frame " << lastFrameIdx << " Row " << iRow << " col " << iCol << " hit " << pixelHit << " times!";
+//				LOG(gLogConfig, logINFO) << "Frame " << lastFrameIdx << " Row " << iRow << " col " << iCol << " hit " << pixelHit << " times!";
 				// Increment running total of number of "corrections" applied
 				mEventsCorrected++;
 			}

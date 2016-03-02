@@ -56,7 +56,7 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 	
 	if ( (lastFrameIdx <= apSubPixelFrame->getFrameIndex()) && (lastFrameIdx !=0))
 	{
-		LOG(gLogConfig, logINFO) << "Already processed frame " << apSubPixelFrame->getFrameIndex();		
+//		LOG(gLogConfig, logINFO) << "Already processed frame " << apSubPixelFrame->getFrameIndex();
 		return false;
 	}
 
