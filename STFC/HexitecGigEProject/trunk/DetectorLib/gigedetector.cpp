@@ -113,7 +113,6 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
-   qDebug() << "GigEDetector::handleReturnBufferReady, address" << returnBuffer << " data size " << validFrames * frameSize;
    if ((saveRaw) && (mode == CONTINUOUS))
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
@@ -174,18 +173,6 @@ int GigEDetector::initialiseConnection()
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
    showError("GetDeviceInformation", status);
 
-   if (!status)
-   {
-      qDebug() <<"\tVendor:" << deviceInfo.Vendor;
-      qDebug() <<"\tModel:" << deviceInfo.Model;
-      qDebug() <<"\tManufacturerInfo:" << deviceInfo.ManufacturerInfo;
-      qDebug() <<"\tSerialNumber:" <<deviceInfo.SerialNumber;
-      qDebug() <<"\tUserId:" << deviceInfo.UserId;
-      qDebug() <<"\tMacAddress:" << deviceInfo.MacAddress;
-      qDebug() <<"\tIpAddress:" << deviceInfo.IpAddress;
-      qDebug() <<"\tNetMask:" << deviceInfo.NetMask;
-      qDebug() <<"\tGateWay:" << deviceInfo.GateWay;
-   }
    status = CloseSerialPort(detectorHandle);
    status = ClosePipeline(detectorHandle);
    status = CloseStream(detectorHandle);
