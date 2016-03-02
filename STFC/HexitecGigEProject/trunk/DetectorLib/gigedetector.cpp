@@ -45,7 +45,7 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
 
-   framesPerBuffer = 1000;
+   framesPerBuffer = 500;
    directory = "C:";
    prefix = "GigE_";
    xRes = 80;
@@ -215,7 +215,10 @@ int GigEDetector::initialiseConnection()
 
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
    updateState(READY);
-   emit writeMessage("Detector connection initialised Ok");
+   QString message = QString("Detector connection to IP ");
+   message.append(deviceInfo.IpAddress);
+   message.append (" initialised Ok");
+   emit writeMessage(message);
 
    return status;
 }
