@@ -1031,7 +1031,7 @@ bool Slice::readHXT(unsigned short *buffer)
     unsigned short *tmpBuffer;
 
     unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
-    qDebug() << "Slice::readHXT processing a hxtBuffer allocated bytes:" << MAX_SPECTRUM_SIZE * sizeof(double);
+//    qDebug() << "Slice::readHXT processing a hxtBuffer allocated bytes:" << MAX_SPECTRUM_SIZE * sizeof(double);
     memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
 
     tmpBuffer = buffer + bufferSize/sizeof(unsigned short);

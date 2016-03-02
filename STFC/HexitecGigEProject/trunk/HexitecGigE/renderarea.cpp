@@ -506,7 +506,7 @@ void RenderArea::renderSum(Slice *slice)
    }
    if (slice->getSummedImageY() != NULL)
    {
-      emit updatePlotter(slice->getSummedImageY(), slice->getNumberOfBins());
+      emit updatePlotter(slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
    }
 
 }
@@ -576,7 +576,7 @@ void RenderArea::setMinimumColour(int minimum)
    if (minimum < axes.maxZ)
    {
       axes.minZ = minimum;
-	  qDebug() << "RenderArea:: update commented out!";
+//	  qDebug() << "RenderArea:: update commented out!";
 //      update();
    }
 }

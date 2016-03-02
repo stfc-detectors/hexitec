@@ -84,7 +84,7 @@ signals:
     void updatePlotter();
     void updatePlotter(QPoint, bool);
     void updatePlotter(QVector <QPoint> &, bool);
-    void updatePlotter(double *summedImage, int numberOfBins);
+    void updatePlotter(QVector<double> xData, double *summedImage, int numberOfBins);
     void writeMessage(QString);
     void writeWarning(QString);
     void writeError(QString);

@@ -125,7 +125,7 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
 {
 
     Reservation reservation = ObjectReserver::instance()->reserveForGUI(rkl);
-    qDebug() << "Turning HV off and releasing!";
+    //qDebug() << "Changing HV and releasing!";
 
     if (reservation.getReserved().isEmpty())
     {
@@ -141,7 +141,7 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
        else if (command == HVOFF)
        {
           off();
-          qDebug() << "Turning HV off and releasing!";
+          //qDebug() << "Turning HV off and releasing!";
           ObjectReserver::instance()->release(reservation.getReserved(), "GUIReserver");
        }
     }

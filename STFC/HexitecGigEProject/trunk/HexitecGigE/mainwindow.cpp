@@ -96,7 +96,7 @@ MainWindow::MainWindow()
    connect(plotter, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
 
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter()), plotter, SLOT(updatePlotter()));
-   connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(double *, int)), plotter, SLOT(updatePlotter(double *, int)));
+   connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QVector<double>, double *, int)), plotter, SLOT(updatePlotter(QVector<double>, double *, int)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QPoint, bool)), plotter, SLOT(updatePlotter(QPoint, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QVector <QPoint> &, bool)), plotter, SLOT(updatePlotter(QVector <QPoint> &, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
@@ -190,7 +190,7 @@ MainWindow::MainWindow()
 
    // Allow processingWindow to signal when User may (not) be allowed to collect data
 //   connect(processingWindow, SIGNAL(updateMainWindowDataTakingSignal(bool)), fileMenu->actions().at(1), SLOT(setEnabled(bool)));
-   qDebug() <<"mainwindow.cpp:192 updateMainWindowDataTakingIn(Bool) Commented out - User May Now Access deleteSliceAct Component Freely?";
+//   qDebug() <<"mainwindow.cpp:192 updateMainWindowDataTakingIn(Bool) Commented out - User May Now Access deleteSliceAct Component Freely?";
    // Allow MainWindow signal to processingWindow if manual processing has begun/been abandoned
    connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
    connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
@@ -720,11 +720,11 @@ void MainWindow::processNow()
     if (!hxtFileNames.empty())
     {
         /// DEBUG:
-        qDebug() << "MainWindow::processNow() - Number of files selected = " << hxtFileNames.count();
+//        qDebug() << "MainWindow::processNow() - Number of files selected = " << hxtFileNames.count();
         QStringList::iterator fileIterator = hxtFileNames.begin();
         for ( ; fileIterator != hxtFileNames.end(); fileIterator++)
         {
-            qDebug() << "Selected file: " << (*fileIterator).toStdString().c_str();
+//            qDebug() << "Selected file: " << (*fileIterator).toStdString().c_str();
         }
         /// DEBUG END
 

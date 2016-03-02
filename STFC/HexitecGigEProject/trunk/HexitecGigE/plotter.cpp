@@ -199,6 +199,7 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
        }
        else
        {
+
           spanX = zoomStack[currentZoom].spanX();
           numXTicks = zoomStack[currentZoom].numXTicks;
        }
@@ -639,11 +640,11 @@ void Plotter::setMargins(int value)
     bottomMargin = value;
 }
 
-void Plotter::addSummedCurveData(double *yData, int numberOfBins)
+void Plotter::addSummedCurveData(QVector<double> xData, double *yData, int numberOfBins)
 {
     for (int i = 0 ; i < numberOfBins; ++i )
     {
-        summedCurve->xData[i] = (double) i;
+        summedCurve->xData[i] = xData[i];
         summedCurve->yData[i] = yData[i];
     }
     summedCurve->stats();
@@ -969,7 +970,7 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
    if (sizeIsGood)
    {
       title(slice->objectName() + " coordinates (" + QString::number(p.x()+1) + "," + QString::number(p.y()+1) + ")" );
-      addSummedCurveData(slice->getSummedImageY(), slice->getNumberOfBins());
+      addSummedCurveData(slice->getXData(0, 0),slice->getSummedImageY(), slice->getNumberOfBins());
       addCurveData(slice->getXData(p.x(), p.y()), slice->getYData(p.x(), p.y()),
                    slice->objectName(), p, colors.at(colorIndex), wasDoubleClicked);
       if (wasDoubleClicked)
@@ -984,10 +985,10 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
    this->update();
 }
 
-void Plotter::updatePlotter(double *summedCurveY, int numberOfBins)
+void Plotter::updatePlotter(QVector<double> xData, double *summedCurveY, int numberOfBins)
 {
    tidyCurves();
-   addSummedCurveData(summedCurveY, numberOfBins);
+   addSummedCurveData(xData, summedCurveY, numberOfBins);
    this->update();
    MainViewer::instance()->getRenderArea()->setMouseEnabled(true);
 }

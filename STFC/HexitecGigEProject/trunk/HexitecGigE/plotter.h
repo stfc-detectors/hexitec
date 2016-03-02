@@ -108,8 +108,8 @@ public slots:
     void updatePlotter();
     void updatePlotter(QPoint, bool);
     void updatePlotter(QVector <QPoint> &, bool);
-    void updatePlotter(double *, int);
-    void addSummedCurveData(double *, int);
+    void updatePlotter(QVector<double>, double *, int);
+    void addSummedCurveData(QVector<double>, double *, int);
     void addCurveData(QVector <double> &, bool);
     // void addCurveData(QVector <double> &, QVector <double> &);
     void addCurveData(QVector <double> &, QVector <double> &, bool);

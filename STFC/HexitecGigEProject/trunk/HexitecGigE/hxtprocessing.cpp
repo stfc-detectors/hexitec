@@ -186,7 +186,7 @@ void HxtProcessing::prepSettings()
     gLogConfig->setLogStdout(true);
     gLogConfig->setLogFile(true, logFileStream.str());
     gLogConfig->setDebugLevel(mDebugLevel);
-
+/*
     LOG(gLogConfig, logNOTICE) << "Starting up";
 
     // Display user settings
@@ -224,7 +224,7 @@ void HxtProcessing::prepSettings()
 
 
     LOG(gLogConfig, logINFO) << "Writing to log file " << logFileStream.str();
-
+*/
     // Load a threshold file
     if (pixelThreshold != 0) delete pixelThreshold;
     pixelThreshold = new HxtPixelThreshold(kHxtSensorRows, kHxtSensorCols);
@@ -284,7 +284,7 @@ void HxtProcessing::prepSettings()
     if (mDebugLevel) inCorrector->setDebug(true);
     if (mEnableInCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(inCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << inCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << inCorrector->getName() << " corrector to data";
     }
 
     // 2. Calibration
@@ -311,7 +311,7 @@ void HxtProcessing::prepSettings()
         if (mDebugLevel) cabCorrector->setDebug(true);
 
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(cabCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << cabCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << cabCorrector->getName() << " corrector to data";
     }
 
     // 3. CS Addition / O R / CS Discriminator
@@ -327,7 +327,7 @@ void HxtProcessing::prepSettings()
     if (mDebugLevel) subCorrector->setDebug(true);
     if (mEnableCsaspCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(subCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << subCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << subCorrector->getName() << " corrector to data";
     }
 
     // 3.2 CS Addition
@@ -336,7 +336,7 @@ void HxtProcessing::prepSettings()
     if (mDebugLevel) csdCorrector->setDebug(true);
     if (mEnableCsdCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(csdCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << csdCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << csdCorrector->getName() << " corrector to data";
     }
 
     // 4. Incomplete Data
@@ -345,7 +345,7 @@ void HxtProcessing::prepSettings()
     if (mDebugLevel) idCorrector->setDebug(true);
     if (mEnableIdCorrector) {
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(idCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << idCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << idCorrector->getName() << " corrector to data";
     }
 
     // 5. Momentum
@@ -366,7 +366,7 @@ void HxtProcessing::prepSettings()
         if (mDebugLevel) momCorrector->setDebug(true);
 
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(momCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << momCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << momCorrector->getName() << " corrector to data";
     }
 
 
@@ -376,7 +376,7 @@ void HxtProcessing::prepSettings()
     if (mEnableDbPxlsCorrector)  {
         if (mDebugLevel) dbpxlCorrector->setDebug(true);
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(dbpxlCorrector));
-        LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
+//        LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
     }
 
 }
@@ -399,8 +399,8 @@ void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
     * raw image. New filenames for processed data can be created by adding any
     * extension (except .bin) to this filename.
     */
-   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
-               << "frameSize (bytes) = " << frameSize;
+//   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
+//               << "frameSize (bytes) = " << frameSize;
 
    // Setup file path before calling prepSettings() (which instantiates the logger)
    this->setTargetDirectory(aFileName);
@@ -511,7 +511,7 @@ motorPositions* HxtProcessing::copyQHashToMotorPositions(QHash<QString, int> *qH
         else
         {
             emit hexitechSignalError(QString("Received unrecognised motor! Named: %1, Value: %2").arg(mpi.key(), mpi.value()) );
-            qDebug() << "    HxtProcessing::copyQHashToMotorPositions() error! key: " << mpi.key() << " not recognised!";
+//            qDebug() << "    HxtProcessing::copyQHashToMotorPositions() error! key: " << mpi.key() << " not recognised!";
         }
     }
 
@@ -669,8 +669,8 @@ void HxtProcessing::run()
 
                 if (bProcessTheQueue)   /// Set when  image collection finished - So process the lot, no more data arriving before next user-GUI interaction
                 {
-                    if (bDebug) qDebug() << "targetCondition was motor change but no (other) position changed before Image Collection completed.";
-                    if (bDebug) qDebug() << " ! no mPosition changed, bProcessTheQueue set. Clear it & call prepareWholeQueueProcessing()";
+//                    if (bDebug) qDebug() << "targetCondition was motor change but no (other) position changed before Image Collection completed.";
+//                    if (bDebug) qDebug() << " ! no mPosition changed, bProcessTheQueue set. Clear it & call prepareWholeQueueProcessing()";
                     // Call with argument = false, to grab everything of the queues
                     mTimeSinceLastDiscOp += mDiscWritingInterval;
                     bProcessTheQueue = false;
@@ -932,8 +932,8 @@ bool HxtProcessing::performManualProcessing()
     checkQueueLengths(motorSize, bufferSize, fileSize, framesSize);
 
     // DEBUGGING stuff:
-    qDebug() << " DEBUGGING:  motorSize (" << motorSize << ") bufferSize (" << bufferSize
-             << ") framesSize: (" << framesSize << ") fileSize: (" << fileSize << ")";
+//    qDebug() << " DEBUGGING:  motorSize (" << motorSize << ") bufferSize (" << bufferSize
+//             << ") framesSize: (" << framesSize << ") fileSize: (" << fileSize << ")";
 
     if (this->confirmOnlyManualFilesInQueue())
     {
@@ -943,7 +943,7 @@ bool HxtProcessing::performManualProcessing()
             while (!fileQueue.empty())
             {
                 string newFile = fileQueue.dequeue();
-                qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
+//                qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
                 mRawFileNames.push_back(newFile);
                 /// Grab file name of first file & use as .HXT filename
                 if (bUpdateFileName)
@@ -990,7 +990,7 @@ bool HxtProcessing::performManualProcessing()
 
 void HxtProcessing::clearAllQueues()
 {
-    qDebug() << "HxtProcessing::clearAllQueues() called by run() [Clearing all the queues]   !!!";
+//    qDebug() << "HxtProcessing::clearAllQueues() called by run() [Clearing all the queues]   !!!";
     // Return buffer(s), frames from bufferQueue, framesQueue respectively
     if (bufferMutex.tryLock(mutexTimeout))
     {
@@ -1003,7 +1003,7 @@ void HxtProcessing::clearAllQueues()
             for ( ; bufferIterator != bufferQueue.end(); bufferIterator++)
             {
                 emit hexitechSignalError(QString("Ignoring Buffer: %1").arg( (unsigned long)*bufferIterator ));
-                qDebug() << "Qsize: " << bufferQueue.size()  << " clear bufferQueue: emit signal buffer  " << (unsigned long)*bufferIterator << " released?";
+//                qDebug() << "Qsize: " << bufferQueue.size()  << " clear bufferQueue: emit signal buffer  " << (unsigned long)*bufferIterator << " released?";
                 emit returnBufferReady(reinterpret_cast<unsigned char*>(*bufferIterator), *framesIterator);
                 framesIterator++;
             }
@@ -1276,14 +1276,14 @@ void HxtProcessing::setRawFilesToProcess(QStringList rawFilesList)
     dummyPositions->mGALROT  = positionUnavailable;
     dummyPositions->mTimer   = positionUnavailable;
 
-    qDebug() << "HxtProcessing files to manually process:\n----------------------------------------------";
+//    qDebug() << "HxtProcessing files to manually process:\n----------------------------------------------";
     // Display files selected to be processed
     if (!rawFilesToProcess.empty())
     {
         QStringList::iterator listIterator;
         for (listIterator = rawFilesToProcess.begin(); listIterator != rawFilesToProcess.end(); listIterator++)
         {
-            qDebug() << "** Adding file: " << (*listIterator).toStdString().c_str();
+//            qDebug() << "** Adding file: " << (*listIterator).toStdString().c_str();
 
             // Add unprocessed file, dummy motor positions, onto respective queue
             if (fileMutex.tryLock(mutexTimeout))
@@ -1330,11 +1330,11 @@ int HxtProcessing::checkConfigValid()
     /// ToDo: Warn the user if file specified but corrector disabled ? (Vice versa?)
     if (!mMomentumFile.empty())
     {
-        qDebug() << "DEBUG: mMomentumFile specified.";
+//        qDebug() << "DEBUG: mMomentumFile specified.";
     }
     else
     {
-        qDebug() << "DEBUG: mMomentumFile NOT specified.";
+//        qDebug() << "DEBUG: mMomentumFile NOT specified.";
     }
 
     // Cannot specify both global threshold and threshold file
@@ -1350,7 +1350,7 @@ int HxtProcessing::checkConfigValid()
 void HxtProcessing::dumpSettings()
 {
     /// Debug function - call it to check hexitech settings in memory
-    qDebug() << "Start ADU                       " << mHistoStartVal;
+/*    qDebug() << "Start ADU                       " << mHistoStartVal;
     qDebug() << "End ADU                         " << mHistoEndVal;
     qDebug() << "Bin Width ADU                   " << mHistoBins;
     qDebug() << "Interpolate Threshold           " << mInterpolationThreshold;
@@ -1374,6 +1374,7 @@ void HxtProcessing::dumpSettings()
     qDebug() << "Diagnostic Histogram CSV files: " << mWriteCsvFiles;
     qDebug() << "Vector Indexing:                " << mEnableVector;
     qDebug() << "Debug Frame                     " << mEnableDebugFrame;
+    */
 }
 
 void HxtProcessing::configHeaderEntries(string fileName)
@@ -1444,8 +1445,8 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
         else
         {
             emit hexitechSignalError("obtainRawFilePathAndPrefix() Raw filename's missing timestamp in format \"YYMMDD_HHMMSS\" or \"YYYYMMDD_HHHMMSS\" !");
-            qDebug() << "HxtProcessing::obtainRawFilePathAndPrefix() - Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor "
-                     << "\"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
+//            qDebug() << "HxtProcessing::obtainRawFilePathAndPrefix() - Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor "
+//                     << "\"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
             return;
         }
     }
@@ -1579,7 +1580,7 @@ void HxtProcessing::dataCollectionFinished()
     else
     {
         emit hexitechSignalError("HxtProcessing dataCollectionFinished() error: Unable to acquire queue context mutex lock!");
-        qDebug() << "HxtProcessing dataCollectionFinished() error: Unable to acquire queue context mutex lock!";
+//        qDebug() << "HxtProcessing dataCollectionFinished() error: Unable to acquire queue context mutex lock!";
     }
 
 }
@@ -1699,7 +1700,7 @@ int HxtProcessing::updateVisualisationTabAndHxtFile()
     if (mHxtBuffers.empty())
     {
         emit hexitechSignalError("HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)");
-        qDebug() << "HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)";
+//        qDebug() << "HxtProcessing Error: Pool of Buffers! (Visualisation thread too slow?)";
         return -1;
     }
     // Copy "output files" into buffer

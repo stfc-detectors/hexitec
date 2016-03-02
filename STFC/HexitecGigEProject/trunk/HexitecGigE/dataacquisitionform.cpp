@@ -218,7 +218,6 @@ void DataAcquisitionForm::handleMonitorData(MonitorData *md)
    }
    else
    {
-      qDebug() << "DataAcquisitionForm needs to do something with its GUI ";
       disableGui();
    }
 }

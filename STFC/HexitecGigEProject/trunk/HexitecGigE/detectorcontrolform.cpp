@@ -94,7 +94,7 @@ void DetectorControlForm::initialiseDetectorPressed()
    try
    {
       emit initialiseDetector();
-      QThread::sleep(5);
+      QThread::sleep(2);
 
       /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */

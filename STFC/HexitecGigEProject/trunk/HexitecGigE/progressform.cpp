@@ -35,7 +35,7 @@ void ProgressForm::handleImageStarting(double daqCollectionTime)
 
 void ProgressForm::handleUpdateProgress(double progressTime)
 {
-   qDebug() << "ProgressForm::handleUpdateProgress(double progressTime)" << progressTime;
+//   qDebug() << "ProgressForm::handleUpdateProgress(double progressTime)" << progressTime;
    collectionTime += progressTime;
    remainingTime -= progressTime;
 

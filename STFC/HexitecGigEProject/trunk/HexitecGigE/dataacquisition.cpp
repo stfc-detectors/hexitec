@@ -232,6 +232,7 @@ void DataAcquisition::performContinuousDataCollection()
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
+      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000);
       performMonitorEnvironmentalValues();
 
       for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)
@@ -243,7 +244,6 @@ void DataAcquisition::performContinuousDataCollection()
          setDataAcquisitionTime(nDaq);
          collecting = true;
 
-         emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000);
          emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
          nDaqOverall++;
 
@@ -388,7 +388,7 @@ void DataAcquisition::pauseDataAcquisition()
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::PAUSED);
       for (int i = 0; i < pauseDuration; i+=1000)
       {
-         sleep(1);
+         sleep(0.1);
          if (abortRequired())
          {
             break;
@@ -417,7 +417,7 @@ int DataAcquisition::waitForBiasRefreshDone()
    int status = 0;
 
    while (biasRefreshing)
-      sleep(1);
+      sleep(0.1);
 
    return status;
 }
@@ -444,6 +444,9 @@ int DataAcquisition::waitForCollectingDone()
          emit dataAcquisitionStatusChanged(daqStatus);
       }
    }
+   percentage = 100;
+   daqStatus.setPercentage(percentage);
+   emit dataAcquisitionStatusChanged(daqStatus);
    qDebug() << "DAQ finished";
 
    return status;

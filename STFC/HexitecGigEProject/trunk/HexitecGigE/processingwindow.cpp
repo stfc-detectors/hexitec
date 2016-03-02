@@ -335,7 +335,7 @@ void ProcessingWindow::updateStateLabel(bool isBusy)
 void ProcessingWindow::debugButtonPressed()
 {
     /// Debugging button (hidden from user)
-   qDebug() << "ProcessingWindow::debugButtonPressed() [Debugging] ";
+//   qDebug() << "ProcessingWindow::debugButtonPressed() [Debugging] ";
    /// Debug: List current settings
    dumpHexitechConfig();
 }
@@ -724,7 +724,7 @@ void ProcessingWindow::reloadSpectrumOptionsDefaultValues()
     else
     {
         /// Because Momentum Calibration includes Energy Calibration, only look for KeV units if Momentum disabled
-        qDebug() << "reloadSpectrumOptionsDefaultValues() DIDN'T select Momentum";
+//        qDebug() << "reloadSpectrumOptionsDefaultValues() DIDN'T select Momentum";
         if (bEnableCabCorrector)
         {
             iHistoStartVal   = hexitechIniFile->getInt("Processing/StartKEV");
@@ -1208,14 +1208,14 @@ void ProcessingWindow::loadSettingsButtonPressed()
         // File entry valid; is file entry "None"?
         if ( areStringsEqual(fileCalibrationCorrection, "None"))
         {
-            qDebug() << "Calibration = None";
+//            qDebug() << "Calibration = None";
             // File entry is "None"; set Booleans correspondingly
             //  (both initialised to false so need not change them here)
 
             // If GUI's settings doesn't both match File's settings, update GUI's settings
             if ( (bEnableMomCorrector != bFileMom) || (bEnableCabCorrector != bFileCab))
             {
-                qDebug() << "            Setting both correct is to false.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
+//                qDebug() << "            Setting both correct is to false.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
                 bEnableMomCorrector = false;
                 bEnableCabCorrector = false;
                 ui->calibrationComboBox->setCurrentText(fileCalibrationCorrection);
@@ -1225,7 +1225,7 @@ void ProcessingWindow::loadSettingsButtonPressed()
         }
         else if ( areStringsEqual(fileCalibrationCorrection, "Energy"))
         {
-            qDebug() << "Calibration = Energy";
+//            qDebug() << "Calibration = Energy";
             // File entry is "Energy" - set Booleans correspondingly
             bFileMom = false;
             bFileCab = true;
@@ -1249,7 +1249,7 @@ void ProcessingWindow::loadSettingsButtonPressed()
             // If GUI's settings doesn't both match File's settings, update GUI's settings
             if ( (bEnableMomCorrector != bFileMom) || (bEnableCabCorrector != bFileCab))
             {
-                qDebug() << "            Setting both corrector to true.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
+//                qDebug() << "            Setting both corrector to true.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
                 bEnableMomCorrector = true;
                 bEnableCabCorrector = true; //false;
                 ui->calibrationComboBox->setCurrentText(fileCalibrationCorrection);
@@ -1648,7 +1648,7 @@ string ProcessingWindow::validateFileName(QString* qsKeyName, QString* qsKeyValu
 void ProcessingWindow::dumpHexitechConfig()
 {
     /// Debug function - call it to check hexitech settings in memory
-    qDebug() << "Start ADU (iHistoStartVal) " << iHistoStartVal;
+/*    qDebug() << "Start ADU (iHistoStartVal) " << iHistoStartVal;
     qDebug() << "End ADU   (iHistoEndVal)   " << iHistoEndVal;
     qDebug() << "Bin Width ADU (dHistoBins) " << dHistoBins;
     qDebug() << "Interpolate Threshold      " << iInterpolationThreshold;
@@ -1670,6 +1670,7 @@ void ProcessingWindow::dumpHexitechConfig()
     qDebug() << "Interpolate Correction:   " << bEnableIpCorrector;
     qDebug() << "Diagnost Histo CSV files: " << bWriteCsvFiles;
     qDebug() << "Vector Indexing:          " << bEnableVector;
+    */
 }
 
 void ProcessingWindow::saveSettingsButtonPressed()
