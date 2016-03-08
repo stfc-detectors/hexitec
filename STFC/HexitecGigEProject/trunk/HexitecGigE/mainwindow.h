@@ -87,6 +87,7 @@ private:
    QString readFilter;
    bool activeDAQ;
    std::ofstream outFile;
+   void writeH5(QString fileName);
 
 signals:
    void addObject(QObject *object, bool scripting = TRUE, bool gui = TRUE);

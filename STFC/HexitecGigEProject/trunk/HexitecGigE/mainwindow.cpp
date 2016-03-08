@@ -816,6 +816,7 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 
    emit returnHxtBuffer(buffer);
    writeCsv(fileName, slice->getXData(0, 0), (int *)slice->getSummedImageY(), slice->getNumberOfBins());
+   writeH5(fileName);
 }
 
 void MainWindow::writeCsv(QString fileName, QVector<double> col0, int *col1, int numberOfBins)
@@ -834,6 +835,16 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, int *col1, int
    outFile.write(outputText.str().c_str(), outputText.str().length());
    outFile.close();
 
+}
+
+void MainWindow::writeH5(QString fileName)
+{
+   QString program = "Translator.exe";
+   QStringList arguments;
+   arguments << fileName << "h5";
+
+   QProcess *translateProcess = new QProcess();
+   translateProcess->execute(program, arguments);
 }
 
 void MainWindow::sendActiveSliceToMatlab()
