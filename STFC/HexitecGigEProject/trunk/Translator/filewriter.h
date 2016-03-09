@@ -1,19 +1,21 @@
-#ifndef FILEREADER_H
-#define FILEREADER_H
+#ifndef FILEWRITER_H
+#define FILEWRITER_H
 
 #include <stdint.h>
 #include <iostream>
 #include <fstream>
+#include <H5Cpp.h>
+#include <H5public.h>
 
 using namespace std;
+using namespace H5;
 
-class FileReader
+class FileWriter
 {
 public:
-    FileReader();
-    virtual void *read(string fileName);
-//    void buildH5(string fileName);
-private:
+    FileWriter();
+    virtual void write(void * buffer, string fileName);
+protected:
     struct HxtBuffer
     {
         char hxtLabel[8];
@@ -41,10 +43,13 @@ private:
   * */
     };
 
-    std::ifstream inFile;
     struct HxtBuffer hxtBuffer;
+    H5File file;
+
+//    void setFileId(H5File file);
+//    void buildDataSet(H5File file, string dsName, PredType dsType, int rank, hsize_t dsDimensions[], void *dsValues);
 
 };
 
 
-#endif // FILEREADER_H
+#endif // FILEWRITER_H

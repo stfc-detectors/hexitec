@@ -1,18 +1,18 @@
-#ifndef FILEREADER_H
-#define FILEREADER_H
+#ifndef HXTFILEREADER_H
+#define HXTFILEREADER_H
 
 #include <stdint.h>
 #include <iostream>
 #include <fstream>
+#include "filereader.h"
 
 using namespace std;
 
-class FileReader
+class HxtFileReader : public FileReader
 {
 public:
-    FileReader();
-    virtual void *read(string fileName);
-//    void buildH5(string fileName);
+    HxtFileReader();
+    void *read(string fileName);
 private:
     struct HxtBuffer
     {
@@ -43,8 +43,7 @@ private:
 
     std::ifstream inFile;
     struct HxtBuffer hxtBuffer;
-
 };
 
 
-#endif // FILEREADER_H
+#endif // HXTFILEREADER_H
