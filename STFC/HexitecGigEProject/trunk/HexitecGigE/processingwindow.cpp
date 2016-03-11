@@ -1,6 +1,7 @@
 #include "processingwindow.h"
 #include "ui_processingwindow.h"
 #include "parameters.h"
+#include "badinifiledialog.h"
 
 #include <QDebug>
 #include <QThread>

@@ -63,7 +63,7 @@ MainWindow::MainWindow()
       setWindowTitle(nonDAQVersion);
       setWindowIconText(nonDAQVersion);
    }
-   setWindowIcon(QIcon(":/images/HEXITEC_mini.ico"));
+   setWindowIcon(QIcon(":/images/HEXITEC.ico"));
    setMinimumSize(705,730);
    setUnifiedTitleAndToolBarOnMac(true);
    createMenus();
@@ -562,6 +562,8 @@ void MainWindow::about()
 
 void MainWindow::createMenus()
 {
+   QToolBar *fileToolBar = addToolBar(tr("File"));
+
    if (activeDAQ)
    {
       startDAQAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
@@ -570,6 +572,8 @@ void MainWindow::createMenus()
       stopDAQAct->setText("Stop DAQ");
       startDAQAct->setDisabled(true);
       stopDAQAct->setDisabled(true);
+      fileToolBar->addAction(startDAQAct);
+      fileToolBar->addAction(stopDAQAct);
       connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
       connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
    }
@@ -597,7 +601,7 @@ void MainWindow::createMenus()
    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
 
    // Must make fileMenu a class number
-//   this->fileMenu
+   // this->fileMenu
    fileMenu->addAction(readAction);
    fileMenu->addAction(deleteSliceAct);
    fileMenu->addSeparator();
@@ -606,9 +610,6 @@ void MainWindow::createMenus()
    menuBar()->addSeparator();
    helpMenu->addAction(aboutAct);
 
-   QToolBar *fileToolBar = addToolBar(tr("File"));
-   fileToolBar->addAction(startDAQAct);
-   fileToolBar->addAction(stopDAQAct);
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
 
@@ -943,22 +944,24 @@ bool MainWindow::checkDAQChoice()
    bool activeDAQ = false;
 
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+
+   if (settings->contains("hexitecGigEIniFilename"))
+   {
+
+      QFileInfo fileInfo = QFileInfo(settings->value("hexitecGigEIniFilename").toString());
+      if (!fileInfo.isReadable())
+      {
+         BadIniFileDialog *badIniFileDialog = new BadIniFileDialog();
+         badIniFileDialog->setWindowTitle("hexitecGigEIniFilename: " + settings->value("hexitecGigEIniFilename").toString());
+         badIniFileDialog->exec();
+         exit(1);
+      }
+   }
+
    if (settings->contains("DataAcquisition"))
    {
       if (settings->value("DataAcquisition").toString() == "On")
       {
-         if (settings->contains("hexitecGigEIniFilename"))
-         {
-
-            QFileInfo fileInfo = QFileInfo(settings->value("hexitecGigEIniFilename").toString());
-            if (!fileInfo.isReadable())
-            {
-               BadIniFileDialog *badIniFileDialog = new BadIniFileDialog();
-               badIniFileDialog->setWindowTitle("hexitecGigEIniFilename: " + settings->value("hexitecGigEIniFilename").toString());
-               badIniFileDialog->exec();
-               exit(1);
-            }
-         }
          activeDAQ = true;
       }
       else

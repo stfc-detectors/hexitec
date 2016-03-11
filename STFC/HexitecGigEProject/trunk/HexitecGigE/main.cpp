@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(HexitecGigE);
 
     QSplashScreen *splash = new QSplashScreen;
-    splash->setPixmap(QPixmap("images/Hexitec_Logo50.png"));
+    splash->setPixmap(QPixmap(":/images/Hexitec_Logo50.png"));
     splash->show();
 
     MainWindow mainWin;

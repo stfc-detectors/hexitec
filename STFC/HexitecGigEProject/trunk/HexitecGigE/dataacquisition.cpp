@@ -386,9 +386,10 @@ void DataAcquisition::pauseDataAcquisition()
    if ((pauseDuration = dataAcquisitionDefinition->getRepeatInterval()) > 0)
    {
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::PAUSED);
-      for (int i = 0; i < pauseDuration; i+=1000)
+      for (int i = 0; i < pauseDuration; i+=10)
       {
-         sleep(0.1);
+         Sleep(10);
+
          if (abortRequired())
          {
             break;
@@ -565,6 +566,7 @@ void DataAcquisition::handleCollectReducedImages()
    }
    else
    {
+      qDebug() << "handleCollectReducedImages all objects reserved, configuring DAQ";
       configureDataCollection();
       start();
    }
