@@ -6,7 +6,7 @@
  * See for instance http://qt-project.org/forums/viewthread/22133 */
 #define NOMINMAX
 #define STR_LENGTH 1024
-//
+
 #include <QImage>
 #include <QDir>
 
@@ -17,6 +17,7 @@
 static PUCHAR bufferReady;
 static PUCHAR returnBuffer;
 static ULONG validFrames;
+
 HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
@@ -62,7 +63,6 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
-//   qRegisterMetaType<GigEDetector::DetectorState>("GigE::Mode");
    qRegisterMetaType<HANDLE>("HANDLE");
    connectUp(parent);
 }
@@ -83,12 +83,10 @@ void GigEDetector::connectUp(const QObject *parent)
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
    returnBufferReadyEvent = new WindowsEvent(HEXITEC_RETURN_BUFFER_READY, true);
-//   returnBufferReadyEvent->connect1(this, SLOT(handleReturnBufferReady()));
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
    connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
    connect(this, SIGNAL(executeGetImages()), this, SLOT(handleExecuteGetImages()));
-//   connect(this, SIGNAL(notifyStop()), this, SLOT(handleStop()));
 }
 
 void GigEDetector::handleBufferReady()
@@ -359,9 +357,6 @@ void GigEDetector::setGetImageParams()
       QDir().mkpath(directory);
    }
 
-//   outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
-//   outFile.close();
-
    imgCntAverage = 1;
 }
 
@@ -524,11 +519,6 @@ void GigEDetector::setTimestampOn(bool timestampOn)
 bool GigEDetector::getTimestampOn()
 {
    return timestampOn;
-}
-
-GigEDetector::Mode GigEDetector::getMode()
-{
-   return mode;
 }
 
 void GigEDetector::enableDarks()

@@ -23,25 +23,25 @@ class GigEDetector : public QObject
 
 public:
 /* If change add a Mode be sure to add to modes variable. */
-enum Mode {CONTINUOUS, GIGE_DEFAULT, INVALID_MODE};
+   enum Mode {CONTINUOUS, GIGE_DEFAULT, INVALID_MODE};
 /**********************************************************/
-enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
-enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
+   enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
+   enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
    GigEDetector(QString aspectFilename, const QObject *parent = 0);
    ~GigEDetector();
+
    Q_INVOKABLE int initialiseConnection();
    Q_INVOKABLE int terminateConnection();
-//   int configure(unsigned long xResolution, unsigned long yResolution);
    Q_INVOKABLE int getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *hv, double *t);
+   Q_INVOKABLE void getImages(int count, int ndaq);
+   Q_INVOKABLE void enableDarks();
+   Q_INVOKABLE void disableDarks();
+
    unsigned int getXResolution();
    unsigned int getYResolution();
    void setXResolution(unsigned int xResolution);
    void setYResolution(unsigned int yResolution);
-   Q_INVOKABLE void getImages(int count, int ndaq);
-   Q_INVOKABLE Mode getMode();
    void setMode(Mode mode);
-   Q_INVOKABLE void enableDarks();
-   Q_INVOKABLE void disableDarks();
    void setBufferReadyEvent();
    QString getDirectory();
    QString getPrefix();
@@ -49,7 +49,6 @@ enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLL
    void setTimestampOn(bool timestampOn);
    void setDirectory(QString directory);
    void setPrefix(QString prefix);
-//   void timerEvent(QTimerEvent *event);
    void setDataAcquisitionDuration(double imageAcquisitionDuration);
    void acquireImages();
    int getLoggingInterval();
