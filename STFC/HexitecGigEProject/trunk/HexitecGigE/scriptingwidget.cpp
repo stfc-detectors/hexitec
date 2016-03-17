@@ -332,16 +332,12 @@ void ScriptingWidget::executeScript(QString script)
 void ScriptingWidget::constructSections(QString string)
 {
    QStringList qsl = string.split(QRegExp("SCRIPTING|MATLAB"), QString::SkipEmptyParts);
-   for (int i = 0; i < qsl.size(); i++)
-   {
-      qsl.replace(i, removeComments(qsl.at(i)));
-   }
-
-   string = qsl.join("");
 
    for (int i = 0; i < qsl.size(); i++)
    {
       sections.append(string.section(QRegExp("SCRIPTING|MATLAB"), i, i, QString::SectionIncludeLeadingSep));
+      sections.replace(i, removeComments(sections.at(i)).trimmed());
+
    }
 }
 
@@ -442,6 +438,7 @@ void ScriptingWidget::executeLine()
 void ScriptingWidget::sendCommands(QString commands)
 {
    int localDestination = destination;
+
    if (commands.startsWith("MATLAB\n"))
    {
       localDestination = MATLAB;
@@ -456,7 +453,7 @@ void ScriptingWidget::sendCommands(QString commands)
    switch (localDestination)
    {
    case SCRIPTING:
-      //qDebug() << "sendCommands to SCRIPTING";
+//      qDebug() << "sendCommands to SCRIPTING";
       setScriptIsRunning(true);
       scriptRunner->setScript(commands);
       updateOutput("Starting SCRIPTING script");
