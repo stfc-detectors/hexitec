@@ -17,10 +17,13 @@ public:
      void adjust();
      double spanX() const { return maxX - minX; }
      double spanY() const { return maxY - minY; }
+     double spanSummedY() const { return maxSummedY - minSummedY; }
      double minX;
      double maxX;
      double minY;
      double maxY;
+     double minSummedY;
+     double maxSummedY;
      int numXTicks;
      int numYTicks;
 

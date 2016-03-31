@@ -14,6 +14,8 @@ PlotSettings::PlotSettings()
     maxX = 10.0;//voxDataPointsNum;
     minY = 0.0;
     maxY = 10.0;
+    minSummedY = 0.0;
+    maxSummedY = 10.0;
     numXTicks = 10;
     numYTicks = 10;
 }
@@ -27,6 +29,10 @@ void PlotSettings::scroll(int dx, int dy)
     double stepY = spanY() / numYTicks;
     minY += dy * stepY;
     maxY += dy * stepY;
+
+    double stepSummedY = spanSummedY() / numYTicks;
+    minSummedY += dy * stepSummedY;
+    maxSummedY += dy * stepSummedY;
 }
 
 void PlotSettings::adjust()

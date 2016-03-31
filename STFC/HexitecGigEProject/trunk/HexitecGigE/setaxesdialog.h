@@ -15,11 +15,14 @@ class SetAxesDialog : public QDialog
 public:
     explicit SetAxesDialog(QWidget *parent = 0);
     ~SetAxesDialog();
-    void initializeAxes(double minX, double maxX, double minY, double maxY);
+    void initializeAxes(double minX, double maxX, double minY, double maxY,
+                        double minSummedY, double maxSummedY);
     double getMinX();
     double getMaxX();
     double getMinY();
     double getMaxY();    
+    double getMinSummedY();
+    double getMaxSummedY();
     bool getAutoScale();
 
 private:
@@ -28,6 +31,8 @@ private:
     double maxX;
     double minY;
     double maxY;
+    double minSummedY;
+    double maxSummedY;
     double autoScale;
     QDoubleValidator *validator;
     void enableInputFields(bool enable);
@@ -42,6 +47,8 @@ private slots:
     void maxXChanged(QString valueString);
     void minYChanged(QString valueString);
     void maxYChanged(QString valueString);
+    void minSumYChanged(QString valueString);
+    void maxSumYChanged(QString valueString);
 
 };
 

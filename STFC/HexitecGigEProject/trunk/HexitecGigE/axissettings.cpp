@@ -1,30 +1,37 @@
 #include "axissettings.h"
 #include <cmath>
+#include <QDebug>
 
 AxisSettings::AxisSettings()
 {
-    minX				= 0.0;
-    maxX				= 1.0;
-    minY				= 0.0;
-    maxY				= 1.0;
-    minZ				= 0.0;
-    maxZ				= 1.0;
+    minX	= 0.0;
+    maxX	= 1.0;
+    minY	= 0.0;
+    maxY	= 1.0;
+    minZ	= 0.0;
+    maxZ	= 1.0;
+    minSummedY	= 0.0;
+    maxSummedY	= 1.0;
     minTicks = 3;
     maxTicks = 8;
-    numXTicks			= 5;
-    numYTicks			= 5;
-    numZTicks			= 3;
+    numXTicks = 5;
+    numYTicks = 5;
+    numZTicks = 3;
     autoScaleX = true;
     autoScaleY = true;
     autoScaleZ = true;
+    autoScaleSummedY = true;
 }
 
-AxisSettings::AxisSettings(double minX, double maxX, double minY, double maxY)
+AxisSettings::AxisSettings(double minX, double maxX, double minY, double maxY,
+                           double minSummedY, double maxSummedY)
 {
     this->minX = minX;
     this->maxX = maxX;
     this->minY = minY;
     this->maxY = maxY;
+    this->minSummedY = minSummedY;
+    this->maxSummedY = maxSummedY;
     minZ = 0.0;
     maxZ = 1.0;
     minTicks = 3;
@@ -35,7 +42,9 @@ AxisSettings::AxisSettings(double minX, double maxX, double minY, double maxY)
     autoScaleX = false;
     autoScaleY = false;
     autoScaleZ = true;
+    autoScaleSummedY = false;
 }
+
 void AxisSettings::scroll(int dx, int dy, int dz)
 {
     double stepX = spanX() / numXTicks;
@@ -49,6 +58,10 @@ void AxisSettings::scroll(int dx, int dy, int dz)
     double stepZ = spanZ() / numZTicks;
     minZ += dz * stepZ;
     maxZ += dz * stepZ;
+
+    double stepSummedY = spanSummedY() / numYTicks;
+    minSummedY += dy * stepSummedY;
+    maxSummedY += dy * stepSummedY;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -95,4 +108,9 @@ void AxisSettings::setMinTicks(int value)
 void AxisSettings::setMaxTicks(int value)
 {
     maxTicks = value;
+}
+
+double AxisSettings::spanSummedY()
+{
+   return maxSummedY - minSummedY;
 }

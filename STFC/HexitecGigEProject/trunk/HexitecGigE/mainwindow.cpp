@@ -100,6 +100,7 @@ MainWindow::MainWindow()
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QPoint, bool)), plotter, SLOT(updatePlotter(QPoint, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(updatePlotter(QVector <QPoint> &, bool)), plotter, SLOT(updatePlotter(QVector <QPoint> &, bool)));
    connect(MainViewer::instance()->getRenderArea(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
+   connect(plotter, SIGNAL(pixelAdded(QString)), pixelManipulationForm, SLOT(updatePixelList(QString)));
    connect(MainViewer::instance(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(MainViewer::instance(), SIGNAL(readFiles(QStringList)), this, SLOT(readFiles(QStringList)));
 
@@ -244,6 +245,12 @@ QMainWindow *MainWindow::createVisualisation()
    viewMenu->addAction(dock->toggleViewAction());
    dock->setWidget(subTabs);
    subTabs->setParent(dock);
+
+   createPixelManipulation();
+   QDockWidget *pmDock = new QDockWidget(tr("Pixel Manipulation"), visualisation);
+   pmDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+   visualisation->addDockWidget(Qt::LeftDockWidgetArea, pmDock);
+   pmDock->setWidget(pixelManipulationForm);
 
    return visualisation;
 }
@@ -643,6 +650,13 @@ void MainWindow::createMainViewer()
    addToolBar(Qt::TopToolBarArea, MainViewer::instance()->createToolbar());
 }
 
+void MainWindow::createPixelManipulation()
+{
+   pixelManipulationForm = new PixelManipulationForm(visualisation);
+   connect (pixelManipulationForm, SIGNAL(pixelAdditionChanged(bool)),
+            plotter, SLOT(handlePixelAdditionChanged(bool)));
+}
+
 void MainWindow::createPlotter()
 {
    plotter = new Plotter(visualisation);
@@ -995,3 +1009,4 @@ void MainWindow::disableMainWindowActions()
    startDAQAct->setDisabled(true);
    stopDAQAct->setEnabled(true);
 }
+

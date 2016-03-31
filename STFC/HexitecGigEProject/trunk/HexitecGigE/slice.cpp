@@ -1201,6 +1201,9 @@ bool Slice::readHXT(QString fileName)
    // Read data
  ///////////////////////////////  QVector <double> spectrum(nBins);
  ///////////////////////////////  QString fileStem;
+
+   numberOfBins = nBins;
+   summedImageY = (double*) calloc (numberOfBins, sizeof(double));
    for (iRow = 0; iRow < nRows; ++iRow)
    {
       for (iCol = 0; iCol < nCols; ++iCol)
@@ -1212,10 +1215,12 @@ bool Slice::readHXT(QString fileName)
          for (iBin = 0 ; iBin < nBins ; ++iBin)
          {
             file.read((char *) &d, sizeof(d));
+            summedImageY[iBin] += d;
             contentVoxel[iRow][iCol]->contentYData.push_back(d);
          }
       }
    }
+
    file.close();
    voxelDataLen = nBins;
    zeroStats();

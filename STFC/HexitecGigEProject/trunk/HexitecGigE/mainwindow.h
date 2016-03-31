@@ -29,6 +29,7 @@
 #include "dataacquisitionfactory.h"
 #include "processingwindow.h"
 #include "progressform.h"
+#include "pixelmanipulationform.h"
 
 class HexitecSoftTrigger;
 class HardTrigger;
@@ -48,6 +49,7 @@ private:
    QMainWindow *createVisualisation();
    void createStatusBar();
    void createMainViewer();
+   void createPixelManipulation();
    void createPlotter();
    void createProgressViewer();
    void createThumbViewer();
@@ -69,6 +71,7 @@ private:
    ThumbViewer *thumbViewer;
    ProgressForm *progressForm;
    Plotter *plotter;
+   PixelManipulationForm *pixelManipulationForm;
    ScriptingWidget *scripting ;
    Workspace *workspace;
    ChargeSharing *chargeSharingInstance;

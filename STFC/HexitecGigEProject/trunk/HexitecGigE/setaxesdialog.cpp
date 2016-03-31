@@ -11,6 +11,8 @@ SetAxesDialog::SetAxesDialog(QWidget *parent) :
     ui->maxXInput->setValidator(validator);
     ui->minYInput->setValidator(validator);
     ui->maxYInput->setValidator(validator);
+    ui->minSumYInput->setValidator(validator);
+    ui->maxSumYInput->setValidator(validator);
 
     connect(ui->resetAutoScalingButton, SIGNAL(stateChanged(int)),this, SLOT(resetAutoScalingButtonStateChanged(int)));
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyButtonClicked()));
@@ -18,6 +20,8 @@ SetAxesDialog::SetAxesDialog(QWidget *parent) :
     connect(ui->maxXInput, SIGNAL(textEdited(QString)), this, SLOT(maxXChanged(QString)));
     connect(ui->minYInput, SIGNAL(textEdited(QString)), this, SLOT(minYChanged(QString)));
     connect(ui->maxYInput, SIGNAL(textEdited(QString)), this, SLOT(maxYChanged(QString)));
+    connect(ui->minSumYInput, SIGNAL(textEdited(QString)), this, SLOT(minSumYChanged(QString)));
+    connect(ui->maxSumYInput, SIGNAL(textEdited(QString)), this, SLOT(maxSumYChanged(QString)));
 }
 
 SetAxesDialog::~SetAxesDialog()
@@ -25,16 +29,21 @@ SetAxesDialog::~SetAxesDialog()
     delete ui;
 }
 
-void SetAxesDialog::initializeAxes(double minX, double maxX, double minY, double maxY)
+void SetAxesDialog::initializeAxes(double minX, double maxX, double minY, double maxY,
+                                    double minSummedY, double maxSummedY)
 {
     this->minX = minX;
     this->maxX = maxX;
     this->minY = minY;
     this->maxY = maxY;
+    this->minSummedY = minSummedY;
+    this->maxSummedY = maxSummedY;
     ui->minXInput->setText(QString::number(minX));
     ui->maxXInput->setText(QString::number(maxX));
     ui->minYInput->setText(QString::number(minY));
     ui->maxYInput->setText(QString::number(maxY));
+    ui->minSumYInput->setText(QString::number(minSummedY));
+    ui->maxSumYInput->setText(QString::number(maxSummedY));
     autoScale = ui->resetAutoScalingButton->isChecked();
     enableInputFields(!autoScale);
 }
@@ -45,6 +54,8 @@ void SetAxesDialog::enableInputFields(bool enable)
     ui->maxXInput->setEnabled(enable);
     ui->minYInput->setEnabled(enable);
     ui->maxYInput->setEnabled(enable);
+    ui->minSumYInput->setEnabled(enable);
+    ui->maxSumYInput->setEnabled(enable);
 }
 
 double SetAxesDialog::getMinX()
@@ -64,7 +75,17 @@ double SetAxesDialog::getMinY()
 
 double SetAxesDialog::getMaxY()
 {
-    return maxY;
+   return maxY;
+}
+
+double SetAxesDialog::getMinSummedY()
+{
+   return minSummedY;
+}
+
+double SetAxesDialog::getMaxSummedY()
+{
+   return maxSummedY;
 }
 
 void SetAxesDialog::applyButtonClicked()
@@ -101,4 +122,14 @@ void SetAxesDialog::minYChanged(QString valueString)
 void SetAxesDialog::maxYChanged(QString valueString)
 {
     maxY = valueString.toDouble();
+}
+
+void SetAxesDialog::minSumYChanged(QString valueString)
+{
+    minSummedY = valueString.toDouble();
+}
+
+void SetAxesDialog::maxSumYChanged(QString valueString)
+{
+    maxSummedY = valueString.toDouble();
 }
