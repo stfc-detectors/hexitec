@@ -143,7 +143,7 @@ private:
    QString *toolTip;
    bool pixelAddition;
 
-   void copyLastCurve();
+   void copyCurve(Curve *newCurve);
    void constructCurveData(Curve * newCurve, QVector <double> &yData, bool parentHold);
    QRect rubberBandRect;
    QRectF axesBox;

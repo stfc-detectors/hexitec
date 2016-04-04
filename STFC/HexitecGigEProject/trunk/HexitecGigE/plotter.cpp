@@ -787,17 +787,14 @@ void Plotter::addSummedCurveData(QVector<double> xData, double *yData, int numbe
    }
 }
 
-void Plotter::copyLastCurve()
+void Plotter::copyCurve(Curve *newCurve)
 {
-   if (curve.count() > 0)
-   {
-      memcpy((void *) &(lastCurve.xData[0]), (void *) &(curve.last()->xData[0]), curve.last()->xData.count() * sizeof(double));
-      memcpy((void *) &(lastCurve.yData[0]), (void *) &(curve.last()->yData[0]), curve.last()->yData.count() * sizeof(double));
-      lastCurve.minXData = curve.last()->minXData;
-      lastCurve.maxXData = curve.last()->maxXData;
-      lastCurve.minYData = curve.last()->minYData;
-      lastCurve.maxYData = curve.last()->maxYData;
-   }
+   memcpy((void *) &(lastCurve.xData[0]), (void *) &(newCurve->xData[0]), newCurve->xData.count() * sizeof(double));
+   memcpy((void *) &(lastCurve.yData[0]), (void *) &(newCurve->yData[0]), newCurve->yData.count() * sizeof(double));
+   lastCurve.minXData = newCurve->minXData;
+   lastCurve.maxXData = newCurve->maxXData;
+   lastCurve.minYData = newCurve->minYData;
+   lastCurve.maxYData = newCurve->maxYData;
 }
 
 void Plotter::constructCurveData(Curve *newCurve, QVector <double> &yData, bool parentHold)
@@ -808,6 +805,8 @@ void Plotter::constructCurveData(Curve *newCurve, QVector <double> &yData, bool 
       {
          newCurve->yData[i] = yData[i] + lastCurve.yData[i];
       }
+      newCurve->stats();
+      copyCurve(newCurve);
    }
    else
    {
@@ -815,8 +814,12 @@ void Plotter::constructCurveData(Curve *newCurve, QVector <double> &yData, bool 
       {
          newCurve->yData[i] = yData[i];
       }
+      newCurve->stats();
+      if (!pixelAddition)
+      {
+         copyCurve(newCurve);
+      }
    }
-   newCurve->stats();
 }
 
 void Plotter::addCurveData(QVector <double> &yData, bool parentHold)
@@ -833,7 +836,7 @@ void Plotter::addCurveData(QVector <double> &yData, bool parentHold)
    constructCurveData(newCurve, yData, parentHold);
 
    newCurve->setHold(parentHold);
-   copyLastCurve();
+//   copyLastCurve();
    tidyCurves();
    autoSetCurveColors(newCurve);
    curve.push_back(newCurve);
@@ -870,8 +873,7 @@ void Plotter::addCurveData(QVector <double> &xData, QVector <double> &yData, boo
    constructCurveData(newCurve, yData, parentHold);
 
    newCurve->setHold(parentHold);
-
-   copyLastCurve();
+//   copyLastCurve();
    tidyCurves();
    autoSetCurveColors(newCurve);
    curve.push_back(newCurve);
@@ -911,6 +913,7 @@ void Plotter::addCurveData(QVector <double> &xData, QVector <double> &yData,
    constructCurveData(newCurve, yData, parentHold);
    newCurve->setHold(parentHold);
 
+//   copyLastCurve();
    tidyCurves();
    autoSetCurveColors(newCurve);
    newCurve->legends(imageName, p, color);
@@ -1170,7 +1173,7 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
 
    if (wasDoubleClicked && !isHeld() && !MainViewer::instance()->isHeld())
    {
-      copyLastCurve();
+//      copyLastCurve();
       clearPlot();
    }
 

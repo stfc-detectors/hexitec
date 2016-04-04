@@ -1,6 +1,5 @@
 #include "pixelmanipulationform.h"
 #include "ui_pixelmanipulationform.h"
-#include <QDebug>
 
 PixelManipulationForm::PixelManipulationForm(QWidget *parent) :
    QWidget(parent),
@@ -34,16 +33,6 @@ void PixelManipulationForm::updatePixelList(QString newPixel)
 
 void PixelManipulationForm::pixelAdditionClicked(bool pixelAdditionOn)
 {
-   if (pixelAdditionOn)
-   {
-      qDebug() <<"PixelManipulationForm::pixelAdditionClicked: ON";
-//      emit executeCommand(HV::HVON);
-   }
-   else
-   {
-      qDebug() <<"PixelManipulationForm::pixelAdditionClicked: OFF";
-//      emit executeCommand(HV::HVOFF);
-   }
    emit pixelAdditionChanged(pixelAdditionOn);
 }
 

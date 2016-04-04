@@ -100,7 +100,7 @@ signals:
    void setTargetTemperature(double targetTemperature);
    void appendTimestamp(bool appendTimestamp);
    void imageComplete(unsigned long long totalFramesAcquired);
-   void imageStarting(double daqCollectionDuration);
+   void imageStarting(double daqCollectionDuration, int repeatCount, int nRepeat);
 
 public slots:
    void handleAbortDAQ();

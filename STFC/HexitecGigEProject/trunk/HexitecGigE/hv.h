@@ -2,7 +2,6 @@
 #define HV_H
 
 #include <QObject>
-#include <QDebug>
 #include <QTimer>
 #include "inifile.h"
 #include "reservable.h"

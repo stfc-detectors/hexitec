@@ -137,8 +137,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorMonitor, SLOT(disableMonitoring()));
    connect(dataAcquisition, SIGNAL(imageComplete(unsigned long long)),
            ProcessingWindow::getHxtProcessor(), SLOT(pushImageComplete(unsigned long long)));
-   connect(dataAcquisition, SIGNAL(imageStarting(double)),
-           progressForm, SLOT(handleImageStarting(double)));
+   connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
+           progressForm, SLOT(handleImageStarting(double, int, int)));
 
 }
 

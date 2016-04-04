@@ -125,7 +125,7 @@ private:
    static bool bEnableIpCorrector;
    static bool bEnableMomCorrector;
    static bool bEnableDbPxlsCorrector;
-   static bool bWriteCsvFiles;
+//   static bool bWriteCsvFiles;
    static bool bEnableVector;
    static bool bEnableDebugFrame;
    /// [End]
@@ -152,6 +152,7 @@ signals:
    void updateProcessingConditionSignal(processingCondition newCondition);
    void updateProcessingVeto(bool bVeto);
    void removeUnprocessedFiles(bool bRemoveFiles);
+   void customFileSelected(bool bCustom);
 
 protected slots:
    void outputContextMenuEvent(QPoint point);
@@ -185,10 +186,10 @@ private slots:
    void gradientsBrowseButtonPressed();
    void interceptsBrowseButtonPressed();
    void globalThresholdBrowseButtonPressed();
-   void momentumPathLineEditChanged(QString momentumFile);
-   void gradientsPathLineEditChanged(QString gradientsFile);
-   void interceptsPathLineEditChanged(QString interceptsFile);
-   void globalThresholdPathLineEditChanged(QString globalThresholdFile);
+   void momentumPathLineEditChanged(const QString &momentumFile);
+   void gradientsPathLineEditChanged(const QString &gradientsFile);
+   void interceptsPathLineEditChanged(const QString &interceptsFile);
+   void globalThresholdPathLineEditChanged(const QString &globalThresholdFile);
    void startBinLineEditChanged(QString aString);
    void endBinLineEditChanged(QString aString);
    void binWidthLineEditChanged(QString aString);

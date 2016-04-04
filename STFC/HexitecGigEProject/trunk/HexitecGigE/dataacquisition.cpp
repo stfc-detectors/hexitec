@@ -232,7 +232,7 @@ void DataAcquisition::performContinuousDataCollection()
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
-      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000);
+      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);
       performMonitorEnvironmentalValues();
 
       for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)

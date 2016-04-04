@@ -21,14 +21,13 @@ QMainWindow *ProgressForm::getMainWindow()
    return mainWindow;
 }
 
-void ProgressForm::handleImageStarting(double daqCollectionTime)
+void ProgressForm::handleImageStarting(double daqCollectionTime, int repeatCount, int nRepeat)
 {
    this->daqCollectionTime = daqCollectionTime;
-   collectionTime = 0.0;
-   remainingTime = daqCollectionTime;
+   collectionTime = (daqCollectionTime/(double) nRepeat) * (double)repeatCount;
+   remainingTime = daqCollectionTime - (daqCollectionTime/(double)nRepeat) * (double)repeatCount;
 
    ui->daqTimeFormattedLabel->setText(formattedTime(daqCollectionTime));
-//   ui->daqTimeSecsLabel->setText("Seconds:" + QString::number(daqCollectionTime));
 
    updateTimes();
 }

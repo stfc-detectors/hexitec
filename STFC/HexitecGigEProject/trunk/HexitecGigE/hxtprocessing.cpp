@@ -245,9 +245,9 @@ void HxtProcessing::prepSettings()
                                                                  mFilePrefix, mDataTimeStamp, mEnableCallback);
 
     /// DEBUGGING frame by frame [redundant later on]
-    dataProcessor->setDebugFrameDir("U:/BInMe/debug_frames/");
-    // Disable this for now..
-    dataProcessor->setEnableDebugFrame(false);
+    //dataProcessor->setDebugFrameDir("U:/BInMe/debug_frames/");
+    //// Disable this for now..
+    //dataProcessor->setEnableDebugFrame(true);   /// ENABLED, for now - Testing time
 
     // If Motor Positions not selected, pass dummy values as Motor Positions
     if (!bMotorEnabled)
@@ -266,8 +266,8 @@ void HxtProcessing::prepSettings()
     dataProcessor->setVector(mEnableVector);
 
     //  Enable debug frames - each frame written to file before/after being processed
-    dataProcessor->setDebugFrameDir(mDebugFrameDir);
-    dataProcessor->setEnableDebugFrame(mEnableDebugFrame);
+//    dataProcessor->setDebugFrameDir(mDebugFrameDir);
+//    dataProcessor->setEnableDebugFrame(mEnableDebugFrame);
 
     // Set debug flags if debug level non-zero
     if (mDebugLevel) dataProcessor->setDebug(true);
@@ -652,6 +652,8 @@ void HxtProcessing::run()
         // Did the user select Raw file(s) to be processed manually?
         if (bManualProcessingEnabled)
         {
+            // Ensure custom filename (if user selected it)
+            bCustomFile = bCustomFileNameSelected;
             performManualProcessing();
         }
         else
@@ -891,7 +893,7 @@ string HxtProcessing::deduceNewHxtFileName(string fileName)
             string absolutePathNoTimestamp = fileName.substr(0, fileExtension);
 
             string newCompleteFileName = absolutePathNoTimestamp + dFinishedString + ".hxt";
-            qDebug() << "   Our candidates new file name: " << newCompleteFileName.c_str() << " (original file had no timestamp, but this one does)";
+            //qDebug() << "   Our candidates new file name: " << newCompleteFileName.c_str() << " (original file had no timestamp, but this one does)";
             return newCompleteFileName;
             /// -----
         }
@@ -945,15 +947,19 @@ bool HxtProcessing::performManualProcessing()
                 string newFile = fileQueue.dequeue();
 //                qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
                 mRawFileNames.push_back(newFile);
-                /// Grab file name of first file & use as .HXT filename
+                /// Grab file name of first file & use as .HXT filename - BUT ONLY if custom filename NOT selected
+                if (!bCustomFileNameSelected)
+                {
                 if (bUpdateFileName)
                 {
                     size_t fileExtensionPosn = newFile.find(".bin");
                     string fileNameWithoutExtension = newFile.substr( 0, fileExtensionPosn);
                     string fileNameWithHxt          = fileNameWithoutExtension + ".hxt";
+                        //qDebug() << ":: performManualProcessing9) hanging mOutputFailNameDecodedFrame: " << fileNameWithHxt.c_str();
                     mOutputFileNameDecodedFrame     = fileNameWithHxt;
                     bUpdateFileName = false;
                 }
+            }
             }
             fileMutex.unlock();
             // All Files to be manually processed dequeued: process them, signal gui when completed
@@ -1549,6 +1555,11 @@ void HxtProcessing::removeFiles(bool bRemoveFiles)
 void HxtProcessing::handleHxtProcessingPrepSettings()
 {
     prepSettings();
+}
+
+void HxtProcessing::customFileSelected(bool bCustom)
+{
+    bCustomFileNameSelected = bCustom;
 }
 
 void HxtProcessing::handleDataAcquisitionStatusChanged(DataAcquisitionStatus status)

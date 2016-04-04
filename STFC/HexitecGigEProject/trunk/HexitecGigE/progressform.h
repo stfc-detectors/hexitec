@@ -31,7 +31,7 @@ private:
    void updateTimes();
 
 public slots:
-   void handleImageStarting(double daqCollectionTime);
+   void handleImageStarting(double daqCollectionTime, int repeatCount, int nRepeat);
    void handleUpdateProgress(double progressTime);
 };
 

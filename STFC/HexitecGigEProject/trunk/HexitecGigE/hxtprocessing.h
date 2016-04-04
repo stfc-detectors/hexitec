@@ -101,7 +101,7 @@ public:
     void setEnableIpCorrector(bool aEnableIpCorrector) { mEnableIpCorrector = aEnableIpCorrector; }
     void setEnableDbPxlsCorrector(bool aEnableDbPxlsCorrector) { mEnableDbPxlsCorrector = aEnableDbPxlsCorrector; }
 
-    void setWriteCsvFiles(bool aWriteCsvFiles) { mWriteCsvFiles = aWriteCsvFiles; }
+//    void setWriteCsvFiles(bool aWriteCsvFiles) { mWriteCsvFiles = aWriteCsvFiles; }
     void setEnableVector(bool aEnableVector) { mEnableVector = aEnableVector; }
     void setEnableDebugFrame(bool aEnableDebugFrame) { mEnableDebugFrame = aEnableDebugFrame; }
 
@@ -157,6 +157,7 @@ private slots:
     void pushImageComplete(unsigned long long framesAcquired);
     // Update any config changes to HxtProcessing object
     void handleHxtProcessingPrepSettings();
+    void customFileSelected(bool bCustom);
 
 protected:
     // Go through fileQueue looking for any motor position changes
@@ -178,6 +179,8 @@ protected:
     float mTimeSinceLastDiscOp;
     string deduceNewHxtFileName(string fileName);
     string createDataTimeStampString();
+    bool bCustomFileNameSelected;           // Bool used internally, track whether custom filename selected
+    bool bCustomFile;                       // Bool used by external signalling
     ///     ------  Moving stuff away from executeProcessing that need not be repeated ----- ///
     HxtPixelThreshold* pixelThreshold;
     HxtRawDataProcessor* dataProcessor;

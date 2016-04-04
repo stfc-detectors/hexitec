@@ -38,7 +38,7 @@ bool ProcessingWindow::bEnableIdCorrector;
 bool ProcessingWindow::bEnableIpCorrector;
 bool ProcessingWindow::bEnableMomCorrector;
 bool ProcessingWindow::bEnableDbPxlsCorrector;
-bool ProcessingWindow::bWriteCsvFiles;
+//bool ProcessingWindow::bWriteCsvFiles;
 bool ProcessingWindow::bEnableVector;
 bool ProcessingWindow::bEnableDebugFrame;
 
@@ -70,6 +70,17 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
               HxtProcessor, SLOT(changeProcessingCondition(processingCondition)));
       connect(processingWindowInstance, SIGNAL(updateProcessingVeto(bool)), HxtProcessor, SLOT(processingVetoed(bool)));
       connect(processingWindowInstance, SIGNAL(removeUnprocessedFiles(bool)), HxtProcessor, SLOT(removeFiles(bool)));
+      connect(processingWindowInstance, SIGNAL(customFileSelected(bool)), HxtProcessor, SLOT(customFileSelected(bool)));
+
+      /// Bugfix, if user clears gradients/intercepts/momentum/threshold then associated HxtProcessor setting is cleared
+      connect(processingWindowInstance->ui->gradientsPathLineEdit, SIGNAL(textChanged(const QString &)),
+              processingWindowInstance, SLOT(gradientsPathLineEditChanged(const QString &)));
+      connect(processingWindowInstance->ui->globalThresholdPathLineEdit, SIGNAL(textChanged(const QString &)),
+              processingWindowInstance, SLOT(globalThresholdPathLineEditChanged(const QString &)));
+      connect(processingWindowInstance->ui->interceptsPathLineEdit, SIGNAL(textChanged(const QString &)),
+              processingWindowInstance, SLOT(interceptsPathLineEditChanged(const QString &)));
+      connect(processingWindowInstance->ui->momentumPathLineEdit, SIGNAL(textChanged(const QString &)),
+              processingWindowInstance, SLOT(momentumPathLineEditChanged(const QString &)));
 
       connect(HxtProcessor,                         SIGNAL(hexitechRunning(bool)),
               reinterpret_cast<const QObject*>(mw), SLOT(updateHexitechProcessingStatus(bool)) );
@@ -606,6 +617,8 @@ void ProcessingWindow::customCheckBoxToggled(bool isChecked)
     ///     if one is enabled, disable the other
 
     bCustomChecked = isChecked;
+    /// HexitecGigE Addition; Signal to HexitecGigE/HxtProcessing status of custom file selection
+    customFileSelected(bCustomChecked);
 
     // If selected, enable option to set/save custom filename
     //      and save default filenames
@@ -674,7 +687,6 @@ void ProcessingWindow::calibrationComboBoxChanged(QString aString)
         calibString = "None";
         // Rename Spectrum Options' unit labels to read ADU
         changeSpectrumOptionsUnitLabels("ADU");
-//        qDebug() << "calibrationCBC - Selection: " <<  aString << ". Have updated BEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
     }
     else if (aString.toStdString() == calibrationOptions.at(1).toStdString())
     {
@@ -684,7 +696,6 @@ void ProcessingWindow::calibrationComboBoxChanged(QString aString)
         calibString = "Energy";
         // Rename Spectrum Options' unit labels to read KeV
         changeSpectrumOptionsUnitLabels("KeV");
-//        qDebug() << "calibrationCBC - Selection: " <<  aString << ". Have updated BEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
     }
     else
     {
@@ -694,7 +705,6 @@ void ProcessingWindow::calibrationComboBoxChanged(QString aString)
         calibString = "Momentum";
         // Rename Spectrum Options' unit labels to read nm^-1
         changeSpectrumOptionsUnitLabels("nm^-1");
-//        qDebug() << "calibrationCBC - Selection: " <<  aString << ". Have updated BEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
     }
     // Update ini file and processing object
     hexitechIniFile->setParameter("Processing/Calibration", QVariant(calibString));
@@ -720,18 +730,15 @@ void ProcessingWindow::reloadSpectrumOptionsDefaultValues()
         iHistoStartVal   = hexitechIniFile->getInt("Processing/StartNM");
         iHistoEndVal     = hexitechIniFile->getInt("Processing/EndNM");
         dHistoBins       = hexitechIniFile->getDouble("Processing/BinWidthNM");
-//        qDebug() << "reloadSpectrumOptionsDefaultValues() selected Momentum";
     }
     else
     {
         /// Because Momentum Calibration includes Energy Calibration, only look for KeV units if Momentum disabled
-//        qDebug() << "reloadSpectrumOptionsDefaultValues() DIDN'T select Momentum";
         if (bEnableCabCorrector)
         {
             iHistoStartVal   = hexitechIniFile->getInt("Processing/StartKEV");
             iHistoEndVal     = hexitechIniFile->getInt("Processing/EndKEV");
             dHistoBins       = hexitechIniFile->getDouble("Processing/BinWidthKEV");
-//            qDebug() << "reloadSpectrumOptionsDefaultValues() selected Energy (Only)";
         }
         else
         {
@@ -739,7 +746,6 @@ void ProcessingWindow::reloadSpectrumOptionsDefaultValues()
             iHistoStartVal   = hexitechIniFile->getInt("Processing/StartADU");
             iHistoEndVal     = hexitechIniFile->getInt("Processing/EndADU");
             dHistoBins       = hexitechIniFile->getDouble("Processing/BinWidthADU");
-//            qDebug() << "reloadSpectrumOptionsDefaultValues() selected  No (Calibration), therefor ADU units";
         }
     }
     // Global threshold always in ADU though:
@@ -856,15 +862,21 @@ void ProcessingWindow::momentumBrowseButtonPressed()
 
    QString newMomentumFilename = QFileDialog::getOpenFileName(this, tr("Open Momentum Values File"), currentDirectory,
                                                                tr("Momentum Values Files (*.txt)") );
-   // New filename selected?
-   if (!newMomentumFilename.toStdString().empty())
-   {
-       // Update GUI and HxtProcessing settings
        emit momentumPathLineEditChanged(newMomentumFilename);
    }
-}
 
-void ProcessingWindow::momentumPathLineEditChanged(QString momentumFile)
+void ProcessingWindow::momentumPathLineEditChanged(const QString &momentumFile)
+{
+    if (momentumFile.toStdString().empty())
+    {
+        // File empty, clear correspondence setting within HxtProcessing
+        sMomentumFile = momentumFile.toStdString();
+        HxtProcessor->setMomentumFile(sMomentumFile);
+        // Check whether momentum specified, if yes warn user momentum file required
+        if (ui->calibrationComboBox->currentText()  == calibrationOptions.at(2))
+            handleWriteMessage("Warning: \"Momentum File\" cleared but required when Momentum Calibration selected");
+}
+    else
 {
     /// Use new momentum file name if it exists
     if (fileExists(momentumFile.toStdString().c_str()))
@@ -875,7 +887,8 @@ void ProcessingWindow::momentumPathLineEditChanged(QString momentumFile)
         // Need not call hexitechIniFile->setParameter() - saveSettingsButton handles this
     }
     else
-        handleWriteError("Error: Invalid filename specified for \"Momentum File\"");
+            handleWriteError("Error: \"Momentum File\" specified file doesn't exist");
+    }
 }
 
 void ProcessingWindow::globalThresholdBrowseButtonPressed()
@@ -885,15 +898,18 @@ void ProcessingWindow::globalThresholdBrowseButtonPressed()
 
    QString newGlobalThresholdFilename = QFileDialog::getOpenFileName(this, tr("Open Global Threshold Values File"), currentDirectory,
                                                                tr("Global Threshold Values Files (*.txt)") );
-   // New filename selected?
-   if (!newGlobalThresholdFilename.toStdString().empty())
-   {
-       // Update GUI and HxtProcessing settings
        emit globalThresholdPathLineEditChanged(newGlobalThresholdFilename);
    }
-}
 
-void ProcessingWindow::globalThresholdPathLineEditChanged(QString globalThresholdFile)
+void ProcessingWindow::globalThresholdPathLineEditChanged(const QString &globalThresholdFile)
+{
+    if (globalThresholdFile.toStdString().empty())
+    {
+        // File empty, clear corresponding setting within HxtProcessing
+        sThresholdFileName = globalThresholdFile.toStdString();
+        HxtProcessor->setThresholdFileName(sThresholdFileName);
+}
+    else
 {
     /// Use new globalThreshold file name if it exists
     if (fileExists(globalThresholdFile.toStdString().c_str()))
@@ -904,7 +920,8 @@ void ProcessingWindow::globalThresholdPathLineEditChanged(QString globalThreshol
         // Need not call hexitechIniFile->setParameter() - saveSettingsButton handles this
     }
     else
-        handleWriteError("Error: Invalid filename specified for \"Global Threshold File\"");
+            handleWriteError("Error: \"Global Threshold File\" specified file doesn't exist");
+    }
 }
 
 void ProcessingWindow::gradientsBrowseButtonPressed()
@@ -914,15 +931,19 @@ void ProcessingWindow::gradientsBrowseButtonPressed()
 
    QString newGradientsFilename = QFileDialog::getOpenFileName(this, tr("Open Gradients Values File"), currentDirectory,
                                                                tr("Gradients Values Files (*.txt)") );
-   // New filename selected?
-   if (!newGradientsFilename.toStdString().empty())
-   {
-       // Update GUI and HxtProcessing settings
        emit gradientsPathLineEditChanged(newGradientsFilename);
    }
-}
 
-void ProcessingWindow::gradientsPathLineEditChanged(QString gradientsFile)
+void ProcessingWindow::gradientsPathLineEditChanged(const QString &gradientsFile)
+{
+    if (gradientsFile.toStdString().empty())
+    {
+        sGradientsFile = gradientsFile.toStdString();
+        HxtProcessor->setGradientsFile(sGradientsFile);
+        if (ui->calibrationComboBox->currentText() == calibrationOptions.at(1))
+            handleWriteMessage("Warning: \"Gradients File\" cleared but required when Energy Calibration selected");
+}
+    else
 {
     /// Use new gradients file name if it exists
     if (fileExists(gradientsFile.toStdString().c_str()))
@@ -933,7 +954,8 @@ void ProcessingWindow::gradientsPathLineEditChanged(QString gradientsFile)
         // Need not call hexitechIniFile->setParameter() - saveSettingsButton handles this
     }
     else
-        handleWriteError("Error: Invalid filename specified for \"Gradients File\"");
+            handleWriteError("Error: \"Gradients File\" specified file doesn't exist");
+    }
 }
 
 void ProcessingWindow::interceptsBrowseButtonPressed()
@@ -943,15 +965,19 @@ void ProcessingWindow::interceptsBrowseButtonPressed()
 
     QString newInterceptsFilename = QFileDialog::getOpenFileName(this, tr("Open Intercepts Values File"), currentDirectory,
                                                                  tr("Intercepts Values Files (*.txt)") );
-    // New filename selected?
-    if (!newInterceptsFilename.toStdString().empty())
-    {
-        // Update GUI and HxtProcessing settings
         emit interceptsPathLineEditChanged(newInterceptsFilename);
     }
-}
 
-void ProcessingWindow::interceptsPathLineEditChanged(QString interceptsFile)
+void ProcessingWindow::interceptsPathLineEditChanged(const QString &interceptsFile)
+{
+    if (interceptsFile.toStdString().empty())
+    {
+        sInterceptsFile = interceptsFile.toStdString();
+        HxtProcessor->setInterceptsFile(sInterceptsFile);
+        if (ui->calibrationComboBox->currentText() == calibrationOptions.at(1))
+            handleWriteMessage("Warning: \"Intercepts File\" cleared but required when Energy Calibration selected");
+}
+    else
 {
     /// Use new intercepts filename if it exists
     if (fileExists(interceptsFile.toStdString().c_str()))
@@ -962,7 +988,8 @@ void ProcessingWindow::interceptsPathLineEditChanged(QString interceptsFile)
         // Need not call hexitechIniFile->setParameter() - saveSettingsButton handles this
     }
     else
-        handleWriteError("Error: Invalid filename specified for \"Intercepts File\"");
+            handleWriteError("Error: \"Intercepts File\" specified file doesn't exist");
+    }
 }
 
 void ProcessingWindow::startBinLineEditChanged(QString aString)
@@ -974,12 +1001,17 @@ void ProcessingWindow::startBinLineEditChanged(QString aString)
     if (errorOk)
     {
         iHistoStartVal = newStartBin;
-        // Is it KeV or ADU?
+        // Is it KeV, NM or ADU?
         QString unit = ui->startUnitLabel->text();
         if (areStringsEqual(unit, "KeV"))
             hexitechIniFile->setParameter("Processing/StartKEV", QVariant(iHistoStartVal));
-        else
+        else if (areStringsEqual(unit, "nm^-1"))
+            hexitechIniFile->setParameter("Processing/StartNM", QVariant(iHistoStartVal));
+        else  if (areStringsEqual(unit, "ADU"))
             hexitechIniFile->setParameter("Processing/StartADU", QVariant(iHistoStartVal));
+        else
+            handleWriteError(QString("Error: Bin Start unrecognised unit type: %1").arg(unit));
+
         // Set new Histogram start value
         HxtProcessor->setHistoStartVal(iHistoStartVal);
     }
@@ -996,12 +1028,16 @@ void ProcessingWindow::endBinLineEditChanged(QString aString)
     if (errorOk)
     {
         iHistoEndVal = newEndBin;
-        // Is it KeV or ADU?
+        // Is it KeV, NM or ADU?
         QString unit = ui->endUnitLabel->text();
         if (areStringsEqual(unit, "KeV"))
             hexitechIniFile->setParameter("Processing/EndKEV", QVariant(iHistoEndVal));
-        else
+        else if (areStringsEqual(unit, "nm^-1"))
+            hexitechIniFile->setParameter("Processing/EndNM", QVariant(iHistoEndVal));
+        else  if (areStringsEqual(unit, "ADU"))
             hexitechIniFile->setParameter("Processing/EndADU", QVariant(iHistoEndVal));
+        else
+            handleWriteError(QString("Error: Bin End unrecognised unit type: %1").arg(unit));
         // Set new Histogram end value
         HxtProcessor->setHistoEndVal(iHistoEndVal);
     }
@@ -1018,12 +1054,16 @@ void ProcessingWindow::binWidthLineEditChanged(QString aString)
     if (errorOk)
     {
         dHistoBins = newBinWidth;
-        // Is it KeV or ADU?
+        // Is it KeV, NM or ADU?
         QString unit = ui->binUnitLabel->text();
         if (areStringsEqual(unit, "KeV"))
             hexitechIniFile->setParameter("Processing/BinWidthKEV", QVariant(dHistoBins));
-        else
+        else if (areStringsEqual(unit, "nm^-1"))
+            hexitechIniFile->setParameter("Processing/BinWidthNM", QVariant(dHistoBins));
+        else  if (areStringsEqual(unit, "ADU"))
             hexitechIniFile->setParameter("Processing/BinWidthADU", QVariant(dHistoBins));
+        else
+            handleWriteError(QString("Error: Bin Width unrecognised unit type: %1").arg(unit));
         /// Bin width is not number of bins ! See function updateNumberOfBins()
     }
     else
@@ -1093,10 +1133,6 @@ void ProcessingWindow::changeSpectrumOptionsUnitLabels(QString newUnit)
 
 void ProcessingWindow::loadSettingsButtonPressed()
 {
-//    qDebug() << "StartNM: " <<  hexitechIniFile->getInt("Processing/StartNM");
-//    qDebug() << "EndNM:   " << hexitechIniFile->getInt("Processing/EndNM");
-//    qDebug() << "BinWith: " <<  hexitechIniFile->getDouble("Processing/BinWidthNM");
-
     /// Reload file setting into memory when button is pressed
 
     // Check that hexitechFilename actually exists
@@ -1209,14 +1245,12 @@ void ProcessingWindow::loadSettingsButtonPressed()
         // File entry valid; is file entry "None"?
         if ( areStringsEqual(fileCalibrationCorrection, "None"))
         {
-//            qDebug() << "Calibration = None";
             // File entry is "None"; set Booleans correspondingly
             //  (both initialised to false so need not change them here)
 
             // If GUI's settings doesn't both match File's settings, update GUI's settings
             if ( (bEnableMomCorrector != bFileMom) || (bEnableCabCorrector != bFileCab))
             {
-//                qDebug() << "            Setting both correct is to false.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
                 bEnableMomCorrector = false;
                 bEnableCabCorrector = false;
                 ui->calibrationComboBox->setCurrentText(fileCalibrationCorrection);
@@ -1226,14 +1260,12 @@ void ProcessingWindow::loadSettingsButtonPressed()
         }
         else if ( areStringsEqual(fileCalibrationCorrection, "Energy"))
         {
-//            qDebug() << "Calibration = Energy";
             // File entry is "Energy" - set Booleans correspondingly
             bFileMom = false;
             bFileCab = true;
             // If GUI's settings doesn't both match File's settings, update GUI's settings
             if ( (bEnableMomCorrector != bFileMom) || (bEnableCabCorrector != bFileCab))
             {
-                qDebug() << "            Setting Momentum: false; Calibration: true.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
                 bEnableMomCorrector = false;
                 bEnableCabCorrector = true;
                 ui->calibrationComboBox->setCurrentText(fileCalibrationCorrection);
@@ -1243,14 +1275,12 @@ void ProcessingWindow::loadSettingsButtonPressed()
         }
         else if ( areStringsEqual(fileCalibrationCorrection, "Momentum"))
         {
-            qDebug() << "Calibration = Momentum";
             // File entry is "Momentum" - set Booleans correspondingly
             bFileMom = true;
             bFileCab = true;    //false;
             // If GUI's settings doesn't both match File's settings, update GUI's settings
             if ( (bEnableMomCorrector != bFileMom) || (bEnableCabCorrector != bFileCab))
             {
-//                qDebug() << "            Setting both corrector to true.  They were bEnableMomentum: " << bEnableMomCorrector << " bEnableCalibration: " << bEnableCabCorrector;
                 bEnableMomCorrector = true;
                 bEnableCabCorrector = true; //false;
                 ui->calibrationComboBox->setCurrentText(fileCalibrationCorrection);
@@ -1520,26 +1550,26 @@ void ProcessingWindow::loadSettingsButtonPressed()
             handleWriteError(QString("File entry: %1 contains invalid value: \"%2\".").arg("SubpixelFrameFilename", fileSubpixelFilename));
     }
 
-    QString fileHistogramFiles = hexitechIniFile->getString("Processing/DiagnosticHistogramCSVFiles");
-    // Check that file entry is valid
-    if (sanityCheckQString(trueFalseOptions, fileHistogramFiles))
-    {
-        // File entry valid; Is file entry different from GUI's?
-        bool bFileHistogramFilesEnabled = areStringsEqual(fileHistogramFiles, "TRUE");
-        if (bWriteCsvFiles != bFileHistogramFilesEnabled)
-        {
-            // File setting differs from GUI's - Update GUI
-            bWriteCsvFiles = bFileHistogramFilesEnabled;
-            if (bFileHistogramFilesEnabled)
-                if (!bSuppressLoadSettingsInfo)
-                    handleWriteMessage("Enabled CSV Histogram Files.");
-            else
-                if (!bSuppressLoadSettingsInfo)
-                    handleWriteMessage("Disabled CSV Histogram Files.");
-        }
-    }
-    else
-        handleWriteError(QString("File entry: %1 contains invalid value: \"%2\"").arg("DiagnosticHistogramCSVFiles", fileHistogramFiles));
+//    QString fileHistogramFiles = hexitechIniFile->getString("Processing/DiagnosticHistogramCSVFiles");
+//    // Check that file entry is valid
+//    if (sanityCheckQString(trueFalseOptions, fileHistogramFiles))
+//    {
+//        // File entry valid; Is file entry different from GUI's?
+//        bool bFileHistogramFilesEnabled = areStringsEqual(fileHistogramFiles, "TRUE");
+//        if (bWriteCsvFiles != bFileHistogramFilesEnabled)
+//        {
+//            // File setting differs from GUI's - Update GUI
+//            bWriteCsvFiles = bFileHistogramFilesEnabled;
+//            if (bFileHistogramFilesEnabled)
+//                if (!bSuppressLoadSettingsInfo)
+//                    handleWriteMessage("Enabled CSV Histogram Files.");
+//            else
+//                if (!bSuppressLoadSettingsInfo)
+//                    handleWriteMessage("Disabled CSV Histogram Files.");
+//        }
+//    }
+//    else
+//        handleWriteError(QString("File entry: %1 contains invalid value: \"%2\"").arg("DiagnosticHistogramCSVFiles", fileHistogramFiles));
 
     QString fileVector = hexitechIniFile->getString("Processing/VectorIndexing");
     // Check that file entry is valid
@@ -1570,7 +1600,6 @@ void ProcessingWindow::loadSettingsButtonPressed()
     configHexitechSettings();
 
     /// Grab the DiscWritingInterval variable from ini file
-//    qDebug() << "DiscWritingInterval: " << hexitechIniFile->getDouble("Processing/DiscWritingInterval");
     dDiscWritingInterval = hexitechIniFile->getDouble("Processing/DiscWritingInterval");
     if (dDiscWritingInterval != -1) HxtProcessor->setDiscWritingInterval(dDiscWritingInterval);
 
@@ -1721,15 +1750,13 @@ void ProcessingWindow::initHexitechProcessor()
     bEnableIpCorrector           = false;
     bEnableMomCorrector          = false;
     bEnableDbPxlsCorrector       = false;
-    bWriteCsvFiles               = false;
+//    bWriteCsvFiles               = false;
     bEnableVector                = false;
     bEnableDebugFrame            = false;
 }
 
 void ProcessingWindow::configHexitechSettings()
 {
-//    qDebug() << " *** ProcessingWindow::confighexitechSettings() called !";
-
     /// Configure Hexitech with user's settings
     HxtProcessor->setDebugLevel( iDebugLevel);
     HxtProcessor->setHistoStartVal( iHistoStartVal);
@@ -1739,7 +1766,6 @@ void ProcessingWindow::configHexitechSettings()
     HxtProcessor->setGlobalThreshold( dGlobalThreshold);
     HxtProcessor->setDiscWritingInterval( dDiscWritingInterval);
     HxtProcessor->setThresholdFileName( sThresholdFileName);
-//    qDebug() << "                  configHexitechSettings(), sOutputFileNameDecodedFrame = " << sOutputFileNameDecodedFrame.c_str();
     HxtProcessor->setOutputFileNameDecodedFrame( sOutputFileNameDecodedFrame);
     HxtProcessor->setOutputFileNameSubPixelFrame( sOutputFileNameSubPixelFrame);
     HxtProcessor->setGradientsFile( sGradientsFile);
@@ -1752,7 +1778,7 @@ void ProcessingWindow::configHexitechSettings()
     HxtProcessor->setEnableIdCorrector( bEnableIdCorrector);
     HxtProcessor->setEnableIpCorrector( bEnableIpCorrector);
     HxtProcessor->setEnableDbPxlsCorrector( bEnableDbPxlsCorrector);
-    HxtProcessor->setWriteCsvFiles( bWriteCsvFiles);
+//    HxtProcessor->setWriteCsvFiles( bWriteCsvFiles);
     HxtProcessor->setEnableVector( bEnableVector);
     HxtProcessor->setEnableDebugFrame( bEnableDebugFrame);
 }
