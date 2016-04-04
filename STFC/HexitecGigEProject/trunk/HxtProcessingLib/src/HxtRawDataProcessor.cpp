@@ -895,9 +895,10 @@ bool HxtRawDataProcessor::flushFrames(void) {
                 LOG(gLogConfig, logINFO) << "Case A: " << setw(11) << (*correctorIterator)->getCaseA();
                 LOG(gLogConfig, logINFO) << "Case B: " << setw(11) << (*correctorIterator)->getCaseB();
                 LOG(gLogConfig, logINFO) << "Case C: " << setw(11) << (*correctorIterator)->getCaseC();
+                LOG(gLogConfig, logINFO) << "Case T: " << setw(11) << (*correctorIterator)->getCaseT();
                 LOG(gLogConfig, logINFO) << "Case D: " << setw(11) << (*correctorIterator)->getCaseD();
                 LOG(gLogConfig, logINFO) << "Total : " << setw(11) << (*correctorIterator)->getCaseA() + (*correctorIterator)->getCaseB() +
-                    (*correctorIterator)->getCaseC() + (*correctorIterator)->getCaseD();
+                    (*correctorIterator)->getCaseC() + (*correctorIterator)->getCaseD() + (*correctorIterator)->getCaseT();
             }
         }
     }

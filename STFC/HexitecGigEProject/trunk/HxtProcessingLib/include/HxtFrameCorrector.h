@@ -19,7 +19,7 @@ namespace hexitech {
 
 class HxtFrameCorrector {
 public:
-	HxtFrameCorrector(string aName) : mDebug(false), mEventsCorrected(0),  mName(aName), mCaseA(0), mCaseB(0), mCaseC(0), mCaseD(0)
+    HxtFrameCorrector(string aName) : mDebug(false), mEventsCorrected(0),  mName(aName), mCaseA(0), mCaseB(0), mCaseC(0), mCaseD(0), mCaseTriplett(0)
 									{ } ;
 	virtual ~HxtFrameCorrector() { } ;
 
@@ -46,7 +46,7 @@ public:
 	virtual unsigned long long getCaseB() {	return mCaseB; }
 	virtual unsigned long long getCaseC() {	return mCaseC; }
 	virtual unsigned long long getCaseD() {	return mCaseD; }
-
+    virtual unsigned long long getCaseT() { return mCaseTriplett; }
 protected:
 	bool mDebug;
 	unsigned int mEventsCorrected;
@@ -57,6 +57,7 @@ protected:
 	unsigned long long mCaseB;
 	unsigned long long mCaseC;
 	unsigned long long mCaseD;
+    unsigned long long mCaseTriplett;
 
 private:
 	string mName;

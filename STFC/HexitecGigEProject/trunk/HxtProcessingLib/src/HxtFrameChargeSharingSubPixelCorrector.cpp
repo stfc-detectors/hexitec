@@ -7,8 +7,6 @@
  * e.g. 2x2: becomes 2x2:
  *   50 20			100 0
  *   20 10			  0 0
- * It then creates a 3x3 matrix for each  original pixel, i.e. a
- * 240x240 matrix
  *
  *  Created on: 13 Feb 12
  *      Author: ckd
@@ -28,6 +26,8 @@ HxtFrameChargeSharingSubPixelCorrector::HxtFrameChargeSharingSubPixelCorrector()
 																			mLastFrameProcessed(0)																			
 {
 	// Nothing to do
+    /// DEBUGGING:
+    bDebug = false;
 }
 
 HxtFrameChargeSharingSubPixelCorrector::~HxtFrameChargeSharingSubPixelCorrector() {
@@ -87,34 +87,55 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 	// Note frame number of the frame being processed
 	mLastFrameProcessed = lastFrameIdx;
 
+    /// DEBUGGING:
+    if (bDebug) cout << " mLastFrameProcessed: " << mLastFrameProcessed  << endl;
+//    if (mLastFrameProcessed > 7) bDebug = true;
+//    if (mLastFrameProcessed > 8) bDebug = false;
+
+    /// Debugging purposes:
+    int iStart=23*80, iStop=27*80, iWidth=4;
+    bool bWinnerDebug  = false; //true;
+    if (bDebug)
+    {
+        cout << "iStart: " << iStart << " iStop: " << iStop << " iWidth: " << iWidth << endl;
+        cout << " --------- BEFOREHAND ----------";
+        for (int i = iStart; i < iStop; i++ )
+        {
+            if ( i % 40 == 0) cout << endl << "[" << setw(2) << i/80 << "][" << setw(2) << i%80 << "]: ";
+            cout  << setw(iWidth) << (int)(apLastDecodedFrame->getPixel(i/80, i% 80)) << ", ";
+        }
+        cout << endl;
+    }
+    ///
+
 	// Make copy of pixels in frame
-	apLastDecodedFrame->copyPixels();
+//	apLastDecodedFrame->copyPixels();
 
 	// Normal mode only - vector mode slower because
 	// algorithm requires ordering of vector elements
 
     // Iterate over rows and columns in frames
-    for (unsigned int iCol = 0; iCol < nCols; iCol++) {
+    for (unsigned int iRow = 0; iRow < nRows; iRow++) {
 
-        for (unsigned int iRow = 0; iRow < nRows; iRow++) {
+        for (unsigned int iCol = 0; iCol < nCols; iCol++) {
 			
 			// Get pixel values from copy of frame
-			currentPixelValue = apLastDecodedFrame->getPixelCopy(iRow, iCol);
+            currentPixelValue = apLastDecodedFrame->getPixel(iRow, iCol);
 			
 			// Is current pixel hit?
             if (currentPixelValue > 0.0) {
 
-                arPixelValues[0] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol-1);
-                arPixelValues[1] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol);
-                arPixelValues[2] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol+1);
+                arPixelValues[0] = apLastDecodedFrame->getPixel(iRow-1, iCol-1);
+                arPixelValues[1] = apLastDecodedFrame->getPixel(iRow-1, iCol);
+                arPixelValues[2] = apLastDecodedFrame->getPixel(iRow-1, iCol+1);
 
-                arPixelValues[3] = apLastDecodedFrame->getPixelCopy(iRow, iCol-1);
+                arPixelValues[3] = apLastDecodedFrame->getPixel(iRow, iCol-1);
                 arPixelValues[4] = currentPixelValue;
-                arPixelValues[5] = apLastDecodedFrame->getPixelCopy(iRow, iCol+1);
+                arPixelValues[5] = apLastDecodedFrame->getPixel(iRow, iCol+1);
 
-                arPixelValues[6] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol-1);
-                arPixelValues[7] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol);
-                arPixelValues[8] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol+1);
+                arPixelValues[6] = apLastDecodedFrame->getPixel(iRow+1, iCol-1);
+                arPixelValues[7] = apLastDecodedFrame->getPixel(iRow+1, iCol);
+                arPixelValues[8] = apLastDecodedFrame->getPixel(iRow+1, iCol+1);
 
                 // Count number of hit pixels
                 unsigned int numberOfPixelsHit = 0;
@@ -124,11 +145,31 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 
                 sumOfEightPixels = this->sumEightPixels(arPixelValues);
 
+                /// DEBUGGING:
+                if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop))
+                {
+                    cout << " Pxl hit! coord: [" << iRow << "][" << iCol << "] = " << currentPixelValue << ", sumOfEightPixels: " << sumOfEightPixels << ",  arPixelValues array vals:";
+                    for (unsigned int i= 0; i < 9; i++)
+                    {
+                        if (i % 3 == 0)
+                            cout << endl;
+                        cout << setw(3) << i << ": " << setw(iWidth) << arPixelValues[i] << ", ";
+                    }
+                    cout << endl;
+                    bWinnerDebug = true;
+                }
+                else
+                    bWinnerDebug = false;
+
+
+
 				// Pixel hit; case A, B, C or D?
                 if ( numberOfPixelsHit > 3) {
 
+                    if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop)) cout << "CASE Alpha!\n";   /// DEBUGGING purposes
+
                     // Case A, at least four pixels hit
-					this->winnerPixel(arPixelValues, winnerIdx);
+                    this->winnerPixel(arPixelValues, winnerIdx, bWinnerDebug);
 										
                     // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
                     this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
@@ -138,28 +179,35 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 
                     // Case B, if same column pixels hit
                     // Case C, if same row pixels hit
-					this->winnerPixel(arPixelValues, winnerIdx);
+                    this->winnerPixel(arPixelValues, winnerIdx, bWinnerDebug);
 
                     /// How determine each case?
                     // Lets see if pixel "1", "7" hit: Case B
                     if ( winnerIdx == 1 || winnerIdx == 7)
                     {
+                        if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop)) cout << "CASE bravo!\n";   /// DEBUGGING purposes
                         // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
                         this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
                         mCaseB++;
                     }
                     else if (winnerIdx == 3 || winnerIdx == 5)   // Lets see if pixel "3", "5" hit: Case C
 					{
+                        if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop)) cout << "CASE Charlie!\n";   /// DEBUGGING purposes
                         // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
                         this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
                         mCaseC++;
 					}
                     else
-                        ;   // Doesn't seem to be happening..
+                    {
+                        if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop)) cout << "CASE is Triplett..!\n";   /// DEBUGGING purposes;   // It DOES happen !
+                        updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
+                        mCaseTriplett++;
+                    }
 				}
 				else {
 					// Case D, no other pixels hit
 					mCaseD++;
+                    if (bDebug && (iRow*80+iCol > iStart) && (iRow*80+iCol < iStop)) cout << "CASE Delta!\n";   /// DEBUGGING purposes
 				}				
 
 				// Increment running total of number of corrections applied
@@ -169,6 +217,19 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 		}	// End of iCol loop		
     }
     // End of iRow loop
+
+    /// Debugging purposes:
+    if (bDebug)
+    {
+        cout << " --------- AFTERWARDS ----------";
+        for (int i = iStart; i < iStop; i++ )
+        {
+            if ( i % 40 == 0) cout << endl << "[" << setw(2) << i/80 << "][" << setw(2) << i%80 << "]: ";
+            cout  << setw(iWidth) << (int)(apLastDecodedFrame->getPixel(i/80, i% 80)) << ", ";
+        }
+        cout << endl;
+    }
+    ///
 
     return true;
 }
@@ -197,14 +258,36 @@ double HxtFrameChargeSharingSubPixelCorrector::sumEightPixels(double aaPixels[])
 bool HxtFrameChargeSharingSubPixelCorrector::updateDecodedFrame(unsigned int currentRow, unsigned int currentCol, double totalCharge,
 										int const &aWinnerIdx, HxtDecodedFrame* apLastDecodedFrame) {
 
-    /// Regardless of which pixel "won",  we can clear all pixels regardless - winning pixel is then assigned value of totalCharge
-    // Clear all 9 pixels in the original and copy of frame
-    for (unsigned int iRow = currentRow-1; iRow < (currentRow+1); iRow++)
+    /// DEBUGGING:
+    int iStart=23*80, iStop=                     27*80                    , iWidth=4;
+
+    if (bDebug && (currentRow*80+currentCol > iStart) && (currentRow*80+currentCol < iStop))
     {
-        for (unsigned int iCol= currentCol-1; iCol< (currentCol+1); iCol++)
+        cout << " ::updateDecodedFrame() arguments, currentRow: " << currentRow << ", currentCol: "
+             << currentCol << ", totalCharge: " <<  totalCharge << ", aWinnerIdx: " << aWinnerIdx << endl;
+
+        cout << "---- Content of Origin before clearing ----\n";
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol+1) << endl;
+
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol+1) << endl;
+
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol+1) << endl;
+    }
+    ///
+
+    /// Regardless of which pixel "won",  we can clear all pixels - winning pixel is then assigned value of totalCharge
+    // Clear all 9 pixels in the original and copy of frame
+    for (unsigned int iRow = (currentRow-1); iRow < (currentRow+2); iRow++)
+    {
+        for (unsigned int iCol = (currentCol-1); iCol< (currentCol+2); iCol++)
         {
             apLastDecodedFrame->setPixel(iRow, iCol, 0.0);
-            apLastDecodedFrame->setPixelCopy(iRow, iCol, 0.0);
         }
     }
 
@@ -264,7 +347,6 @@ bool HxtFrameChargeSharingSubPixelCorrector::updateDecodedFrame(unsigned int cur
             }
         break;
 
-
 		default:
 			{
 				// Print error Message!
@@ -272,13 +354,28 @@ bool HxtFrameChargeSharingSubPixelCorrector::updateDecodedFrame(unsigned int cur
 				return false;
 			}
 	}
-	return true;
+    if (bDebug && (currentRow*80+currentCol > iStart) && (currentRow*80+currentCol < iStop))
+    {
+        cout << "---- Content of Origin AFTER SETTING winning pixel ----\n";
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow-1, currentCol+1) << endl;
+
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow, currentCol+1) << endl;
+
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol-1);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol);
+        cout << " " << setw(iWidth) << apLastDecodedFrame->getPixel(currentRow+1, currentCol+1) << endl;
+    }
+    return true;
 }
 
 /// winnerPixel - determine which pixel contains the highest value in the aaPixels[] array
 /// @param aaPixels[] - array containing nine pixel values
 /// @param aWinnerIdx - this reference will contain index of pixel with highest value
-void HxtFrameChargeSharingSubPixelCorrector::winnerPixel(double aaPixels[], int &aWinnerIdx) {
+void HxtFrameChargeSharingSubPixelCorrector::winnerPixel(double aaPixels[], int &aWinnerIdx, bool bDebug) {
 
 	// Assume first pixel is winner by default
 	aWinnerIdx = 0;
@@ -293,6 +390,8 @@ void HxtFrameChargeSharingSubPixelCorrector::winnerPixel(double aaPixels[], int 
 			aWinnerIdx = i;
 		}
 	}
+    /// DEBUGGING:
+    if (bDebug) cout << " winnerPixel() aWinnerIdx: " << aWinnerIdx << " MaxVal: " << maxVal << endl;
 }
 
 }
