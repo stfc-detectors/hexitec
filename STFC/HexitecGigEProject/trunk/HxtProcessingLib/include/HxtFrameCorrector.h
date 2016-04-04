@@ -25,8 +25,7 @@ public:
 
     void setDebug(bool aDebug) { mDebug = aDebug; };
 
-	virtual bool apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-						HxtFrame* apSubPixelFrame = NULL) = 0;
+    virtual bool apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) = 0;
 
 	unsigned int getNumEventsCorrected() const
     {

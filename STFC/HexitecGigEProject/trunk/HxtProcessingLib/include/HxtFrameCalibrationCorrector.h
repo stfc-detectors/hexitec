@@ -19,8 +19,7 @@ public:
 	HxtFrameCalibrationCorrector(HxtPixelThreshold* apGradients, HxtPixelThreshold* apIntercepts, unsigned int aRows, unsigned int aCols);
 	virtual ~HxtFrameCalibrationCorrector();
 
-	bool HxtFrameCalibrationCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-														HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameCalibrationCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
 private:	
 	unsigned long long	mLastFrameProcessed;

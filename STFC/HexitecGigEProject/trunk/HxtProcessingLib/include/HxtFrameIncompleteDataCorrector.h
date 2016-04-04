@@ -18,8 +18,7 @@ public:
 	HxtFrameIncompleteDataCorrector();
 	virtual ~HxtFrameIncompleteDataCorrector();
 
-	bool apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-				HxtFrame* apSubPixelFrame = NULL);
+    bool apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 };
 
 }

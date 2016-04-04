@@ -18,8 +18,7 @@ public:
 	HxtFrameInducedNoiseCorrector(double aInducedNoiseThreshold);
 	virtual ~HxtFrameInducedNoiseCorrector();
 
-	bool HxtFrameInducedNoiseCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-														HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameInducedNoiseCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
 private:	
 	unsigned long long	mLastFrameProcessed;

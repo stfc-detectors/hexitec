@@ -30,10 +30,8 @@ HxtFrameIncompleteDataCorrector::~HxtFrameIncompleteDataCorrector() {
 /// apply - applies incomplete data corrector to the specified frames
 /// @param apLastDecodedFrame ptr to previous decoded frame
 /// @param apCurrentDecodedFrame ptr to current decoded frame
-/// @param apSubPixelFrame Disregard, Not used in this class
 /// @return bool value indicating success of correction
-bool HxtFrameIncompleteDataCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-											HxtFrame* apSubPixelFrame) {
+bool HxtFrameIncompleteDataCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 
 	// Do not apply this correction if currentDecodedFrame ptr is NULL; this occurs when last frame is processed
 	// and is not relevant for the incomplete data correction
@@ -41,8 +39,6 @@ bool HxtFrameIncompleteDataCorrector::apply(HxtDecodedFrame* apLastDecodedFrame,
 		if (mDebug) LOG(gLogConfig, logDEBUG2) << "Current frame ptr is NULL, no correction to apply";
 		return true;
 	}
-
-    apSubPixelFrame = apSubPixelFrame;
 
 	// Determine last and current frame indices from objects
 	unsigned long long currentFrameIdx, lastFrameIdx;

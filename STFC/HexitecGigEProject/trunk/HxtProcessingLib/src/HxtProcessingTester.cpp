@@ -30,7 +30,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
 
     // Make these user changeable
     mOutputFileNameDecodedFrame = "pixelHisto.hxt";
-    mOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
+    //mOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
 
     mEnableInCorrector = false;
     mEnableCabCorrector = false;
@@ -358,7 +358,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
 //        dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);	/// The previous, proper function call
 
         // Write subpixel files if subpixel corrector enabled
-        if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);
+        //if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);   /// do not write  subpixel .HXT file
 
         // Write CSV diagnostic histograms if selected
         if (mWriteCsvFiles)
@@ -366,8 +366,8 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
             dataProcessor->writeCsvFiles();
             string rawSpectrumFile = dataProcessor->getRawCsvFileName();
             string corSpectrumFile = dataProcessor->getCorCsvFileName();
-            cout << "raw spectrum:" << rawSpectrumFile.c_str() << endl;
-            cout << "cor spectrum:" << corSpectrumFile.c_str() << endl;
+            //cout << "raw spectrum:" << rawSpectrumFile.c_str() << endl;
+            //cout << "cor spectrum:" << corSpectrumFile.c_str() << endl;
         }
     }
     LOG(gLogConfig, logNOTICE) << "Finished";
@@ -387,10 +387,10 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
     HxtBuffer* hxtBuffer = 0;
 
     hxtBuffer = *mHxtBuffers.begin();// *buffersIterator;
-    qDebug() << " * " << (void*)(hxtBuffer) << " <- HxtProcessingTester.cpp:396 (hxtBuffer)";
+    //qDebug() << " * " << (void*)(hxtBuffer) << " <- HxtProcessingTester.cpp:396 (hxtBuffer)";
     dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
 
-    qDebug() << "----------------\n       DEBUGGING, let's look inside hxtBuffer (local copy)";
+    //qDebug() << "----------------\n       DEBUGGING, let's look inside hxtBuffer (local copy)";
 //    qDebug() << " * " << (hxtBuffer) << " <- HxtProcessingTester.cpp:400 (hxtBuffer)";
 //    qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
 //    qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
@@ -461,7 +461,7 @@ void HxtProcessing::printUsage(string aAppName) {
          << "   --noidcor|-ni                    Disable incomplete data corrector" << endl
          << "   --ipcor|-ip <threshold>          Enable and set interpolate corrector threshold level" << endl
          << "   --outputpixelfile|-opf <name>    Output pixel file name (defaults to " << mOutputFileNameDecodedFrame << ")" << endl
-         << "   --outputsubpixelfile|-osf <name> Output subpixel file name (defaults to " << mOutputFileNameSubPixelFrame << ", if enabled)" << endl
+//         << "   --outputsubpixelfile|-osf <name> Output subpixel file name (defaults to " << mOutputFileNameSubPixelFrame << ", if enabled)" << endl
          << "   --csvfiles|-c                    Enable output of diagnostic histogram CSV files" << endl
          << "   --vector|-v                      Enable vector indexing (boosts ID, CSD and IN performance)" << endl
          << endl

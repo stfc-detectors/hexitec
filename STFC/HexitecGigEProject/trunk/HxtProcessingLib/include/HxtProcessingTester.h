@@ -54,9 +54,9 @@ public:
 
     void setThresholdFileName(string aThresholdFileName) { mThresholdFileName = aThresholdFileName; }
     void setOutputFileNameDecodedFrame(string aOutputFileNameDecodedFrame) { mOutputFileNameDecodedFrame = aOutputFileNameDecodedFrame; }
-    void setOutputFileNameSubPixelFrame(string aOutputFileNameSubPixelFrame) { mOutputFileNameSubPixelFrame = aOutputFileNameSubPixelFrame; }
+    //void setOutputFileNameSubPixelFrame(string aOutputFileNameSubPixelFrame) { mOutputFileNameSubPixelFrame = aOutputFileNameSubPixelFrame; }
     string getOutputFileNameDecodedFrame() { return mOutputFileNameDecodedFrame; }
-    string getOutputFileNameSubPixelFrame() { return mOutputFileNameSubPixelFrame; }
+    //string getOutputFileNameSubPixelFrame() { return mOutputFileNameSubPixelFrame; }
     void setGradientsFile(string aGradientsFile) { mGradientsFile = aGradientsFile; }
     void setInterceptsFile(string aInterceptsFile) { mInterceptsFile = aInterceptsFile; }
     void setMomentumFile(string aMomentumFile) { mMomentumFile = aMomentumFile; }
@@ -122,7 +122,7 @@ protected:
     double mGlobalThreshold;
     string mThresholdFileName;
     string mOutputFileNameDecodedFrame;
-    string mOutputFileNameSubPixelFrame;
+    //string mOutputFileNameSubPixelFrame;
     string mGradientsFile;
     string mInterceptsFile;
     string mMomentumFile;

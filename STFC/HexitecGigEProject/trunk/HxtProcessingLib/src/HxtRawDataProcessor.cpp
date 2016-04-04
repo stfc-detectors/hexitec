@@ -31,9 +31,9 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
 //                            mRows(aRows),
 //                            mHxtBuffer.nCols(aCols),
                             mPixels(aRows * aCols),
-                            mSubPixelRows(aRows*3),
-                            mSubPixelCols(aCols*3),
-                            mSubPixelPixels(mSubPixelRows*mSubPixelCols),
+//                            mSubPixelRows(aRows*3),
+//                            mSubPixelCols(aCols*3),
+//                            mSubPixelPixels(mSubPixelRows*mSubPixelCols),
                             mHistoStart(aHistoStart),
                             mHistoEnd(aHistoEnd),
 //                            mHistoBins(aHistoBins),
@@ -84,7 +84,7 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     mFramesDetected = 0;
     mEventsDetected = 0;
     mCorrectedFramesWritten  = 0;
-    mSubPixelFramesWritten = 0;
+//    mSubPixelFramesWritten = 0;
     mEventsAboveThreshold = 0;
 
     // Initialise parser state so it is preserved across files. Assumes
@@ -97,7 +97,7 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     // Create global raw and corrected histograms  - ONLY needed for debugging
     mGlobalRawHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
     mGlobalDecodedHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
-    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+//    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
 
     // Create pair of decoded frame stores. These are defined to be bigger than the real
     // size in each dimension by two pixels to allow for pixel addressing starting from
@@ -106,7 +106,7 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     mDecodedFrame[1] = new HxtDecodedFrame(mHxtBuffer.nRows, mHxtBuffer.nBins);
 
     // Create subpixel frame here
-    mSubPixelFrame = new HxtFrame(mSubPixelRows, mSubPixelCols);
+//    mSubPixelFrame = new HxtFrame(mSubPixelRows, mSubPixelCols);
 
     // Decoded Frame: Create histogram for each pixel and initialize pixel thresholds to zero
     for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
@@ -115,11 +115,11 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
         mPixelThreshold[iPixel] = 0.0;
     }
 
-    // SubPixels Frame: Create histogram for each pixel and initialize pixel thresholds to zero
-    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
-        mSubPixelHistogram.push_back(pixelHisto);
-    }
+//    // SubPixels Frame: Create histogram for each pixel and initialize pixel thresholds to zero
+//    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+//        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+//        mSubPixelHistogram.push_back(pixelHisto);
+//    }
 
     // Charge Sharing Addition Sub Pixel Corrector disabled by default
     mCaCorrector = false;
@@ -130,10 +130,10 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     ///     (u8 bytes[3] * 2) or buffer(s) (u16) processing occurring
     mRawData = new u16;      /* New raw mode uses 16 bit data */
 
-    mCsvFileName = string("");
+//    mCsvFileName = string("");
 
-    string mRawCsvFileName = string("");
-    string mCorCsvFileName = string("");
+//    string mRawCsvFileName = string("");
+//    string mCorCsvFileName = string("");
 
     /// Setup lookup table for pixel reordering
     mPixelTable = 0;
@@ -165,7 +165,7 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
 
     delete mGlobalRawHisto;
     delete mGlobalDecodedHisto;
-    delete mGlobalSubPixelHisto;
+//    delete mGlobalSubPixelHisto;
 
     delete mFileTimer;
 
@@ -173,8 +173,8 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
     delete mDecodedFrame[0];
     delete mDecodedFrame[1];
 
-    // Delete SubPixel frames
-    delete mSubPixelFrame;
+//    // Delete SubPixel frames
+//    delete mSubPixelFrame;
 
     // Delete histogram objects
     for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
@@ -182,10 +182,10 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
     }
     mPixelHistogram.clear();
 
-    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        delete mSubPixelHistogram[iPixel];
-    }
-    mSubPixelHistogram.clear();
+//    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+//        delete mSubPixelHistogram[iPixel];
+//    }
+//    mSubPixelHistogram.clear();
 
     // Delete pixel thresholds
     delete [] mPixelThreshold;
@@ -201,7 +201,6 @@ HxtRawDataProcessor::~HxtRawDataProcessor() {
 void HxtRawDataProcessor::resetHistograms() {
 
     bool bDebug = false;
-    /*
     if (bDebug)
     {
         LOG(gLogConfig, logINFO) << "PRE-RESET: Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
@@ -209,12 +208,12 @@ void HxtRawDataProcessor::resetHistograms() {
         LOG(gLogConfig, logINFO) << "PRE-RESET: Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
         LOG(gLogConfig, logINFO) << "PRE-RESET: Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
     }
-*/
+
     vector<HxtFrameCorrector*>::iterator correctorIterator;
     for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
         if (bDebug) {
             const unsigned int nCorrected = (*correctorIterator)->getNumEventsCorrected();
-//            LOG(gLogConfig, logINFO) << "PRE-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
+            LOG(gLogConfig, logINFO) << "PRE-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
         }
         /// Reset number of events as we go along in this loop..
         (*correctorIterator)->resetNumEventsCorrected();
@@ -223,7 +222,7 @@ void HxtRawDataProcessor::resetHistograms() {
     /// Begin by freeing histograms' memory
     delete mGlobalRawHisto;
     delete mGlobalDecodedHisto;
-    delete mGlobalSubPixelHisto;
+//    delete mGlobalSubPixelHisto;
 
     // Delete histogram objects
     for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
@@ -231,17 +230,17 @@ void HxtRawDataProcessor::resetHistograms() {
     }
     mPixelHistogram.clear();
 
-    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        delete mSubPixelHistogram[iPixel];
-    }
-    mSubPixelHistogram.clear();
+//    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+//        delete mSubPixelHistogram[iPixel];
+//    }
+//    mSubPixelHistogram.clear();
 
     /// Recreate histograms
 
     // Create global raw and corrected histograms  - ONLY needed for debugging
     mGlobalRawHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
     mGlobalDecodedHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
-    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+//    mGlobalSubPixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
 
     // Decoded Frame: Create histogram for each pixel
     for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
@@ -249,11 +248,11 @@ void HxtRawDataProcessor::resetHistograms() {
         mPixelHistogram.push_back(pixelHisto);
     }
 
-    // SubPixels Frame: Create histogram for each pixel
-    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
-        mSubPixelHistogram.push_back(pixelHisto);
-    }
+//    // SubPixels Frame: Create histogram for each pixel
+//    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+//        Histogram* pixelHisto = new Histogram(mHistoStart, mHistoEnd, mHxtBuffer.nBins);
+//        mSubPixelHistogram.push_back(pixelHisto);
+//    }
 
     /// Reset variables associated with a histogram
     mFramesDetected = 0;
@@ -263,14 +262,14 @@ void HxtRawDataProcessor::resetHistograms() {
 
     if (bDebug)
     {
-//        LOG(gLogConfig, logINFO) << "POST-RESET: Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
-//        LOG(gLogConfig, logINFO) << "POST-RESET: Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
-//        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
-//        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
+        LOG(gLogConfig, logINFO) << "POST-RESET: Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
+        LOG(gLogConfig, logINFO) << "POST-RESET: Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
+        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
+        LOG(gLogConfig, logINFO) << "POST-RESET: Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
 
         for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
             const unsigned int nCorrected = (*correctorIterator)->getNumEventsCorrected();
-//            LOG(gLogConfig, logINFO) << "POST-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
+            LOG(gLogConfig, logINFO) << "POST-RESET: Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
         }
     }
 }
@@ -381,10 +380,10 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
     // Open data file, binary mode, reading
     ifstream datFile(aFileName.c_str(), ios::in | ios::binary);
     if (!datFile.is_open()) {
-//        LOG(gLogConfig, logERROR) << "Failed to open raw data file " << aFileName;
+        LOG(gLogConfig, logERROR) << "Failed to open raw data file " << aFileName;
         return false;
     }
-//    LOG(gLogConfig, logINFO) << "Opened data file " << aFileName << " OK";
+    LOG(gLogConfig, logINFO) << "Opened data file " << aFileName << " OK";
 
     // Frame, row and column indices
 
@@ -400,7 +399,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
     unsigned int currentFrameIdx = mFramesDetected % 2;
     unsigned int lastFrameIdx    = 1 - currentFrameIdx;
 
-//    LOG(gLogConfig, logDEBUG2) << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
+    LOG(gLogConfig, logDEBUG2) << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
 
     // Track pixel number (across frames)
     u64 index=0;
@@ -480,7 +479,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
 
     } // while (!datFile.eof())
 
-//    LOG(gLogConfig, logDEBUG2) << "Parser finish: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
+    LOG(gLogConfig, logDEBUG2) << "Parser finish: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
 
     // Close file
     datFile.close();
@@ -496,9 +495,9 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
 
     // Print processing summary
     if (parseOK) {
-//        LOG(gLogConfig, logINFO) << "Processed file " << aFileName << " in " << mFileTimer->elapsed() << " secs, frames read: " << framesDetected << " events read: " << eventsDetected;
+        LOG(gLogConfig, logINFO) << "Processed file " << aFileName << " in " << mFileTimer->elapsed() << " secs, frames read: " << framesDetected << " events read: " << eventsDetected;
     } else {
-//        LOG(gLogConfig, logERROR) << "Processing file " << aFileName << " unexpected stopped inside frame: " << framesDetected << " events read: " << eventsDetected;
+        LOG(gLogConfig, logERROR) << "Processing file " << aFileName << " unexpected stopped inside frame: " << framesDetected << " events read: " << eventsDetected;
     }
 
     return parseOK;
@@ -524,7 +523,7 @@ bool HxtRawDataProcessor::parseFile(vector<string> aFileList) {
         numFilesProcessed++;
     }
 
-//    LOG(gLogConfig, logINFO) << "Completed processing " << numFilesProcessed << " files";
+    LOG(gLogConfig, logINFO) << "Completed processing " << numFilesProcessed << " files";
 
     return processOK;
 }
@@ -684,7 +683,7 @@ bool HxtRawDataProcessor::parseBuffer(vector<unsigned short*> &aBufferNames, vec
         frameIterator++;
     }
 
-//    LOG(gLogConfig, logINFO) << "Completed processing " << numBufferProcessed << " buffers";
+    LOG(gLogConfig, logINFO) << "Completed processing " << numBufferProcessed << " buffers";
 
     return processOK;
 }
@@ -732,13 +731,13 @@ bool HxtRawDataProcessor::processFrame(unsigned int currentFrameIdx, unsigned in
         /// DEBUGGING purposes: Write frame(s) to disk (if enabled)
         if (mDebugFrames)
         {
-            this->debugWriteFrame(currentFrameIdx, "A_PreProcess"); // Need only process previous frame; Next call will cover "current" frame
-            this->debugWriteFrame(lastFrameIdx, "B_PreProcess");
+            this->debugWriteFrame(currentFrameIdx, "A_PreProcessing"); // Need only process previous frame; Next call will cover "current" frame
+            this->debugWriteFrame(lastFrameIdx, "B_PreProcessing");
         }
         ///
         vector<HxtFrameCorrector*>::iterator correctorIterator;
         for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
-            (*correctorIterator)->apply(mDecodedFrame[lastFrameIdx], mDecodedFrame[currentFrameIdx], mSubPixelFrame);
+            (*correctorIterator)->apply(mDecodedFrame[lastFrameIdx], mDecodedFrame[currentFrameIdx]/*, mSubPixelFrame*/);
         }
         /// DEBUGGING purposes: Write frame(s) to disk (if enabled)
         if (mDebugFrames)
@@ -753,12 +752,13 @@ bool HxtRawDataProcessor::processFrame(unsigned int currentFrameIdx, unsigned in
         this->outputFrame(lastFrameIdx);
     }
 
+    /// Don't write 250x240 subpixel frame histogram info
     // Output subpixel frame if CSA Enable
-    if (mCaCorrector)
-    {
-        this->outputFrame(mSubPixelFrame);
-        mSubPixelFrame->clear();
-    }
+//    if (mCaCorrector)
+//    {
+//        this->outputFrame(mSubPixelFrame);
+//        mSubPixelFrame->clear();
+//    }
 
     return true;
 }
@@ -766,6 +766,9 @@ bool HxtRawDataProcessor::processFrame(unsigned int currentFrameIdx, unsigned in
 /// Debugging function - Write frame number 'aFrame'
 bool HxtRawDataProcessor::debugWriteFrame(unsigned int aFrameIdx, string fileDescription)
 {
+    /// Return early without any action if we were already done 10 frames..
+    if (mFrameNumber > 10) return false;
+
     // Create file name from frame number and current timestamp
     DateStamp* now = new DateStamp();
     string debugFile(mDebugFrameDir + now->GetDateStamp() + fileDescription + "_Frame_" + to_string((_ULonglong)mFrameNumber) + ".bin");
@@ -780,14 +783,6 @@ bool HxtRawDataProcessor::debugWriteFrame(unsigned int aFrameIdx, string fileDes
         return false;
     }
 
-    // Write binary file header
-
-    //debugStream.write((const char*)&mFormatVersion, sizeof(u64));
-
-//    debugStream.write(mDataTimeStamp.c_str(), mDataTimeStamp.size());
-
-//    // Continue writing header information that is common to both format versions
-//    debugStream.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));
     unsigned int counting = 0;
     // Write Each pixel to file
     for (unsigned int iRow = 0; iRow < mHxtBuffer.nRows; iRow++) {
@@ -795,16 +790,13 @@ bool HxtRawDataProcessor::debugWriteFrame(unsigned int aFrameIdx, string fileDes
             double pixelValue = mDecodedFrame[aFrameIdx]->getPixel(iRow, iCol);
             if (pixelValue > 0.0)
                 counting++;
-//            debugStream << pixelValue;
-//            debugStream.write((const char*)&pixelValue, sizeof(u16));  /// 1 Pixel = 16 bits
 
             debugStream.write(reinterpret_cast<const char *>(&pixelValue), sizeof(pixelValue));
-//            debugStream.write((const u16)pixelValue, sizeof(u16));  /// 1 Pixel = 16 bits
         }
     }
     debugStream.close();
 
-//    LOG(gLogConfig, logINFO) << "DEBUG: Written t_o file " << debugFile << " & where non-zero: " << counting;
+    LOG(gLogConfig, logINFO) << "DEBUG: Written t_o file " << debugFile << " & where non-zero: " << counting;
 
     return true;
 }
@@ -832,35 +824,35 @@ bool HxtRawDataProcessor::outputFrame(unsigned int aFrameIdx)
     return true;
 }
 
-/// outputFrame - outputs decoded and corrected frames to histograms
-/// @param aFrameIdx index of frame to write
-/// @return boolean flag indicating if output succeeded (not currently implemented)
-bool HxtRawDataProcessor::outputFrame(HxtFrame* apSubPixelFrame)
-{
-    if (mDebug) LOG(gLogConfig, logDEBUG1) << "Outputting SubPixel frame " << apSubPixelFrame->getFrameIndex() << " to histograms";
+///// outputFrame - outputs decoded and corrected frames to histograms
+///// @param aFrameIdx index of frame to write
+///// @return boolean flag indicating if output succeeded (not currently implemented)
+//bool HxtRawDataProcessor::outputFrame(HxtFrame* apSubPixelFrame)
+//{
+//    if (mDebug) LOG(gLogConfig, logDEBUG1) << "Outputting SubPixel frame " << apSubPixelFrame->getFrameIndex() << " to histograms";
 
-    for (unsigned int iRow = 0; iRow < mSubPixelRows; iRow++) {
-        for (unsigned int iCol = 0; iCol < mSubPixelCols; iCol++) {
-            double subPixelValue = apSubPixelFrame->getPixel(iRow, iCol);
-            if (subPixelValue != 0.0) {
-                mGlobalSubPixelHisto->Fill(subPixelValue);
-                unsigned int pixelAddress = (iRow * mSubPixelCols) + iCol;
-                mSubPixelHistogram[pixelAddress]->Fill(subPixelValue);
-            }
-        }
-    }
+//    for (unsigned int iRow = 0; iRow < mSubPixelRows; iRow++) {
+//        for (unsigned int iCol = 0; iCol < mSubPixelCols; iCol++) {
+//            double subPixelValue = apSubPixelFrame->getPixel(iRow, iCol);
+//            if (subPixelValue != 0.0) {
+//                mGlobalSubPixelHisto->Fill(subPixelValue);
+//                unsigned int pixelAddress = (iRow * mSubPixelCols) + iCol;
+//                mSubPixelHistogram[pixelAddress]->Fill(subPixelValue);
+//            }
+//        }
+//    }
 
-    mSubPixelFramesWritten++;
+//    mSubPixelFramesWritten++;
 
-    return true;
-}
+//    return true;
+//}
 
-/// getSubPixelFrame - get Sub Pixel Frame
-/// @return pointer to SubPixel Frame HxtFrame object
-HxtFrame* HxtRawDataProcessor::getSubPixelFrame()
-{
-    return mSubPixelFrame;
-}
+///// getSubPixelFrame - get Sub Pixel Frame
+///// @return pointer to SubPixel Frame HxtFrame object
+//HxtFrame* HxtRawDataProcessor::getSubPixelFrame()
+//{
+//    return mSubPixelFrame;
+//}
 
 /// flushFrames - flush pending frames through processor, correctors and output at end
 /// of parsing. This method MUST be called after processing all files to ensure that
@@ -875,23 +867,21 @@ bool HxtRawDataProcessor::flushFrames(void) {
     vector<HxtFrameCorrector*>::iterator correctorIterator;
     // Loop over corrections and apply them to the last two frames (i.e. current and previous)
     for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
-        (*correctorIterator)->apply(mDecodedFrame[lastFrameIdx], mDecodedFrame[currentFrameIdx], mSubPixelFrame);
+        (*correctorIterator)->apply(mDecodedFrame[lastFrameIdx], mDecodedFrame[currentFrameIdx]/*, mSubPixelFrame*/);
     }
 
     // Loop over corrections and apply to last frame (current) - other ptr is null which allows
     // corrector to handle this edge case correctly
     for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
-        (*correctorIterator)->apply(mDecodedFrame[currentFrameIdx], NULL, mSubPixelFrame);
+        (*correctorIterator)->apply(mDecodedFrame[currentFrameIdx], NULL/*, mSubPixelFrame*/);
     }
 
     // Write last two frames
     this->outputFrame(lastFrameIdx);
     this->outputFrame(currentFrameIdx);
 
-//    LOG(gLogConfig, logINFO) << "Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
-//    LOG(gLogConfig, logINFO) << "Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
-//    LOG(gLogConfig, logINFO) << "Total counts in global raw spectrum = \t\t" << mGlobalRawHisto->GetTotalCount();
-//    LOG(gLogConfig, logINFO) << "Total counts in global corrected spectrum = \t" << mGlobalDecodedHisto->GetTotalCount();
+    LOG(gLogConfig, logINFO) << "Frames detected: " << mFramesDetected << " Frames written: " << mCorrectedFramesWritten;
+    LOG(gLogConfig, logINFO) << "Events detected: " << mEventsDetected << " Events above threshold: " << mEventsAboveThreshold;
 
     // If Charge Sharing Addition Sub Pixel enabled, display how many of each case of subpixel hit distribution
     if (mCaCorrector)
@@ -900,20 +890,21 @@ bool HxtRawDataProcessor::flushFrames(void) {
             // Hack to output subpixel frame if that corrector chosen
             if (strcmp( ((*correctorIterator)->getName()).c_str(), "ChargeSharingAdditionSubPixel") == 0)
             {
-//                LOG(gLogConfig, logINFO) << "Total counts in global  subpixel spectrum = \t" << mGlobalSubPixelHisto->GetTotalCount();
-//                LOG(gLogConfig, logINFO) << "Case A: " << setw(11) << (*correctorIterator)->getCaseA();
-//                LOG(gLogConfig, logINFO) << "Case B: " << setw(11) << (*correctorIterator)->getCaseB();
-//                LOG(gLogConfig, logINFO) << "Case C: " << setw(11) << (*correctorIterator)->getCaseC();
-//                LOG(gLogConfig, logINFO) << "Case D: " << setw(11) << (*correctorIterator)->getCaseD();
-//                LOG(gLogConfig, logINFO) << "Total : " << setw(11) << (*correctorIterator)->getCaseA() + (*correctorIterator)->getCaseB() +
-//                    (*correctorIterator)->getCaseC() + (*correctorIterator)->getCaseD();
+                /// Don't report 240x240 frame (now redundant) but do report hits/case type
+                //LOG(gLogConfig, logINFO) << "Total counts in global  subpixel spectrum = \t" << mGlobalSubPixelHisto->GetTotalCount();
+                LOG(gLogConfig, logINFO) << "Case A: " << setw(11) << (*correctorIterator)->getCaseA();
+                LOG(gLogConfig, logINFO) << "Case B: " << setw(11) << (*correctorIterator)->getCaseB();
+                LOG(gLogConfig, logINFO) << "Case C: " << setw(11) << (*correctorIterator)->getCaseC();
+                LOG(gLogConfig, logINFO) << "Case D: " << setw(11) << (*correctorIterator)->getCaseD();
+                LOG(gLogConfig, logINFO) << "Total : " << setw(11) << (*correctorIterator)->getCaseA() + (*correctorIterator)->getCaseB() +
+                    (*correctorIterator)->getCaseC() + (*correctorIterator)->getCaseD();
             }
         }
     }
 
     for (correctorIterator = mFrameCorrector.begin(); correctorIterator != mFrameCorrector.end(); correctorIterator++) {
         const unsigned int nCorrected = (*correctorIterator)->getNumEventsCorrected();
-//        LOG(gLogConfig, logINFO) << "Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
+        LOG(gLogConfig, logINFO) << "Correction " << (*correctorIterator)->getName() << " corrected " << nCorrected << " events";
     }
 
     return true;
@@ -930,9 +921,9 @@ bool HxtRawDataProcessor::writeStructOutput(string aOutputPixelFileName) {
         return false;
     }
 
-    // Make a note of filename, to be used by CSV file  shortly - TEMP ADDITION ??
-    size_t periodPosn = aOutputPixelFileName.find(".");
-    mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
+//    // Make a note of filename, to be used by CSV file  shortly - TEMP ADDITION ??
+//    size_t periodPosn = aOutputPixelFileName.find(".");
+//    mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
 
     /// Well, this block turn out to be redundant..:
 //    //Toggle for more information about what written into the file's header:
@@ -967,7 +958,7 @@ bool HxtRawDataProcessor::writeStructOutput(string aOutputPixelFileName) {
     }
     pixelFile.close();
 
-//    LOG(gLogConfig, logINFO) << "(modded) Written output histogram binary file " << aOutputPixelFileName;
+    LOG(gLogConfig, logINFO) << "(modded) Written output histogram binary file " << aOutputPixelFileName;
 
     return true;
 }
@@ -983,9 +974,9 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
         return false;
     }
 
-    // Make a note of filename, to be used by CSV file  shortly
-    size_t periodPosn = aOutputPixelFileName.find(".");
-    mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
+//    // Make a note of filename, to be used by CSV file  shortly
+//    size_t periodPosn = aOutputPixelFileName.find(".");
+//    mCsvFileName = string(aOutputPixelFileName.substr(0, periodPosn)) + ".csv";
 
     bool bExtraDebug = false;   //true;
 
@@ -1044,7 +1035,7 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
     }
     pixelFile.close();
 
-//    LOG(gLogConfig, logINFO) << "Written output histogram binary file " << aOutputPixelFileName;
+    LOG(gLogConfig, logINFO) << "Written output histogram binary file " << aOutputPixelFileName;
 
     return true;
 }
@@ -1109,7 +1100,7 @@ bool HxtRawDataProcessor::copyPixelOutput(unsigned short* aHxtBuffer) {
 //        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)aHxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)aHxtBuffer)->allData[k+3];
 //    }
 
-//    LOG(gLogConfig, logINFO) << "Copied processed HXT contents to buffer";
+    LOG(gLogConfig, logINFO) << "Copied processed HXT contents to buffer";
 
     return true;
 }
@@ -1296,45 +1287,45 @@ void HxtRawDataProcessor::InterpolateDeadPixels(const unsigned int aThreshold)
         }	// for(iBin)
     }	// for(pixelListIterator)
 
-//    LOG(gLogConfig, logINFO) << "Interpolate masked " << deadPixels.size() << " dead pixels";
+    LOG(gLogConfig, logINFO) << "Interpolate masked " << deadPixels.size() << " dead pixels";
 
     // Free allocated memory
     delete [] deadPixelFrame;
 }
 
-/// writeSubPixelOutput - write the output of a raw data processing run to output files
-bool HxtRawDataProcessor::writeSubPixelOutput(string aOutputSubPixelFileName) {
+///// writeSubPixelOutput - write the output of a raw data processing run to output files
+//bool HxtRawDataProcessor::writeSubPixelOutput(string aOutputSubPixelFileName) {
 
-    // Write subpixel histograms out to binary file
-    ofstream subPixelFile;
-    subPixelFile.open(aOutputSubPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
-    if (!subPixelFile.is_open()) {
-        LOG(gLogConfig, logERROR) << "(3) Failed to open output file " << aOutputSubPixelFileName;
-        return false;
-    }
+//    // Write subpixel histograms out to binary file
+//    ofstream subPixelFile;
+//    subPixelFile.open(aOutputSubPixelFileName.c_str(), ios::binary | ios::out | ios::trunc);
+//    if (!subPixelFile.is_open()) {
+//        LOG(gLogConfig, logERROR) << "(3) Failed to open output file " << aOutputSubPixelFileName;
+//        return false;
+//    }
 
-    // Write binary file header
-    subPixelFile.write(mHxtBuffer.hxtLabel, sizeof(mHxtBuffer.hxtLabel));
+//    // Write binary file header
+//    subPixelFile.write(mHxtBuffer.hxtLabel, sizeof(mHxtBuffer.hxtLabel));
 
-    subPixelFile.write((const char*)&mHxtBuffer.hxtVersion, sizeof(u64));
+//    subPixelFile.write((const char*)&mHxtBuffer.hxtVersion, sizeof(u64));
 
-    subPixelFile.write((const char*)&mSubPixelRows, sizeof(mSubPixelRows));
-    subPixelFile.write((const char*)&mSubPixelCols, sizeof(mSubPixelCols));
-    subPixelFile.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));
+//    subPixelFile.write((const char*)&mSubPixelRows, sizeof(mSubPixelRows));
+//    subPixelFile.write((const char*)&mSubPixelCols, sizeof(mSubPixelCols));
+//    subPixelFile.write((const char*)&mHxtBuffer.nBins, sizeof(mHxtBuffer.nBins));
 
-    // Write histogram bins to file
-    mSubPixelHistogram[0]->BinaryWriteBins(subPixelFile);
+//    // Write histogram bins to file
+//    mSubPixelHistogram[0]->BinaryWriteBins(subPixelFile);
 
-    // Write subpixel histograms to file
-    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
-        mSubPixelHistogram[iPixel]->BinaryWriteContent(subPixelFile);
-    }
-    subPixelFile.close();
+//    // Write subpixel histograms to file
+//    for (unsigned int iPixel = 0; iPixel < mSubPixelPixels; iPixel++) {
+//        mSubPixelHistogram[iPixel]->BinaryWriteContent(subPixelFile);
+//    }
+//    subPixelFile.close();
 
 //    LOG(gLogConfig, logINFO) << "Written output histogram binary file " << aOutputSubPixelFileName;
 
-    return true;
-}
+//    return true;
+//}
 
 bool HxtRawDataProcessor::writeCsvFiles(void) {
 
@@ -1351,7 +1342,7 @@ bool HxtRawDataProcessor::writeCsvFiles(void) {
     mGlobalRawHisto->WriteCsv(rawCsvFile);
     rawCsvFile.close();
 
-//    LOG(gLogConfig, logINFO) << "Written global raw histogram to CSV file " << rawCsvFileName;
+    LOG(gLogConfig, logINFO) << "Written global raw histogram to CSV file " << rawCsvFileName;
 
     // Write CSV histogram file out
     ofstream corCsvFile;
@@ -1359,7 +1350,7 @@ bool HxtRawDataProcessor::writeCsvFiles(void) {
 
     corCsvFile.open(corCsvFileName.c_str(), ios::out | ios::trunc);
     if (!corCsvFile.is_open()) {
-//        LOG(gLogConfig, logERROR) <<  "Failed to open CSV file" << corCsvFileName;
+        LOG(gLogConfig, logERROR) <<  "Failed to open CSV file" << corCsvFileName;
         return false;
     }
 
@@ -1367,27 +1358,27 @@ bool HxtRawDataProcessor::writeCsvFiles(void) {
 
     corCsvFile.close();
 
-//    LOG(gLogConfig, logINFO) << "Written global corrected histogram to CSV file " << corCsvFileName;
+    LOG(gLogConfig, logINFO) << "Written global corrected histogram to CSV file " << corCsvFileName;
 
-    // Write subpixel CSV histogram file if charge sharing addition corrector enabled
-    if (mCaCorrector)
-    {
-        ofstream corSbPxlCsvFile;
-        string corSbPxlCsvFileName("histoSubPixelCorrected.csv");
+//    /// DO NOT Write subpixel CSV histogram file EVEN if charge sharing addition corrector enabled
+//    if (mCaCorrector)
+//    {
+//        ofstream corSbPxlCsvFile;
+//        string corSbPxlCsvFileName("histoSubPixelCorrected.csv");
 
-        corSbPxlCsvFile.open(corSbPxlCsvFileName.c_str(), ios::out | ios::trunc);
-        if (!corSbPxlCsvFile.is_open()) {
-            LOG(gLogConfig, logERROR) <<  "Failed to open CSV file" << corSbPxlCsvFileName;
-            return false;
-        }
+//        corSbPxlCsvFile.open(corSbPxlCsvFileName.c_str(), ios::out | ios::trunc);
+//        if (!corSbPxlCsvFile.is_open()) {
+//            LOG(gLogConfig, logERROR) <<  "Failed to open CSV file" << corSbPxlCsvFileName;
+//            return false;
+//        }
 
-        mGlobalSubPixelHisto->WriteCsv(corSbPxlCsvFile);
+//        mGlobalSubPixelHisto->WriteCsv(corSbPxlCsvFile);
 
-        corSbPxlCsvFile.close();
+//        corSbPxlCsvFile.close();
 
-        LOG(gLogConfig, logINFO) << "Written subpixel corrected histogram to CSV file " << corSbPxlCsvFileName;
+//        LOG(gLogConfig, logINFO) << "Written subpixel corrected histogram to CSV file " << corSbPxlCsvFileName;
 
-    }
+//    }
     // Processing CSV files successful, note filenames before returning
     mRawCsvFileName = rawCsvFileName;
     mCorCsvFileName = corCsvFileName;

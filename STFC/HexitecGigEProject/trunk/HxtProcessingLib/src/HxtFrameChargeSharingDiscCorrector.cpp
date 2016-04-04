@@ -26,15 +26,12 @@ HxtFrameChargeSharingDiscCorrector::~HxtFrameChargeSharingDiscCorrector() {
 /// apply - applies charge sharing discrimination data corrected to specified frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame Disregard, Not used in this class
 /// @return bool value indicating success of correction
-bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-												HxtFrame* apSubPixelFrame) {
+bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 	
 	// Determine last and current frame indices from objects - current decoded frame ptr can be null at end
 	// of processing (i.e. on last frame), in which case we still apply the correction to the last frame but
 	// there is no forward rejection of pixel into current frame
-    apSubPixelFrame = apSubPixelFrame;
 
 	unsigned long long currentFrameIdx = 0, lastFrameIdx = 0;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();
@@ -46,6 +43,9 @@ bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFra
 			                                  " last frame index" << lastFrameIdx;
 
 	bool consecutiveFrames = (currentFrameIdx == lastFrameIdx + 1);
+
+    /// HexitecGigE Addition; getAdjacent() expanded to include all 8 neighbours
+    /// HexitecGigE Addition; clearAdjacent() expanded to include all 8 neighbours
 
 	// Vector mode? (Only examine hit pixels)
 	if (apLastDecodedFrame->getVectorStatus())
@@ -104,7 +104,7 @@ bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFra
 														   << " adjacent sum = " << adjacentSum;
 					
 					apLastDecodedFrame->setPixel(iRow, iCol, 0.0);
-					apLastDecodedFrame->clearAdjacent(iRow, iCol);					
+                    apLastDecodedFrame->clearAdjacent(iRow, iCol);
 
 					// If current frame is consecutive to last frame, also clear pixels in current
 					if (consecutiveFrames) {

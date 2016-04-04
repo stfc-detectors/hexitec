@@ -29,17 +29,14 @@ HxtFrameInterpolateCorrector::~HxtFrameInterpolateCorrector() {
 /// apply - applies interpolate correction to specified frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame frame ptr to previous subpixel frame
 /// @return bool value indicating success of correction
-bool HxtFrameInterpolateCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-													HxtFrame* apSubPixelFrame) {
+bool HxtFrameInterpolateCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 
 	// Check if each hit pixel in current frame induces noise in the following column, starting at the same row
 	// until the end of that column, then check same column in the next frame from the first row until the same 
 	// row as hit pixel.
-	// (apCurrentDecodedFrame and apSubPixelFrame never used)
+    // (apCurrentDecodedFrame never used)
     apCurrentDecodedFrame = apCurrentDecodedFrame;
-    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

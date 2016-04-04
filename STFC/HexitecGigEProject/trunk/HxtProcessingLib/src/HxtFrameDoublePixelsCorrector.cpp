@@ -28,13 +28,10 @@ HxtFrameDoublePixelsCorrector::~HxtFrameDoublePixelsCorrector() {
 /// apply - applies charge sharing discrimination data corrected to specified frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame Disregard, Not used in this class
 /// @return bool value indicating success of correction
-bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-												HxtFrame* apSubPixelFrame) {
+bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 
     apCurrentDecodedFrame = apCurrentDecodedFrame;
-    apSubPixelFrame = apSubPixelFrame;
 
 	// Check each pixel in frame apLastDecodedFrame against vector of all pixels
 	// read from file and flag any pixel that occurs more than once
@@ -78,7 +75,7 @@ bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, H
 			// Was this pixel read out more than once?
 			if ( pixelHit > 1 )
 			{
-//				LOG(gLogConfig, logINFO) << "Frame " << lastFrameIdx << " Row " << iRow << " col " << iCol << " hit " << pixelHit << " times!";
+				LOG(gLogConfig, logINFO) << "Frame " << lastFrameIdx << " Row " << iRow << " col " << iCol << " hit " << pixelHit << " times!";
 				// Increment running total of number of "corrections" applied
 				mEventsCorrected++;
 			}

@@ -18,8 +18,7 @@ public:
 	HxtFrameDoublePixelsCorrector();
 	virtual ~HxtFrameDoublePixelsCorrector();
 	
-	bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-													HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 };
 
 }

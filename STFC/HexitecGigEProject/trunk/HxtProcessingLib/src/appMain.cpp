@@ -182,13 +182,13 @@ int main(int argc, char** argv) {
 	// 3. CS Addition / O R / CS Discriminator
 	// 3.1 subpixel
 	// Get pointer to subpixel frame
-	HxtFrame* subPixelFrame = dataProcessor->getSubPixelFrame();
+//	HxtFrame* subPixelFrame = dataProcessor->getSubPixelFrame();
 	
 	// Set Charge Sharing Sub Pixel flag if enabled
 	dataProcessor->setCsaCorrector(gEnableCsaspCorrector);
 
 	// Create subpixel corrector
-	HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector(subPixelFrame);
+    HxtFrameChargeSharingSubPixelCorrector* subCorrector = new HxtFrameChargeSharingSubPixelCorrector(/*subPixelFrame*/);
 	// Register it, enable debug if needed
 	if (gDebugLevel) subCorrector->setDebug(true);
 	if (gEnableCsaspCorrector) {
@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
 	dataProcessor->writePixelOutput(gOutputFileNameDecodedFrame);
 	
 	// Write subpixel files if subpixel corrector enabled
-	if (gEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(gOutputFileNameSubPixelFrame);
+//	if (gEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(gOutputFileNameSubPixelFrame);
 	
 	// Write CSV diagnostic histograms if selected
 	if (gWriteCsvFiles)	dataProcessor->writeCsvFiles();

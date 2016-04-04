@@ -46,19 +46,16 @@ HxtFrameCalibrationCorrector::~HxtFrameCalibrationCorrector() {
 /// apply - applies calibration "correction" to apLastDecodedFrame's frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame frame ptr to previous subpixel frame
 /// @return bool value indicating success of calibration
-bool HxtFrameCalibrationCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-													HxtFrame* apSubPixelFrame) {
+bool HxtFrameCalibrationCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 
 	// Calibrate according to equation y = m*x + c
 	// where m = mGradientValue
 	//		 x = apLastDecodedFrame->getPixel();
 	// 		 c = mInterceptValue
 	//		 y = measured in keV
-	// (apCurrentDecodedFrame and apSubPixelFrame never used)
+    // (apCurrentDecodedFrame never used)
     apCurrentDecodedFrame = apCurrentDecodedFrame;
-    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

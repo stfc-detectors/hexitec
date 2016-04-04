@@ -19,8 +19,7 @@ public:
     HxtFrameMomentumCorrector(HxtPixelThreshold* apMomentum, unsigned int aRows, unsigned int aCols);
     virtual ~HxtFrameMomentumCorrector();
 
-    bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-														HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
 private:	
 	unsigned long long	mLastFrameProcessed;

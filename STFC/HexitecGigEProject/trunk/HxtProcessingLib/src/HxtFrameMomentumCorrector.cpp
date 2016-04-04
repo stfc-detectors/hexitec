@@ -38,15 +38,12 @@ HxtFrameMomentumCorrector::~HxtFrameMomentumCorrector() {
 /// apply - applies calibration "correction" to apLastDecodedFrame's frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame frame ptr to previous subpixel frame
 /// @return bool value indicating success of calibration
-bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-													HxtFrame* apSubPixelFrame) {
+bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
 
     // Apply Momentum after Calibration and Charge XX (CSA, CSD?) applied
-	// (apCurrentDecodedFrame and apSubPixelFrame never used)
+    // (apCurrentDecodedFrame never used)
     apCurrentDecodedFrame = apCurrentDecodedFrame;
-    apSubPixelFrame = apSubPixelFrame;
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();

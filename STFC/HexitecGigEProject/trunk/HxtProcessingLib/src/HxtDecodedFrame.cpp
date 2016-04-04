@@ -46,10 +46,15 @@ double HxtDecodedFrame::getAdjacent(unsigned int aRow, unsigned int aCol) {
 	// Sum up pixel values for pixels(row+-1,col+-1) around specified pixel - here we exploit
 	// the fact that the pixel array is offset in row and col by one to allow this to work
 	// generally even up to the edges of the pixel array
-	adjacentSum += mPixelValue[pixelAddress((aRow - 1), aCol)];
-	adjacentSum += mPixelValue[pixelAddress((aRow + 1), aCol)];
-	adjacentSum += mPixelValue[pixelAddress(aRow, (aCol - 1))];
-	adjacentSum += mPixelValue[pixelAddress(aRow, (aCol + 1))];
+    /// HexitecGigE Addition: Expanded to incorporate all 8 neighbours
+    adjacentSum += mPixelValue[pixelAddress((aRow - 1), (aCol - 1))];
+    adjacentSum += mPixelValue[pixelAddress((aRow - 1),  aCol)];
+    adjacentSum += mPixelValue[pixelAddress((aRow - 1), (aCol + 1))];
+    adjacentSum += mPixelValue[pixelAddress(aRow,       (aCol - 1))];
+    adjacentSum += mPixelValue[pixelAddress(aRow,       (aCol + 1))];
+    adjacentSum += mPixelValue[pixelAddress((aRow + 1), (aCol - 1))];
+    adjacentSum += mPixelValue[pixelAddress((aRow + 1),  aCol)];
+    adjacentSum += mPixelValue[pixelAddress((aRow + 1), (aCol + 1))];
 
 	return adjacentSum;
 }
@@ -59,10 +64,15 @@ double HxtDecodedFrame::getAdjacent(unsigned int aRow, unsigned int aCol) {
 /// @param aCol column number
 void HxtDecodedFrame::clearAdjacent(unsigned int aRow, unsigned int aCol) {
 
-	mPixelValue[pixelAddress((aRow - 1), aCol)] = 0.0;
-	mPixelValue[pixelAddress((aRow + 1), aCol)] = 0.0;
-	mPixelValue[pixelAddress(aRow, (aCol - 1))] = 0.0;
-	mPixelValue[pixelAddress(aRow, (aCol + 1))] = 0.0;
+    /// HexitecGigE Addition: Expanded to incorporate all 8 neighbours
+    mPixelValue[pixelAddress((aRow - 1), (aCol - 1))] = 0.0;
+    mPixelValue[pixelAddress((aRow - 1), aCol)]       = 0.0;
+    mPixelValue[pixelAddress((aRow - 1), (aCol + 1))] = 0.0;
+    mPixelValue[pixelAddress(aRow, (aCol - 1))]       = 0.0;
+    mPixelValue[pixelAddress(aRow, (aCol + 1))]       = 0.0;
+    mPixelValue[pixelAddress((aRow + 1), (aCol - 1))] = 0.0;
+    mPixelValue[pixelAddress((aRow + 1), aCol)]       = 0.0;
+    mPixelValue[pixelAddress((aRow + 1), (aCol + 1))] = 0.0;
 	
 }
 

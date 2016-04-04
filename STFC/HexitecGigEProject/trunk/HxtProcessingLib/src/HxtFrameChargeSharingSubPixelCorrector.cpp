@@ -16,6 +16,10 @@
 
 #include "HxtFrameChargeSharingSubPixelCorrector.h"
 #include <algorithm>
+/// DEBUGGING purposes:
+#include <iostream>
+#include <iomanip>
+///
 
 namespace hexitech {
 
@@ -34,34 +38,19 @@ HxtFrameChargeSharingSubPixelCorrector::~HxtFrameChargeSharingSubPixelCorrector(
 /// apply - applies charge sharing addition correction (CSA) algorithm to specified frame
 /// @param apLastDecodedFrame ptr to the previous decoded frame
 /// @param apCurrentDecoded frame ptr to current decoded frame
-/// @param apSubPixelFrame frame ptr to previous subpixel frame
-/// @return bool value indicating success of correction
-bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame, 
-													HxtFrame* apSubPixelFrame) {
 
-	// Examine apLastDecodedFrame for hits; Any hit examines local 2x2 matrix for charge sharing and were found,
-	// move all charges on to pixel containing highest initial charge. This charge is also copied into
-	// the 240x240 matrix (apSubPixelFrame) according to subpixel algorithm
+/// @return bool value indicating success of correction
+bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
+
+    // Examine apLastDecodedFrame for hits; Any hit examines local 3x3 matrix for charge sharing and were found,
+    // move all charges on to pixel containing highest initial charge.
+    /// HexitecGigE Modification, the 240x240 matrix (apSubPixelFrame) of the subpixel algorithm has been removed
 	// (apCurrentDecodedFrame pointer never used)
     apCurrentDecodedFrame = apCurrentDecodedFrame;
-
-	if ( apSubPixelFrame == NULL )
-	{
-		LOG(gLogConfig, logERROR) << "Charge Sharing Addition Error: apSubPixelFrame argument not defined!";
-		return false;
-	}
 
     unsigned long long lastFrameIdx;
 	lastFrameIdx = apLastDecodedFrame->getFrameIndex();
 	
-	if ( (lastFrameIdx <= apSubPixelFrame->getFrameIndex()) && (lastFrameIdx !=0))
-	{
-//		LOG(gLogConfig, logINFO) << "Already processed frame " << apSubPixelFrame->getFrameIndex();
-		return false;
-	}
-
-	// Set SubPixel frame number to apLastDecodedFrame's
-	apSubPixelFrame->setFrameIndex((lastFrameIdx));
 
 	// Get rows and columns lengths
 	const unsigned int nRows = apLastDecodedFrame->getRows();
@@ -69,24 +58,26 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 
 	// Current pixel to be interrogated
 	double currentPixelValue = 0.0;
-	// Sum of pixel values in 2x2 pixel matrix
-	double sumOfFourPixels = 0.0;
+    // Sum of pixel values in 3x3 pixel matrix
+    double sumOfEightPixels = 0.0;
 
-	// Create array of four indexes, one for each pixel in 2x2 matrix
-	double arPixelValues[4];
-	for ( int i = 0; i < 4; i++ )
+    // Create array of nine indices, one for each pixel in 3x3 matrix
+    double arPixelValues[9];
+    for ( int i = 0; i < 9; i++ )
 	{
 		arPixelValues[i] = 0;
 		if (mDebug) LOG(gLogConfig, logDEBUG2) << "CSSPxl::apply() arPixelValues[" << i << "] = " << arPixelValues[i];
 	}
 
-	// Looking for the three neighbouring pixels, 
-	// forming a 2x2 matrix:
-	//		-------
-	//		|0*| 1|
-	//		-------
-	//		|2 | 3|
-	//		-------
+    // Looking for the eight neighbouring pixels,
+    // forming a 3x3 matrix:
+    //		----------
+    //		| 0 1| 2|
+    //		----------
+    //		| 3|*4| 5|
+    //		----------
+    //		| 6| 7| 8|
+    //		----------
 	// * = The pixel that's hit
 	
 	int winnerIdx = -1;
@@ -101,86 +92,73 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 
 	// Normal mode only - vector mode slower because
 	// algorithm requires ordering of vector elements
-	
-	// Iterate over rows and columns in frames
-	for (unsigned int iCol = 0; iCol < nCols; iCol++) {
 
-		for (unsigned int iRow = 0; iRow < nRows; iRow++) {
+    // Iterate over rows and columns in frames
+    for (unsigned int iCol = 0; iCol < nCols; iCol++) {
+
+        for (unsigned int iRow = 0; iRow < nRows; iRow++) {
 			
 			// Get pixel values from copy of frame
 			currentPixelValue = apLastDecodedFrame->getPixelCopy(iRow, iCol);
 			
 			// Is current pixel hit?
-			if (currentPixelValue > 0.0) {				
+            if (currentPixelValue > 0.0) {
 
-				arPixelValues[0] = currentPixelValue;
-				// Current pixel hit, grab its three neighbours..
-				arPixelValues[1] = apLastDecodedFrame->getPixelCopy(iRow, iCol+1);
-				arPixelValues[2] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol);
-				arPixelValues[3] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol+1);
+                arPixelValues[0] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol-1);
+                arPixelValues[1] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol);
+                arPixelValues[2] = apLastDecodedFrame->getPixelCopy(iRow-1, iCol+1);
 
-				sumOfFourPixels = this->sumFourPixels(arPixelValues);
+                arPixelValues[3] = apLastDecodedFrame->getPixelCopy(iRow, iCol-1);
+                arPixelValues[4] = currentPixelValue;
+                arPixelValues[5] = apLastDecodedFrame->getPixelCopy(iRow, iCol+1);
+
+                arPixelValues[6] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol-1);
+                arPixelValues[7] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol);
+                arPixelValues[8] = apLastDecodedFrame->getPixelCopy(iRow+1, iCol+1);
+
+                // Count number of hit pixels
+                unsigned int numberOfPixelsHit = 0;
+
+                for (unsigned int i= 0; i < 9; i++)
+                    if (arPixelValues[i] > 0) numberOfPixelsHit++;  // Only count non-zero pixels..
+
+                sumOfEightPixels = this->sumEightPixels(arPixelValues);
 
 				// Pixel hit; case A, B, C or D?
-				if ( arPixelValues[3] > 0.0) {
+                if ( numberOfPixelsHit > 3) {
 
-					// Case A, all four pixels hit
+                    // Case A, at least four pixels hit
 					this->winnerPixel(arPixelValues, winnerIdx);
-
-					// 240x240 frame: Update SubPixel frame with total charge
-					this->updateSubPixelFrameCaseA(apSubPixelFrame, iRow, iCol, winnerIdx, sumOfFourPixels);
 										
-					// 80x80 frame: Set winning pixel to total charge and clear the other three pixels
-					this->updateDecodedFrame(iRow, iCol, sumOfFourPixels, winnerIdx, apLastDecodedFrame);		
+                    // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
+                    this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
 					mCaseA++;
 				}
-				else if ( arPixelValues[2] > 0.0 ) {
+                else if ( numberOfPixelsHit > 1 ) {
 
-					// Case B, same column pixels hit
-					// (or possible case A but only three hit pixels)
+                    // Case B, if same column pixels hit
+                    // Case C, if same row pixels hit
 					this->winnerPixel(arPixelValues, winnerIdx);
 
-					// If index 1 is the winner of then we actually have a case A scenario
-					//	but the pixel at index 3's charge fell below that pixel's threshold
-					if ( winnerIdx == 1 )
+                    /// How determine each case?
+                    // Lets see if pixel "1", "7" hit: Case B
+                    if ( winnerIdx == 1 || winnerIdx == 7)
+                    {
+                        // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
+                        this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
+                        mCaseB++;
+                    }
+                    else if (winnerIdx == 3 || winnerIdx == 5)   // Lets see if pixel "3", "5" hit: Case C
 					{
-						// Case A (three hits pixels), 240x240 frame: Update SubPixel frame with total charge
-						this->updateSubPixelFrameCaseA(apSubPixelFrame, iRow, iCol, winnerIdx, sumOfFourPixels);
-										
-						// 80x80 frame: Set winning pixel to total charge and clear the other three pixels
-						this->updateDecodedFrame(iRow, iCol, sumOfFourPixels, winnerIdx, apLastDecodedFrame);		
-						mCaseA++;
+                        // 80x80 frame: Set winning pixel to total charge and clear the other eight pixels
+                        this->updateDecodedFrame(iRow, iCol, sumOfEightPixels, winnerIdx, apLastDecodedFrame);
+                        mCaseC++;
 					}
-					else
-					{
-						// Case B; 240x240 frame: Update SubPixel frame with total charge
-						this->updateSubPixelFrameCaseB(apSubPixelFrame, iRow, iCol, winnerIdx, sumOfFourPixels);
-
-						// 80x80 frame: Set winning pixel to total charge and clear the other three pixels
-						this->updateDecodedFrame(iRow, iCol, sumOfFourPixels, winnerIdx, apLastDecodedFrame);
-						mCaseB++;
-					}
-				}
-				else if ( arPixelValues[1] > 0.0 ) {
-		
-					// Case C, same row pixels hit
-					this->winnerPixel(arPixelValues, winnerIdx);
-
-					// 240x240 frame: Update SubPixel frame with total charge
-					this->updateSubPixelFrameCaseC(apSubPixelFrame, iRow, iCol, winnerIdx, sumOfFourPixels);
-					
-					// 80x80 frame: Set winning pixel to total charge and clear the other three pixels
-					this->updateDecodedFrame(iRow, iCol, sumOfFourPixels, winnerIdx, apLastDecodedFrame);
-					mCaseC++;
+                    else
+                        ;   // Doesn't seem to be happening..
 				}
 				else {
-
 					// Case D, no other pixels hit
-
-					// 240x240 frame: Update SubPixel frame with total charge
-					apSubPixelFrame->setPixel((iRow*3+1), (iCol*3+1), currentPixelValue);
-					
-					// Only current pixel hit, therefore need not call updateDecodedFrame(), updateSubPixelFrameCase..()
 					mCaseD++;
 				}				
 
@@ -189,101 +167,103 @@ bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecode
 
 			}	// End of currentPixelValue > 0.0
 		}	// End of iCol loop		
-	}	// End of iRow loop
+    }
+    // End of iRow loop
 
-	return true;
+    return true;
 }
 
-/// sumFourPixels - Sum the pixel values in array aaPixels[]
+/// sumEightPixels - Sum the pixel values in array aaPixels[]
 /// @param aaPixels[] array containing four pixel values
 /// @return double value containing sum of the four pixels
-double HxtFrameChargeSharingSubPixelCorrector::sumFourPixels(double aaPixels[]) {
+double HxtFrameChargeSharingSubPixelCorrector::sumEightPixels(double aaPixels[]) {
 
-	double sumOfFourPixels = 0.0;
-	// Sum up to charge for the four pixels
-	for ( int i = 0; i < 4; i++ )
-	{		
-		sumOfFourPixels += aaPixels[i];
+    double sumOfEightPixels = 0.0;
+    // Sum up to charge for the eight neighbouring pixels (i.e. 9 including the pixel in the middle)
+    for ( int i = 0; i < 9; i++ )
+    {
+        sumOfEightPixels += aaPixels[i];
 	}
-
-	return sumOfFourPixels;
+    return sumOfEightPixels;
 }
 
 /// updateDecodedFrame - update decoded frame at pointer apLastDecodedFrame based upon the other arguments
-/// @param currentRow - the row index of the current 2x2 miniature targeted frame
-/// @param currentCol - the col index of the current 2x2 miniature targeted frame
-/// @param totalCharge - the total charge of the four pixels in the 2x2 frame
-/// @param aWinnerIdx - the pixel in the 2x2 frame containing the highest value
+/// @param currentRow - the row index of the current 3x3 miniature targeted frame
+/// @param currentCol - the col index of the current 3x3 miniature targeted frame
+/// @param totalCharge - the total charge of the four pixels in the 3x3 frame
+/// @param aWinnerIdx - the pixel in the 3x3 frame containing the highest value
 /// @param apLastDecodedFrame pointer pointing at decoded frame to be modified
 /// @return bool value  signalling true for success and false for failure
 bool HxtFrameChargeSharingSubPixelCorrector::updateDecodedFrame(unsigned int currentRow, unsigned int currentCol, double totalCharge,
 										int const &aWinnerIdx, HxtDecodedFrame* apLastDecodedFrame) {
-	
+
+    /// Regardless of which pixel "won",  we can clear all pixels regardless - winning pixel is then assigned value of totalCharge
+    // Clear all 9 pixels in the original and copy of frame
+    for (unsigned int iRow = currentRow-1; iRow < (currentRow+1); iRow++)
+    {
+        for (unsigned int iCol= currentCol-1; iCol< (currentCol+1); iCol++)
+        {
+            apLastDecodedFrame->setPixel(iRow, iCol, 0.0);
+            apLastDecodedFrame->setPixelCopy(iRow, iCol, 0.0);
+        }
+    }
+
 	switch(aWinnerIdx)
 	{
 		case 0:
-			{
-				// Update winner (current pixel)
-				apLastDecodedFrame->setPixel(currentRow, currentCol, totalCharge);
-				// The hit pixel was the winner, clear its' three neighbours
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol+1, 0.0);
-				// Clear all four pixels in copy of frame to prevent reprocessing same pixel(s) later on
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol+1, 0.0);				
-			}
-			break;
+            {
+                apLastDecodedFrame->setPixel(currentRow-1, currentCol-1, totalCharge);
+            }
+        break;
 
-		case 1:
+        case 1:
+            {
+                apLastDecodedFrame->setPixel(currentRow-1, currentCol, totalCharge);
+            }
+        break;
+
+        case 2:
+            {
+                apLastDecodedFrame->setPixel(currentRow-1, currentCol+1, totalCharge);
+            }
+        break;
+
+        case 3:
+            {
+                apLastDecodedFrame->setPixel(currentRow, currentCol-1, totalCharge);
+            }
+        break;
+
+        case 4:
+            {
+                apLastDecodedFrame->setPixel(currentRow, currentCol, totalCharge);
+            }
+        break;
+
+        case 5:
 			{
-				// Update winner (currentRow, currentCol+1)
 				apLastDecodedFrame->setPixel(currentRow, currentCol+1, totalCharge);
-				// Clear 0, 2, 3
-				apLastDecodedFrame->setPixel(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol+1, 0.0);
-				// Clear all four pixels in copy of frame to prevent reprocessing same pixel(s) later on
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol+1, 0.0);
 			}
 			break;
 
-		case 2:
-			{
-				// Update winner (currentRow+1, currentCol)
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol, totalCharge);
-				// Clear 0, 1, 3
-				apLastDecodedFrame->setPixel(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol+1, 0.0);
-				// Clear all four pixels in copy of frame to prevent reprocessing same pixel(s) later on
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol+1, 0.0);
-			}
-			break;
+        case 6:
+            {
+                apLastDecodedFrame->setPixel(currentRow+1, currentCol-1, totalCharge);
+            }
+        break;
 
-		case 3:
-			{
-				// Update winner (currentRow+1, currentCol+1)
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol+1, totalCharge);
-				// Clear 0, 1, 2
-				apLastDecodedFrame->setPixel(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixel(currentRow, currentCol+1, 0.0);
-				// Clear all four pixels in copy of frame to prevent reprocessing same pixel(s) later on
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow, currentCol+1, 0.0);
-				apLastDecodedFrame->setPixelCopy(currentRow+1, currentCol+1, 0.0);
-			}
-			break;
+        case 7:
+            {
+                apLastDecodedFrame->setPixel(currentRow+1, currentCol, totalCharge);
+            }
+        break;
+
+        case 8:
+            {
+                apLastDecodedFrame->setPixel(currentRow+1, currentCol+1, totalCharge);
+            }
+        break;
+
 
 		default:
 			{
@@ -296,7 +276,7 @@ bool HxtFrameChargeSharingSubPixelCorrector::updateDecodedFrame(unsigned int cur
 }
 
 /// winnerPixel - determine which pixel contains the highest value in the aaPixels[] array
-/// @param aaPixels[] - array containing four pixel values
+/// @param aaPixels[] - array containing nine pixel values
 /// @param aWinnerIdx - this reference will contain index of pixel with highest value
 void HxtFrameChargeSharingSubPixelCorrector::winnerPixel(double aaPixels[], int &aWinnerIdx) {
 
@@ -305,120 +285,13 @@ void HxtFrameChargeSharingSubPixelCorrector::winnerPixel(double aaPixels[], int 
 	double maxVal = -1;
 
 	// Look for biggest hit in array
-	for ( int i = 0; i < 4; i++ )
-	{	
+    for ( int i = 0; i < 9; i++ )
+    {
 		if (aaPixels[i] > maxVal)
 		{
 			maxVal = aaPixels[i];
 			aWinnerIdx = i;
 		}
-	}
-}
-
-/// updateSubPixelFrameCaseA - update subpixelframe at apSubPixelFrame according to CSA algorithm Case A
-/// @param aRow - the row index of "winning" pixel 
-/// @param aCol - the column index of "winning" pixel
-/// @param aSumOfFourPixels - the total charge of pixel (aRow, aCol) + its three neighbours
-/// @param aWinnerIdx - the location of the "winning" pixel in relation to the 2x2 matrix
-/// @param apSubPixelFrame pointer pointing at subpixel frame to be modified
-void HxtFrameChargeSharingSubPixelCorrector::updateSubPixelFrameCaseA(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, 
-																	int aWinnerIdx, double aSumOfFourPixels) {
-	// 240x240 frame: Update SubPixel frame with total charge
-	switch(aWinnerIdx)
-	{
-		case 0:
-			{				
-				apSubPixelFrame->setPixel((aRow*3+2), (aCol*3+2), aSumOfFourPixels);
-			}
-			break;
-
-		case 1:
-			{				
-				apSubPixelFrame->setPixel((aRow*3+2), (aCol*3), aSumOfFourPixels);
-			}
-			break;
-
-		case 2:
-			{				
-				apSubPixelFrame->setPixel((aRow*3), (aCol*3+2), aSumOfFourPixels);
-			}
-			break;
-
-		case 3:
-			{				
-				apSubPixelFrame->setPixel((aRow*3), (aCol*3), aSumOfFourPixels);
-			}
-			break;
-
-		default:
-			{
-				// Print error Message!
-				LOG(gLogConfig, logERROR) << "Unable to Update Case A Subpixel, aWinnerIdx = " << aWinnerIdx;
-				return;
-			}
-	}
-}
-
-/// updateSubPixelFrameCaseA - update subpixelframe at apSubPixelFrame according to CSA algorithm Case B
-/// @param aRow - the row index of "winning" pixel 
-/// @param aCol - the column index of "winning" pixel
-/// @param aSumOfFourPixels - the total charge of pixel (aRow, aCol) + its three neighbours
-/// @param aWinnerIdx - the location of the "winning" pixel in relation to the 2x2 matrix
-/// @param apSubPixelFrame pointer pointing at subpixel frame to be modified
-void HxtFrameChargeSharingSubPixelCorrector::updateSubPixelFrameCaseB(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, 
-																	int aWinnerIdx, double aSumOfFourPixels) {
-	
-	switch(aWinnerIdx)
-	{
-		case 0:
-			{				
-				apSubPixelFrame->setPixel((aRow*3+2), (aCol*3+1), aSumOfFourPixels);
-			}
-			break;
-
-		case 2:
-			{				
-				apSubPixelFrame->setPixel((aRow*3), (aCol*3+1), aSumOfFourPixels);
-			}
-			break;
-
-		default:
-			{
-				// Print error Message!
-				LOG(gLogConfig, logERROR) << "Unable to Update Case B Subpixel, aWinnerIdx = " << aWinnerIdx;
-				return;
-			}
-	}
-}
-
-/// updateSubPixelFrameCaseA - update subpixelframe at apSubPixelFrame according to CSA algorithm Case C
-/// @param aRow - the row index of "winning" pixel 
-/// @param aCol - the column index of "winning" pixel
-/// @param aSumOfFourPixels - the total charge of pixel (aRow, aCol) + its three neighbours
-/// @param aWinnerIdx - the location of the "winning" pixel in relation to the 2x2 matrix
-/// @param apSubPixelFrame pointer pointing at subpixel frame to be modified
-void HxtFrameChargeSharingSubPixelCorrector::updateSubPixelFrameCaseC(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, 
-																	int aWinnerIdx, double aSumOfFourPixels) {
-	switch(aWinnerIdx)
-	{
-		case 0:
-			{				
-				apSubPixelFrame->setPixel((aRow*3+1), (aCol*3+2), aSumOfFourPixels);
-			}
-			break;
-
-		case 1:
-			{				
-				apSubPixelFrame->setPixel((aRow*3+1), (aCol*3), aSumOfFourPixels);
-			}
-			break;
-
-		default:
-			{
-				// Print error Message!
-				LOG(gLogConfig, logERROR) << "Unable to Update Case C Subpixel, aWinnerIdx = " << aWinnerIdx;
-				return;
-			}
 	}
 }
 

@@ -18,8 +18,7 @@ public:
 	HxtFrameChargeSharingDiscCorrector();
 	virtual ~HxtFrameChargeSharingDiscCorrector();
 	
-	bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-													HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 };
 
 }

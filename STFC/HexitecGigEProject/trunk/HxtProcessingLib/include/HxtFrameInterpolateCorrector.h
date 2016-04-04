@@ -20,8 +20,7 @@ public:
 	HxtFrameInterpolateCorrector();
 	virtual ~HxtFrameInterpolateCorrector();
 
-	bool HxtFrameInterpolateCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-														HxtFrame* apSubPixelFrame = NULL);
+    bool HxtFrameInterpolateCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
 	double calculateNeighboursAverage(HxtDecodedFrame* apLastDecodedFrame, unsigned int aRow, unsigned int aCol);
 private:

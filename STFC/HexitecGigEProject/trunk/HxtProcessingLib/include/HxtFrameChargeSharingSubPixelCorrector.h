@@ -19,9 +19,8 @@ public:
     HxtFrameChargeSharingSubPixelCorrector();
 	virtual ~HxtFrameChargeSharingSubPixelCorrector();
 
-	bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame,
-														HxtFrame* apSubPixelFrame = NULL);
-	double sumFourPixels(double aaPixels[]);
+    bool HxtFrameChargeSharingSubPixelCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
+    double sumEightPixels(double aaPixels[]);
 	bool	updateDecodedFrame(unsigned int currentRow, unsigned int currentCol, double totalCharge,
 										int const &aWinnerIdx, HxtDecodedFrame* apLastDecodedFrame);
 	void	winnerPixel(double aaPixels[], int &aWinnerIdx);

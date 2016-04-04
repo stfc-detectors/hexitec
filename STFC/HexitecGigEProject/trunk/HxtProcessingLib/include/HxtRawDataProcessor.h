@@ -74,17 +74,17 @@ public:
     bool parseBuffer(vector<unsigned short*> &aBufferNames, vector<unsigned long> &aValidFrames);
     bool flushFrames(void);
 
-	bool outputFrame(HxtFrame* pSubPixelFrame);
+//	bool outputFrame(HxtFrame* pSubPixelFrame);
 	bool outputFrame(unsigned int aFrameIdx);
     bool writeStructOutput(string aOutputFileName); /// HexitecGigE: To replace writePixelOutput() ?
 	bool writePixelOutput(string aOutputFileName);
-	bool writeSubPixelOutput(string aOutputFileName);
-	bool writeCsvFiles(void);
+//	bool writeSubPixelOutput(string aOutputFileName);
+    bool writeCsvFiles(void);
     /// HexitecGigE Added: (Support copying .HXT contents to buffer, not file)
     bool copyPixelOutput(unsigned short* aHxtBuffer);
     void resetHistograms();
 
-	HxtFrame* getSubPixelFrame();
+//	HxtFrame* getSubPixelFrame();
 
     // Debugging functions - may be useful in the future?
     unsigned int calculateCurrentHeaderSize();
@@ -115,23 +115,6 @@ private:
     /// Setup lookup table for pixel reordering:
     int* mPixelTable;
 
-//	/// dumpRawLine - inline function to print raw Hxt data line    // Now redundant
-//	inline void dumpRawLine(hxtRawLine* apLine, LogLevel aLevel) {
-//		LOG(gLogConfig, aLevel) << setw(3) << (int)apLine->byte[0] << " " << setw(3) << (int)apLine->byte[1] << " " << setw(3) << (int)apLine->byte[2] << " ";
-//	}
-
-//	/// isFramePreamble - inline function to detect if raw line is a frame preamble
-//	inline bool isFramePreamble(hxtRawLine* apLine) {
-//		return ((apLine->byte[0] == kHxtFramePreambleLabel) &&
-//				(apLine->byte[1] == kHxtFramePreambleLabel) &&
-//				(apLine->byte[2] == kHxtFramePreambleLabel));
-//	}
-
-//	/// isRowMarker - inline function to detect if raw line is a row marker
-//	inline bool isRowMarker(hxtRowMarker* apRow) {
-//		return ((apRow->pad == 0) && (apRow->rowLabel == kHxtRowMarkerLabel));
-//	}
-
     /// Debugging frame by frame
     string mDebugFrameDir;
     unsigned int mFrameNumber;
@@ -156,9 +139,9 @@ private:
 //	unsigned int mHxtBuffer.nCols;     // number of decoded pixel columns
 	unsigned int mPixels;   // number of decoded pixels in sensor
 
-	unsigned int mSubPixelRows;     // number of subpixel rows
-	unsigned int mSubPixelCols;     // number of subpixel columns
-	unsigned int mSubPixelPixels;   // number of subpixel in sensor
+//	unsigned int mSubPixelRows;     // number of subpixel rows
+//	unsigned int mSubPixelCols;     // number of subpixel columns
+//	unsigned int mSubPixelPixels;   // number of subpixel in sensor
 
 	double       mHistoStart; // histogram start value
 	double       mHistoEnd;   // histogram end value
@@ -171,7 +154,7 @@ private:
     int            mRowIdx;               // current pixel row index within current frame
 
 	unsigned int   mCorrectedFramesWritten;   // number of frames written to output histograms
-	unsigned int   mSubPixelFramesWritten;   // number of frames written to output histograms
+//	unsigned int   mSubPixelFramesWritten;   // number of frames written to output histograms
 
 	bool mDebug;   // debug flag
 
@@ -181,19 +164,19 @@ private:
 	// Temporary histograms for raw, corrected and subpixel data from all pixels
 	Histogram*   mGlobalRawHisto;
 	Histogram*   mGlobalDecodedHisto;
-	Histogram*   mGlobalSubPixelHisto;
+//	Histogram*   mGlobalSubPixelHisto;
 
 	// Pair of decoded frame stores for current and last frames
 	HxtDecodedFrame* mDecodedFrame[2];
 
 	// Create subpixel frame [240x240] where [3x3] for each pixel of decoded frame [82x82]
-	HxtFrame* mSubPixelFrame;
+//	HxtFrame* mSubPixelFrame;
 
 	// Vector of per-pixel histograms for output of corrected data
 	vector<Histogram*> mPixelHistogram;
 
 	// Vector of per-pixel histograms for output of subpixel data
-	vector<Histogram*> mSubPixelHistogram;
+//	vector<Histogram*> mSubPixelHistogram;
 
 	// Vector of frame correctors to be applied to the data
 	vector<HxtFrameCorrector*> mFrameCorrector;
