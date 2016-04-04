@@ -58,7 +58,7 @@ private:
 //   void checkKeithleyConfiguration();
    void closeEvent(QCloseEvent *event);
    bool checkDAQChoice();
-   void writeCsv(QString filename, QVector<double> col0, int *col1, int numberOfBins);
+   void writeCsv(QString filename, QVector<double> col0, double *col1, int numberOfBins);
    QAction *startDAQAct;
    QAction *stopDAQAct;
 
