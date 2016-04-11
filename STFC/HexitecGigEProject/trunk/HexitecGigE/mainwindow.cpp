@@ -172,18 +172,19 @@ MainWindow::MainWindow()
       dataAcquisitionForm->setDaqModelName(daqModelName);
    }
 
-   createStatusBar();
-   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
+   tabs->addTab(processingWindow->getMainWindow(), QString("Processing"));
    if (activeDAQ)
    {
       tabs->addTab(detectorControlForm->getMainWindow(), QString("Detector Control"));
       tabs->addTab(dataAcquisitionForm->getMainWindow(), QString("Data Acquisition"));
       connect(this, SIGNAL(startDAQ()), dataAcquisitionForm, SLOT(handleCollectImagesPressed()));
       connect(this, SIGNAL(stopDAQ()), dataAcquisitionForm, SLOT(handleAbortDAQPressed()));
+      connect(this, SIGNAL(startHV()), detectorControlForm, SLOT(handleHVOn()));
+      connect(this, SIGNAL(stopHV()), detectorControlForm, SLOT(handleHVOff()));
       tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
    }
 
-   tabs->addTab(processingWindow->getMainWindow(), QString("Processing"));
+   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
    connect(processingWindow, SIGNAL(removeSlice()), this, SLOT(deleteFirstSlice( ) ));
 
    // Need to signal to processingWindow to initialise itself with settings from 2Easy.ini file
@@ -238,19 +239,21 @@ QMainWindow *MainWindow::createVisualisation()
    subTabs->addTab(plotter->getMainWindow(), QString("Plotter"));
    subTabs->addTab(workspace->getMainWindow(), QString("Workspace"));
 
-   // And the whole tabs widget is dockable
+   createPixelManipulation();
    QDockWidget *dock = new QDockWidget(tr("Plotter and Workspace"), visualisation);
    dock->setAllowedAreas(Qt::RightDockWidgetArea);
+
+   QWidget *newWidget = new QWidget(this);
+   QGridLayout *layout = new QGridLayout;
+   layout->setColumnStretch(0, 1);
+   layout->setColumnStretch(1, 0);
+   layout->addWidget(subTabs, 0, 0);
+   layout->addWidget(pixelManipulationForm, 0, 1);
+   newWidget->setLayout(layout);
+   dock->setWidget(newWidget);
+   newWidget->setParent(dock);
    visualisation->addDockWidget(Qt::RightDockWidgetArea, dock);
    viewMenu->addAction(dock->toggleViewAction());
-   dock->setWidget(subTabs);
-   subTabs->setParent(dock);
-
-   createPixelManipulation();
-   QDockWidget *pmDock = new QDockWidget(tr("Pixel Manipulation"), visualisation);
-   pmDock->setAllowedAreas(Qt::LeftDockWidgetArea);
-   visualisation->addDockWidget(Qt::LeftDockWidgetArea, pmDock);
-   pmDock->setWidget(pixelManipulationForm);
 
    return visualisation;
 }
