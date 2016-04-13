@@ -55,6 +55,8 @@ public slots:
     void handleCollectingChanged(bool collectingOn);
     void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
     void handleBiasVoltageChanged(bool biasOn);
+    void handleHVOn();
+    void handleHVOff();
     void handleScriptReserve(QString name);
     void handleScriptRelease(QString name);
 
@@ -80,6 +82,8 @@ signals:
    void disableBiasRefresh();
    void writeError(QString message);
    void writeMessage(QString message);
+   void enableHVActions();
+   void disableHVActions();
 };
 
 #endif // DETECTORCONTROLFORM_H

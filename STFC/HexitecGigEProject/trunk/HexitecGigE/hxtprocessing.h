@@ -159,6 +159,11 @@ private slots:
     void handleHxtProcessingPrepSettings();
     void customFileSelected(bool bCustom);
 
+//public slot:  /// Must be public slot..? - I guess not
+    // ProcessingWindow toggling Processing Logging
+    void toggleProcessingLogging(bool bBool);
+
+
 protected:
     // Go through fileQueue looking for any motor position changes
     bool checkQueueForMotorChanges(int currentCondition, int *numberOfFilesToProcess);
@@ -261,6 +266,8 @@ protected:
     int mutexTimeout;
 
     ostringstream logFileStream;
+    /// HexitecGigE Addition; Allow user to disable logging
+    bool bProcessingLoggingDisabled;
 
     // Queues for raw filename and motor positions
     QQueue<string> fileQueue;

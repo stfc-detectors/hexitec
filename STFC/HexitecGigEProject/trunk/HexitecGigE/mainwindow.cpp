@@ -43,6 +43,7 @@ MainWindow::MainWindow()
 
    if (activeDAQ)
    {
+      hVOn = false;
       if (settings->contains("aspectIniFilename"))
       {
 
@@ -150,6 +151,10 @@ MainWindow::MainWindow()
               this, SLOT(enableMainWindowActions()));
       connect(dataAcquisitionForm, SIGNAL(disableMainWindowActions()),
               this, SLOT(disableMainWindowActions()));
+      connect(detectorControlForm, SIGNAL(enableHVActions()),
+              this, SLOT(enableHVActions()));
+      connect(detectorControlForm, SIGNAL(disableHVActions()),
+              this, SLOT(disableHVActions()));
    }
 //   We don't have one of these so this won't happen.
    scriptingWidget->runInitScript();
@@ -172,6 +177,7 @@ MainWindow::MainWindow()
       dataAcquisitionForm->setDaqModelName(daqModelName);
    }
 
+   createStatusBar();
    tabs->addTab(processingWindow->getMainWindow(), QString("Processing"));
    if (activeDAQ)
    {
@@ -512,6 +518,22 @@ void MainWindow::handleStopDAQ()
    enableMainWindowActions();
 }
 
+void MainWindow::handleStartHV()
+{
+   qDebug() << "MainWindow::handleStartHV()";
+   hVOn = true;
+   emit startHV();
+   enableHVActions();
+}
+
+void MainWindow::handleStopHV()
+{
+   qDebug() << "MainWindow::handleStopHV()";
+   hVOn = false;
+   emit stopHV();
+   enableHVActions();
+}
+
 
 void MainWindow::deleteActiveSlice()
 {
@@ -586,6 +608,17 @@ void MainWindow::createMenus()
       fileToolBar->addAction(stopDAQAct);
       connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
       connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
+
+      startHVAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
+      stopHVAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
+      startHVAct->setText("Turn HV On (start bias refreshing)");
+      stopHVAct->setText("Turn HV Off (stop bias refreshing)");
+      startHVAct->setDisabled(true);
+      stopHVAct->setDisabled(true);
+      fileToolBar->addAction(startHVAct);
+      fileToolBar->addAction(stopHVAct);
+      connect(startHVAct, SIGNAL(triggered()), this, SLOT(handleStartHV()));
+      connect(stopHVAct, SIGNAL(triggered()), this, SLOT(handleStopHV()));
    }
 
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
@@ -1007,9 +1040,29 @@ void MainWindow::enableMainWindowActions()
    stopDAQAct->setDisabled(true);
 }
 
+void MainWindow::enableHVActions()
+{
+   if (hVOn)
+   {
+      stopHVAct->setEnabled(true);
+      startHVAct->setDisabled(true);
+   }
+   else
+   {
+      startHVAct->setEnabled(true);
+      stopHVAct->setDisabled(true);
+   }
+}
+
 void MainWindow::disableMainWindowActions()
 {
    startDAQAct->setDisabled(true);
    stopDAQAct->setEnabled(true);
 }
 
+
+void MainWindow::disableHVActions()
+{
+   startHVAct->setDisabled(true);
+   stopHVAct->setDisabled(true);
+}

@@ -61,6 +61,8 @@ private:
    void writeCsv(QString filename, QVector<double> col0, double *col1, int numberOfBins);
    QAction *startDAQAct;
    QAction *stopDAQAct;
+   QAction *startHVAct;
+   QAction *stopHVAct;
 
    ProcessingWindow *processingWindow;
    QMainWindow *visualisation;
@@ -89,6 +91,7 @@ private:
    QString readDir;
    QString readFilter;
    bool activeDAQ;
+   bool hVOn;
    std::ofstream outFile;
    void writeH5(QString fileName);
 
@@ -112,6 +115,8 @@ signals:
    void executeShowImage();
    void startDAQ();
    void stopDAQ();
+   void startHV();
+   void stopHV();
    void returnHxtBuffer(unsigned short* hxtBuffer);  /// HexitecGigE Addition
    void updateProgress(double elapsed);
    // The private slots are used only internally to connect to the menus and to other parts of the program
@@ -137,6 +142,8 @@ private slots:
 public slots:
    void handleStartDAQ();
    void handleStopDAQ();
+   void handleStartHV();
+   void handleStopHV();
    void readFiles(QStringList files);
    void readBuffer(unsigned short* buffer, QString fileName);   /// HexitecGigE Addition
    void readData(QString fileName);
@@ -151,6 +158,8 @@ public slots:
    void handleShowImage();
    void enableMainWindowActions();
    void disableMainWindowActions();
+   void enableHVActions();
+   void disableHVActions();
 };
 
 #endif

@@ -2,6 +2,12 @@
 #include <QSplashScreen>
 #include "mainwindow.h"
 
+/// HexitecGigE Addition; Static linking?
+//#include <QtPlugin>
+//Q_IMPORT_PLUGIN(qt5gui)
+//Q_IMPORT_PLUGIN(Qt5Widgets)
+//Q_IMPORT_PLUGIN(Qt5ExtSerialPort1)
+///
 
 int main(int argc, char *argv[])
 {

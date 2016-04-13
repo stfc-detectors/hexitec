@@ -76,6 +76,18 @@ void DetectorControlForm::handleSetFingerTemperature()
    emit setFingerTemperature(temperature);
 }
 
+void DetectorControlForm::handleHVOn()
+{
+   qDebug() << "DetectorControlForm::handleHVOn()";
+   biasVoltageClicked(true);
+}
+
+void DetectorControlForm::handleHVOff()
+{
+   qDebug() << "DetectorControlForm::handleHVOff()";
+   biasVoltageClicked(false);
+}
+
 void DetectorControlForm::biasVoltageClicked(bool biasVoltageOn)
 {
    if (biasVoltageOn)
@@ -302,6 +314,7 @@ void DetectorControlForm::guiIdle()
    ui->terminateConnection->setEnabled(false);
    ui->setFingerTemperatureButton->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
+   emit disableHVActions();
 }
 
 void DetectorControlForm::guiReady()
@@ -316,6 +329,7 @@ void DetectorControlForm::guiReady()
    {
       ui->biasVoltageButton->setEnabled(true);
    }
+   emit enableHVActions();
 }
 
 void DetectorControlForm::guiWaitingDarks()
@@ -346,6 +360,7 @@ void DetectorControlForm::guiCollecting()
 
 void DetectorControlForm::guiDetectorBusy()
 {
+   emit disableHVActions();
    ui->initialiseConnection->setEnabled(false);
    ui->terminateConnection->setEnabled(false);
    ui->imageCount->setEnabled(false);
