@@ -125,7 +125,6 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
 {
 
     Reservation reservation = ObjectReserver::instance()->reserveForGUI(rkl);
-    qDebug() << "Changing HV and releasing!";
 
     if (reservation.getReserved().isEmpty())
     {

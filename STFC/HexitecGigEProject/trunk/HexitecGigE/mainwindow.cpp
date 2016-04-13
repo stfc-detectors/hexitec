@@ -520,7 +520,6 @@ void MainWindow::handleStopDAQ()
 
 void MainWindow::handleStartHV()
 {
-   qDebug() << "MainWindow::handleStartHV()";
    hVOn = true;
    emit startHV();
    enableHVActions();
@@ -528,7 +527,6 @@ void MainWindow::handleStartHV()
 
 void MainWindow::handleStopHV()
 {
-   qDebug() << "MainWindow::handleStopHV()";
    hVOn = false;
    emit stopHV();
    enableHVActions();

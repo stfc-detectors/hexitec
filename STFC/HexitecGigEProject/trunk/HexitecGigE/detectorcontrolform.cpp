@@ -78,13 +78,11 @@ void DetectorControlForm::handleSetFingerTemperature()
 
 void DetectorControlForm::handleHVOn()
 {
-   qDebug() << "DetectorControlForm::handleHVOn()";
    biasVoltageClicked(true);
 }
 
 void DetectorControlForm::handleHVOff()
 {
-   qDebug() << "DetectorControlForm::handleHVOff()";
    biasVoltageClicked(false);
 }
 
