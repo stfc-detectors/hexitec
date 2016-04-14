@@ -23,17 +23,11 @@ public:
     double sumEightPixels(double aaPixels[]);
 	bool	updateDecodedFrame(unsigned int currentRow, unsigned int currentCol, double totalCharge,
 										int const &aWinnerIdx, HxtDecodedFrame* apLastDecodedFrame);
-    void	winnerPixel(double aaPixels[], int &aWinnerIdx, bool bDebug);
-
-//	void	updateSubPixelFrameCaseA(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, int aWinnerIdx, double aSumOfFourPixels);
-//	void	updateSubPixelFrameCaseB(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, int aWinnerIdx, double aSumOfFourPixels);
-//	void	updateSubPixelFrameCaseC(HxtFrame* apSubPixelFrame, unsigned int aRow, unsigned int aCol, int aWinnerIdx, double aSumOfFourPixels);
+    void	winnerPixel(double aaPixels[], int &aWinnerIdx);
 
 private:
 
 	unsigned long long mLastFrameProcessed;
-    /// DEBUGGING:
-    bool bDebug;
 
 };
 

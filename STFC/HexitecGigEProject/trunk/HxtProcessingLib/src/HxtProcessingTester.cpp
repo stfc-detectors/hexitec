@@ -54,8 +54,18 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
 
     // Create new log configuration
     gLogConfig = new LogConfig( aAppName);
-    gLogConfig->setLogStdout(true);
-    gLogConfig->setLogFile(true, logFileStream.str());
+    bool bLoggingDisabled = false;//true;
+    if (bLoggingDisabled)
+    {
+        gLogConfig->setLogStdout(false/*true*/);
+    //    gLogConfig->setLogFile(true, logFileStream.str());
+        cout << "Logging o neither file nor standard out!\n";
+    }
+    else
+    {
+        gLogConfig->setLogStdout(true);
+        gLogConfig->setLogFile(true, logFileStream.str());
+    }
     gLogConfig->setDebugLevel(mDebugLevel);
 
     mFormatVersion = 3;
@@ -344,34 +354,6 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
 
     }
 
-    if (bWriteFiles)
-    {
-        // Flush last frames through processor to output
-        dataProcessor->flushFrames();
-
-        // Interpolate pixel histograms if enabled
-        if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
-
-        // Write output files
-        dataProcessor->writeStructOutput( string("E_10Dec_") + mOutputFileNameDecodedFrame);  /// Experimental - Struct to replace disparate vars
-//        dataProcessor->writePixelOutput( string("09Dec_") + mOutputFileNameDecodedFrame);
-//        dataProcessor->writePixelOutput(mOutputFileNameDecodedFrame);	/// The previous, proper function call
-
-        // Write subpixel files if subpixel corrector enabled
-        //if (mEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(mOutputFileNameSubPixelFrame);   /// do not write  subpixel .HXT file
-
-        // Write CSV diagnostic histograms if selected
-        if (mWriteCsvFiles)
-        {
-            dataProcessor->writeCsvFiles();
-            string rawSpectrumFile = dataProcessor->getRawCsvFileName();
-            string corSpectrumFile = dataProcessor->getCorCsvFileName();
-            //cout << "raw spectrum:" << rawSpectrumFile.c_str() << endl;
-            //cout << "cor spectrum:" << corSpectrumFile.c_str() << endl;
-        }
-    }
-    LOG(gLogConfig, logNOTICE) << "Finished";
-
     /// Testing dataProcessor->copyPixelOutput() ...
 
     vector<HxtBuffer*> mHxtBuffers;    /// Pool of buffers;signalled to Visualisation tab to be displayed
@@ -390,36 +372,29 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
     //qDebug() << " * " << (void*)(hxtBuffer) << " <- HxtProcessingTester.cpp:396 (hxtBuffer)";
     dataProcessor->copyPixelOutput((unsigned short*)hxtBuffer);
 
-    //qDebug() << "----------------\n       DEBUGGING, let's look inside hxtBuffer (local copy)";
-//    qDebug() << " * " << (hxtBuffer) << " <- HxtProcessingTester.cpp:400 (hxtBuffer)";
-//    qDebug() << "  (local copy) hxtBuffer label " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->hxtLabel) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtLabel);
-//    qDebug() << "  (local copy) hxtBuffer version " << QString::number( ((HxtBuffer*)hxtBuffer)->hxtVersion) << " @ " << &( ((HxtBuffer*)hxtBuffer)->hxtVersion);
-//    qDebug() << "  (local copy) hxtBuffer hxtPrefixLength " << QString::number( ((HxtBuffer*)hxtBuffer)->filePrefixLength);
+    if (bWriteFiles)
+    {
+        // Flush last frames through processor to output
+        dataProcessor->flushFrames();
 
-//    for (int i = 0; i < 3; i++)
-//    {
-//        qDebug() << i << QString::number( ((HxtBuffer*)hxtBuffer)->motorPositions[i]);
-//    }
-//    qDebug() << "  (local copy) hxtBuffer filePrefix " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->filePrefix) << " @ " << &( ((HxtBuffer*)hxtBuffer)->filePrefix);
-//    qDebug() << "  (local copy) hxtBuffer dataTimeStamp " << QString::fromStdString( ((HxtBuffer*)hxtBuffer)->dataTimeStamp);
-//    qDebug() << "  (local copy) hxtBuffer nRows " << QString::number( ((HxtBuffer*)hxtBuffer)->nRows);
-//    qDebug() << "  (local copy) hxtBuffer nCols " << QString::number( ((HxtBuffer*)hxtBuffer)->nCols);
-//    qDebug() << "  (local copy) hxtBuffer nBins " << QString::number( ((HxtBuffer*)hxtBuffer)->nBins) << " @ " << &( ((HxtBuffer*)hxtBuffer)->nBins);
+        // Interpolate pixel histograms if enabled
+        if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
 
-//    /// Bin start values appear to be fine - Check the contents next?
-//    qDebug() << " --------- Histogram's bin start values: [HxtProcessingTester.CPP:438 - And here's hxtBuffer when returned from copyPixelOutput()] ----------";
-//    int k = 0;
-//    for (int i = 0; i < 12; i++)
-//    {
-//        qDebug() << " L" << i << " = " <<((HxtBuffer*)hxtBuffer)->allData[i] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[i];
-//        k = 1000 + i;
-//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k];
-//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+1] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+1];
-//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+2] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+2];
-//        qDebug() <<  "Pixel[" << i << "], = " <<((HxtBuffer*)hxtBuffer)->allData[k+3] << " address: " <<  &((HxtBuffer*)hxtBuffer)->allData[k+3];
-//    }
+        // Write output files - use the hexitech buffer structure instead:
+        dataProcessor->writeHxtBufferToFile( string("_New_") + mOutputFileNameDecodedFrame);   cout << endl << "\t New Implementation.. Write just 0's???\n";
+        //dataProcessor->writeStructOutput( string("_Old_") + mOutputFileNameDecodedFrame);  cout << endl << "\t Old Implementation.. Write pxl values\n";
 
-    ///
+        // Write CSV diagnostic histograms if selected
+        if (mWriteCsvFiles)
+        {
+            dataProcessor->writeCsvFiles();
+            string rawSpectrumFile = dataProcessor->getRawCsvFileName();
+            string corSpectrumFile = dataProcessor->getCorCsvFileName();
+            //cout << "raw spectrum:" << rawSpectrumFile.c_str() << endl;
+            //cout << "cor spectrum:" << corSpectrumFile.c_str() << endl;
+        }
+    }
+    LOG(gLogConfig, logNOTICE) << "Finished";
 
     return 0;
 }

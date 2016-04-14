@@ -232,10 +232,7 @@ int main(int argc, char** argv) {
 	// Write output files
 	dataProcessor->writePixelOutput(gOutputFileNameDecodedFrame);
 	
-	// Write subpixel files if subpixel corrector enabled
-//	if (gEnableCsaspCorrector)	dataProcessor->writeSubPixelOutput(gOutputFileNameSubPixelFrame);
-	
-	// Write CSV diagnostic histograms if selected
+        // Write CSV diagnostic histograms if selected
 	if (gWriteCsvFiles)	dataProcessor->writeCsvFiles();
 	
 	//// Delete objects

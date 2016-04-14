@@ -76,8 +76,9 @@ public:
 
 //	bool outputFrame(HxtFrame* pSubPixelFrame);
 	bool outputFrame(unsigned int aFrameIdx);
-    bool writeStructOutput(string aOutputFileName); /// HexitecGigE: To replace writePixelOutput() ?
-	bool writePixelOutput(string aOutputFileName);
+    bool writeHxtBufferToFile(string aOutputFileName);  /// HexitecGigE: To replace writePixelOutput
+    bool writeStructOutput(string aOutputPixelFileName);
+    bool writePixelOutput(string aOutputFileName);
 //	bool writeSubPixelOutput(string aOutputFileName);
     bool writeCsvFiles(void);
     /// HexitecGigE Added: (Support copying .HXT contents to buffer, not file)
