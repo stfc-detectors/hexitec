@@ -32,7 +32,6 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mInducedNoiseThreshold       = 0.0;
     mGlobalThreshold             = -1.0;
     mOutputFileNameDecodedFrame  = "pixelHisto.hxt";
-    mOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
     mEnableInCorrector           = false;
     mEnableCabCorrector          = false;
     mEnableMomCorrector          = false;
@@ -83,7 +82,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
 
     pixelThreshold = 0;
     // Create new raw data processor instance
-    dataProcessor = 0; 
+    dataProcessor = 0;
     // 1. Induced Noise Corrector
     inCorrector = 0;
     // 2. Calibration
@@ -117,6 +116,11 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mDiscWritingInterval = 1.0;
     // Processing Logging disabled by default (matching the GUI upon initialisation)
     bProcessingLoggingDisabled = false;//true;
+    // Assume not using custom filename upon start
+    bCustomFile = false;
+    // Track when hxt file name changes
+    mPreviousOutputFileName = "";
+    bLastDataOfCurrentHxtFile = false;
 }
 
 HxtProcessing::~HxtProcessing()
@@ -390,16 +394,12 @@ void HxtProcessing::prepSettings()
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(dbpxlCorrector));
         LOG(gLogConfig, logINFO) << "Applying " << dbpxlCorrector->getName() << " corrector to data";
     }
-
 }
 
 void HxtProcessing::setTargetDirectory(string aFileName)
 {
     QFileInfo fileInfo(aFileName.c_str());
     mFilePath = fileInfo.absolutePath().toStdString();
-
-//    qDebug() << "HxtProcessing::setTargetDirectory() afileName: '" << aFileName.c_str()s << "'producing mFilePath: '" << mFilePath.c_str() << "'";
-
 }
 
 void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
@@ -411,27 +411,26 @@ void HxtProcessing::pushRawFileName(string aFileName, int frameSize)
     * raw image. New filenames for processed data can be created by adding any
     * extension (except .bin) to this filename.
     */
-//   qDebug() << " -=-=-  -=-=-  hxtProcessing::pushRawFileName() with " << aFileName.c_str()
-//               << "frameSize (bytes) = " << frameSize;
+//   qDebug() << " -=-=- pushRawFileName() " << aFileName.c_str() << "frameSize (bytes) = " << frameSize;
 
    // Setup file path before calling prepSettings() (which instantiates the logger)
    this->setTargetDirectory(aFileName);
    this->prepSettings();
 
-   /// HexitecGigE Addition, Check file has .hxt file ending - It always should have
-   if ( aFileName.find(".") > 250)
-       aFileName = aFileName + ".hxt";
+    /// HexitecGigE Addition, Check file has .hxt file ending - It always should have
+    if ( aFileName.find(".") > 250)
+        aFileName = aFileName + ".hxt";
 
    /// Only one filename per  acquisition,  use it as name of processed file
    mOutputFileNameDecodedFrame = aFileName;
     /// Modification to handle buffers (to replace files, except where raw file(s) picked manually by user)
     mFrameSize = frameSize;
 }
+
 void HxtProcessing::pushImageComplete(unsigned long long totalFramesAcquired)
 {
    /* totalFramesAcquired should tally with how many acquired before this function is called */
    qDebug() << "The image is complete and has " << totalFramesAcquired << "total frames";
-//   LOG(gLogConfig, logNOTICE) << "The image is completed and had " << totalFramesAcquired << " total frames";
 }
 
 void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, unsigned long validFrames)
@@ -451,7 +450,7 @@ void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, 
    int iDebug = 0;
    if (bufferMutex.tryLock(mutexTimeout))
    {
-       bufferQueue.enqueue(newBuffer); //transferBuffer);
+       bufferQueue.enqueue(newBuffer);
        bufferMutex.unlock();
        iDebug++;
    }
@@ -485,10 +484,6 @@ void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)
     else
         emit hexitechSignalError("HxtProcessing::pushMotorPositions() - Unable to acquire mutex lock!");
 
-//    qDebug() <<" -=- HxtProcessing::pushMotorPositions() -=-"
-//            << " mSSX: " << newPositions->mSSX  << " mSSY: " << newPositions->mSSY << " mSSZ: " << newPositions->mSSZ
-//            << " mSSROT: " << newPositions->mSSROT << " mGALX: " << newPositions->mGALX << " mGALY: " << newPositions->mGALY
-//            << " mGALZ: " << newPositions->mGALZ << " GALROT: " << newPositions->mGALROT << " mTimer: " << newPositions->mTimer;
     delete newPositions;
     newPositions = 0;
 }
@@ -523,10 +518,7 @@ motorPositions* HxtProcessing::copyQHashToMotorPositions(QHash<QString, int> *qH
         else if (mpi.key() == "galrot")     newPositions->mGALROT   = mpi.value();
         else if (mpi.key() == "timer")      newPositions->mTimer    = mpi.value();
         else
-        {
-            emit hexitechSignalError(QString("Received unrecognised motor! Named: %1, Value: %2").arg(mpi.key(), mpi.value()) );
-//            qDebug() << "    HxtProcessing::copyQHashToMotorPositions() error! key: " << mpi.key() << " not recognised!";
-        }
+            emit hexitechSignalError(QString("Received unrecognised motor! Named: %1, Value: %2").arg(mpi.key()).arg(mpi.value()) );
     }
 
     return newPositions;
@@ -547,6 +539,8 @@ void HxtProcessing::run()
     mDiscWritingTimer->stop();
 
     bDebug = false; /// Debugging purposes only
+
+    bool bLastHexitechRunning = false;    // Remember last hexitechRunning signal sent
 
     while (bThreadRunning)
     {
@@ -611,18 +605,15 @@ void HxtProcessing::run()
         }
         while( 1);
 
-        // Tell processing tab we are no longer idling - Once per image collection
+        // Tell processing tab we are no longer idling - But don't repeat
         if (mTimeSinceLastDiscOp > 0.0)
-            emit hexitechRunning(true);
-
-//        // The following two lines are required by the nested if (bProcessTheQueue) if (motorSize <1)
-//        int motorSize = -1, bufferSize = -1, fileSize = -1, framesSize = -1;
-//        checkQueueLengths(motorSize, bufferSize, fileSize, framesSize);
-
-//        // DEBUGGING stuff:
-//        qDebug() << " DEBUGGING: [Beyond while() loop]  motorSize (" << motorSize << ") bufferSize (" << bufferSize
-//                 << ") framesSize: (" << framesSize << ") fileSize: (" << fileSize << ")"
-//                 << " mTimeSinceLastDiscOp: " << mTimeSinceLastDiscOp;
+        {
+            if (!bLastHexitechRunning)
+            {
+                emit hexitechRunning(true);
+                bLastHexitechRunning = true;
+            }
+        }
 
         if (bProcessTheQueue)
         {
@@ -630,9 +621,10 @@ void HxtProcessing::run()
             mTimeSinceLastDiscOp += mDiscWritingInterval;
             // Tell processing tab we (very soon will be) idle
             emit hexitechRunning(false);
+            bLastHexitechRunning = false;
         }
 
-        /// First off, catch choices were no processing to be performed
+        /// First off, catch choices where no processing to be performed
 
         if (bRemoveUnprocessedFiles)    // User clicked clearedUnprocessedButton in processingwindow's tab
         {
@@ -642,12 +634,8 @@ void HxtProcessing::run()
         if (bDontDisplayProcessedData && (!bManualProcessingEnabled))   // User selected manual (i.e. no) processing
         {
             if (bProcessTheQueue)
-            {
-//                qDebug() << " bProcessTheQueue while user has selected a manual processing - Clearing bProcessTheQ.. Before clearing the queues themselves";
                 bProcessTheQueue = false;
-            }
-            else
-                /*qDebug() << " (bDontDisplayProcessedData && (!bManualProcessingEnabled)) evaluated to true, but bProcessTheQueue  isn't set so only clearing the queues next"*/;
+
             clearAllQueues();
             continue;
         }
@@ -661,7 +649,6 @@ void HxtProcessing::run()
         }
         else
             emit hexitechSignalError("HxtProcessing Error: Unable to acquire processing mutex lock!");
-
 
         // Did the user select Raw file(s) to be processed manually?
         if (bManualProcessingEnabled)
@@ -678,22 +665,15 @@ void HxtProcessing::run()
             if (currentCondition == conditionEveryNewFile)         /// HexitecGigE: filenames replaced by buffers
             {
                 prepareSingleProcessing(bProcessTheQueue);
-
             }
             else    /// Condition is a change of motor position {conditionMotorAnyStep, conditionMotorPositionStep, conditionMotorTimeStep}
             {
-
-                if (bProcessTheQueue)   /// Set when  image collection finished - So process the lot, no more data arriving before next user-GUI interaction
+                if (bProcessTheQueue)   /// Set when image collection finished - So process the lot, no more data arriving before next user-GUI interaction
                 {
-                    if (bDebug) qDebug() << "targetCondition was motor change but no (other) position changed before Image Collection completed.";
-                    if (bDebug) qDebug() << " ! no mPosition changed, bProcessTheQueue set. Clear it & call prepareWholeQueueProcessing()";
                     // Call with argument = false, to grab everything of the queues
                     mTimeSinceLastDiscOp += mDiscWritingInterval;
                     bProcessTheQueue = false;
                     prepareWholeQueueProcessing(bProcessTheQueue);
-
-//                    if (bDebug)
-//                        bDebug = false;
                 }
                 else
                 {
@@ -703,9 +683,6 @@ void HxtProcessing::run()
                     if (this->checkQueueForMotorChanges(currentCondition, &numberOfBuffersToProcess))
                     {
                         /* Desired motorPosition change DID happen */
-                        if (bDebug) {qDebug() << "HxtProcessing::run() - Desired mover position change detected ! \n" <<
-                                    "------------------------------------------------------------------------------------------------------------" <<
-                                    "\n   Time to reset histograms..";}
 
                         prepareMotorPositionProcessing(&numberOfBuffersToProcess);
                         dataProcessor->resetHistograms();
@@ -721,18 +698,21 @@ void HxtProcessing::run()
                     }
                 }
 
-            }  // End of else (i.e. not conditionEveryNewFile)
+            } // End of else (i.e. not conditionEveryNewFile)
 
         } // End of else (if bManualProcessingEnabled)
 
-    }   // End of while (bThreadRunning)
+    } // End of while (bThreadRunning)
 }
 
 bool HxtProcessing::prepareSingleProcessing(bool &bProcessTheQueue)
 {
     if (bProcessTheQueue)
     {
+        // Set argument to false and feed into prepareWholeQueueProcessing
+        //  to signal that (all remaining) buffer(s) to be processed
         bProcessTheQueue = false;
+        prepareWholeQueueProcessing(bProcessTheQueue);
     }
     else
     {
@@ -740,7 +720,7 @@ bool HxtProcessing::prepareSingleProcessing(bool &bProcessTheQueue)
         {
             unsigned short* newBuffer = bufferQueue.dequeue();
             bufferMutex.unlock();
-            
+
             mBufferNames.push_back(newBuffer);
 
             if (motorMutex.tryLock(mutexTimeout))
@@ -771,19 +751,14 @@ bool HxtProcessing::prepareSingleProcessing(bool &bProcessTheQueue)
             emit hexitechSignalError("EveryNewFile Error: Cannot acquire buffer mutex lock!");
             return false;
         }
+        bool bProcessFiles = false;  // true = file, false = buffer
+        executeProcessing(bProcessFiles);    /// process 1 Buffer
     }
-
-    bool bProcessFiles = false;  // true = file, false = buffer
-    executeProcessing(bProcessFiles);    /// process 1 Buffer
-
     return true;
 }
 
-bool HxtProcessing::prepareMotorPositionProcessing(/*bool bProcessTheQueue,*/ int *numberOfBuffersToProcess)
+bool HxtProcessing::prepareMotorPositionProcessing(int *numberOfBuffersToProcess)
 {
-//    if (bDebug) qDebug() << "HxtProcessing::prepareMotorPositionProcessing() called by run() [Process buffer(s) accordingly] - bQ(" << bufferQueue.size()
-//             << ") mQ(" << motorQueue.size() << ") mF(" << framesQueue.size() << ")";
-
     // Depending upon numberOfBuffersToProcess, add buffer(s) onto mBufferNames
     if (bufferMutex.tryLock(mutexTimeout))
     {
@@ -810,14 +785,12 @@ bool HxtProcessing::prepareMotorPositionProcessing(/*bool bProcessTheQueue,*/ in
                     mPositions = motorQueue.dequeue();
                     newFrameSize = framesQueue.dequeue();
                     mValidFrames.push_back(newFrameSize);
-//                        qDebug() << "Motor Changes: Adding buffer: " << (unsigned long)*newBuffer << " with: " << newFrameSize << "frames";
+                    //qDebug() << "Motor Changes: Adding buffer: " << (unsigned long)*newBuffer << " with: " << newFrameSize << "frames";
                     buffersDequeuedCount++;
                 }
                 framesMutex.unlock();
                 /// Because motor position change to occurred, must ensure data written to file now (and Visualisation tab updated)
                 mTimeSinceLastDiscOp += mDiscWritingInterval;
-
-//                if (bDebug) qDebug() << "   ::PerformMotorPositionProcessing() have doped up mTimeSinceLastDiscOp = " << mTimeSinceLastDiscOp;
             }
             else
             {
@@ -962,14 +935,14 @@ bool HxtProcessing::performManualProcessing()
 //                qDebug() << "Going to process filename: " <<  QString(newFile.c_str());
                 mRawFileNames.push_back(newFile);
                 /// Grab file name of first file & use as .HXT filename - BUT ONLY if custom filename NOT selected
-                if (!bCustomFileNameSelected)
+                if (!bCustomFile)
                 {
                     if (bUpdateFileName)
                     {
                         size_t fileExtensionPosn = newFile.find(".bin");
                         string fileNameWithoutExtension = newFile.substr( 0, fileExtensionPosn);
                         string fileNameWithHxt          = fileNameWithoutExtension + ".hxt";
-                        //qDebug() << ":: performManualProcessing9) hanging mOutputFailNameDecodedFrame: " << fileNameWithHxt.c_str();
+                        //qDebug() << ":: performManualProcessing() hanging mOutputFileNameDecodedFrame: " << fileNameWithHxt.c_str();
                         mOutputFileNameDecodedFrame     = fileNameWithHxt;
                         bUpdateFileName = false;
                     }
@@ -1092,8 +1065,6 @@ bool HxtProcessing::prepareWholeQueueProcessing(bool bProcessTheQueue)
 
             if (motorMutex.tryLock(mutexTimeout))
             {
-//                qDebug() << "Processing the whole Queue: Adding " << numberOfBuffersToProcess - queueOffset << " buffer(s)"
-//                         << "numberOfBuffersToProcess: " << numberOfBuffersToProcess;
                 while (buffersDequeuedCount < (numberOfBuffersToProcess - queueOffset))
                 {
                     newBuffer = bufferQueue.dequeue();
@@ -1124,9 +1095,6 @@ bool HxtProcessing::prepareWholeQueueProcessing(bool bProcessTheQueue)
         hexitechSignalError("HxtProcessing::prepareWholeQueueProcessing() Error: Unable to acquire buffer mutex lock!");
         return false;
     }
-
-//    qDebug() << "HxtProcessing::prepareWholeQueueProcessing() Just adjusted the motor Q - bQ(" << bufferQueue.size()
-//             << ") mQ(" << motorQueue.size() << ") mF(" << framesQueue.size() << ")";
 
     // Process buffer(s)
     bool bProcessFiles = false;  // Process this buffer
@@ -1380,7 +1348,6 @@ void HxtProcessing::dumpSettings()
     qDebug() << "Momentum:                       " << mEnableMomCorrector;
     qDebug() << "Global Threshold                " << mGlobalThreshold;
     qDebug() << "Decoded Frame Filename:         " << mOutputFileNameDecodedFrame.c_str();
-    qDebug() << "Subpixel Frame Filename:        " << mOutputFileNameSubPixelFrame.c_str();
     qDebug() << "CalibrationFile";
     qDebug() << "mGradientsFile:                 " << mGradientsFile.c_str();
     qDebug() << "mInterceptsFile:                " << mInterceptsFile.c_str();
@@ -1464,8 +1431,6 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
         else
         {
             emit hexitechSignalError("obtainRawFilePathAndPrefix() Raw filename's missing timestamp in format \"YYMMDD_HHMMSS\" or \"YYYYMMDD_HHHMMSS\" !");
-//            qDebug() << "HxtProcessing::obtainRawFilePathAndPrefix() - Cannot find timestamp of format \"_YYMMDD_HHMMSS_\", nor "
-//                     << "\"_YYYYMMDD_HHHMMSS_\" within raw file!" << endl;
             return;
         }
     }
@@ -1481,12 +1446,6 @@ void HxtProcessing::obtainRawFilePathAndPrefix(string fileName)
     // Construct hexitech filename, using file path and prefix inserting pre-file extension characters and timestamp before file's extension:
     mOutputFileNameDecodedFrame = pathAndPrefix + "_" + string(dateString) + ".hxt";
 
-    // Repeat operation upon mOutputFileNameSubPixelFrame if charge sharing enabled
-    if (mEnableCsaspCorrector)
-    {
-        // Construct filename,  using file path and prefix inserting "_SubResolution_", pre-file extension characters and timestamp before file's extension:
-        mOutputFileNameSubPixelFrame = pathAndPrefix + "_SubResolution" + "_" + string(dateString) + ".hxt";
-    }
     qDebug() << "::obtainRaw..() Before: " << beforeString.c_str() << " after: " << mOutputFileNameDecodedFrame.c_str();
 }
 
@@ -1606,6 +1565,8 @@ void HxtProcessing::dataCollectionFinished()
     {
         bProcessQueueContents = true;
         qContentsMutex.unlock();
+        //qDebug() << "HxtProcessing::dataCollectionFinish() Time to note this is the last data belonging to current HXT file..";
+        bLastDataOfCurrentHxtFile = true;
     }
     else
     {
@@ -1696,8 +1657,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles)
         if ( mTimeSinceLastDiscOp > mDiscWritingInterval)
         {
             mTimeSinceLastDiscOp = 0.0;
-            /// Call function to right to disc and update  Visualise tab
-            /// ..
+            /// Call function to write to disc and update Visualise tab
             updateVisualisationTabAndHxtFile();
             LOG(gLogConfig, logNOTICE) << "Process data pushed to Visualisation Tab, HXT file";
         }
@@ -1747,6 +1707,32 @@ int HxtProcessing::updateVisualisationTabAndHxtFile()
 //        emit hexitechBufferToDisplay( (HxtBuffer*)hxtBuffer, QString::fromStdString(fileName));
     emit hexitechBufferToDisplay( (unsigned short*)hxtBuffer, QString::fromStdString(mOutputFileNameDecodedFrame));
 
+    /// Determine whether file name changed; If yes, signal that
+    //qDebug() << "mPreviousOutputFileName: " << mPreviousOutputFileName.c_str() << " mOutputFileNameDecodedFrame: " << mOutputFileNameDecodedFrame.c_str();
+    if (mPreviousOutputFileName == "")
+    {
+        //qDebug() << "Previous file name is blank - Meaning no real file name change to be signalled";
+        mPreviousOutputFileName = mOutputFileNameDecodedFrame;
+    }
+    else
+    {
+        if (mPreviousOutputFileName != mOutputFileNameDecodedFrame)
+        {
+            //qDebug() << "previous file name differs from current;  signal file name changed & update previous file name";
+            emit hxtProcessedFileNameChanged(QString::fromStdString(mPreviousOutputFileName));
+            mPreviousOutputFileName = mOutputFileNameDecodedFrame;
+        }
+        else
+            ;//qDebug() << "previous file name defined but no file name change occurred";
+    }
+
+    if (bLastDataOfCurrentHxtFile)
+    {
+        //qDebug() << " *** This is the last data belonging to the current HXT file !";
+        emit hxtProcessedFileNameChanged(QString::fromStdString(mOutputFileNameDecodedFrame));
+        mPreviousOutputFileName = "";
+        bLastDataOfCurrentHxtFile = false;
+    }
     //qDebug() << "Erasing element 0 from mHxtBuffer vector, address: " << (void*)hxtBuffer;
     mHxtBuffers.erase(mHxtBuffers.begin());
 
@@ -1793,7 +1779,7 @@ string HxtProcessing::createDataTimeStampString()
 
     // Reduce year from YYYY -> YY; e.g. 2016 -> 16
     string dateTimeString = dString.substr(2,dString.size());
-    qDebug() << " ! dateTimeString = " << dateTimeString.c_str();
+//    qDebug() << " ! dateTimeString = " << dateTimeString.c_str();
     return dateTimeString;
 }
 

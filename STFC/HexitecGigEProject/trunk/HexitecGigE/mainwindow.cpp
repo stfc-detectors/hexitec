@@ -74,6 +74,8 @@ MainWindow::MainWindow()
 
    bHexitechProcessingBusy = false;
    bUpdateVisualisationTab = false;
+   saveCsv = false;
+   saveH5 = false;
 
    QTabWidget *tabs = new QTabWidget(this);
    setCentralWidget(tabs);
@@ -532,7 +534,6 @@ void MainWindow::handleStopHV()
    enableHVActions();
 }
 
-
 void MainWindow::deleteActiveSlice()
 {
    deleteSlice(DataModel::instance()->getActiveSlice());
@@ -864,8 +865,11 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
    initializeSlice(slice, sliceNumber);
 
    emit returnHxtBuffer(buffer);
-   writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
-   writeH5(fileName);
+   if (saveCsv)
+   {
+      writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
+   }
+   //   writeH5(fileName);
 }
 
 void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, int numberOfBins)
@@ -1030,6 +1034,25 @@ void MainWindow::handleBufferReady()
 void MainWindow::handleShowImage()
 {
    emit executeShowImage();
+}
+
+void MainWindow::handleProcessingComplete(QString fileName)
+{
+   if (saveH5)
+   {
+      writeH5(fileName);
+   }
+
+}
+
+void MainWindow::handleSaveH5Changed(bool saveH5)
+{
+   this->saveH5 = saveH5;
+}
+
+void MainWindow::handleSaveCsvChanged(bool saveCsv)
+{
+   this->saveCsv = saveCsv;
 }
 
 void MainWindow::enableMainWindowActions()

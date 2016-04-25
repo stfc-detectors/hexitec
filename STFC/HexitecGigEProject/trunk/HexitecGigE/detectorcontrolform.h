@@ -33,6 +33,7 @@ private:
    bool hvReservedByScripting;
    bool tAboveTdp;
    bool firstMonitor;
+   void readIniFile(double *targetTemperature);
    void connectSignals();
    void terminateDetector();
    void guiIdle();

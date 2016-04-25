@@ -1,4 +1,5 @@
 #include <QThread>
+#include "parameters.h"
 #include "detectorcontrolform.h"
 #include "ui_detectorcontrolform.h"
 #include "objectreserver.h"
@@ -7,6 +8,7 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DetectorControlForm)
 {
+   double targetTemperature;
    waitingForModeChange = false;
    ui->setupUi(this);
    ui->logFileDirectoryLabel->setVisible(false);
@@ -22,10 +24,27 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    dpWarningDialog = new DPWarningDialog(this);
    hvReservedByScripting = false;
    tAboveTdp = false;
+
+   readIniFile(&targetTemperature);
+   ui->setFingerTemperature->setValue(targetTemperature);
    firstMonitor = true;
 
    connectSignals();
    guiReady();
+}
+
+void DetectorControlForm::readIniFile(double *targetTemperature)
+{
+   QString detectorFilename = Parameters::twoEasyIniFilename;
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+
+   if (settings.contains("hexitecGigEIniFilename"))
+   {
+      detectorFilename = settings.value("hexitecGigEIniFilename").toString();
+   }
+   IniFile *detectorIniFile = new IniFile(detectorFilename);
+   *targetTemperature = detectorIniFile->getDouble("Environmental/Target_Temperature");
+   return;
 }
 
 DetectorControlForm::~DetectorControlForm()
@@ -153,7 +172,8 @@ void DetectorControlForm::handleMonitorData(MonitorData *md)
       ui->detectorTemperature->setText(QString::number(md->getTASIC(), 'f', 1));
       if (firstMonitor)
       {
-         ui->setFingerTemperature->setValue(md->getT());
+//         ui->setFingerTemperature->setValue(md->getT());
+//         qDebug() << "DetectorControlForm::handleMonitorData(MonitorData *md)" << md->getT();
          firstMonitor = false;
       }
    }

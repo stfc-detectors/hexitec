@@ -89,10 +89,13 @@
         <number>1</number>
        </property>
        <property name="minimum">
-        <double>-273.100000000000023</double>
+        <double>18.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>30.000000000000000</double>
+        <double>35.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>18.000000000000000</double>
        </property>
       </widget>
      </item>

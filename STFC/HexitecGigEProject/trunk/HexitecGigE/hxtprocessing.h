@@ -85,9 +85,7 @@ public:
 
     void setThresholdFileName(string aThresholdFileName) { mThresholdFileName = aThresholdFileName; }
     void setOutputFileNameDecodedFrame(string aOutputFileNameDecodedFrame) { mOutputFileNameDecodedFrame = aOutputFileNameDecodedFrame; }
-    void setOutputFileNameSubPixelFrame(string aOutputFileNameSubPixelFrame) { mOutputFileNameSubPixelFrame = aOutputFileNameSubPixelFrame; }
     string getOutputFileNameDecodedFrame() { return mOutputFileNameDecodedFrame; }
-    string getOutputFileNameSubPixelFrame() { return mOutputFileNameSubPixelFrame; }
     void setGradientsFile(string aGradientsFile) { mGradientsFile = aGradientsFile; }
     void setInterceptsFile(string aInterceptsFile) { mInterceptsFile = aInterceptsFile; }
     void setMomentumFile(string aMomentumFile) { mMomentumFile = aMomentumFile; }
@@ -142,6 +140,7 @@ signals:
     void hexitechRemoveAnyExcessSlices();
     void hexitechUnprocessedFiles(bool bFilesExists);
     void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
+    void hxtProcessedFileNameChanged(QString oldFileName);
 
 private slots:
     void handleReturnHxtBuffer(unsigned short* buffer);
@@ -208,6 +207,7 @@ protected:
     /// DEBUGGING PURPOSES:
     bool bReordering;
     ///
+    bool bLastDataOfCurrentHxtFile; // Denote if current data is the last in the current HXT file
     vector<string> mRawFileNames;
     unsigned int mDebugLevel;
     unsigned int mHistoStartVal;
@@ -218,7 +218,7 @@ protected:
     double mGlobalThreshold;
     string mThresholdFileName;
     string mOutputFileNameDecodedFrame;
-    string mOutputFileNameSubPixelFrame;
+    string mPreviousOutputFileName;
     string mGradientsFile;
     string mInterceptsFile;
     string mMomentumFile;

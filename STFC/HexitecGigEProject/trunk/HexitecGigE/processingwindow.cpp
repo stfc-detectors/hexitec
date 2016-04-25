@@ -26,7 +26,6 @@ double ProcessingWindow::dGlobalThreshold;
 double ProcessingWindow::dDiscWritingInterval;
 string ProcessingWindow::sThresholdFileName;
 string ProcessingWindow::sOutputFileNameDecodedFrame;
-string ProcessingWindow::sOutputFileNameSubPixelFrame;
 string ProcessingWindow::sGradientsFile;
 string ProcessingWindow::sInterceptsFile;
 string ProcessingWindow::sMomentumFile;
@@ -61,6 +60,9 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
       connect(HxtProcessor, SIGNAL(hexitechConsumedFiles(vector<string>)), processingWindowInstance, SLOT(displayHxtProcessingDatFiles(vector<string>)));
       connect(HxtProcessor, SIGNAL(hexitechConsumedBuffers(vector<unsigned short*>)), processingWindowInstance, SLOT(displayHxtProcessingBuffers(vector<unsigned short*>)));
       connect(HxtProcessor, SIGNAL(hexitechProducedFile(string)),          processingWindowInstance, SLOT(displayHxtProcessingHxtFile(string)));
+      /// Temporary connect single & slot to demonstrate when Hxt file name changes
+//      connect(HxtProcessor, SIGNAL(hxtProcessedFileNameChanged(string)),
+//              processingWindowInstance, SLOT(handleHxtProcessedFileNameChanged(string)));
 
       connect(processingWindowInstance, SIGNAL(updatePrefixSignal(bool)),           HxtProcessor, SLOT(savePrefix(bool)));
       connect(processingWindowInstance, SIGNAL(updateMotorSignal(bool)),            HxtProcessor, SLOT(saveMotor(bool)));
@@ -85,18 +87,21 @@ ProcessingWindow *ProcessingWindow::instance(MainWindow *mw, QWidget *parent)
       /// HexitecGigE Addition: Signal when HDF5, CSV  file(s) (de)selected
       /// For DSoFt: I've begun adding connect statement and  tying to slots within mainwindow,
       ///           But I believe that for you to  sort out.
-//      connect(processingWindowInstance->ui->hdf5FileCheckBox, SIGNAL(toggled(bool)),
+      connect(processingWindowInstance->ui->csvFileCheckBox, SIGNAL(toggled(bool)),
+              reinterpret_cast<const QObject*>(mw), SLOT(handleSaveCsvChanged(bool)));
+      connect(processingWindowInstance->ui->hdf5FileCheckBox, SIGNAL(toggled(bool)),
+              reinterpret_cast<const QObject*>(mw), SLOT(handleSaveH5Changed(bool)));
 
       /// HexitecGigE Addition: Add slot so processingLoggingCheckBox toggles logging on/off
       connect(processingWindowInstance->ui->processingLoggingCheckBox,  SIGNAL(toggled(bool)),
               HxtProcessor,                                             SLOT(toggleProcessingLogging(bool)));
 
-
       connect(HxtProcessor,                         SIGNAL(hexitechRunning(bool)),
               reinterpret_cast<const QObject*>(mw), SLOT(updateHexitechProcessingStatus(bool)) );
-
       connect(HxtProcessor,                         SIGNAL(hexitechFilesToDisplay(QStringList)),
               reinterpret_cast<const QObject*>(mw), SLOT(readFiles(QStringList)) );
+      connect(HxtProcessor, SIGNAL(hxtProcessedFileNameChanged(QString)),
+              reinterpret_cast<const QObject*>(mw), SLOT(handleProcessingComplete(QString)));
 
       /// HexitecGigE Addition: (The following 2 connections)
       // DSoFt: added filename to indicate when a new image/slice begins as this will change.
@@ -643,7 +648,6 @@ void ProcessingWindow::customCheckBoxToggled(bool isChecked)
         ui->hxtFileLineEdit->setEnabled(true);
         ui->hxtFileSaveButton->setEnabled(true);
         defaultDecodedFileName  = "pixelHisto.hxt";
-        defaultSubPixelFileName = "pixelSubResolutionHisto.hxt";
     }
     else
     {
@@ -652,7 +656,6 @@ void ProcessingWindow::customCheckBoxToggled(bool isChecked)
         ui->hxtFileSaveButton->setEnabled(false);
         // Overwrite custom filenames with default values
         HxtProcessor->setOutputFileNameDecodedFrame(defaultDecodedFileName);
-        HxtProcessor->setOutputFileNameSubPixelFrame(defaultSubPixelFileName);
         // Update (now locked) hxtFileLineEdit with default filename
         ui->hxtFileLineEdit->setText(QString(defaultDecodedFileName.c_str()));
     }
@@ -681,7 +684,6 @@ void ProcessingWindow::sameAsRawFileCheckBoxToggled(bool isChecked)
         ui->customCheckBox->setEnabled(true);
         // Same as raw file deselected, reset filenames to defaults
         HxtProcessor->setOutputFileNameDecodedFrame(defaultDecodedFileName);
-        HxtProcessor->setOutputFileNameSubPixelFrame(defaultSubPixelFileName);
         // Update hxtFileLineEdit with default filename (just to be on the safe side)
         ui->hxtFileLineEdit->setText(QString(defaultDecodedFileName.c_str()));
     }
@@ -845,12 +847,6 @@ void ProcessingWindow::hxtFileLineEditChanged(QString newPrefixString)
         sOutputFileNameDecodedFrame = newPrefixFilename;
         HxtProcessor->setOutputFileNameDecodedFrame( sOutputFileNameDecodedFrame);
         hexitechIniFile->setParameter("Processing/DecodedFrameFilename", QVariant(sOutputFileNameDecodedFrame.c_str()));
-
-        // Extract file path and name (without extension) from decoded frame filename
-        //   prepend this to subpixel filename and log filename
-        string decodedFileWithoutExtension = sOutputFileNameDecodedFrame.substr(0, sOutputFileNameDecodedFrame.find("."));;
-        sOutputFileNameSubPixelFrame = decodedFileWithoutExtension + "SubResolution.hxt";
-        HxtProcessor->setOutputFileNameSubPixelFrame(sOutputFileNameSubPixelFrame);
     }
 }
 
@@ -1547,24 +1543,6 @@ void ProcessingWindow::loadSettingsButtonPressed()
             handleWriteError(QString("File entry: %1 contains invalid value: \"%2\".").arg("DecodedFrameFilename", fileDecodedFilename));
     }
 
-    QString fileSubpixelFilename = hexitechIniFile->getString("Processing/SubpixelFrameFilename");
-    // Check that fileSubpixelFilename isn't empty
-    if (!fileSubpixelFilename.toStdString().empty())
-    {
-        // Filename specified; Obtain directory from fileSubpixelFilename
-        string sSubpixelFileDirectory = stripFilenameFromFullPath(fileSubpixelFilename.toStdString());
-        if (doesFilePathExist(sSubpixelFileDirectory) == 0)
-        {
-            //Directory exists - save this setting in HxtProcessing
-            sOutputFileNameSubPixelFrame = fileSubpixelFilename.toStdString();
-            HxtProcessor->setOutputFileNameSubPixelFrame(sOutputFileNameSubPixelFrame);
-            if (!bSuppressLoadSettingsInfo)
-                handleWriteMessage(QString("Changed SubpixelFrameFilename to: \"%1\"").arg(fileSubpixelFilename));
-        }
-        else
-            handleWriteError(QString("File entry: %1 contains invalid value: \"%2\".").arg("SubpixelFrameFilename", fileSubpixelFilename));
-    }
-
 //    QString fileHistogramFiles = hexitechIniFile->getString("Processing/DiagnosticHistogramCSVFiles");
 //    // Check that file entry is valid
 //    if (sanityCheckQString(trueFalseOptions, fileHistogramFiles))
@@ -1701,7 +1679,6 @@ void ProcessingWindow::dumpHexitechConfig()
     qDebug() << "Global Threshold           " << dGlobalThreshold;
     qDebug() << "Pixel Threshold File:      " << sThresholdFileName.c_str();
     qDebug() << "Decoded Frame Filename:    " << sOutputFileNameDecodedFrame.c_str();
-    qDebug() << "Subpixel Frame Filename:   " << sOutputFileNameSubPixelFrame.c_str();
     qDebug() << "CalibrationFile";
     qDebug() << "sGradientsFile:           " << sGradientsFile.c_str();
     qDebug() << "sInterceptsFile:          " << sInterceptsFile.c_str();
@@ -1752,7 +1729,6 @@ void ProcessingWindow::initHexitechProcessor()
     dDiscWritingInterval          = 1.0;
     sThresholdFileName           = "";
     sOutputFileNameDecodedFrame  = "pixelHisto.hxt";
-    sOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
     sGradientsFile               = "";
     sInterceptsFile              = "";
     sMomentumFile                = "";
@@ -1781,7 +1757,6 @@ void ProcessingWindow::configHexitechSettings()
     HxtProcessor->setDiscWritingInterval( dDiscWritingInterval);
     HxtProcessor->setThresholdFileName( sThresholdFileName);
     HxtProcessor->setOutputFileNameDecodedFrame( sOutputFileNameDecodedFrame);
-    HxtProcessor->setOutputFileNameSubPixelFrame( sOutputFileNameSubPixelFrame);
     HxtProcessor->setGradientsFile( sGradientsFile);
     HxtProcessor->setInterceptsFile( sInterceptsFile);
     HxtProcessor->setMomentumFile(sMomentumFile);
@@ -1795,4 +1770,10 @@ void ProcessingWindow::configHexitechSettings()
 //    HxtProcessor->setWriteCsvFiles( bWriteCsvFiles);
     HxtProcessor->setEnableVector( bEnableVector);
     HxtProcessor->setEnableDebugFrame( bEnableDebugFrame);
+}
+
+/// Temporary implementation to prove signalling changed HXT file name working
+void ProcessingWindow::handleHxtProcessedFileNameChanged(string hxtFileNameCompleted)
+{
+    qDebug() << " ProcessingWindow::handleHxtProcessedFileNameChanged() received: " << hxtFileNameCompleted.c_str();
 }

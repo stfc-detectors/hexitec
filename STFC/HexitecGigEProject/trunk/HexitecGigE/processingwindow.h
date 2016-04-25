@@ -99,7 +99,6 @@ private:
 
    processingCondition currentCondition;
    string defaultDecodedFileName;
-   string defaultSubPixelFileName;
 
    /// [Define variables for configuring HxtProcessing instance]
    static unsigned int iDebugLevel;
@@ -113,7 +112,6 @@ private:
    static double dDiscWritingInterval;
    static string sThresholdFileName;
    static string sOutputFileNameDecodedFrame;
-   static string sOutputFileNameSubPixelFrame;
    static string sGradientsFile;
    static string sInterceptsFile;
    static string sMomentumFile;
@@ -205,6 +203,8 @@ private slots:
    void guiUnprocessedFilesInQueue(bool bFilesPresent);
    // Setup slot to communicate to HxtProcessing to discard all unprocessed raw files
    void clearUnprocessedFiles();
+   /// Temporary slot to demonstrate changed HXT file name working
+   void handleHxtProcessedFileNameChanged(string hxtFileNameCompleted);
 };
 
 #endif // PROCESSINGWINDOW_H
