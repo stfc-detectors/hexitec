@@ -83,8 +83,10 @@ void GigEDetector::connectUp(const QObject *parent)
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
    returnBufferReadyEvent = new WindowsEvent(HEXITEC_RETURN_BUFFER_READY, true);
+
    showImageEvent = new WindowsEvent(HEXITEC_SHOW_IMAGE, true);
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
+
    connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
    connect(this, SIGNAL(executeGetImages()), this, SLOT(handleExecuteGetImages()));
 }
@@ -121,6 +123,11 @@ void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned
    ReturnBuffer(detectorHandle, returnBuffer);
 }
 
+void GigEDetector::setTargetTemperature(double targetTemperature)
+{
+   handleSetTargetTemperature(targetTemperature);
+}
+
 void GigEDetector::handleSetTargetTemperature(double targetTemperature)
 {
     int status = -1;
@@ -129,6 +136,11 @@ void GigEDetector::handleSetTargetTemperature(double targetTemperature)
 
     status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
     showError("SetDAC", status);
+}
+
+void GigEDetector::setHV(double voltage)
+{
+   handleSetHV(voltage);
 }
 
 void GigEDetector::handleSetHV(double voltage)
@@ -146,9 +158,13 @@ void GigEDetector::handleAppendTimestamp(bool appendTimestamp)
     this->appendTimestamp = appendTimestamp;
 }
 
+void GigEDetector::setSaveRaw(bool saveRaw)
+{
+   this->saveRaw = saveRaw;
+}
+
 void GigEDetector::handleSaveRawChanged(bool saveRaw)
 {
-    qDebug() << "GigEDetector::handleSaveRawChanged with:" <<saveRaw;
     this->saveRaw = saveRaw;
 }
 
@@ -229,7 +245,7 @@ int GigEDetector::terminateConnection()
    return status;
 }
 
-int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *t, double *hv)
+int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *t, double *hvCurrent)
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
@@ -239,7 +255,8 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
-    *hv = hvOut;
+
+    *hvCurrent = hvOut;
 /*
     *rh = 20.0;
     *th = 25.0;
@@ -259,6 +276,17 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
    frameSize = xResolution * xResolution * 2;
 
    return status;
+}
+
+void GigEDetector::setCommand(DetectorCommand command)
+{
+   this->command = command;
+}
+
+void GigEDetector::collectImage()
+{
+   setMode(CONTINUOUS);
+   getImages(0, 0);
 }
 
 void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2)
@@ -321,7 +349,7 @@ void GigEDetector::getImages(int count, int ndaq)
 
    if (mode == CONTINUOUS && appendTimestamp)
    {
-      setGetImageParams();
+     setGetImageParams();
    }
 
    if (ndaq == 0 && offsetsOn)
@@ -331,6 +359,10 @@ void GigEDetector::getImages(int count, int ndaq)
    }
    else
    {
+      if ( !QDir(directory).exists())
+      {
+         QDir().mkpath(directory);
+      }
       handleReducedDataCollection();
    }
 }
@@ -461,26 +493,6 @@ void GigEDetector::updateState(DetectorState state)
    emit notifyState(state);
 }
 
-unsigned int GigEDetector::getXResolution()
-{
-   return xResolution;
-}
-
-unsigned int GigEDetector::getYResolution()
-{
-   return yResolution;
-}
-
-void GigEDetector::setXResolution(unsigned int xResolution)
-{
-   this->xResolution = xResolution;
-}
-
-void GigEDetector::setYResolution(unsigned int yResolution)
-{
-   this->yResolution = yResolution;
-}
-
 void GigEDetector::setMode(Mode mode)
 {
    this->mode = mode;
@@ -501,9 +513,19 @@ QString GigEDetector::getDirectory()
    return this->directory;
 }
 
+void GigEDetector::setDataPrefix(string  prefix)
+{
+   this->prefix = QString::fromStdString(prefix);
+}
+
 void GigEDetector::setPrefix(QString prefix)
 {
    this->prefix = prefix;
+}
+
+string GigEDetector::getDataPrefix()
+{
+   return prefix.toStdString();
 }
 
 QString GigEDetector::getPrefix()
@@ -519,6 +541,11 @@ void GigEDetector::setTimestampOn(bool timestampOn)
 bool GigEDetector::getTimestampOn()
 {
    return timestampOn;
+}
+
+GigEDetector::Mode GigEDetector::getMode()
+{
+   return mode;
 }
 
 void GigEDetector::enableDarks()
@@ -546,9 +573,11 @@ void GigEDetector::imageDestToPixmap()
       QImage image(charImageDest, xRes, yRes, QImage::Format_Indexed8);
 
       image.setColorTable(colorTable);
+
       imagePixmap = QPixmap::fromImage(image);
       free(imageDest);
       emit imageAcquired(imagePixmap);
+
    }
 }
 
@@ -612,6 +641,7 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
 {
    LONG status = -1;
    int loggingInterval = 1;
+   double vCal;
 
    status = 0;
    iniFile = new IniFile(aspectFilename);
@@ -624,6 +654,11 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
    else
    {
       this->loggingInterval = 1;
+   }
+
+   if ((vCal = iniFile->getDouble("Control-Settings/VCAL")) != QVariant(INVALID))
+   {
+      this->vCal = vCal;
    }
 
    sensorConfig.Gain = (HexitecGain)iniFile->getInt("Control-Settings/Gain");

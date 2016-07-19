@@ -1,5 +1,6 @@
 #ifndef DETECTORFILENAME_H
 #define DETECTORFILENAME_H
+#define NOMINMAX
 
 #include <QString>
 

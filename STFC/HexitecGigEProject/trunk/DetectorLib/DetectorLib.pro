@@ -27,8 +27,7 @@ SOURCES += windowsevent.cpp \
     filewriter.cpp \
     detectorexception.cpp
 
-HEADERS +=DetectorLib_global.h \
-    windowsevent.h \
+HEADERS += windowsevent.h \
     inifile.h \
     detectorfactory.h \
     detectormonitor.h \

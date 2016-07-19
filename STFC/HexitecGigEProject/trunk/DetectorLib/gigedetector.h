@@ -1,5 +1,6 @@
 #ifndef GIGEDETECTOR_H
 #define GIGEDETECTOR_H
+#define NOMINMAX
 
 #include <QObject>
 #include <QPixmap>
@@ -13,9 +14,13 @@
 #include "GigE.h"
 
 #define HEXITEC_BUFFER_READY TEXT("Hexitec_BufferReady")
+#define HEXITEC_TRANSFER_BUFFER_READY TEXT("Hexitec_TransferBufferReady")
 #define HEXITEC_RETURN_BUFFER_READY TEXT("Hexitec_ReturnBufferReady")
 #define HEXITEC_STOP_DAQ TEXT("Hexitec_StopDAQ")
 #define HEXITEC_SHOW_IMAGE TEXT("Hexitec_ShowImage")
+#define HEXITEC_NOTIFY_STATE TEXT("Hexitec_NotifyState")
+
+using namespace std;
 
 class GigEDetector : public QObject
 {
@@ -36,20 +41,24 @@ public:
    Q_INVOKABLE void getImages(int count, int ndaq);
    Q_INVOKABLE void enableDarks();
    Q_INVOKABLE void disableDarks();
+   Q_INVOKABLE Mode getMode();
 
-   unsigned int getXResolution();
-   unsigned int getYResolution();
-   void setXResolution(unsigned int xResolution);
-   void setYResolution(unsigned int yResolution);
+   void setCommand(DetectorCommand command);
    void setMode(Mode mode);
    void setBufferReadyEvent();
    QString getDirectory();
    QString getPrefix();
+   void setDataPrefix(string  prefix);
+   string getDataPrefix();
    bool getTimestampOn();
    void setTimestampOn(bool timestampOn);
    void setDirectory(QString directory);
    void setPrefix(QString prefix);
    void setDataAcquisitionDuration(double imageAcquisitionDuration);
+   void setTargetTemperature(double targetTemperature);
+   void setHV(double voltage);
+   void setSaveRaw(bool saveRaw);
+   void collectImage();
    void acquireImages();
    int getLoggingInterval();
    void beginMonitoring();
@@ -143,6 +152,7 @@ private:
    HexitecSetupRegister rowSetupRegister;
    HexitecSetupRegister columnSetupRegister;
    HANDLE detectorHandle;
+   DetectorCommand command;
 
    void connectUp(const QObject *parent);
    LONG readIniFile(QString aspectFilename);

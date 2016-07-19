@@ -57,7 +57,7 @@ void DetectorMonitor::monitor()
 void DetectorMonitor::executeMonitorEnvironmentalValues()
 {
    /* Bias refreshing is turned off when the detector performs other operations
-    * e.g. data collection. When a long DAQ occurs the ENvirnmental parameters
+    * e.g. data collection. When a long DAQ occurs the Envirnmental parameters
     * need to be checked before a bias refresh is performed.
     */
 
