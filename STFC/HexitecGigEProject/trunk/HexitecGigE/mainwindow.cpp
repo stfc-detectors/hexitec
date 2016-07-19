@@ -869,7 +869,6 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
    {
       writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
    }
-   //   writeH5(fileName);
 }
 
 void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, int numberOfBins)
@@ -878,7 +877,7 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, 
 
    for (unsigned int i = 0; i < numberOfBins; i++)
    {
-      outputText << (int)col0[i] << "," << col1[i] << std::endl;
+      outputText << col0[i] << "," << col1[i] << std::endl;
    }
 
    fileName.replace(".hxt", ".csv");

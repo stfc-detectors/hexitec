@@ -156,6 +156,9 @@ void DataAcquisitionModel::connectGigEDetector()
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
    connect(gigEDetector, SIGNAL(enableMonitoring()),
            detectorMonitor, SLOT(enableMonitoring()));
+   connect(gigEDetector, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
+           gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
+
 }
 
 void DataAcquisitionModel::connectDetectorControlForm()
