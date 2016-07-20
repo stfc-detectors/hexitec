@@ -12,6 +12,10 @@
 #include "monitordata.h"
 #include "detectorfilename.h"
 #include "filewriter.h"
+#include <Windows.h>
+
+#define HEXITEC_MONITORING_DONE TEXT("Hexitec_MonitoringDone")
+#define HEXITEC_TEMPERATURE_BELOWDP TEXT("Hexitec_TemperatureBelowDP")
 
 class DetectorMonitor : public QObject
 {
@@ -28,9 +32,13 @@ private:
    int monitorCount;
    bool monitoringEnabled;
    FileWriter *logfileWriter;
+   HANDLE monitoringDoneEvent;
+   HANDLE temperatureBelowDPEvent;
+   MonitorData *monitorData;
    void calcTDP();
    void read();
-   void monitorEnvironmentalValues();
+   void monitorEnvironmentalValues(bool external = false);
+
 
 public:
    explicit DetectorMonitor(GigEDetector *gigEDetector, QObject *parent = 0);
@@ -38,6 +46,8 @@ public:
    int start();
    int stop();
    int getLoggingInterval();
+   HANDLE *getTemperatureBelowDPEvent();
+   HANDLE *getMonitoringDoneEvent();
 
 signals:
    void updateMonitorData(MonitorData *md);
@@ -48,7 +58,7 @@ signals:
    void temperatureAboveDP();
 
 private slots:
-   void monitor();
+   //void monitor();
    void handleWriteError(QString message);
    void handleWriteMessage(QString message);
 
@@ -59,6 +69,7 @@ public slots:
    void executeMonitorEnvironmentalValues();
    void enableMonitoring();
    void disableMonitoring();
+   MonitorData *monitor(bool external = false);
 };
 
 #endif // DETECTORMONITOR_H

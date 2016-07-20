@@ -19,6 +19,8 @@ DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, QObject *parent) :
    timer = new QTimer(this);
    connect(timer, SIGNAL(timeout()), this, SLOT(monitor()));
    this->gigEDetector = gigEDetector;
+   monitoringDoneEvent = CreateEvent(NULL, FALSE, FALSE, HEXITEC_MONITORING_DONE);
+   temperatureBelowDPEvent = CreateEvent(NULL, FALSE, FALSE, HEXITEC_TEMPERATURE_BELOWDP);
 }
 
 DetectorMonitor::~DetectorMonitor()
@@ -45,13 +47,23 @@ int DetectorMonitor::start()
 
    return status;
 }
-
+/*
 void DetectorMonitor::monitor()
 {
    if (monitoringEnabled)
    {
       monitorEnvironmentalValues();
    }
+}
+*/
+MonitorData *DetectorMonitor::monitor(bool external)
+{ 
+   if (monitoringEnabled)
+   {
+      monitorEnvironmentalValues(external);
+   }
+
+   return monitorData;
 }
 
 void DetectorMonitor::executeMonitorEnvironmentalValues()
@@ -67,13 +79,22 @@ void DetectorMonitor::executeMonitorEnvironmentalValues()
    }
 }
 
-void DetectorMonitor::monitorEnvironmentalValues()
+
+void DetectorMonitor::monitorEnvironmentalValues(bool external)
 {
    try
    {
       read();
-      emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, true));
-      emit monitoringDone();
+      if (external)
+      {
+         monitorData = new MonitorData(th, t, tdp, rh, ik, tasic, true);
+         SetEvent(monitoringDoneEvent);
+      }
+      else
+      {
+	      emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, true));
+	      emit monitoringDone();
+      }
 
       if (logfileWriter != NULL)
       {
@@ -96,6 +117,7 @@ void DetectorMonitor::monitorEnvironmentalValues()
          if (temperatureInRange)
          {
             emit temperatureBelowDP();
+            SetEvent(temperatureBelowDPEvent);
             temperatureInRange = false;
          }
       }
@@ -107,7 +129,6 @@ void DetectorMonitor::monitorEnvironmentalValues()
    }
    catch (DetectorException &ex)
    {
-      qDebug() << "DetectorException caught in monitorEnvironmentalValues()";
       emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, false));
       emit writeError(ex.getMessage());
    }
@@ -189,4 +210,14 @@ void DetectorMonitor::createLogFile(DetectorFilename *logFilename)
       }
    }
 
+}
+
+HANDLE *DetectorMonitor::getMonitoringDoneEvent()
+{
+   return &monitoringDoneEvent;
+}
+
+HANDLE *DetectorMonitor::getTemperatureBelowDPEvent()
+{
+   return &temperatureBelowDPEvent;
 }

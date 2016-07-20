@@ -32,6 +32,11 @@ public:
 /**********************************************************/
    enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
    enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
+   GigEDetector(string aspectFilename);
+   int initialiseConnection(p_bufferCallBack bufferCallBack);
+   void setHV(double *voltage);
+   void setSaveRaw(bool *saveRaw);
+ 
    GigEDetector(QString aspectFilename, const QObject *parent = 0);
    ~GigEDetector();
 
@@ -68,7 +73,7 @@ public:
    WindowsEvent *getShowImageEvent();
    static PUCHAR getBufferReady();
    static ULONG getValidFrames();
-   void abort(bool restart);
+   void abort(bool restart = false);
 
 signals:
    void notifyState(GigEDetector::DetectorState state);
@@ -116,6 +121,9 @@ private:
    WindowsEvent *bufferReadyEvent;
    WindowsEvent *returnBufferReadyEvent;
    WindowsEvent *showImageEvent;
+   HANDLE transferBufferReadyEvent;
+//   HANDLE returnBufferReadyEvent;
+   HANDLE notifyStateEvent;
    const QObject *parent;
    Mode mode;
    bool offsetsOn;
@@ -147,6 +155,7 @@ private:
    unsigned long framesPerBuffer;
    int loggingInterval;
    QString aspectFilename;
+   QString aspectFilenameQ;
    IniFile *iniFile;
    HexitecSensorConfig sensorConfig;
    HexitecSetupRegister rowSetupRegister;
@@ -154,6 +163,8 @@ private:
    HANDLE detectorHandle;
    DetectorCommand command;
 
+   void constructorInit(const QObject *parent = 0);
+   int initialise();
    void connectUp(const QObject *parent);
    LONG readIniFile(QString aspectFilename);
    HexitecSetupRegister initSetupRegister(QString type);
