@@ -36,8 +36,8 @@ MainWindow::MainWindow()
    MotionControlForm *motionControlform;
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
 
-   QString version = "HexitecGigE Alpha";
-   QString nonDAQVersion = "HexitecGigE Alpha (excluding DAQ)";
+   QString version = "HexitecGigE V1.0";
+   QString nonDAQVersion = "HexitecGigE V1.0 (excluding DAQ)";
 
    activeDAQ = checkDAQChoice();
 
