@@ -1,12 +1,27 @@
+#include "detectorfactory.h"
 #include <QDebug>
 #include "windowsevent.h"
-#include "detectorfactory.h"
+#include <Windows.h>
+
+#include <iostream>
+#include <QApplication>
+
+using namespace std;
 
 DetectorFactory *DetectorFactory::dfInstance = 0;
 
 DetectorFactory::DetectorFactory(const QObject *parent)
 {
    this->parent = parent;
+}
+
+DetectorFactory *DetectorFactory::instance()
+{
+   if (dfInstance == 0)
+   {
+      dfInstance = new DetectorFactory(0);
+   }
+   return dfInstance;
 }
 
 DetectorFactory *DetectorFactory::instance(const QObject *parent)
@@ -18,6 +33,12 @@ DetectorFactory *DetectorFactory::instance(const QObject *parent)
    return dfInstance;
 }
 
+GigEDetector *DetectorFactory::createGigEDetector(string aspectFilename)
+{
+   QString aspectFilenameQ = QString::fromStdString(aspectFilename);
+   return createGigEDetector(aspectFilenameQ);
+}
+
 GigEDetector *DetectorFactory::createGigEDetector(QString aspectFilename, QObject *parent)
 {
    gigEDetector = new GigEDetector(aspectFilename, parent);
@@ -26,6 +47,7 @@ GigEDetector *DetectorFactory::createGigEDetector(QString aspectFilename, QObjec
    bufferReadyEvent = gigEDetector->getBufferReadyEvent();
    returnBufferReadyEvent = gigEDetector->getReturnBufferReadyEvent();
    showImageEvent = gigEDetector->getShowImageEvent();
+   notifyStateEvent = gigEDetector->getNotifyStateEvent();
 
    detectorMonitor = new DetectorMonitor(gigEDetector, NULL);
 
@@ -47,7 +69,12 @@ WindowsEvent *DetectorFactory::getBufferReadyEvent()
    return bufferReadyEvent;
 }
 
-WindowsEvent *DetectorFactory::getReturnBufferReadyEvent()
+HANDLE *DetectorFactory::getTransferBufferReadyEvent()
+{
+   return transferBufferReadyEvent;
+}
+
+HANDLE *DetectorFactory::getReturnBufferReadyEvent()
 {
    return returnBufferReadyEvent;
 }
@@ -56,6 +83,11 @@ WindowsEvent *DetectorFactory::getShowImageEvent()
 {
    return showImageEvent;
 
+}
+
+HANDLE *DetectorFactory::getNotifyStateEvent()
+{
+   return notifyStateEvent;
 }
 
 DetectorFactory::~DetectorFactory()

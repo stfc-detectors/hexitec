@@ -9,18 +9,26 @@
 #include "imageacquirer.h"
 #include "detectormonitor.h"
 
+#include <string>
 class DetectorFactory : public QObject
 {
    Q_OBJECT
 public:
-   ~DetectorFactory();
-   static DetectorFactory *instance(const QObject *parent = 0);
-   GigEDetector *createGigEDetector(QString aspectFilename, QObject *parent);
+   static DetectorFactory *instance();
+   static DetectorFactory *instance(const QObject *parent);
+   GigEDetector *createGigEDetector(QString aspectFilename, QObject *parent = 0);
+   GigEDetector *createGigEDetector(string aspectFilename);
    GigEDetector *getGigEDetector();
    DetectorMonitor *getDetectorMonitor();
+   HANDLE *getNotifyStateEvent();
    WindowsEvent *getBufferReadyEvent();
-   WindowsEvent *getReturnBufferReadyEvent();
+//   WindowsEvent *getReturnBufferReadyEvent();
    WindowsEvent *getShowImageEvent();
+   HANDLE *getTransferBufferReadyEvent();
+   HANDLE *getReturnBufferReadyEvent();
+   HANDLE *getMonitoringDoneEvent();
+   HANDLE *getTemperatureBelowDPEvent();
+    ~DetectorFactory();
 
 protected:
    explicit DetectorFactory(const QObject *parent = 0);
@@ -31,8 +39,11 @@ private:
    DetectorMonitor *detectorMonitor;
    const QObject *parent;
    WindowsEvent *bufferReadyEvent;
-   WindowsEvent *returnBufferReadyEvent;
+//   WindowsEvent *returnBufferReadyEvent;
    WindowsEvent *showImageEvent;
+   HANDLE *transferBufferReadyEvent;
+   HANDLE *returnBufferReadyEvent;
+   HANDLE *notifyStateEvent;
 };
 
 #endif // DETECTORFACTORY_H

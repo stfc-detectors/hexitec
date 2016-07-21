@@ -26,6 +26,7 @@ HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, 0 };
 HexitecSystemConfig	systemConfig = {2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4};
 
+#ifdef DETECTORLIB_EXPORTS
 static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
    bufferReady = transferBuffer;
@@ -36,12 +37,28 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
    bufferReadyEvent->SetEvent1();
    showImageEvent->SetEvent1();
 }
+#else
+static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
+{
+}
+#endif
+
+GigEDetector::GigEDetector(string aspectFilename)
+{
+   this->aspectFilename = QString::fromStdString(aspectFilename);
+   constructorInit();
+}
 
 GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
 {
+   this->aspectFilename = aspectFilename;
+   constructorInit(parent);
+}
+
+void GigEDetector::constructorInit(const QObject *parent)
+{
    timeout = 1000;
    collectDcTime = 0;
-   this->aspectFilename = aspectFilename;
    gigEDetectorThread = new QThread();
    gigEDetectorThread->start();
    moveToThread(gigEDetectorThread);
@@ -64,6 +81,11 @@ GigEDetector::GigEDetector(QString aspectFilename, const QObject *parent)
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
    qRegisterMetaType<HANDLE>("HANDLE");
+
+
+//   notifyStateEvent = new WindowsEvent(HEXITEC_NOTIFY_STATE, true);
+   notifyStateEvent = CreateEvent(NULL, FALSE, FALSE, HEXITEC_NOTIFY_STATE);
+
    connectUp(parent);
 }
 
@@ -80,6 +102,8 @@ GigEDetector::~GigEDetector()
 
 void GigEDetector::connectUp(const QObject *parent)
 {
+
+#ifdef DETECTORLIB_EXPORTS
    bufferReadyEvent = new WindowsEvent(HEXITEC_BUFFER_READY, true);
    bufferReadyEvent->connect1(parent, SLOT(handleBufferReady()));
    returnBufferReadyEvent = new WindowsEvent(HEXITEC_RETURN_BUFFER_READY, true);
@@ -88,6 +112,7 @@ void GigEDetector::connectUp(const QObject *parent)
    showImageEvent->connect1(parent, SLOT(handleShowImage()));
 
    connect(this , SIGNAL(executeReturnBufferReady(unsigned char *)), this, SLOT(handleReturnBufferReady()));
+#endif
    connect(this, SIGNAL(executeGetImages()), this, SLOT(handleExecuteGetImages()));
 }
 
@@ -138,9 +163,9 @@ void GigEDetector::handleSetTargetTemperature(double targetTemperature)
     showError("SetDAC", status);
 }
 
-void GigEDetector::setHV(double voltage)
+void GigEDetector::setHV(double *voltage)
 {
-   handleSetHV(voltage);
+   handleSetHV(*voltage);
 }
 
 void GigEDetector::handleSetHV(double voltage)
@@ -158,9 +183,9 @@ void GigEDetector::handleAppendTimestamp(bool appendTimestamp)
     this->appendTimestamp = appendTimestamp;
 }
 
-void GigEDetector::setSaveRaw(bool saveRaw)
+void GigEDetector::setSaveRaw(bool *saveRaw)
 {
-   this->saveRaw = saveRaw;
+   this->saveRaw = *saveRaw;
 }
 
 void GigEDetector::handleSaveRawChanged(bool saveRaw)
@@ -169,6 +194,20 @@ void GigEDetector::handleSaveRawChanged(bool saveRaw)
 }
 
 int GigEDetector::initialiseConnection()
+{
+   int status = initialise();
+   RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   return status;
+}
+
+int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
+{
+   int status = initialise();
+   RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   return status;
+}
+
+int GigEDetector::initialise()
 {
    LONG status = -1;
    CONST LPSTR deviceDescriptor = "";
@@ -213,8 +252,9 @@ int GigEDetector::initialiseConnection()
 
    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
    showError("SetDAC", status);
-
+#ifdef DETECTORLIB_EXPORTS
    RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+#endif
    updateState(READY);
    QString message = QString("Detector connection to IP ");
    message.append(deviceInfo.IpAddress);
@@ -397,14 +437,24 @@ WindowsEvent *GigEDetector::getBufferReadyEvent()
    return bufferReadyEvent;
 }
 
-WindowsEvent *GigEDetector::getReturnBufferReadyEvent()
+HANDLE *GigEDetector::getTransferBufferReadyEvent()
 {
-   return returnBufferReadyEvent;
+   return &transferBufferReadyEvent;
+}
+
+HANDLE *GigEDetector::getReturnBufferReadyEvent()
+{
+   return &returnBufferReadyEvent;
 }
 
 WindowsEvent *GigEDetector::getShowImageEvent()
 {
    return showImageEvent;
+}
+
+HANDLE *GigEDetector::getNotifyStateEvent()
+{
+   return &notifyStateEvent;
 }
 
 void GigEDetector::handleReducedDataCollection()
@@ -423,7 +473,8 @@ void GigEDetector::handleExecuteOffsets()
    if (offsetsOn)
    {
       updateState(OFFSETS);
-      collectOffsets();
+//      collectOffsets();
+      collectOffsetValues();
       updateState(COLLECTING_PREP);
       emit prepareForDataCollection();
    }
@@ -432,8 +483,15 @@ void GigEDetector::handleExecuteOffsets()
       updateState(READY);
    }
 }
+void GigEDetector::collectOffsets()
+{
+   updateState(OFFSETS);
+   collectOffsetValues();
+   updateState(READY);
 
-LONG GigEDetector::collectOffsets()
+}
+
+LONG GigEDetector::collectOffsetValues()
 {
    int status = -1;
 
@@ -491,6 +549,12 @@ void GigEDetector::updateState(DetectorState state)
 {
    this->state = state;
    emit notifyState(state);
+   SetEvent(notifyStateEvent);
+}
+
+GigEDetector::DetectorState GigEDetector::getState()
+{
+   return state;
 }
 
 void GigEDetector::setMode(Mode mode)
@@ -498,9 +562,9 @@ void GigEDetector::setMode(Mode mode)
    this->mode = mode;
 }
 
-void GigEDetector::setDirectory(QString directory)
+void GigEDetector::setDataAcquisitionDuration(double *dataAcquisitionDuration)
 {
-   this->directory = directory;
+   this->dataAcquisitionDuration = *dataAcquisitionDuration;
 }
 
 void GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
@@ -508,14 +572,29 @@ void GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
    this->dataAcquisitionDuration = dataAcquisitionDuration;
 }
 
+void GigEDetector::setDataDirectory(string  *directory)
+{
+   this->directory = QString::fromStdString(*directory);
+}
+
+void GigEDetector::setDirectory(QString directory)
+{
+   this->directory = directory;
+}
+
+string GigEDetector::getDataDirectory()
+{
+   return this->directory.toStdString();
+}
+
 QString GigEDetector::getDirectory()
 {
    return this->directory;
 }
 
-void GigEDetector::setDataPrefix(string  prefix)
+void GigEDetector::setDataPrefix(string *prefix)
 {
-   this->prefix = QString::fromStdString(prefix);
+   this->prefix = QString::fromStdString(*prefix);
 }
 
 void GigEDetector::setPrefix(QString prefix)
@@ -669,7 +748,6 @@ LONG GigEDetector::readIniFile(QString aspectFilename)
    sensorConfig.WaitClockCol = 1;
    sensorConfig.WaitClockRow = 8;
 
-//   !!! Column configuration through the GigE.dll is failing and always returns 80 for xRes!
    sensorConfig.SetupRow = initSetupRegister("Row");
    sensorConfig.SetupCol = initSetupRegister("Column");
 

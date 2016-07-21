@@ -7,10 +7,12 @@
 #include <fstream>
 #include <QDateTime>
 #include <string>
+#include <QString>
 
 #include "detectorexception.h"
 #include "inifile.h"
 #include "windowsevent.h"
+#include <iostream>
 #include "GigE.h"
 
 #define HEXITEC_BUFFER_READY TEXT("Hexitec_BufferReady")
@@ -34,15 +36,21 @@ public:
    enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
    GigEDetector(string aspectFilename);
    int initialiseConnection(p_bufferCallBack bufferCallBack);
+   void setDataDirectory(string *directory);
+   void setDataPrefix(string *prefix);
+   void setDataAcquisitionDuration(double *imageAcquisitionDuration);
+   string getDataDirectory();
+   void collectOffsets();
    void setHV(double *voltage);
    void setSaveRaw(bool *saveRaw);
+   DetectorState getState();
  
    GigEDetector(QString aspectFilename, const QObject *parent = 0);
    ~GigEDetector();
 
    Q_INVOKABLE int initialiseConnection();
    Q_INVOKABLE int terminateConnection();
-   Q_INVOKABLE int getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *hv, double *t);
+   Q_INVOKABLE int getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *t, double *hvCurrent);
    Q_INVOKABLE void getImages(int count, int ndaq);
    Q_INVOKABLE void enableDarks();
    Q_INVOKABLE void disableDarks();
@@ -69,8 +77,12 @@ public:
    void beginMonitoring();
 
    WindowsEvent *getBufferReadyEvent();
-   WindowsEvent *getReturnBufferReadyEvent();
+//   WindowsEvent *getReturnBufferReadyEvent();
    WindowsEvent *getShowImageEvent();
+   HANDLE *getTransferBufferReadyEvent();
+   HANDLE *getReturnBufferReadyEvent();
+   HANDLE *getNotifyStateEvent();
+
    static PUCHAR getBufferReady();
    static ULONG getValidFrames();
    void abort(bool restart = false);
@@ -119,10 +131,10 @@ private:
    QString errorMessage;
 
    WindowsEvent *bufferReadyEvent;
-   WindowsEvent *returnBufferReadyEvent;
+//   WindowsEvent *returnBufferReadyEvent;
    WindowsEvent *showImageEvent;
    HANDLE transferBufferReadyEvent;
-//   HANDLE returnBufferReadyEvent;
+   HANDLE returnBufferReadyEvent;
    HANDLE notifyStateEvent;
    const QObject *parent;
    Mode mode;
@@ -175,7 +187,7 @@ private:
    unsigned char *getImage(int imageNumber);
    void run();
    void showError(const LPSTR context, long asError);
-   LONG collectOffsets();
+   LONG collectOffsetValues();
    void setGetImageParams();
 };
 
