@@ -1,0 +1,5 @@
+The HEXITEC Gig E software is designed to control and readout the data from the HEXITEC detector. The software will collect, process and display the hyperspectral data collected from HEXITEC.
+
+This work was designed and funded by the Science & Technology Facilities Council, UK and builds upon the work conducted throughout the HEXITEC collaboration through the EPSRC funded grants (EP/D048737/1 and EP/H046577/1).
+
+For more information please contact Matt Wilson - matt.wilson@stfc.ac.uk.</p>

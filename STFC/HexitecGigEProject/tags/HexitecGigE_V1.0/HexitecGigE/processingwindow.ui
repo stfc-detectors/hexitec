@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProcessingWindow</class>
+ <widget class="QWidget" name="ProcessingWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>743</width>
+    <height>494</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="3" rowspan="2">
+    <widget class="QLabel" name="endUnitLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>ADU</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1" rowspan="2" colspan="2">
+    <widget class="QLineEdit" name="endBinLineEdit">
+     <property name="text">
+      <string>8000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QPushButton" name="processNowButton">
+     <property name="text">
+      <string>Process Now</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" colspan="2">
+    <widget class="QLabel" name="dataProcessingLabel">
+     <property name="text">
+      <string> Data Processing</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4" colspan="3">
+    <widget class="QComboBox" name="dataProcessingComboBox"/>
+   </item>
+   <item row="0" column="9" colspan="2">
+    <widget class="QComboBox" name="processingFrequencyComboBox"/>
+   </item>
+   <item row="0" column="7" colspan="2">
+    <widget class="QLabel" name="processingFrequencyLabel">
+     <property name="text">
+      <string>Every</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="6" colspan="8">
+    <widget class="QLineEdit" name="momentumPathLineEdit"/>
+   </item>
+   <item row="12" column="3" colspan="3">
+    <widget class="QLabel" name="momentumPathLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Momentum File:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="14">
+    <widget class="QPushButton" name="momentumBrowseButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="4" rowspan="3" colspan="3">
+    <widget class="QPushButton" name="hxtFileSaveButton">
+     <property name="text">
+      <string>Save As..</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="3">
+    <widget class="QLabel" name="thresholdUnitLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>ADU</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0" colspan="3">
+    <widget class="QPushButton" name="debugButton">
+     <property name="text">
+      <string>Cancel [Debug]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="6" colspan="8">
+    <widget class="QLineEdit" name="globalThresholdPathLineEdit"/>
+   </item>
+   <item row="15" column="3" colspan="2">
+    <widget class="QLabel" name="globalThresholdPathLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Global Threshold:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="15" colspan="2">
+    <widget class="QPushButton" name="loadSettingsButton">
+     <property name="text">
+      <string>Load Settings</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="16">
+    <widget class="QLabel" name="stateLabel">
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text">
+      <string>Idle</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QLabel" name="spectrumOptionsLabel">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Spectrum Options</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" rowspan="2">
+    <widget class="QLabel" name="binWidthLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Bin Width</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="15" rowspan="2" colspan="2">
+    <widget class="QCheckBox" name="motorPositionCheckBox">
+     <property name="text">
+      <string>Motor Position</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1" rowspan="2" colspan="2">
+    <widget class="QLineEdit" name="binWidthLineEdit">
+     <property name="text">
+      <string>10</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5" colspan="3">
+    <widget class="QComboBox" name="calibrationComboBox"/>
+   </item>
+   <item row="1" column="3" colspan="2">
+    <widget class="QLabel" name="calibrationLabel">
+     <property name="text">
+      <string>Calibration</string>
+     </property>
+    </widget>
+   </item>
+   <item row="16" column="0" colspan="17">
+    <widget class="QTextBrowser" name="output">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="3" colspan="3">
+    <widget class="QLabel" name="gradientsPathLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Gradients File:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3" rowspan="2">
+    <widget class="QLabel" name="binUnitLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>ADU</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="14">
+    <widget class="QPushButton" name="interceptsBrowseButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1" colspan="2">
+    <widget class="QLineEdit" name="thresholdLineEdit">
+     <property name="text">
+      <string>100</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="15" colspan="2">
+    <widget class="QPushButton" name="saveSettingsButton">
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Save Settings</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="10" colspan="2">
+    <widget class="QComboBox" name="nextFrameCorrectionComboBox"/>
+   </item>
+   <item row="8" column="15" rowspan="2" colspan="2">
+    <widget class="QCheckBox" name="dataTimeStampCheckBox">
+     <property name="text">
+      <string>Data Time Stamp</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="8" rowspan="2" colspan="2">
+    <widget class="QCheckBox" name="sameAsRawFileCheckBox">
+     <property name="text">
+      <string>Same As Raw File</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="14">
+    <widget class="QPushButton" name="gradientsBrowseButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="6" colspan="8">
+    <widget class="QLineEdit" name="interceptsPathLineEdit"/>
+   </item>
+   <item row="4" column="4" rowspan="2" colspan="4">
+    <widget class="QCheckBox" name="customCheckBox">
+     <property name="text">
+      <string>Custom:</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QPushButton" name="clearUnprocessedButton">
+     <property name="text">
+      <string>Clear Unprocessed</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="4" rowspan="2" colspan="9">
+    <widget class="QLineEdit" name="hxtFileLineEdit">
+     <property name="text">
+      <string>C:\custom.hxt</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="3" colspan="3">
+    <widget class="QLabel" name="interceptsPathLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Intercepts File:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" rowspan="2">
+    <widget class="QLabel" name="startBinLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Start Bin</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="14">
+    <widget class="QPushButton" name="globalThresholdBrowseButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="11" colspan="2">
+    <widget class="QLabel" name="updateDisplayLabel">
+     <property name="text">
+      <string>Update Display</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="6" colspan="8">
+    <widget class="QLineEdit" name="gradientsPathLineEdit"/>
+   </item>
+   <item row="0" column="13" colspan="3">
+    <widget class="QComboBox" name="updateDisplayComboBox"/>
+   </item>
+   <item row="4" column="15" rowspan="2" colspan="2">
+    <widget class="QCheckBox" name="filePrefixCheckBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>File Prefix</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" rowspan="2" colspan="2">
+    <widget class="QLineEdit" name="startBinLineEdit">
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" rowspan="2">
+    <widget class="QLabel" name="endBinLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>End Bin</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="thresholdLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Threshold</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3" rowspan="2">
+    <widget class="QLabel" name="startUnitLabel">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>ADU</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="8" colspan="2">
+    <widget class="QLabel" name="nextFrameCorrectionLabel">
+     <property name="text">
+      <string>Next Frame Correction</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="16">
+    <widget class="QComboBox" name="chargeSharingCorrectionComboBox"/>
+   </item>
+   <item row="1" column="12" colspan="4">
+    <widget class="QLabel" name="chargeSharingCorrectionLabel">
+     <property name="text">
+      <string>Charged Sharing Correction</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4" rowspan="2" colspan="3">
+    <widget class="QLabel" name="hxtFileNameLabel">
+     <property name="text">
+      <string>HXT FileName</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="15" rowspan="2" colspan="2">
+    <widget class="QLabel" name="hxHeaderInfoLabel">
+     <property name="text">
+      <string>HXT Header Info</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="11">
+    <widget class="QCheckBox" name="hdf5FileCheckBox">
+     <property name="text">
+      <string>HDF5 File</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="8">
+    <widget class="QCheckBox" name="csvFileCheckBox">
+     <property name="text">
+      <string>CSV File</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="8" colspan="2">
+    <widget class="QCheckBox" name="processingLoggingCheckBox">
+     <property name="text">
+      <string>Processing Logging</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
