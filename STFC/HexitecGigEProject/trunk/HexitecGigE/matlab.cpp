@@ -2,6 +2,7 @@
 #include "mex.h"
 
 #include <iostream>
+#include <Windows.h>
 using namespace std;
 matlab *matlab::matlabInstance = 0;
 

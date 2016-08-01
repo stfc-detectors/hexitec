@@ -36,9 +36,11 @@ private:
    static void initHexitechProcessor();
    static QHash<QString, int> motorPositions;
    void run();
+   int waitForConfiguringDone();
    int waitForCollectingDone();
    void waitForMonitoringDone();
    int waitForBiasRefreshDone();
+   void configureTriggering(int triggeringMode);
    void configureDataCollection();
    void configureBasicCollection();
    void setDirectory(int repeatCount);
@@ -64,6 +66,7 @@ private:
    int nRepeat;
    int currentImageNumber;
    bool collecting;
+   bool configuring;
    bool biasRefreshing;
    bool monitoring;
    bool biasOn;
@@ -81,6 +84,7 @@ private:
    Reservation reservation;
    unsigned long long totalFramesAcquired;
    void performGigEDefaultDataCollection();
+   void performTriggeringConfigure();
 
 signals:
    void executeCommand(GigEDetector::DetectorCommand, int, int);
@@ -105,6 +109,7 @@ signals:
 public slots:
    void handleAbortDAQ();
    void receiveState(GigEDetector::DetectorState detectorState);
+   void handleTriggeringSelectionChanged(int triggering);
    void handleCollectReducedImages();
    void handleCollectFixedImages();
    void handleExecuteOffsets();

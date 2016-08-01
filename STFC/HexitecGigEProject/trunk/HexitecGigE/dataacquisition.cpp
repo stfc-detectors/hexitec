@@ -21,6 +21,7 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    collecting = false;
    biasRefreshing = false;
    monitoring = false;
+   configuring = false;
    biasOn = false;
    biasRefreshRequired = false;
    setAbort(false);
@@ -43,6 +44,12 @@ void DataAcquisition::positionChanged(Motor *motor, const QVariant & value)
    int position = value.toInt();
    QString name = motor->property("objectName").toString();
    motorPositions[name] = position;
+}
+
+void DataAcquisition::configureTriggering(int triggeringMode)
+{
+   mode = GigEDetector::RECONFIGURE;
+   gigEDetector->setTriggeringMode(triggeringMode);
 }
 
 void DataAcquisition::configureBasicCollection()
@@ -71,47 +78,46 @@ void DataAcquisition::configureDataCollection()
    }
    else
    {
+      dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
+      gigEDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
+      gigEDetector->setDirectory(dataAcquisitionDefinition->getDataFilename()->getDirectory());
+      gigEDetector->setPrefix(dataAcquisitionDefinition->getDataFilename()->getPrefix());
+      gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+      if (dataAcquisitionDefinition->getOffsets())
+      {
+         gigEDetector->enableDarks();
+      }
+      else
+      {
+         gigEDetector->disableDarks();
+      }
 
-   dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
-   gigEDetector->setTimestampOn(dataAcquisitionDefinition->getDataFilename()->getTimestampOn());
-   gigEDetector->setDirectory(dataAcquisitionDefinition->getDataFilename()->getDirectory());
-   gigEDetector->setPrefix(dataAcquisitionDefinition->getDataFilename()->getPrefix());
-   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
-   if (dataAcquisitionDefinition->getOffsets())
-   {
-      gigEDetector->enableDarks();
-   }
-   else
-   {
-      gigEDetector->disableDarks();
-   }
+      setAbort(false);
+      nRepeat = 1;
+      appendRepeatCount = false;
 
-   setAbort(false);
-   nRepeat = 1;
-   appendRepeatCount = false;
+      if (biasOn)
+      {
+         splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )hv->getBiasRefreshInterval()));
+      }
+      else
+      {
+         splitDataCollections = 1;
+      }
+      if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
+      {
+         appendRepeatCount = true;
+      }
 
-   if (biasOn)
-   {
-      splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )hv->getBiasRefreshInterval()));
-   }
-   else
-   {
-      splitDataCollections = 1;
-   }
-   if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
-   {
-      appendRepeatCount = true;
-   }
+      mode = GigEDetector::CONTINUOUS;
+      gigEDetector->setMode(mode);
+      currentImageNumber = 0;
 
-   mode = GigEDetector::CONTINUOUS;
-   gigEDetector->setMode(mode);
-   currentImageNumber = 0;
-
-   daqStatus.setDaqImages(splitDataCollections * nRepeat);
-   daqStatus.setCurrentImage(0);
-   daqStatus.setPercentage(0);
-   changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
-                   daqStatus.getMinorStatus());
+      daqStatus.setDaqImages(splitDataCollections * nRepeat);
+      daqStatus.setCurrentImage(0);
+      daqStatus.setPercentage(0);
+      changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
+                      daqStatus.getMinorStatus());
    }
 }
 
@@ -192,6 +198,10 @@ void DataAcquisition::run()
       changeDAQStatus(DataAcquisitionStatus::IDLE,
                       DataAcquisitionStatus::READY);
    }
+   else if (mode == GigEDetector::RECONFIGURE)
+   {
+      performTriggeringConfigure();
+   }
 /*   else if (mode == GigEDetector::FIXED)
    {
       performFixedDataCollection();
@@ -213,6 +223,21 @@ void DataAcquisition::setDirectory(int repeatCount)
 
    gigEDetector->setDirectory(*dir);
    delete dir;
+}
+
+void DataAcquisition::performTriggeringConfigure()
+{
+   configuring = true;
+   emit storeBiasSettings();
+   emit disableBiasRefresh();
+   emit disableMonitoring();
+
+   emit executeCommand(GigEDetector::CONFIGURE, 0, 0);
+   waitForConfiguringDone();
+
+   emit restoreBiasSettings();
+   emit enableMonitoring();
+
 }
 
 void DataAcquisition::performContinuousDataCollection()
@@ -423,6 +448,16 @@ int DataAcquisition::waitForBiasRefreshDone()
    return status;
 }
 
+int DataAcquisition::waitForConfiguringDone()
+{
+   int status = 0;
+
+   while (configuring)
+      sleep(0.1);
+
+   return status;
+}
+
 int DataAcquisition::waitForCollectingDone()
 {
    int status = 0;
@@ -518,6 +553,10 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
       {
          collecting = false;
       }
+      if (configuring)
+      {
+         configuring = false;
+      }
       break;
    case GigEDetector::INITIALISING:
       changeDAQStatus(DataAcquisitionStatus::INITIALISING,
@@ -549,6 +588,22 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
       changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
                       DataAcquisitionStatus::COLLECTING);
       break;
+   }
+}
+
+void DataAcquisition::handleTriggeringSelectionChanged(int triggeringMode)
+{
+   reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
+   if (reservation.getReserved().isEmpty())
+   {
+      qDebug() << "handleTriggeringSelectionChanged Could not reserve all objects, message = " << reservation.getMessage();
+   }
+   else
+   {
+      qDebug() << "handleTriggeringSelectionChanged all objects reserved, configuring triggering";
+      qDebug() <<"handleTriggeringSelectionChanged(int triggering):" << triggeringMode;
+      configureTriggering(triggeringMode);
+      start();
    }
 }
 

@@ -3,7 +3,7 @@
 # Project created by QtCreator 2011-11-24T10:35:18
 #
 #-------------------------------------------------
-QT       += core gui script
+QT       += core gui script serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -178,14 +178,16 @@ DSoFt64 {
   # DSoFt 64 bit configuration
   DEFINES += NONI
   DEFINES += OS_WIN
-  LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
-  LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
-  CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2 /DELAYLOAD:Galil2.dll
+  LIBS += delayimp.lib
+  QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll /DELAYLOAD:Galil2.dll /DELAYLOAD:XpsLib.dll
+  LIBS += ../DetectorLib/GigE.lib
+  LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx
+  CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2
   CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
-  CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib -L../SerialPortLib/qextserialport/release -lQt5ExtSerialPort1 /DELAYLOAD:XpsLib.dll
-  CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2 /DELAYLOAD:Galil2.dll
+  CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
+  CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2
   CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
-  CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib -L../SerialPortLib/qextserialport/debug -lQt5ExtSerialPortd1 /DELAYLOAD:XpsLib.dll
+  CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib
   INCLUDEPATH += "C:/Program Files/MATLAB/R2012b/extern/include/"
   INCLUDEPATH += "C:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64"
   INCLUDEPATH += ../Eigen/3_1_2/Eigen
@@ -193,8 +195,6 @@ DSoFt64 {
   INCLUDEPATH  += ../HxtProcessingLib/include
   INCLUDEPATH += ../XpsLib
   INCLUDEPATH += ../SerialPortLib
-  INCLUDEPATH += ../SerialPortLib/qextserialport/src
-  DEFINES += QEXTSERIALPORT_USING_SHARED
 } else:DSoFt32 {
   # DSoFt 32 bit configuration
   DEFINES += NONI

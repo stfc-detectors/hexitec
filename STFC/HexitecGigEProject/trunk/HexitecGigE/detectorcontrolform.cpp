@@ -18,6 +18,8 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    ui->logFilePrefix->setVisible(false);
    ui->logFileTimestamp->setVisible(false);
    ui->loggingEnabled->setVisible(false);
+   ui->triggeringSelection->setEnabled(false);
+   ui->ttlInputSelection->setEnabled(false);
 
    mainWindow = new QMainWindow();
    mainWindow->setCentralWidget(this);
@@ -62,6 +64,24 @@ void DetectorControlForm::setHvName(QString hvName)
    this->hvName = hvName;
 }
 
+void DetectorControlForm::handleTriggeringAvailable(bool triggeringAvailable)
+{
+   this->triggeringAvailable = triggeringAvailable;
+
+   if (this->triggeringAvailable)
+   {
+      ui->triggeringSelection->setEnabled(true);
+      ui->ttlInputSelection->setEnabled(true);
+   }
+   else
+   {
+      ui->triggeringSelection->setEnabled(false);
+      ui->ttlInputSelection->setEnabled(false);
+   }
+
+   qDebug() <<"Triggering Available = " << triggeringAvailable;
+}
+
 void DetectorControlForm::connectSignals()
 {
    connect(ui->biasVoltageButton, SIGNAL(clicked(bool)), this, SLOT(biasVoltageClicked(bool)));
@@ -71,6 +91,8 @@ void DetectorControlForm::connectSignals()
    connect(ui->abortDAQ, SIGNAL(pressed()), this, SLOT(abortDAQ()));
    connect(ui->imageCount, SIGNAL(valueChanged(int)), this, SLOT(handleFixedImageCountChanged(int)));
    connect(ui->setFingerTemperatureButton, SIGNAL(pressed()), this, SLOT(handleSetFingerTemperature()));
+   connect(ui->triggeringSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(handleTriggeringSelectionChanged(int)));
+   connect(ui->ttlInputSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(handleTtlInputSelectionChanged(int)));
 }
 
 void DetectorControlForm::handleCollectImagesPressed()
@@ -144,10 +166,12 @@ void DetectorControlForm::terminateDetectorPressed()
 
 void DetectorControlForm::terminateDetector()
 {
+   qDebug() << "DetectorControlForm::terminateDetector() called";
    emit disableMonitoring();
    emit disableBiasRefresh();
    emit executeCommand(GigEDetector::CLOSE, 0, 0);
 
+   QThread::msleep(100);
    /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
    guiDetectorBusy();
@@ -277,6 +301,20 @@ void DetectorControlForm::handleBiasVoltageChanged(bool biasOn)
    ui->biasVoltageButton->setChecked(biasOn);
 }
 
+void DetectorControlForm::handleTriggeringSelectionChanged(int triggering)
+{
+   qDebug() <<"DetectorControlForm::handleTriggeringSelectionChanged";
+   emit disableMonitoring();
+   emit triggeringSelectionChanged(triggering);
+//   terminateDetector();
+//   initialiseDetectorPressed();
+}
+
+void DetectorControlForm::handleTtlInputSelectionChanged(int ttlInput)
+{
+   qDebug() <<"handleTtlInputSelectionChanged(int ttlInput):" << ttlInput;
+}
+
 void DetectorControlForm::handleScriptReserve(QString name)
 {
    if (name == hvName)
@@ -343,6 +381,9 @@ void DetectorControlForm::guiReady()
    ui->abortDAQ->setEnabled(false);
    ui->imageCount->setEnabled(true);
    ui->setFingerTemperatureButton->setEnabled(true);
+   ui->triggeringSelection->setEnabled(true);
+   ui->ttlInputSelection->setEnabled(true);
+
    if (!hvReservedByScripting && tAboveTdp)
    {
       ui->biasVoltageButton->setEnabled(true);
@@ -385,4 +426,6 @@ void DetectorControlForm::guiDetectorBusy()
    ui->collectImages->setEnabled(false);
    ui->abortDAQ->setEnabled(false);
    ui->biasVoltageButton->setEnabled(false);
+   ui->triggeringSelection->setEnabled(false);
+   ui->ttlInputSelection->setEnabled(false);
 }

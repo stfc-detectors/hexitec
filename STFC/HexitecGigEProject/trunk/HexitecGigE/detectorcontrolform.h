@@ -33,6 +33,7 @@ private:
    bool hvReservedByScripting;
    bool tAboveTdp;
    bool firstMonitor;
+   bool triggeringAvailable;
    void readIniFile(double *targetTemperature);
    void connectSignals();
    void terminateDetector();
@@ -56,10 +57,13 @@ public slots:
     void handleCollectingChanged(bool collectingOn);
     void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
     void handleBiasVoltageChanged(bool biasOn);
+    void handleTriggeringSelectionChanged(int triggering);
+    void handleTtlInputSelectionChanged(int ttlInput);
     void handleHVOn();
     void handleHVOff();
     void handleScriptReserve(QString name);
     void handleScriptRelease(QString name);
+    void handleTriggeringAvailable(bool triggeringAvailable);
 
 private slots:
    void biasVoltageClicked(bool biasVoltageOn);
@@ -81,6 +85,8 @@ signals:
    void biasVoltageChanged(bool);
    void disableMonitoring();
    void disableBiasRefresh();
+   void triggeringSelectionChanged(int triggering);
+   void ttlInputSelectionChanged(int ttlInput);
    void writeError(QString message);
    void writeMessage(QString message);
    void enableHVActions();

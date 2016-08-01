@@ -211,12 +211,13 @@ MainWindow::MainWindow()
 
    if (activeDAQ)
    {
+      GigEDetector *gigEDetector = DetectorFactory::instance()->getGigEDetector();
       connect(this, SIGNAL(executeBufferReady(unsigned char*, unsigned long)), dataAcquisitionFactory->getDataAcquisition(),
               SLOT(handleBufferReady(unsigned char*, unsigned long)));
       connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
       connect(this, SIGNAL(executeShowImage()),
-              DetectorFactory::instance()->getGigEDetector(), SLOT(handleShowImage()));
+              gigEDetector, SLOT(handleShowImage()));
       connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
    }
 

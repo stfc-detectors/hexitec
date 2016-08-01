@@ -158,6 +158,8 @@ void DataAcquisitionModel::connectGigEDetector()
            detectorMonitor, SLOT(enableMonitoring()));
    connect(gigEDetector, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
+   connect(gigEDetector, SIGNAL(triggeringAvailableChanged(bool)),
+           detectorControlForm, SLOT(handleTriggeringAvailable(bool)));
 
 }
 
@@ -185,6 +187,8 @@ void DataAcquisitionModel::connectDetectorControlForm()
    connect(detectorControlForm, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
    connect(detectorControlForm, SIGNAL(initialiseDetector()),
            dataAcquisition, SLOT(handleInitialiseDetector()));
+   connect(detectorControlForm, SIGNAL(triggeringSelectionChanged(int)),
+           dataAcquisition, SLOT(handleTriggeringSelectionChanged(int)));
 }
 
 void DataAcquisitionModel::connectDataAcquisitionModel()
