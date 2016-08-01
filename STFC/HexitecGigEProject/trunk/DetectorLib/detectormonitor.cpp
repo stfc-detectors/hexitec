@@ -92,7 +92,7 @@ void DetectorMonitor::monitorEnvironmentalValues(bool external)
       }
       else
       {
-	      emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, true));
+         emit updateMonitorData(new MonitorData(th, t, tdp, rh, ik, tasic, valid));
 	      emit monitoringDone();
       }
 
@@ -142,7 +142,12 @@ void DetectorMonitor::read()
 
    if(!status)
    {
-       calcTDP();
+      valid = true;
+      calcTDP();
+   }
+   else
+   {
+      valid = false;
    }
 }
 

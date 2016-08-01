@@ -831,7 +831,84 @@ EXTERN_C	GIGE_API	LONG	ConfigureDetector(
 	PULONG							collectDcTime,
 	ULONG							timeOut );
 
-// create Pleora API frame acquisition pipeline
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>	Configures the detector with trigger options. </summary>
+///
+/// <remarks>
+/// Configures the detector by applying the Hexitec sensor / state machine configuration, the
+/// operation mode / data path configuration and the system parameters. If the resolution is
+/// changed the acquisition pipeline has to be recreated by calling CreatePipeline(). The optional
+/// trigger functionality (available since FW version 2) is set up additionally in comparison to
+/// ConfigureDetector().
+/// 
+/// </remarks>
+///
+/// <param name="deviceHdl">
+///		[in]	Handle to a valid GigE device instance.
+///	</param>
+/// <param name="sensorConfig">
+/// 	[in]	Sets the Hexitec sensor / state machine configuration.
+/// </param>
+/// <param name="operationMode">
+/// 	[in]	Sets the operation mode / data path configuration.
+/// </param>
+/// <param name="systemConfig">
+/// 	[in]	Sets the system parameters.
+/// </param>
+/// <param name="width">
+/// 	[out] 	Returns the width / X-Resolution of the frame based on the applied sensor
+/// 	configuration. Use this value when calling SetFrameFormatControl().
+/// </param>
+/// <param name="height">
+/// 	[out] 	Returns the height / Y-Resolution of the frame based on the applied sensor
+/// 	configuration. Use this value when calling SetFrameFormatControl().
+/// </param>
+/// <param name="frameTime">
+/// 	[out]	Returns the frame time (s) based on the applied detector configuration.
+/// </param>
+/// <param name="collectDcTime">
+/// 	[out]	Returns the time (ms) which is needed to collect the offset values within the
+/// 	detecor. Use this value when calling CollectOffsetValues().
+/// </param>
+/// <param name="timeOut">
+///		[in]	Communication time out (ms).
+/// </param>
+/// <param name="enSyncMode">
+///		[in]	Enables the triggered synchronous state machine start. The detector state machine is
+///		started	and kept running with an applied high level on trigger input 1. With this
+///		functionality a	synchronous start of multiple detectors can be achieved.
+///		 <value>
+///		property | value
+///		---------|--------
+///		default	 | AS_CONTROL_DISABLED
+///		</value>
+/// </param>
+/// <param name="enTriggerMode">
+///		[in]	Enables the triggered data acquisition mode. The detector delivers n frames
+///		(SetTriggeredFrameCount()) after a trigger event on trigger input 2 or frames as long as an
+///		high level is applied on trigger input 3.
+///		 <value>
+///		property | value
+///		---------|--------
+///		default	 | AS_CONTROL_DISABLED
+///		</value>
+/// </param>
+///
+/// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+EXTERN_C	GIGE_API	LONG	ConfigureDetectorWithTrigger(
+	HANDLE							deviceHdl,
+	CONST HexitecSensorConfigPtr	sensorConfig,
+	CONST HexitecOperationModePtr	operationMode,
+	CONST HexitecSystemConfigPtr	systemConfig,
+	PUCHAR							width,
+	PUCHAR							height,
+	DOUBLE							*frameTime,
+	PULONG							collectDcTime,
+	ULONG							timeOut,
+	Control							enSyncMode,
+	Control							enTriggerMode );
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Create a frame acquisition pipeline. </summary>
 ///
@@ -885,8 +962,8 @@ EXTERN_C	GIGE_API	LONG	CreatePipeline(
 ///
 /// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-EXTERN_C	GIGE_API	LONG	ExitDevice(									// return an aSpect error code
-	HANDLE							deviceHdl );							// handle for the device
+EXTERN_C	GIGE_API	LONG	ExitDevice(
+	HANDLE							deviceHdl );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Returns an aSpect error code description. </summary>
@@ -910,7 +987,7 @@ EXTERN_C	GIGE_API	LONG	GetAsErrorMsg(
 	ULONG							length );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// <summary>	Get information strings from the connected Gige device. </summary>
+/// <summary>	Get information strings from the connected GigE device. </summary>
 /// 
 /// <remarks>
 ///		The returned pointer to the strings are valid as long the device instance is valid.
@@ -927,7 +1004,7 @@ EXTERN_C	GIGE_API	LONG	GetAsErrorMsg(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 EXTERN_C	GIGE_API	LONG	GetDeviceInformation(
 	HANDLE							deviceHdl,
-	GigEDeviceInfoStrPtr			deviceInfoStr );						// struct which returns the string pointers; pointers are valid as long the device instance exists
+	GigEDeviceInfoStrPtr			deviceInfoStr );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Gets the last occurred Pleora API error. </summary>
@@ -963,13 +1040,13 @@ EXTERN_C	GIGE_API	LONG	GetDeviceInformation(
 ///
 /// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-EXTERN_C	GIGE_API	LONG	GetLastResult(								// return an aSpect error code
-	HANDLE							deviceHdl,								// handle for the device
-	PULONG							pleoraErrorCode,						// returns the last occured Pleora API error code
-	LPSTR							pleoraErrorCodeString,					// supply string pointer to allocated memory; optional 'NULL'
-	PULONG							pleoraErrorCodeStringLen,				// returns the error code string; set to the size of the allocated memory for 'pleoraErrorCodeString'; returns the required size for the string
-	LPSTR							pleoraErrorDescription,					// supply string pointer to allocated memory; optional 'NULL'
-	PULONG							pleoraErrorDescriptionLen );			// returns the error description; set to the size of the allocated memory for 'pleoraErrorDescription'; returns the required size for the string; not available in all cases
+EXTERN_C	GIGE_API	LONG	GetLastResult(
+	HANDLE							deviceHdl,
+	PULONG							pleoraErrorCode,
+	LPSTR							pleoraErrorCodeString,
+	PULONG							pleoraErrorCodeStringLen,
+	LPSTR							pleoraErrorDescription,
+	PULONG							pleoraErrorDescriptionLen );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Returns a system error code description. </summary>
@@ -991,6 +1068,38 @@ EXTERN_C	GIGE_API	LONG	GetSystemErrorMsg(
 	LONG							sysError,
 	LPSTR							sysErrorMsg,
 	ULONG							length );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>	Return the states of the trigger lines. </summary>
+///
+/// <remarks>
+///		Return the states of the trigger lines.
+/// </remarks>
+/// 
+/// <param name="deviceHdl">
+///		[in]	Handle to a valid GigE device instance.
+///	</param>
+/// <param name="trigger1">
+///		[out]	State of trigger1.
+///	</param>
+/// <param name="trigger2">
+///		[out]	State of trigger2.
+///	</param>
+/// <param name="trigger3">
+///		[out]	State of trigger3.
+///	</param>
+/// <param name="timeOut">
+///		[in]	Communication time out (ms).
+///	</param>
+///
+/// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+EXTERN_C	GIGE_API	LONG	GetTriggerState(
+	HANDLE							deviceHdl,
+	PUCHAR							trigger1,
+	PUCHAR							trigger2,
+	PUCHAR							trigger3,
+	ULONG							timeOut );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Initialize a GigE device instance. </summary>
@@ -1305,8 +1414,6 @@ EXTERN_C	GIGE_API	LONG	ReturnBuffer(
 	HANDLE							deviceHdl,
 	PUCHAR							transferBuffer );
 
-// writes and read from the serial communication port
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Sends and / or receives bytes from the serial interface. </summary>
 ///
@@ -1483,6 +1590,34 @@ EXTERN_C	GIGE_API	LONG	SetFrameFormatControl(
 	ULONGLONG						offsetY,
 	CONST LPSTR						sensorTaps,
 	CONST LPSTR						testPattern );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>	Set the number of frames acquired after a trigger event. </summary>
+///
+/// <remarks>
+///		Set the number of frames acquired after a trigger event on trigger input 2
+///		(EnableTriggerMode()).
+/// </remarks>
+/// 
+/// <param name="deviceHdl">
+///		[in]	Handle to a valid GigE device instance.
+///	</param>
+/// <param name="frameCount">
+///		[in]	Sets the number of frames to acquire.
+///		property         | value
+///		-----------------|--------
+/// 	range            | 1..4294967295
+///	</param>
+/// <param name="timeOut">
+///		[in]	Communication time out (ms).
+///	</param>
+///
+/// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+EXTERN_C	GIGE_API	LONG	SetTriggeredFrameCount(
+	HANDLE							deviceHdl,
+	ULONG							frameCount,
+	ULONG							timeOut );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Stops a running acquisition. </summary>

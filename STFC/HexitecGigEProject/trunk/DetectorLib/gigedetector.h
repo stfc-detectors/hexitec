@@ -30,10 +30,11 @@ class GigEDetector : public QObject
 
 public:
 /* If change add a Mode be sure to add to modes variable. */
-   enum Mode {CONTINUOUS, GIGE_DEFAULT, INVALID_MODE};
+   enum Mode {CONTINUOUS, GIGE_DEFAULT, RECONFIGURE, INVALID_MODE};
 /**********************************************************/
+   enum Triggering {NO_TRIGGERING, STANDARD_TRIGGERING, SYNCHRONISED_TRIGGERING, INVALID_TRIGGERING};
    enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
-   enum DetectorCommand {CONNECT, CONFIGURE, RECONFIGURE, INITIALISE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, STOP_TRIGGER};
+   enum DetectorCommand {INITIALISE, CONFIGURE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE};
    GigEDetector(string aspectFilename);
    int initialiseConnection(p_bufferCallBack bufferCallBack);
    void setDataDirectory(string *directory);
@@ -71,10 +72,12 @@ public:
    void setTargetTemperature(double targetTemperature);
    void setHV(double voltage);
    void setSaveRaw(bool saveRaw);
+   void setTriggeringMode(int triggeringMode);
    void collectImage();
    void acquireImages();
    int getLoggingInterval();
    void beginMonitoring();
+   bool getTriggeringAvailable();
 
    WindowsEvent *getBufferReadyEvent();
 //   WindowsEvent *getReturnBufferReadyEvent();
@@ -103,6 +106,7 @@ signals:
    void prepareForOffsets();
    void prepareForDataCollection();
    void enableMonitoring();
+   void triggeringAvailableChanged(bool triggeringAvailable);
 
 public slots:
    void handleShowImage();
@@ -118,6 +122,7 @@ public slots:
    void handleSetHV(double voltage);
    void handleAppendTimestamp(bool appendTimestamp);
    void handleSaveRawChanged(bool saveRaw);
+//   void handleTriggeringSelectionChanged(int triggering);
 
 private:
    QThread *gigEDetectorThread;
@@ -129,6 +134,8 @@ private:
    bool appendTimestamp;
    bool saveRaw;
    QString errorMessage;
+   bool triggeringAvailable;
+   Triggering triggeringMode;
 
    WindowsEvent *bufferReadyEvent;
 //   WindowsEvent *returnBufferReadyEvent;
@@ -176,7 +183,7 @@ private:
    DetectorCommand command;
 
    void constructorInit(const QObject *parent = 0);
-   int initialise();
+   int initialise(Triggering triggering = Triggering::NO_TRIGGERING);
    void connectUp(const QObject *parent);
    LONG readIniFile(QString aspectFilename);
    HexitecSetupRegister initSetupRegister(QString type);
@@ -189,6 +196,7 @@ private:
    void showError(const LPSTR context, long asError);
    LONG collectOffsetValues();
    void setGetImageParams();
+   int configure();
 };
 
 #endif // GIGEDETECTOR_H

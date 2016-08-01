@@ -26,6 +26,7 @@ private:
    double th, t, tdp, rh, ik, tasic, tdac;
    double a, b, c;
    double gamma;
+   bool valid;
    bool temperatureInRange;
    bool readTAsic;
    int loggingInterval;

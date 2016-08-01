@@ -75,6 +75,7 @@ void GigEDetector::constructorInit(const QObject *parent)
    hvSetPoint = 0;
    appendTimestamp = false;
    saveRaw = true;
+   triggeringAvailable = false;
 
    readIniFile(this->aspectFilename);
 
@@ -153,6 +154,11 @@ void GigEDetector::setTargetTemperature(double targetTemperature)
    handleSetTargetTemperature(targetTemperature);
 }
 
+void GigEDetector::setTriggeringMode(int triggeringMode)
+{
+   this->triggeringMode = (Triggering)triggeringMode;
+}
+
 void GigEDetector::handleSetTargetTemperature(double targetTemperature)
 {
     int status = -1;
@@ -207,7 +213,7 @@ int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
    return status;
 }
 
-int GigEDetector::initialise()
+int GigEDetector::initialise(Triggering triggering)
 {
    LONG status = -1;
    CONST LPSTR deviceDescriptor = "";
@@ -217,6 +223,12 @@ int GigEDetector::initialise()
    CHAR pleoraErrorCodeStr[STR_LENGTH] = {0};
    CHAR pleoraErrorDescription[STR_LENGTH] = {0};
    GigEDeviceInfoStr deviceInfo = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+   UCHAR customerId = 0x01;
+   UCHAR projectId = 0x12;
+   UCHAR version = 0x02;
+   UCHAR forceEqualVersion = 0x0;
+   ULONG timeOut = 1000;
+
    updateState(INITIALISING);
 
    status = InitDevice(&detectorHandle, deviceDescriptor, &pleoraErrorCode, pleoraErrorCodeStr,
@@ -236,8 +248,22 @@ int GigEDetector::initialise()
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
 
+   status = CheckFirmware(detectorHandle,&customerId, &projectId, &version, forceEqualVersion, timeout);
+   showError("CheckFirmware", status);
+   if (!status)
+   {
+      qDebug() <<"Detector in use - customer ID:" << customerId;
+      qDebug() <<"Detector in use - project ID:" << projectId;
+      qDebug() <<"Detector in use - firmware version:" << version;
+      triggeringAvailable = true;
+   }
+   else
+   {
+      triggeringAvailable = false;
+   }
+
    status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
-                              &xRes, &yRes, &frameTime, &collectDcTime, 1000);
+                              &xRes, &yRes, &frameTime, &collectDcTime, timeOut);
    showError( "ConfigureDetector", status);
    if (!status)
    {
@@ -260,6 +286,64 @@ int GigEDetector::initialise()
    message.append(deviceInfo.IpAddress);
    message.append (" initialised Ok");
    emit writeMessage(message);
+   emit triggeringAvailableChanged(triggeringAvailable);
+
+   return status;
+}
+
+int GigEDetector::configure()
+{
+   LONG status = -1;
+   ULONG timeOut = 1000;
+
+   updateState(INITIALISING);
+   status = CloseSerialPort(detectorHandle);
+   showError( "CloseSerialPort", status);
+
+   status = ClosePipeline(detectorHandle);
+   showError( "ClosePipeline", status);
+
+   status = CloseStream(detectorHandle);
+   showError( "CloseStream", status);
+
+   status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d );
+   showError("OpenSerialPort", status);
+   frameTime = 0;
+
+   status = OpenStream(detectorHandle);
+   showError("OpenStream", status);
+
+   switch (triggeringMode)
+   {
+      case Triggering::NO_TRIGGERING:
+         qDebug() << "No Triggering";
+         status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
+                                    &xRes, &yRes, &frameTime, &collectDcTime, timeOut);
+         showError( "ConfigureDetector", status);
+         break;
+      case Triggering::STANDARD_TRIGGERING:
+         qDebug() << "Standard Triggering";
+         status = ConfigureDetectorWithTrigger(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
+                                    &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_DISABLED, AS_CONTROL_ENABLED);
+         showError("ConfigureDetectorWithTrigger", status);
+         break;
+      case Triggering::SYNCHRONISED_TRIGGERING:
+         qDebug() << "Synchronised Triggering";
+         status = ConfigureDetectorWithTrigger(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
+                                    &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_ENABLED, AS_CONTROL_ENABLED);
+         showError("ConfigureDetectorWithTrigger", status);
+         break;
+      default:
+         triggeringMode = Triggering::INVALID_TRIGGERING;
+         break;
+   }
+   qDebug() <<"configuring DONE";
+
+   status = setImageFormat(xRes, yRes);
+   status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
+   showError( "CreatePipeline", status);
+
+   updateState(READY);
 
    return status;
 }
@@ -342,6 +426,17 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
       else
       {
          emit writeError("Failed to initialise detector connection, status = " + QString::number(status));
+      }
+   }
+   if (command == CONFIGURE)
+   {
+      if ((status = configure()) == 0)
+      {
+         emit writeMessage("Detector configured Ok");
+      }
+      else
+      {
+         emit writeError("Failed to configure detector, status = " + QString::number(status));
       }
    }
    if (command == COLLECT)
@@ -531,6 +626,11 @@ int GigEDetector::getLoggingInterval()
 void GigEDetector::beginMonitoring()
 {
    emit enableMonitoring();
+}
+
+bool GigEDetector::getTriggeringAvailable()
+{
+   return triggeringAvailable;
 }
 
 void GigEDetector::handleStop()
