@@ -33,6 +33,7 @@ public:
    enum Mode {CONTINUOUS, GIGE_DEFAULT, RECONFIGURE, INVALID_MODE};
 /**********************************************************/
    enum Triggering {NO_TRIGGERING, STANDARD_TRIGGERING, SYNCHRONISED_TRIGGERING, INVALID_TRIGGERING};
+   enum TtlInput{NONE, INPUT2, INPUT3, INVALID_TTLINPUT};
    enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
    enum DetectorCommand {INITIALISE, CONFIGURE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE};
    GigEDetector(string aspectFilename);
@@ -136,6 +137,7 @@ private:
    QString errorMessage;
    bool triggeringAvailable;
    Triggering triggeringMode;
+   TtlInput ttlInputMode;
 
    WindowsEvent *bufferReadyEvent;
 //   WindowsEvent *returnBufferReadyEvent;

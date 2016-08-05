@@ -71,7 +71,7 @@ void GigEDetector::constructorInit(const QObject *parent)
    vCal = 0.5;
    uMid = 1.0;
    detCtrl = 0;
-   targetTemperature = 20.0;
+   targetTemperature = 24.0;
    hvSetPoint = 0;
    appendTimestamp = false;
    saveRaw = true;
@@ -373,12 +373,16 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
-
+    UCHAR t1 = 100, t2 = 200, t3 = 300;
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
     showError("ReadEnvironmentValues", status);
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
+
+    status = GetTriggerState(detectorHandle, &t1, &t2, &t3, timeout);
+    showError("GetTriggerState", status);
+    qDebug() <<"TRIGGER STATES: " << t1 << t2 << t3 << "valid:" << status;
 
     *hvCurrent = hvOut;
 /*
@@ -609,8 +613,17 @@ void GigEDetector::acquireImages()
       frameTimeout = 100;
    }
 
-   status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
-   showError("AcquireFrames", status);
+   if (triggeringMode == NONE)
+   {
+      status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
+      showError("AcquireFrames", status);
+   }
+   else
+   {
+      qDebug() <<"Collect triggered image!";
+      status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
+      showError("AcquireFrames", status);
+   }
    if (mode == CONTINUOUS)
    {
       emit imageComplete(framesAcquired);
