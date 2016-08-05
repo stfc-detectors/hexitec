@@ -245,12 +245,15 @@ void DataAcquisition::performContinuousDataCollection()
    int nDaq;
    int repeatCount;
    int nDaqOverall = 0;
+   bool triggeredCollection = false;
 
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
 //   waitForMonitoringDone();
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
+   triggeredCollection = dataAcquisitionDefinition->isTriggering();
+   qDebug() << "performContinuousDataCollection(), triggeredCollection: " << triggeredCollection;
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -293,13 +296,22 @@ void DataAcquisition::performContinuousDataCollection()
       if (abortRequired())
          break;
 
-      if (repeatPauseRequired(repeatCount))
+      if (dataAcquisitionDefinition->isTriggering())
       {
-         pauseDataAcquisition();
-         if (abortRequired())
-            break;
-         changeDAQStatus(daqStatus.getMajorStatus(),
-                         DataAcquisitionStatus::COLLECTING);
+         qDebug() << "Waiting for next trigger.";
+      }
+      else
+      {
+         if (repeatPauseRequired(repeatCount))
+         {
+            qDebug() << "No triggering normal operation.";
+            pauseDataAcquisition();
+         
+            if (abortRequired())
+               break;
+            changeDAQStatus(daqStatus.getMajorStatus(),
+                            DataAcquisitionStatus::COLLECTING);
+		 }
       }
    }
 
@@ -490,6 +502,7 @@ int DataAcquisition::waitForCollectingDone()
 
 void DataAcquisition::handleSetFingerTemperature(double temperature)
 {
+   qDebug() << "handleSetFingerTemperature(double temperature)" << temperature;
    if (temperature < tdp)
    {
       QMessageBox msgBox;
@@ -596,7 +609,7 @@ void DataAcquisition::handleTriggeringSelectionChanged(int triggeringMode)
    reservation = ObjectReserver::instance()->reserveForGUI(rdaql);
    if (reservation.getReserved().isEmpty())
    {
-      qDebug() << "handleTriggeringSelectionChanged Could not reserve all objects, message = " << reservation.getMessage();
+      qDebug() << "handleintTriggeringSelectionChanged Could not reserve all objects, message = " << reservation.getMessage();
    }
    else
    {

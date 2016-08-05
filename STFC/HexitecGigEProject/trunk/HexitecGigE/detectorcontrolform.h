@@ -34,7 +34,10 @@ private:
    bool tAboveTdp;
    bool firstMonitor;
    bool triggeringAvailable;
-   void readIniFile(double *targetTemperature);
+   double targetTemperature;
+   double targetTemperatureMin;
+   double targetTemperatureMax;
+   void readIniFile();
    void connectSignals();
    void terminateDetector();
    void guiIdle();
@@ -50,6 +53,7 @@ private:
 
 public slots:
     void handleMonitorData(MonitorData *md);
+    void handleSetFingerTemperature();
     void handleTemperatureBelowDP();
     void handleTemperatureAboveDP();
     void setPixmap(QPixmap pixmap);
@@ -72,7 +76,6 @@ private slots:
    void terminateDetectorPressed();
    void abortDAQ();
    void handleFixedImageCountChanged(int fixedImageCount);
-   void handleSetFingerTemperature();
 
 signals:
    void executeCommand(HV::VoltageSourceCommand);

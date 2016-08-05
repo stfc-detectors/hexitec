@@ -177,6 +177,7 @@ MainWindow::MainWindow()
       dataAcquisitionForm->setDaqName(daqName);
       QString daqModelName = dataAcquisitionFactory->getDataAcquisitionModel()->property("objectName").toString();
       dataAcquisitionForm->setDaqModelName(daqModelName);
+      detectorControlForm->handleSetFingerTemperature();
    }
 
    createStatusBar();

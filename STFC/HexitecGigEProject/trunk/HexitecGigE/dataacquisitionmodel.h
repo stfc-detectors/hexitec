@@ -79,13 +79,15 @@ signals:
    void dataChanged(QString mode);
    void daqDurationChanged(double daqDurationTime);
    void biasVoltageChanged(bool);
-   
+   void triggeringChanged(bool);
+
 public slots:
    void handleDataFilenameChanged(DetectorFilename dataFilename);
    void handleLogFilenameChanged(DetectorFilename logFilename);
    void handleDataAcquisitionDefinitionChanged(DataAcquisitionDefinition dataAcquisitionDefinition);
    void handleFixedImageCountChanged(int fixedImageCount);
    void handleBiasVoltageChanged(bool biasOn);
+   void handleTriggeringChanged(int triggering);
 };
 
 #endif // DATAACQUISITIONMODEL_H

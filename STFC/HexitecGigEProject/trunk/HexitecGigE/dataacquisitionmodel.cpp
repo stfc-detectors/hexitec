@@ -179,6 +179,8 @@ void DataAcquisitionModel::connectDetectorControlForm()
            dataAcquisition, SLOT(handleSetFingerTemperature(double)));
    connect(detectorControlForm, SIGNAL(biasVoltageChanged(bool)),
            this, SLOT(handleBiasVoltageChanged(bool)));
+   connect(detectorControlForm, SIGNAL(triggeringSelectionChanged(int)),
+           this, SLOT(handleTriggeringChanged(int)));
    connect(detectorControlForm, SIGNAL(disableMonitoring()),
            detectorMonitor, SLOT(disableMonitoring()));
    connect(detectorControlForm, SIGNAL(disableBiasRefresh()),
@@ -314,7 +316,13 @@ void DataAcquisitionModel::handleDataFilenameChanged(DetectorFilename dataFilena
    setDetectorFilename(dataFilename, dataAcquisitionDefinition.getDataFilename());
    dataAcquisitionDefinition.setDataFilename(dataFilename);
 }
-
+/*
+void DataAcquisitionModel::handleTriggeringChanged(DetectorFilename dataFilename)
+{
+   setDetectorFilename(dataFilename, dataAcquisitionDefinition.getDataFilename());
+   dataAcquisitionDefinition.setDataFilename(dataFilename);
+}
+*/
 void DataAcquisitionModel::handleLogFilenameChanged(DetectorFilename logFilename)
 {
    setDetectorFilename(logFilename, dataAcquisitionDefinition.getLogFilename());
@@ -368,6 +376,7 @@ void DataAcquisitionModel::handleDataAcquisitionDefinitionChanged(DataAcquisitio
    this->dataAcquisitionDefinition.setOffsets(dataAcquisitionDefinition.getOffsets());
    this->dataAcquisitionDefinition.setRepeatCount(dataAcquisitionDefinition.getRepeatCount());
    this->dataAcquisitionDefinition.setRepeatInterval(dataAcquisitionDefinition.getRepeatInterval());
+   this->dataAcquisitionDefinition.setTriggering(dataAcquisitionDefinition.isTriggering());
 
    changeDaqDuration();
 }
@@ -381,4 +390,16 @@ void DataAcquisitionModel::handleBiasVoltageChanged(bool biasOn)
 {
    changeDaqDuration();
    emit biasVoltageChanged(biasOn);
+}
+
+void DataAcquisitionModel::handleTriggeringChanged(int triggering)
+{
+   if (triggering != 0)
+   {
+      this->dataAcquisitionDefinition.setTriggering(true);
+   }
+   else
+   {
+      this->dataAcquisitionDefinition.setTriggering(false);
+   }
 }

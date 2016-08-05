@@ -8,7 +8,6 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DetectorControlForm)
 {
-   double targetTemperature;
    waitingForModeChange = false;
    ui->setupUi(this);
    ui->logFileDirectoryLabel->setVisible(false);
@@ -26,8 +25,13 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    dpWarningDialog = new DPWarningDialog(this);
    hvReservedByScripting = false;
    tAboveTdp = false;
+   targetTemperature = 20.0;
+   targetTemperatureMin = 18.0;
+   targetTemperatureMax = 35.0;
 
-   readIniFile(&targetTemperature);
+   readIniFile();
+   ui->setFingerTemperature->setMinimum(targetTemperatureMin);
+   ui->setFingerTemperature->setMaximum(targetTemperatureMax);
    ui->setFingerTemperature->setValue(targetTemperature);
    firstMonitor = true;
 
@@ -35,17 +39,33 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    guiReady();
 }
 
-void DetectorControlForm::readIniFile(double *targetTemperature)
+void DetectorControlForm::readIniFile()
 {
    QString detectorFilename = Parameters::twoEasyIniFilename;
    QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   double targetTemperature;
+   double targetTemperatureMin;
+   double targetTemperatureMax;
 
    if (settings.contains("hexitecGigEIniFilename"))
    {
       detectorFilename = settings.value("hexitecGigEIniFilename").toString();
    }
    IniFile *detectorIniFile = new IniFile(detectorFilename);
-   *targetTemperature = detectorIniFile->getDouble("Environmental/Target_Temperature");
+
+   if ((targetTemperature = detectorIniFile->getDouble("Environmental/Target_Temperature")) != QVariant(INVALID))
+   {
+      this->targetTemperature = targetTemperature;
+   }
+   if ((targetTemperatureMin = detectorIniFile->getDouble("Environmental/Target_Temperature_Min")) != QVariant(INVALID))
+   {
+      this->targetTemperatureMin = targetTemperatureMin;
+   }
+   if ((targetTemperatureMax = detectorIniFile->getDouble("Environmental/Target_Temperature_Max")) != QVariant(INVALID))
+   {
+      this->targetTemperatureMax = targetTemperatureMax;
+   }
+
    return;
 }
 
@@ -114,6 +134,7 @@ void DetectorControlForm::handleFixedImageCountChanged(int fixedImageCount)
 void DetectorControlForm::handleSetFingerTemperature()
 {
    double temperature = ui->setFingerTemperature->value();
+   qDebug() << "DetectorControlForm::handleSetFingerTemperature() temperature = " << temperature;
    emit setFingerTemperature(temperature);
 }
 

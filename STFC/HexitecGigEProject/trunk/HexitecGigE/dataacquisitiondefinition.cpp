@@ -119,6 +119,11 @@ void DataAcquisitionDefinition::setLogging(bool logging)
    this->logging = logging;
 }
 
+void DataAcquisitionDefinition::setTriggering(bool triggering)
+{
+   this->triggering = triggering;
+}
+
 DetectorFilename *DataAcquisitionDefinition::getDataFilename()
 {
    return &dataFilename;
@@ -157,4 +162,9 @@ int DataAcquisitionDefinition::getFixedImageCount()
 bool DataAcquisitionDefinition::isLogging()
 {
    return logging;
+}
+
+bool DataAcquisitionDefinition::isTriggering()
+{
+   return triggering;
 }
