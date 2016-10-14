@@ -35,7 +35,7 @@ public:
    enum Triggering {NO_TRIGGERING, STANDARD_TRIGGERING, SYNCHRONISED_TRIGGERING, INVALID_TRIGGERING};
    enum TtlInput{NONE, INPUT2, INPUT3, INVALID_TTLINPUT};
    enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
-   enum DetectorCommand {INITIALISE, CONFIGURE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE};
+   enum DetectorCommand {INITIALISE, CONFIGURE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, RESTART};
    GigEDetector(string aspectFilename);
    int initialiseConnection(p_bufferCallBack bufferCallBack);
    void setDataDirectory(string *directory);
@@ -45,6 +45,7 @@ public:
    void collectOffsets();
    void setHV(double *voltage);
    void setSaveRaw(bool *saveRaw);
+   unsigned long long getRemainingFrames();
    DetectorState getState();
  
    GigEDetector(QString aspectFilename, const QObject *parent = 0);
@@ -54,6 +55,7 @@ public:
    Q_INVOKABLE int terminateConnection();
    Q_INVOKABLE int getDetectorValues(double *rh, double *th, double *tasic, double *tdac, double *t, double *hvCurrent);
    Q_INVOKABLE void getImages(int count, int ndaq);
+   Q_INVOKABLE void restartImages(bool startOfImage);
    Q_INVOKABLE void enableDarks();
    Q_INVOKABLE void disableDarks();
    Q_INVOKABLE Mode getMode();
@@ -75,7 +77,7 @@ public:
    void setSaveRaw(bool saveRaw);
    void setTriggeringMode(int triggeringMode);
    void collectImage();
-   void acquireImages();
+   void acquireImages(bool startOfImage = true);
    int getLoggingInterval();
    void beginMonitoring();
    bool getTriggeringAvailable();
@@ -103,7 +105,7 @@ signals:
    void imageAcquired(QPixmap data);
    void imageStarted(char *path, int frameSize);
    void imageComplete(unsigned long long framesAcquired);
-   void executeAcquireImages();
+   void executeAcquireImages(bool imageRestart = false);
    void prepareForOffsets();
    void prepareForDataCollection();
    void enableMonitoring();
@@ -165,6 +167,7 @@ private:
    double dataAcquisitionDuration;
    unsigned char xRes, xResAcquiredImage;
    unsigned char yRes, yResAcquiredImage;
+   ULONGLONG totalFramesAcquired;
    ULONG collectDcTime;
    double frameTime;
    int imgCntAverage;
@@ -199,6 +202,7 @@ private:
    LONG collectOffsetValues();
    void setGetImageParams();
    int configure();
+   int configureDetector();
 };
 
 #endif // GIGEDETECTOR_H

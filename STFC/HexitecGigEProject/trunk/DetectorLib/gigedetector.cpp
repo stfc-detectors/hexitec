@@ -17,6 +17,7 @@
 static PUCHAR bufferReady;
 static PUCHAR returnBuffer;
 static ULONG validFrames;
+static ULONGLONG remainingFrames;
 
 HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
@@ -31,6 +32,8 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
    bufferReady = transferBuffer;
    validFrames = frameCount;
+   remainingFrames -=validFrames;
+   qDebug() << "remainingFrames = " << remainingFrames;
    WindowsEvent *bufferReadyEvent = DetectorFactory::instance()->getBufferReadyEvent();
    WindowsEvent *showImageEvent = DetectorFactory::instance()->getShowImageEvent();
 
@@ -139,6 +142,7 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
+   qDebug() << "!!!!! GigEDetector::handleReturnBufferReady pathString: " << pathString << " :";
    if ((saveRaw) && (mode == CONTINUOUS))
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
@@ -194,6 +198,11 @@ void GigEDetector::setSaveRaw(bool *saveRaw)
    this->saveRaw = *saveRaw;
 }
 
+unsigned long long GigEDetector::getRemainingFrames()
+{
+   return remainingFrames;
+}
+
 void GigEDetector::handleSaveRawChanged(bool saveRaw)
 {
     this->saveRaw = saveRaw;
@@ -237,13 +246,14 @@ int GigEDetector::initialise(Triggering triggering)
 
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
    showError("GetDeviceInformation", status);
+   frameTime = 0;
+
 
    status = CloseSerialPort(detectorHandle);
    status = ClosePipeline(detectorHandle);
    status = CloseStream(detectorHandle);
    status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d );
    showError("OpenSerialPort", status);
-   frameTime = 0;
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
@@ -262,9 +272,7 @@ int GigEDetector::initialise(Triggering triggering)
       triggeringAvailable = false;
    }
 
-   status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
-                              &xRes, &yRes, &frameTime, &collectDcTime, timeOut);
-   showError( "ConfigureDetector", status);
+   status = configureDetector();
    if (!status)
    {
       qDebug() <<"Configure Detector - frames per buffer:" << framesPerBuffer;
@@ -272,9 +280,6 @@ int GigEDetector::initialise(Triggering triggering)
       qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
    }
 
-   status = setImageFormat(xRes, yRes);
-   status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
-   showError( "ConfigureDetector", status);
 
    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
    showError("SetDAC", status);
@@ -294,43 +299,49 @@ int GigEDetector::initialise(Triggering triggering)
 int GigEDetector::configure()
 {
    LONG status = -1;
-   ULONG timeOut = 1000;
 
    updateState(INITIALISING);
+
    status = CloseSerialPort(detectorHandle);
-   showError( "CloseSerialPort", status);
-
    status = ClosePipeline(detectorHandle);
-   showError( "ClosePipeline", status);
-
    status = CloseStream(detectorHandle);
-   showError( "CloseStream", status);
 
-   status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d );
+   status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d);
    showError("OpenSerialPort", status);
-   frameTime = 0;
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
 
+   status = configureDetector();
+
+   updateState(READY);
+
+   return status;
+}
+
+int GigEDetector::configureDetector()
+{
+   LONG status = -1;
+   ULONG timeOut = 1000;
+
    switch (triggeringMode)
    {
       case Triggering::NO_TRIGGERING:
-         qDebug() << "No Triggering";
+         qDebug() << "CONFIGURE: No Triggering";
          status = ConfigureDetector(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                                     &xRes, &yRes, &frameTime, &collectDcTime, timeOut);
          showError( "ConfigureDetector", status);
          break;
       case Triggering::STANDARD_TRIGGERING:
-         qDebug() << "Standard Triggering";
+         qDebug() << "CONFIGURE: Standard Triggering";
          status = ConfigureDetectorWithTrigger(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
-                                    &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_DISABLED, AS_CONTROL_ENABLED);
+                                               &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_DISABLED, AS_CONTROL_ENABLED);
          showError("ConfigureDetectorWithTrigger", status);
          break;
       case Triggering::SYNCHRONISED_TRIGGERING:
-         qDebug() << "Synchronised Triggering";
+         qDebug() << "CONFIGURE: Synchronised Triggering";
          status = ConfigureDetectorWithTrigger(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
-                                    &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_ENABLED, AS_CONTROL_ENABLED);
+                                               &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_ENABLED, AS_CONTROL_ENABLED);
          showError("ConfigureDetectorWithTrigger", status);
          break;
       default:
@@ -342,8 +353,6 @@ int GigEDetector::configure()
    status = setImageFormat(xRes, yRes);
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
    showError( "CreatePipeline", status);
-
-   updateState(READY);
 
    return status;
 }
@@ -382,7 +391,7 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 
     status = GetTriggerState(detectorHandle, &t1, &t2, &t3, timeout);
     showError("GetTriggerState", status);
-    qDebug() <<"TRIGGER STATES: " << t1 << t2 << t3 << "valid:" << status;
+//    qDebug() <<"TRIGGER STATES: " << t1 << t2 << t3 << "valid:" << status;
 
     *hvCurrent = hvOut;
 /*
@@ -443,11 +452,15 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
          emit writeError("Failed to configure detector, status = " + QString::number(status));
       }
    }
+   if (command == RESTART)
+   {
+      restartImages(ival1);
+   }
+
    if (command == COLLECT)
    {
       getImages(ival1, ival2);
    }
-
    else if (command == COLLECT_OFFSETS)
    {
 
@@ -455,7 +468,8 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
 
    else if (command == ABORT)
    {
-      abort(true);
+      abort(false);
+//      abort(true);
    }
    else if (command == CLOSE)
    {
@@ -510,6 +524,7 @@ void GigEDetector::setGetImageParams()
 {
    QString path;
 
+   qDebug() << "GigEDetector::setGetImageParams() CALLED!!!";
    path = directory + "/" + prefix;
 
    if (timestampOn)
@@ -561,9 +576,28 @@ void GigEDetector::handleReducedDataCollection()
    emit executeGetImages();
 }
 
+void GigEDetector::restartImages(bool startOfImage)
+{
+   qDebug() << "GigEDetector::restartImages() called";
+   if (mode == CONTINUOUS && appendTimestamp)
+   {
+     setGetImageParams();
+   }
+   handleExecuteGetImages();
+//   emit executeAcquireImages(startOfImage);
+}
+
 void GigEDetector::handleExecuteGetImages()
 {
-   updateState(COLLECTING);
+   if ((triggeringMode == STANDARD_TRIGGERING) || (triggeringMode == SYNCHRONISED_TRIGGERING))
+   {
+      qDebug() << "triggeringMode = " << triggeringMode;
+      updateState(WAITING_TRIGGER);
+   }
+   else
+   {
+      updateState(COLLECTING);
+   }
    emit executeAcquireImages();
 }
 
@@ -600,13 +634,25 @@ LONG GigEDetector::collectOffsetValues()
    return 0;
 }
 
-void GigEDetector::acquireImages()
+void GigEDetector::acquireImages(bool startOfImage)
 {
    int status = -1;
    ULONGLONG framesAcquired;
    double durationSeconds = dataAcquisitionDuration/1000.0;
    ULONG frameCount = (durationSeconds/frameTime) + 0.5;
    ULONG frameTimeout = (ULONG)(frameTime * 2500.0);
+
+   if (startOfImage)
+   {
+      qDebug() <<"Starting a new collection, frameCount = " << frameCount;
+      remainingFrames = frameCount;
+      totalFramesAcquired = 0;
+   }
+   else
+   {
+      qDebug() <<"Setting frame count to remainingFrames ready to restart collection";
+      frameCount = remainingFrames;
+   }
 
    if( frameTimeout < 100 )
    {
@@ -617,16 +663,22 @@ void GigEDetector::acquireImages()
    {
       status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
       showError("AcquireFrames", status);
+      totalFramesAcquired += framesAcquired;
    }
    else
    {
-      qDebug() <<"Collect triggered image!";
-      status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
-      showError("AcquireFrames", status);
+      qDebug() <<"Set triggered frame count HERE!";
+//      status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
+//      showError("SetTriggeredFrameCount", status);
+      qDebug() <<"Collect triggered image HERE!";
+      Sleep(frameCount * frameTime);
+//      status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout * 100);
+//      showError("AcquireFrames", status);
+      qDebug() <<"Collect triggered image over!";
    }
-   if (mode == CONTINUOUS)
+   if (mode == CONTINUOUS && remainingFrames == 0)
    {
-      emit imageComplete(framesAcquired);
+      emit imageComplete(totalFramesAcquired);
    }
    updateState(READY);
 }
@@ -654,8 +706,16 @@ void GigEDetector::handleStop()
 
 void GigEDetector::abort(bool restart)
 {
-   StopAcquisition(detectorHandle);
-   updateState(READY);
+   if (restart)
+   {
+      StopAcquisition(detectorHandle);
+      qDebug() << "Acquisition STOPPED!!!";
+   }
+   else
+   {
+      StopAcquisition(detectorHandle);
+      updateState(READY);
+   }
 }
 
 void GigEDetector::updateState(DetectorState state)
@@ -677,11 +737,17 @@ void GigEDetector::setMode(Mode mode)
 
 void GigEDetector::setDataAcquisitionDuration(double *dataAcquisitionDuration)
 {
+   double durationSeconds = *dataAcquisitionDuration/1000.0;
+   remainingFrames = (durationSeconds/frameTime) + 0.5;
+
    this->dataAcquisitionDuration = *dataAcquisitionDuration;
 }
 
 void GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
 {
+   double durationSeconds = dataAcquisitionDuration/1000.0;
+   remainingFrames = (durationSeconds/frameTime) + 0.5;
+
    this->dataAcquisitionDuration = dataAcquisitionDuration;
 }
 
