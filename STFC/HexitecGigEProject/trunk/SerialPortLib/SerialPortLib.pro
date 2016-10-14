@@ -7,6 +7,8 @@
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QT +=serialport
+
 TARGET = SerialPortLib
 CONFIG +=staticlib
 
@@ -15,11 +17,11 @@ TEMPLATE = lib
 DEFINES += SERIALPORTLIB_LIBRARY
 
 SOURCES += \
-    serialport.cpp \
+    serialport.cpp
 
-INCLUDEPATH += qextserialport/src
-LIBS += -Lqextserialport/release -lQt5ExtSerialPort1
-DEFINES += QEXTSERIALPORT_USING_SHARED
+#DEFINES += QEXTSERIALPORT_USING_SHARED
 
 HEADERS += \
-    serialport.h \
+    serialport.h
+
+#INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt"

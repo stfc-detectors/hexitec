@@ -2,47 +2,42 @@
 #include <QIODevice>
 #include <QStringList>
 #include "serialport.h"
-#include "windows.h"
 
 SerialPort::SerialPort(QString port, QObject *parent) :
     QObject(parent)
 {
-    serialPort = new QextSerialPort(port);
+    serialPort = new QSerialPort(port);
     initialiseHashMaps();
     connect(serialPort, SIGNAL(readyRead()), this, SLOT(onDataAvailable()));
 }
 
+
 void SerialPort::initialiseHashMaps()
 {
-    baudRate["110"] = BAUD110;
-    baudRate["300"] = BAUD300;
-    baudRate["600"] = BAUD600;
-    baudRate["1200"] = BAUD1200;
-    baudRate["2400"] = BAUD2400;
-    baudRate["9600"] = BAUD9600;
-    baudRate["14400"] = BAUD14400;
-    baudRate["19200"] = BAUD19200;
-    baudRate["38400"] = BAUD38400;
-    baudRate["56000"] = BAUD56000;
-    baudRate["57600"] = BAUD57600;
-    baudRate["128000"] = BAUD128000;
-    baudRate["256000"] = BAUD256000;
+    baudRate["1200"] = QSerialPort::Baud1200;
+    baudRate["2400"] = QSerialPort::Baud2400;
+    baudRate["9600"] = QSerialPort::Baud9600;
+    baudRate["19200"] = QSerialPort::Baud19200;
+    baudRate["38400"] = QSerialPort::Baud38400;
+    baudRate["57600"] = QSerialPort::Baud57600;
 
-    dataBits["5"] = DATA_5;
-    dataBits["6"] = DATA_6;
-    dataBits["7"] = DATA_7;
-    dataBits["8"] = DATA_8;
+    dataBits["5"] = QSerialPort::Data5;
+    dataBits["6"] = QSerialPort::Data6;
+    dataBits["7"] = QSerialPort::Data7;
+    dataBits["8"] = QSerialPort::Data8;
 
-    parity["Space Parity"] = PAR_SPACE;
-    parity["Mark Parity"] = PAR_MARK;
-    parity["No Parity"] = PAR_NONE;
-    parity["Even Parity"] = PAR_EVEN;
-    parity["Odd Parity"] = PAR_ODD;
+    parity["Space Parity"] = QSerialPort::SpaceParity;
+    parity["Mark Parity"] = QSerialPort::MarkParity;
+    parity["No Parity"] = QSerialPort::NoParity;
+    parity["Even Parity"] = QSerialPort::EvenParity;
+    parity["Odd Parity"] = QSerialPort::OddParity;
 
-    stopBits["1"] = STOP_1;
-    stopBits["1.5"] = STOP_1_5;
-    stopBits["2"] = STOP_2;
+    stopBits["1"] = QSerialPort::OneStop;
+    stopBits["1.5"] = QSerialPort::OneAndHalfStop;
+    stopBits["2"] = QSerialPort::TwoStop;
+
 }
+
 
 void SerialPort::send(QString string)
 {
@@ -78,9 +73,9 @@ void SerialPort::setBaudRate(QString baudRateString)
     setBaudRate(baudRate[baudRateString]);
 }
 
-void SerialPort::setBaudRate(BaudRateType baudRateType)
+void SerialPort::setBaudRate(QSerialPort::BaudRate baudRate)
 {
-    serialPort->setBaudRate(baudRateType);
+    serialPort->setBaudRate(baudRate);
 }
 
 void SerialPort::setDataBits(QString dataBitsString)
@@ -88,9 +83,9 @@ void SerialPort::setDataBits(QString dataBitsString)
     setDataBits(dataBits[dataBitsString]);
 }
 
-void SerialPort::setDataBits(DataBitsType dataBitsType)
+void SerialPort::setDataBits(QSerialPort::DataBits dataBits)
 {
-    serialPort->setDataBits(dataBitsType);
+    serialPort->setDataBits(dataBits);
 }
 
 void SerialPort::setStopBits(QString stopBitsString)
@@ -98,9 +93,9 @@ void SerialPort::setStopBits(QString stopBitsString)
     setStopBits(stopBits[stopBitsString]);
 }
 
-void SerialPort::setStopBits(StopBitsType stopBitsType)
+void SerialPort::setStopBits(QSerialPort::StopBits stopBits)
 {
-    serialPort->setStopBits(stopBitsType);
+    serialPort->setStopBits(stopBits);
 }
 
 void SerialPort::setParity(QString parityString)
@@ -108,9 +103,9 @@ void SerialPort::setParity(QString parityString)
     setParity(parity[parityString]);
 }
 
-void SerialPort::setParity(ParityType parityType)
+void SerialPort::setParity(QSerialPort::Parity parity)
 {
-    serialPort->setParity(parityType);
+    serialPort->setParity(parity);
 }
 
 bool SerialPort::open(QIODevice::OpenMode mode)
