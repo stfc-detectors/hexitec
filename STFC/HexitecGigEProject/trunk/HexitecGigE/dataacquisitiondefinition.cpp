@@ -1,6 +1,7 @@
 #include "dataacquisitiondefinition.h"
 #include "parameters.h"
 #include <QSettings>
+#include <QDebug>
 
 DataAcquisitionDefinition::DataAcquisitionDefinition()
 {
@@ -26,6 +27,7 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
    this->repeatCount = repeatCount;
    this->repeatInterval = repeatCount;
    this->offsets = offsets;
+   this->triggering = false;
 
    if ((duration = twoEasyIniFile->getDouble("Data_Acquisition/Duration")) != QVariant(INVALID))
    {
@@ -121,6 +123,7 @@ void DataAcquisitionDefinition::setLogging(bool logging)
 
 void DataAcquisitionDefinition::setTriggering(bool triggering)
 {
+   qDebug() << "DataAcquisitionDefinition::setTriggering called with: " << triggering;
    this->triggering = triggering;
 }
 

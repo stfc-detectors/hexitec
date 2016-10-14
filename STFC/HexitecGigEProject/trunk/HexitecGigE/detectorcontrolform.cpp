@@ -98,8 +98,6 @@ void DetectorControlForm::handleTriggeringAvailable(bool triggeringAvailable)
       ui->triggeringSelection->setEnabled(false);
       ui->ttlInputSelection->setEnabled(false);
    }
-
-   qDebug() <<"Triggering Available = " << triggeringAvailable;
 }
 
 void DetectorControlForm::connectSignals()

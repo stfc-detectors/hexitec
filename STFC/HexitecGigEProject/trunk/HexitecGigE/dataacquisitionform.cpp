@@ -125,6 +125,17 @@ void DataAcquisitionForm::setDaqModelName(QString daqModelName)
 
 void DataAcquisitionForm::handleCollectImagesPressed()
 {
+   /*
+   try
+   {
+      emit collectImagesPressed();
+   }
+   catch (DetectorException &ex)
+   {
+      qDebug() << "handleCollectImages caught a DetectorException";
+//      emit writeError(ex.getMessage());
+   }
+   */
    emit collectImagesPressed();
 }
 

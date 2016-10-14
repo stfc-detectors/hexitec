@@ -1,3 +1,4 @@
+#include <locale>
 #include "hv.h"
 #include "objectreserver.h"
 
@@ -29,7 +30,20 @@ HV::HV(QObject *parent) :
 
 void HV::initialise(QString detectorFilename)
 {
+   QString vbPriority;
     detectorIniFile = new IniFile(detectorFilename);
+
+    vbPriority = detectorIniFile->getString("Bias_Voltage/Bias_Voltage_Priority").toUpper();
+    if (vbPriority == "HIGH")
+    {
+       qDebug() << "Setting bias priority TRUE";
+       biasPriority = true;
+    }
+    else if (vbPriority == "LOW")
+    {
+       qDebug() << "Setting bias priority FALSE";
+       biasPriority = false;
+    }
     vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
     vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
     vbrTime = detectorIniFile->getInt("Bias_Voltage/Time_Refresh_Voltage_Held");
@@ -39,6 +53,8 @@ void HV::initialise(QString detectorFilename)
     totalBiasRefreshTime = vbrTime + vbSettleTime;
     voltage = vb;
     voltageAfterRefresh = voltage;
+    storedBiasOn = false;
+    readyForRefresh = true;
 
     off();
     if (vb < -500 || vb > 5)
@@ -55,7 +71,12 @@ int HV::getBiasRefreshTime()
 
 int HV::getBiasRefreshInterval()
 {
-    return biasRefreshInterval;
+   return biasRefreshInterval;
+}
+
+int HV::getTotalBiasRefreshInterval()
+{
+   return totalBiasRefreshTime + biasRefreshInterval;
 }
 
 void HV::off()
@@ -63,6 +84,7 @@ void HV::off()
    emit setHV(0.0);
    biasOnState = false;
    emit biasState(false);
+   emit stopRefreshTimerSignal();
 }
 
 void HV::on(double voltage)
@@ -89,9 +111,11 @@ void HV::biasRefresh()
 
 void HV::singleBiasRefresh(int refreshTime)
 {
+    qDebug() << "hv doing singleBiasRefresh!!!";
     if (biasOnState)
     {
        emit biasRefreshing();
+       qDebug() << "hv doing the refresh!!!";
        voltageAfterRefresh = voltage;
        biasRefreshState = true;
        on(vr);
@@ -139,6 +163,7 @@ void HV::handleExecuteCommand(HV::VoltageSourceCommand command)
        }
        else if (command == HVOFF)
        {
+          emit stopRefreshTimerSignal();
           off();
           //qDebug() << "Turning HV off and releasing!";
           ObjectReserver::instance()->release(reservation.getReserved(), "GUIReserver");
@@ -154,7 +179,19 @@ void HV::enableBiasRefresh()
 
 void HV::disableBiasRefresh()
 {
-   biasRefreshEnabled = false;
+   if (biasPriority)
+   {
+      biasRefreshEnabled = false;
+   }
+   else
+   {
+      readyForRefresh = false;
+   }
+}
+
+void HV::setReadyForRefresh(bool readyForRefresh)
+{
+   this->readyForRefresh = readyForRefresh;
 }
 
 void HV::handleTemperatureBelowDP()
@@ -166,20 +203,26 @@ void HV::handleTemperatureBelowDP()
 
 void HV::executeBiasRefresh()
 {
-    biasRefresh();
+   if (!biasPriority)
+   {
+      qDebug() << "prepare for a refresh, readyForRefresh = " << readyForRefresh;
+      emit prepareForBiasRefresh();
+      waitForReady();
+      qDebug() << "readyForRefresh = " << readyForRefresh;
+   }
+   biasRefresh();
 }
 
 void HV::executeSingleBiasRefresh()
 {
     singleBiasRefresh();
-
 }
 
 void HV::storeBiasSettings()
 {
     storedBiasOn = biasOnState;
     storedBiasRefreshing = biasRefreshEnabled;
-
+    qDebug() << "storeBiasSettings(), biasOnState: " << biasOnState << " biasRefreshEnabled: " << biasRefreshEnabled;
 }
 
 void HV::restoreBiasSettings()
@@ -193,16 +236,18 @@ void HV::restoreBiasSettings()
 
 }
 
+bool HV::getStoredBiasOn()
+{
+   return storedBiasOn;
+}
 void HV::handleDisableBiasRefresh()
 {
     disableBiasRefresh();
-
 }
 
 void HV::handleEnableBiasRefresh()
 {
     enableBiasRefresh();
-
 }
 
 void HV::endOfRefresh()
@@ -223,19 +268,26 @@ void HV::endOfSettle()
 
 void HV::startRefreshTimer(double interval)
 {
+   qDebug() <<"HV::startRefreshTimer, interval: " << interval;
     enableBiasRefresh();
     executeBiasRefreshTimer->start(interval);
 }
 
 void HV::stopRefreshTimer()
 {
+   qDebug() <<"HV::stopRefreshTimer";
     disableBiasRefresh();
     executeBiasRefreshTimer->stop();
 }
 
 bool HV::getBiasOnState()
 {
-    return biasOnState;
+   return biasOnState;
+}
+
+bool HV::getBiasPriority()
+{
+   return biasPriority;
 }
 
 void HV::startBiasRefreshTimer()
@@ -256,4 +308,12 @@ void HV::startBiasSettleTimer()
 void HV::stopBiasSettleTimer()
 {
    biasSettleTimer->stop();
+}
+
+void HV::waitForReady()
+{
+   while (!readyForRefresh)
+   {
+      QThread::sleep(0.1);
+   }
 }

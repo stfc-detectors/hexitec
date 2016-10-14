@@ -156,6 +156,7 @@ void DataAcquisitionModel::connectGigEDetector()
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
    connect(gigEDetector, SIGNAL(enableMonitoring()),
            detectorMonitor, SLOT(enableMonitoring()));
+// The next 2 lines have been added. Check why???
    connect(gigEDetector, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(gigEDetector, SIGNAL(triggeringAvailableChanged(bool)),
@@ -233,6 +234,8 @@ void DataAcquisitionModel::connectDataAcquisitionForm()
 
 void DataAcquisitionModel::connectHV()
 {
+   connect(hv, SIGNAL(prepareForBiasRefresh()), dataAcquisition, SLOT(prepareForBiasRefresh()));
+
    connect(hv, SIGNAL(biasRefreshing()), detectorMonitor, SLOT(handleBiasRefreshing()));
    connect(hv, SIGNAL(biasRefreshing()), dataAcquisition, SLOT(handleBiasRefreshing()));
 
@@ -377,6 +380,7 @@ void DataAcquisitionModel::handleDataAcquisitionDefinitionChanged(DataAcquisitio
    this->dataAcquisitionDefinition.setRepeatCount(dataAcquisitionDefinition.getRepeatCount());
    this->dataAcquisitionDefinition.setRepeatInterval(dataAcquisitionDefinition.getRepeatInterval());
    this->dataAcquisitionDefinition.setTriggering(dataAcquisitionDefinition.isTriggering());
+   qDebug() << "DataAcquisitionModel::handleDataAcquisitionDefinitionChanged, triggering: " << dataAcquisitionDefinition.isTriggering();
 
    changeDaqDuration();
 }
@@ -394,6 +398,7 @@ void DataAcquisitionModel::handleBiasVoltageChanged(bool biasOn)
 
 void DataAcquisitionModel::handleTriggeringChanged(int triggering)
 {
+   qDebug() << "DataAcquisitionModel::handleTriggeringChanged, triggering: " << triggering;
    if (triggering != 0)
    {
       this->dataAcquisitionDefinition.setTriggering(true);

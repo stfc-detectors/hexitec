@@ -16,7 +16,10 @@ public:
     void initialise(QString detectorFilename);
     int getBiasRefreshTime();
     int getBiasRefreshInterval();
+    int getTotalBiasRefreshInterval();
     bool getBiasOnState();
+    bool getBiasPriority();
+    bool getStoredBiasOn();
     Q_INVOKABLE void off();
     Q_INVOKABLE void on(double voltage);
     Q_INVOKABLE void on();
@@ -26,12 +29,15 @@ public:
     void singleBiasRefresh();
     void enableBiasRefresh();
     void disableBiasRefresh();
+    void setReadyForRefresh(bool readyForRefresh);
 
 private:
     double voltage;
     double voltageAfterRefresh;
     double currentLimit;
+    bool readyForRefresh;
     bool biasRefreshState;
+    bool biasPriority; //(LOW = false, HIGH = true)
     double hV;
     double vb;
     double vr;
@@ -66,6 +72,7 @@ signals:
     void biasState(bool);
     void biasVoltageChanged(bool);
     void vbOutOfRange();
+    void prepareForBiasRefresh();
 
 private slots:
     void handleExecuteCommand(HV::VoltageSourceCommand command);
@@ -83,6 +90,7 @@ private slots:
     void stopBiasRefreshTimer();
     void startBiasSettleTimer();
     void stopBiasSettleTimer();
+    void waitForReady();
 
 public slots:
    void startBiasRefreshTimer();

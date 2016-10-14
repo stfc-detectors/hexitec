@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QDateTime>
 
 DataAcquisition *DataAcquisition::daqInstance = 0;
 hexitech::HxtProcessing *DataAcquisition::hxtProcessor = 0;
@@ -19,6 +20,7 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    QThread(parent)
 {
    collecting = false;
+   triggered = false;
    biasRefreshing = false;
    monitoring = false;
    configuring = false;
@@ -28,6 +30,7 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
    detectorState = GigEDetector::IDLE;
    hv = VoltageSourceFactory::instance()->getHV();
+   biasPriority = hv->getBiasPriority();
    tdp = 0.0;
    currentImageNumber = 0;
    daqStatus = DataAcquisitionStatus();
@@ -96,7 +99,7 @@ void DataAcquisition::configureDataCollection()
       nRepeat = 1;
       appendRepeatCount = false;
 
-      if (biasOn)
+      if (biasOn && biasPriority)
       {
          splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )hv->getBiasRefreshInterval()));
       }
@@ -104,6 +107,7 @@ void DataAcquisition::configureDataCollection()
       {
          splitDataCollections = 1;
       }
+
       if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
       {
          appendRepeatCount = true;
@@ -182,6 +186,8 @@ char *DataAcquisition::getStatus()
 
 void DataAcquisition::run()
 {
+   try
+   {
    if (mode == GigEDetector::GIGE_DEFAULT)
    {
       performGigEDefaultDataCollection();
@@ -191,7 +197,14 @@ void DataAcquisition::run()
    }
    else if (mode == GigEDetector::CONTINUOUS)
    {
-      performContinuousDataCollection();
+      if (dataAcquisitionDefinition->isTriggering())
+      {
+         performTriggeredDataCollection();
+      }
+      else
+      {
+         performContinuousDataCollection();
+      }
       // TODO : would emiting this to DataAcquisition be better for thread safety
       changeDAQStatus(daqStatus.getMajorStatus(),
                       DataAcquisitionStatus::DONE);
@@ -210,6 +223,13 @@ void DataAcquisition::run()
                       daqStatus.getMinorStatus());
    }
    */
+   }
+   catch (DetectorException &ex)
+   {
+//         emit writeError(ex.getMessage());
+      qDebug() << "DetectorException caught: ";
+      qDebug() << "Message: " << ex.getMessage();
+   }
 }
 
 void DataAcquisition::setDirectory(int repeatCount)
@@ -245,15 +265,151 @@ void DataAcquisition::performContinuousDataCollection()
    int nDaq;
    int repeatCount;
    int nDaqOverall = 0;
-   bool triggeredCollection = false;
 
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
 //   waitForMonitoringDone();
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
-   triggeredCollection = dataAcquisitionDefinition->isTriggering();
-   qDebug() << "performContinuousDataCollection(), triggeredCollection: " << triggeredCollection;
+   qDebug() << "performContinuousDataCollection() ";
+
+   for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
+   {
+      totalFramesAcquired = 0;
+      emit appendTimestamp(true);
+      setDirectory(repeatCount);
+      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);
+      performMonitorEnvironmentalValues();
+
+      if (biasPriority)
+      {
+         qDebug() << "Standard DAQ";
+         nDaqOverall = doSplitDataCollections(nDaqOverall, repeatCount);
+      }
+      else
+      {
+         qDebug() << "LowPriorityBias DAQ";
+         nDaqOverall = doLowPriorityBiasDataCollections(nDaqOverall);
+      }
+
+      emit imageComplete(totalFramesAcquired);
+
+      // Break the outer loop too.
+      if (abortRequired())
+         break;
+
+      if (repeatPauseRequired(repeatCount))
+      {
+         pauseDataAcquisition();
+         
+         if (abortRequired())
+            break;
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::COLLECTING);
+      }
+   }
+
+   daqStatus.setCurrentImage(++nDaqOverall);
+   emit dataAcquisitionStatusChanged(daqStatus);
+
+   gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
+   emit restoreBiasSettings();
+   emit enableMonitoring();
+}
+
+int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount)
+{
+      for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)
+      {
+         if (nDaq > 0)
+         {
+            emit appendTimestamp(false);
+         }
+         setDataAcquisitionTime(nDaq);
+         collecting = true;
+
+         emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
+         nDaqOverall++;
+         waitForCollectingDone();
+
+         daqStatus.setCurrentImage(nDaqOverall);
+         if (abortRequired())
+         {
+            break;
+         }
+
+         if (nDaq < (splitDataCollections - 1) ||
+             !repeatPauseRequired(repeatCount))
+         {
+            performMonitorEnvironmentalValues();
+            performSingleBiasRefresh();
+            if (abortRequired())
+            {
+               break;
+            }
+         }
+      }
+   return nDaqOverall;
+}
+
+int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
+{
+   unsigned long long remainingFrames = -1;
+   totalImageFrames = -1;
+   bool startOfImage = true;
+
+   dataCollectionTime = dataAcquisitionDefinition->getDuration();
+   collecting = true;
+   nDaqOverall++;
+   emit appendTimestamp(true);
+
+   remainingFrames = gigEDetector->getRemainingFrames();
+   totalImageFrames = remainingFrames;
+
+   while (remainingFrames != 0)
+   {
+      if (!startOfImage)
+      {
+         emit appendTimestamp(false);
+      }
+      hv->setReadyForRefresh(false);
+      collecting = true;
+      emit executeCommand(GigEDetector::RESTART, startOfImage, 0);
+      waitForCollectingDone();
+      if (abortRequired())
+      {
+         break;
+      }
+      remainingFrames = gigEDetector->getRemainingFrames();
+
+      if (remainingFrames != 0)
+      {
+         performMonitorEnvironmentalValues();
+         emit executeSingleBiasRefresh();
+         qDebug() << "emitted the refresh signal";
+         waitForBiasRefreshDone();
+      }
+      startOfImage = false;
+      sleep(0.1);
+   }
+
+   daqStatus.setCurrentImage(nDaqOverall);
+
+   return nDaqOverall;
+}
+
+void DataAcquisition::performTriggeredDataCollection()
+{
+   int nDaq;
+   int repeatCount;
+   int nDaqOverall = 0;
+
+   emit storeBiasSettings();
+   emit disableBiasRefresh();
+   emit disableMonitoring();
+//   waitForMonitoringDone();
+   dataAcquisitionModel = DataAcquisitionModel::getInstance();
+   qDebug() << "performTriggeredDataCollection()!!! ";
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -271,9 +427,20 @@ void DataAcquisition::performContinuousDataCollection()
          }
          setDataAcquisitionTime(nDaq);
          collecting = true;
+         triggered = false;
+
+         qDebug() << "Changing DAQStatus to DataAcquisitionStatus::WAITING_TRIGGER";
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::WAITING_TRIGGER);
 
          emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
+         qDebug() <<"GigEDetector::COLLECT command emitted, waiting for a trigger event";
          nDaqOverall++;
+         waitForTrigger();
+
+         qDebug() << "Changing DAQStatus to DataAcquisitionStatus::COLLECTING";
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::COLLECTING);
 
          waitForCollectingDone();
          daqStatus.setCurrentImage(nDaqOverall);
@@ -295,24 +462,6 @@ void DataAcquisition::performContinuousDataCollection()
       // Break the outer loop too.
       if (abortRequired())
          break;
-
-      if (dataAcquisitionDefinition->isTriggering())
-      {
-         qDebug() << "Waiting for next trigger.";
-      }
-      else
-      {
-         if (repeatPauseRequired(repeatCount))
-         {
-            qDebug() << "No triggering normal operation.";
-            pauseDataAcquisition();
-         
-            if (abortRequired())
-               break;
-            changeDAQStatus(daqStatus.getMajorStatus(),
-                            DataAcquisitionStatus::COLLECTING);
-		 }
-      }
    }
 
    daqStatus.setCurrentImage(++nDaqOverall);
@@ -406,12 +555,16 @@ void DataAcquisition::waitForMonitoringDone()
 
 void DataAcquisition::performSingleBiasRefresh()
 {
+   qDebug() << "DataAcquisition::performSingleBiasRefresh() called!!!, threadId: " << QThread::currentThreadId();
    if (biasOn)
    {
+      qDebug() << "biasOn!!!";
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
       biasRefreshing = true;
       emit executeSingleBiasRefresh();
+      qDebug() << "emitted the refresh signal";
       waitForBiasRefreshDone();
+      qDebug() << "bias refresh done.";
       emit disableBiasRefresh();
    }
 }
@@ -454,10 +607,33 @@ int DataAcquisition::waitForBiasRefreshDone()
 {
    int status = 0;
 
+   changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
+   qDebug() << "waitForBiasRefreshDone(), biasRefreshing: " <<biasRefreshing;
    while (biasRefreshing)
+   {
+      sleep(0.1);
+   }
+   qDebug() << "waiting complete!!!, biasRefreshing: " <<biasRefreshing;
+
+   return status;
+}
+
+int DataAcquisition::waitForTrigger()
+{
+   int status = 0;
+
+   changeDAQStatus(daqStatus.getMajorStatus(),
+                   DataAcquisitionStatus::WAITING_TRIGGER);
+//REMOVE THE NEXT TWO LINES!!!!!
+
+   triggered = true;
+   collecting = false;
+
+   while (!triggered)
       sleep(0.1);
 
    return status;
+
 }
 
 int DataAcquisition::waitForConfiguringDone()
@@ -475,7 +651,9 @@ int DataAcquisition::waitForCollectingDone()
    int status = 0;
    int elapsed = 0;
    int percentage = 0;
+   unsigned long long remainingFrames;
 
+   qDebug() <<"collecting: " << collecting << "daqStatus.getMinorStatus(): " << daqStatus.getMinorStatus() << " mode: " << mode;
    while (collecting)
    {
       sleep(1);
@@ -483,7 +661,17 @@ int DataAcquisition::waitForCollectingDone()
           mode == GigEDetector::CONTINUOUS)
       {
          elapsed++;
-         percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
+         if (biasPriority)
+         {
+            percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
+         }
+         else
+         {
+            remainingFrames = gigEDetector->getRemainingFrames();
+            percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
+
+            qDebug() << " totalImageFrames: " << totalImageFrames << " remainingFrames: " << remainingFrames;
+         }
          if (percentage > 100)
          {
             percentage = 100;
@@ -492,17 +680,23 @@ int DataAcquisition::waitForCollectingDone()
          emit dataAcquisitionStatusChanged(daqStatus);
       }
    }
-   percentage = 100;
+   if ((remainingFrames = gigEDetector->getRemainingFrames()) != 0)
+   {
+      percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
+   }
+   else
+   {
+      percentage = 100;
+      qDebug() << "DAQ finished";
+   }
    daqStatus.setPercentage(percentage);
    emit dataAcquisitionStatusChanged(daqStatus);
-   qDebug() << "DAQ finished";
 
    return status;
 }
 
 void DataAcquisition::handleSetFingerTemperature(double temperature)
 {
-   qDebug() << "handleSetFingerTemperature(double temperature)" << temperature;
    if (temperature < tdp)
    {
       QMessageBox msgBox;
@@ -616,7 +810,16 @@ void DataAcquisition::handleTriggeringSelectionChanged(int triggeringMode)
       qDebug() << "handleTriggeringSelectionChanged all objects reserved, configuring triggering";
       qDebug() <<"handleTriggeringSelectionChanged(int triggering):" << triggeringMode;
       configureTriggering(triggeringMode);
-      start();
+//      try
+//      {
+         start();
+//      }
+//      catch (DetectorException &ex)
+//      {
+//         emit writeError(ex.getMessage());
+//         qDebug() << "DetectorException caught: " << ex.getMessage();
+//      }
+
    }
 }
 
@@ -636,6 +839,7 @@ void DataAcquisition::handleCollectReducedImages()
    {
       qDebug() << "handleCollectReducedImages all objects reserved, configuring DAQ";
       configureDataCollection();
+
       start();
    }
 }
@@ -650,6 +854,7 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 {
    if (mode != GigEDetector::GIGE_DEFAULT)
    {
+      triggered = true;
       hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
    }
    ///  HexitecGigE Addition:
@@ -660,6 +865,7 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 
 void DataAcquisition::handleImageStarted(char *path, int frameSize)
 {
+   qDebug() << "DataAcquisition::handleImageStarted path: " << path;
    hxtProcessor->pushRawFileName(path, frameSize);
 //   hxtProcessor->pushMotorPositions(&motorPositions); /// Provide motorPositions together with buffer instead
 }
@@ -673,6 +879,17 @@ void DataAcquisition::handleInitialiseDetector()
 {
    gigEDetector->initialiseConnection();
    emit enableMonitoring();
+}
+
+void DataAcquisition::prepareForBiasRefresh()
+{
+   gigEDetector->abort(true);
+   hv->setReadyForRefresh(true);
+}
+
+void DataAcquisition::performLPSingleBiasRefresh()
+{
+   qDebug() << "Stop acquisition. Do bias refresh. Restart acquisition. threadID: " << QThread::currentThreadId();
 }
 
 void DataAcquisition::handleExecuteOffsets()

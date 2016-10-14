@@ -40,15 +40,21 @@ private:
    int waitForCollectingDone();
    void waitForMonitoringDone();
    int waitForBiasRefreshDone();
+   int waitForTrigger();
    void configureTriggering(int triggeringMode);
    void configureDataCollection();
    void configureBasicCollection();
    void setDirectory(int repeatCount);
    void performContinuousDataCollection();
+   void performTriggeredDataCollection();
    void performFixedDataCollection();
+   int doSplitDataCollections(int nDaqOverall, int repeatCount);
+   int doLowPriorityBiasDataCollections(int nDaqOverall);
    void setDataAcquisitionTime(int nDaq);
    void performSingleBiasRefresh();
    void performMonitorEnvironmentalValues();
+   void performGigEDefaultDataCollection();
+   void performTriggeringConfigure();
    void setAbort(bool abort);
    bool abortRequired();
    void pauseDataAcquisition();
@@ -66,7 +72,9 @@ private:
    int nRepeat;
    int currentImageNumber;
    bool collecting;
+   bool triggered;
    bool configuring;
+   bool biasPriority;
    bool biasRefreshing;
    bool monitoring;
    bool biasOn;
@@ -83,8 +91,7 @@ private:
    QList <QObject *> rdaql;
    Reservation reservation;
    unsigned long long totalFramesAcquired;
-   void performGigEDefaultDataCollection();
-   void performTriggeringConfigure();
+   unsigned long long totalImageFrames = -1;
 
 signals:
    void executeCommand(GigEDetector::DetectorCommand, int, int);
@@ -127,8 +134,10 @@ public slots:
    void handleImageStarted(char *path, int frameSize);
    void handleImageComplete(unsigned long long framesAcquired);
    void handleInitialiseDetector();
+   void prepareForBiasRefresh();
 
 private slots:
+   void performLPSingleBiasRefresh();
    //void handlePushFilename();
 };
 

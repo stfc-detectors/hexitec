@@ -85,6 +85,7 @@ Plotter::Plotter(QWidget *parent) :
    setDynamicStateOff();
    setBackgroundRole(QPalette::Base);
    setAutoFillBackground(true);
+   pixelAddition = false;
    currentCurve = -1;
    currentZoom = 0;
    zoomStack.resize(currentZoom + 1);

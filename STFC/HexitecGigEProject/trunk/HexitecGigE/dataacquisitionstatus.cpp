@@ -102,9 +102,12 @@ void DataAcquisitionStatus::constructMinorMessage()
    case WAITING_DARK:
       statusMessage += " : waiting for user";
       break;
+   case WAITING_TRIGGER:
+      statusMessage += " : waiting for trigger";
+      break;
    case NOT_INITIALIZED:
-         statusMessage += " : detector not initialized";
-         break;
+      statusMessage += " : detector not initialized";
+      break;
    default:
       break;
    }
