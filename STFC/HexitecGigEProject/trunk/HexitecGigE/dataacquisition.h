@@ -137,7 +137,6 @@ public slots:
    void prepareForBiasRefresh();
 
 private slots:
-   void performLPSingleBiasRefresh();
    //void handlePushFilename();
 };
 

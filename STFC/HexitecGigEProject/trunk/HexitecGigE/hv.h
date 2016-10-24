@@ -46,8 +46,9 @@ private:
     int biasRefreshInterval;
     int totalBiasRefreshTime;
     int biasRefreshTime;
-    QTimer *biasRefreshTimer;
+    QTimer *biasRefreshHeldTimer;
     QTimer *biasSettleTimer;
+    QTimer *biasRefreshIntervalTimer;
     QTimer *executeBiasRefreshTimer;
     bool biasRefreshEnabled;
     bool biasOnState;
@@ -61,10 +62,10 @@ signals:
     void writeWarning(QString);
     void writeError(QString);
     void setHV(double voltage);
-    void startBiasRefreshTimerSignal();
-    void stopBiasRefreshTimerSignal();
-    void startRefreshTimerSignal(double interval);
-    void stopRefreshTimerSignal();
+    void startBiasRefreshHeldSignal();
+    void stopBiasRefreshHeldSignal();
+    void startExecuteBiasRefreshTimerSignal(double interval);
+    void stopExecuteBiasRefreshTimerSignal();
     void startBiasSettleTimerSignal();
     void stopBiasSettleTimerSignal();
     void biasRefreshing();
@@ -85,15 +86,15 @@ private slots:
     void handleEnableBiasRefresh();
     void endOfRefresh();
     void endOfSettle();
-    void startRefreshTimer(double interval);
-    void stopRefreshTimer();
-    void stopBiasRefreshTimer();
+    void startExecuteBiasRefreshTimer(double interval);
+    void stopExecuteBiasRefreshTimer();
+    void stopBiasRefreshHeldTimer();
     void startBiasSettleTimer();
     void stopBiasSettleTimer();
     void waitForReady();
 
 public slots:
-   void startBiasRefreshTimer();
+   void startBiasRefreshHeldTimer();
 
 };
 

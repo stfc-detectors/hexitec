@@ -271,7 +271,7 @@ void DataAcquisition::performContinuousDataCollection()
    emit disableMonitoring();
 //   waitForMonitoringDone();
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
-   qDebug() << "performContinuousDataCollection() ";
+//   qDebug() << "performContinuousDataCollection() ";
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -385,8 +385,9 @@ int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
       if (remainingFrames != 0)
       {
          performMonitorEnvironmentalValues();
-         emit executeSingleBiasRefresh();
-         qDebug() << "emitted the refresh signal";
+         biasRefreshing = true;  // NEWLY ADDED
+ //        emit executeSingleBiasRefresh();
+ //        qDebug() << QTime::currentTime().toString() << "emitted the refresh signal";
          waitForBiasRefreshDone();
       }
       startOfImage = false;
@@ -409,7 +410,7 @@ void DataAcquisition::performTriggeredDataCollection()
    emit disableMonitoring();
 //   waitForMonitoringDone();
    dataAcquisitionModel = DataAcquisitionModel::getInstance();
-   qDebug() << "performTriggeredDataCollection()!!! ";
+//   qDebug() << "performTriggeredDataCollection()!!! ";
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
@@ -555,16 +556,16 @@ void DataAcquisition::waitForMonitoringDone()
 
 void DataAcquisition::performSingleBiasRefresh()
 {
-   qDebug() << "DataAcquisition::performSingleBiasRefresh() called!!!, threadId: " << QThread::currentThreadId();
+//   qDebug() << "DataAcquisition::performSingleBiasRefresh() called!!!, threadId: " << QThread::currentThreadId();
    if (biasOn)
    {
-      qDebug() << "biasOn!!!";
+//      qDebug() << "biasOn!!!";
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
       biasRefreshing = true;
       emit executeSingleBiasRefresh();
-      qDebug() << "emitted the refresh signal";
+      qDebug() << QTime::currentTime().toString() << "emitted the refresh signal";
       waitForBiasRefreshDone();
-      qDebug() << "bias refresh done.";
+      qDebug() << QTime::currentTime().toString() << "bias refresh done.";
       emit disableBiasRefresh();
    }
 }
@@ -608,12 +609,12 @@ int DataAcquisition::waitForBiasRefreshDone()
    int status = 0;
 
    changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
-   qDebug() << "waitForBiasRefreshDone(), biasRefreshing: " <<biasRefreshing;
+   qDebug() << QTime::currentTime().toString() << "waitForBiasRefreshDone(), biasRefreshing: " << biasRefreshing;
    while (biasRefreshing)
    {
       sleep(0.1);
    }
-   qDebug() << "waiting complete!!!, biasRefreshing: " <<biasRefreshing;
+   qDebug() << QTime::currentTime().toString() << "waiting complete!!!, biasRefreshing: " << biasRefreshing;
 
    return status;
 }
@@ -653,7 +654,7 @@ int DataAcquisition::waitForCollectingDone()
    int percentage = 0;
    unsigned long long remainingFrames;
 
-   qDebug() <<"collecting: " << collecting << "daqStatus.getMinorStatus(): " << daqStatus.getMinorStatus() << " mode: " << mode;
+//   qDebug() <<"collecting: " << collecting << "daqStatus.getMinorStatus(): " << daqStatus.getMinorStatus() << " mode: " << mode;
    while (collecting)
    {
       sleep(1);
@@ -885,11 +886,6 @@ void DataAcquisition::prepareForBiasRefresh()
 {
    gigEDetector->abort(true);
    hv->setReadyForRefresh(true);
-}
-
-void DataAcquisition::performLPSingleBiasRefresh()
-{
-   qDebug() << "Stop acquisition. Do bias refresh. Restart acquisition. threadID: " << QThread::currentThreadId();
 }
 
 void DataAcquisition::handleExecuteOffsets()
