@@ -33,7 +33,6 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
    bufferReady = transferBuffer;
    validFrames = frameCount;
    remainingFrames -=validFrames;
-   qDebug() << "remainingFrames = " << remainingFrames;
    WindowsEvent *bufferReadyEvent = DetectorFactory::instance()->getBufferReadyEvent();
    WindowsEvent *showImageEvent = DetectorFactory::instance()->getShowImageEvent();
 
@@ -142,7 +141,6 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
-   qDebug() << "!!!!! GigEDetector::handleReturnBufferReady pathString: " << pathString << " :";
    if ((saveRaw) && (mode == CONTINUOUS))
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
@@ -578,7 +576,7 @@ void GigEDetector::handleReducedDataCollection()
 
 void GigEDetector::restartImages(bool startOfImage)
 {
-   qDebug() << "GigEDetector::restartImages() called";
+//   qDebug() << "GigEDetector::restartImages() called";
    if (mode == CONTINUOUS && appendTimestamp)
    {
      setGetImageParams();
@@ -591,7 +589,7 @@ void GigEDetector::handleExecuteGetImages()
 {
    if ((triggeringMode == STANDARD_TRIGGERING) || (triggeringMode == SYNCHRONISED_TRIGGERING))
    {
-      qDebug() << "triggeringMode = " << triggeringMode;
+//      qDebug() << "triggeringMode = " << triggeringMode;
       updateState(WAITING_TRIGGER);
    }
    else
@@ -650,7 +648,7 @@ void GigEDetector::acquireImages(bool startOfImage)
    }
    else
    {
-      qDebug() <<"Setting frame count to remainingFrames ready to restart collection";
+//      qDebug() <<"Restart collection, remainingFrames = " << remainingFrames;
       frameCount = remainingFrames;
    }
 
@@ -709,7 +707,7 @@ void GigEDetector::abort(bool restart)
    if (restart)
    {
       StopAcquisition(detectorHandle);
-      qDebug() << "Acquisition STOPPED!!!";
+      qDebug() << QTime::currentTime().toString() << "Acquisition STOPPED!!!";
    }
    else
    {
