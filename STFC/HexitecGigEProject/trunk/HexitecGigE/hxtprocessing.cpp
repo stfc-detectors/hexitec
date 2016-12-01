@@ -383,7 +383,7 @@ void HxtProcessing::prepSettings()
 
         dataProcessor->registerCorrector(dynamic_cast<HxtFrameCorrector*>(momCorrector));
         LOG(gLogConfig, logINFO) << "Applying " << momCorrector->getName() << " corrector to data";
-    }
+     }
 
 
     // x. Development purposes only, check for pixels read out more than once

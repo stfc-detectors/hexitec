@@ -28,6 +28,7 @@ DataAcquisitionDefinition::DataAcquisitionDefinition()
    this->repeatInterval = repeatCount;
    this->offsets = offsets;
    this->triggering = false;
+   this->ttlInput = 0;
 
    if ((duration = twoEasyIniFile->getDouble("Data_Acquisition/Duration")) != QVariant(INVALID))
    {
@@ -127,6 +128,11 @@ void DataAcquisitionDefinition::setTriggering(bool triggering)
    this->triggering = triggering;
 }
 
+void DataAcquisitionDefinition::setTtlInput(int ttlInput)
+{
+   this->ttlInput = ttlInput;
+}
+
 DetectorFilename *DataAcquisitionDefinition::getDataFilename()
 {
    return &dataFilename;
@@ -170,4 +176,9 @@ bool DataAcquisitionDefinition::isLogging()
 bool DataAcquisitionDefinition::isTriggering()
 {
    return triggering;
+}
+
+int DataAcquisitionDefinition::getTtlInput()
+{
+   return ttlInput;
 }

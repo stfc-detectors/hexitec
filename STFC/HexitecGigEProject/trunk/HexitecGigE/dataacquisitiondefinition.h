@@ -17,6 +17,7 @@ public:
    void setFixedImageCount(int fixedImageCount);
    void setLogging(bool logging);
    void setTriggering(bool triggering);
+   void setTtlInput(int ttlInput);
    DetectorFilename *getDataFilename();
    DetectorFilename *getLogFilename();
    bool getOffsets();
@@ -26,6 +27,7 @@ public:
    int getFixedImageCount();
    bool isLogging();
    bool isTriggering();
+   int getTtlInput();
 
 private:
    DetectorFilename dataFilename;
@@ -34,6 +36,7 @@ private:
    bool logging;
    bool offsets;
    bool triggering;
+   int ttlInput;
    double duration;
    int repeatCount;
    int repeatInterval;

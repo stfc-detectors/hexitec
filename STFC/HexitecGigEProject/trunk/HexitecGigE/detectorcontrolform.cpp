@@ -332,6 +332,7 @@ void DetectorControlForm::handleTriggeringSelectionChanged(int triggering)
 void DetectorControlForm::handleTtlInputSelectionChanged(int ttlInput)
 {
    qDebug() <<"handleTtlInputSelectionChanged(int ttlInput):" << ttlInput;
+   emit ttlInputSelectionChanged(ttlInput);
 }
 
 void DetectorControlForm::handleScriptReserve(QString name)

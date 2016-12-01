@@ -98,8 +98,8 @@ void HV::on(double voltage)
     emit biasState(true);
     if ((fabs(voltage - vr) < 0.0000001) && (!executeBiasRefreshTimer->isActive()))
     {
-       qDebug() << QTime::currentTime().toString() << "emit startRefreshTimerSignal from HV::on(), biasRefreshTimer->isActive()"
-                << executeBiasRefreshTimer->isActive();
+//       qDebug() << QTime::currentTime().toString() << "emit startRefreshTimerSignal from HV::on(), biasRefreshTimer->isActive()"
+//                << executeBiasRefreshTimer->isActive();
        emit startExecuteBiasRefreshTimerSignal(biasRefreshInterval + totalBiasRefreshTime);
     }
 }
@@ -116,11 +116,11 @@ void HV::biasRefresh()
 
 void HV::singleBiasRefresh(int refreshTime)
 {
-    qDebug() << QTime::currentTime().toString() << "hv doing singleBiasRefresh!!!";
+//    qDebug() << QTime::currentTime().toString() << "hv doing singleBiasRefresh!!!";
     if (biasOnState)
     {
        emit biasRefreshing();
-       qDebug() << QTime::currentTime().toString() << "hv doing the refresh!!!";
+//       qDebug() << QTime::currentTime().toString() << "hv doing the refresh!!!";
        voltageAfterRefresh = voltage;
        biasRefreshState = true;
        on(vr);
@@ -138,13 +138,13 @@ void HV::singleBiasRefresh()
 
 void HV::biasRefresh(int refreshTime)
 {
-   qDebug() << QTime::currentTime().toString() << "HV::biasRefresh() called";
+//   qDebug() << QTime::currentTime().toString() << "HV::biasRefresh() called";
     if (biasOnState && biasRefreshEnabled)
     {
        emit biasRefreshing();
        voltageAfterRefresh = voltage;
        biasRefreshState = true;
-       qDebug() << QTime::currentTime().toString() << "calling HV::on() with " << vr;
+//       qDebug() << QTime::currentTime().toString() << "calling HV::on() with " << vr;
        on(vr);
        biasRefreshTime = refreshTime;
        emit startBiasRefreshHeldSignal();
@@ -277,14 +277,14 @@ void HV::endOfSettle()
 
 void HV::startExecuteBiasRefreshTimer(double interval)
 {
-    qDebug() << QTime::currentTime().toString() <<"HV::startRefreshTimer, interval: " << interval;
+//    qDebug() << QTime::currentTime().toString() <<"HV::startRefreshTimer, interval: " << interval;
     enableBiasRefresh();
     executeBiasRefreshTimer->start(interval);
 }
 
 void HV::stopExecuteBiasRefreshTimer()
 {
-   qDebug() <<"HV::stopRefreshTimer";
+//   qDebug() <<"HV::stopRefreshTimer";
     disableBiasRefresh();
     executeBiasRefreshTimer->stop();
 }
@@ -301,7 +301,7 @@ bool HV::getBiasPriority()
 
 void HV::startBiasRefreshHeldTimer()
 {
-   qDebug() << QTime::currentTime().toString() << "startBiasRefreshHeldTimer() with " << biasRefreshTime;
+//   qDebug() << QTime::currentTime().toString() << "startBiasRefreshHeldTimer() with " << biasRefreshTime;
    biasRefreshHeldTimer->start(biasRefreshTime);
 }
 

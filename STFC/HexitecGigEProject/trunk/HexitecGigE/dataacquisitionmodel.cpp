@@ -161,6 +161,8 @@ void DataAcquisitionModel::connectGigEDetector()
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(gigEDetector, SIGNAL(triggeringAvailableChanged(bool)),
            detectorControlForm, SLOT(handleTriggeringAvailable(bool)));
+   connect(gigEDetector, SIGNAL(cancelDataCollection()),
+           dataAcquisition, SLOT(handleCancelReducedDataCollection()));
 
 }
 
@@ -192,6 +194,8 @@ void DataAcquisitionModel::connectDetectorControlForm()
            dataAcquisition, SLOT(handleInitialiseDetector()));
    connect(detectorControlForm, SIGNAL(triggeringSelectionChanged(int)),
            dataAcquisition, SLOT(handleTriggeringSelectionChanged(int)));
+   connect(detectorControlForm, SIGNAL(ttlInputSelectionChanged(int)),
+           dataAcquisition, SLOT(handleTtlInputSelectionChanged(int)));
 }
 
 void DataAcquisitionModel::connectDataAcquisitionModel()
@@ -380,7 +384,9 @@ void DataAcquisitionModel::handleDataAcquisitionDefinitionChanged(DataAcquisitio
    this->dataAcquisitionDefinition.setRepeatCount(dataAcquisitionDefinition.getRepeatCount());
    this->dataAcquisitionDefinition.setRepeatInterval(dataAcquisitionDefinition.getRepeatInterval());
    this->dataAcquisitionDefinition.setTriggering(dataAcquisitionDefinition.isTriggering());
+   this->dataAcquisitionDefinition.setTtlInput(dataAcquisitionDefinition.getTtlInput());
    qDebug() << "DataAcquisitionModel::handleDataAcquisitionDefinitionChanged, triggering: " << dataAcquisitionDefinition.isTriggering();
+   qDebug() << "DataAcquisitionModel::handleDataAcquisitionDefinitionChanged, ttlInput: " << dataAcquisitionDefinition.getTtlInput();
 
    changeDaqDuration();
 }

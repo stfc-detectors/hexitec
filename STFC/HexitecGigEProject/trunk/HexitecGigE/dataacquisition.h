@@ -48,7 +48,8 @@ private:
    void performContinuousDataCollection();
    void performTriggeredDataCollection();
    void performFixedDataCollection();
-   int doSplitDataCollections(int nDaqOverall, int repeatCount);
+   int doSplitDataCollections(int nDaqOverall, int repeatCount,
+                              bool triggering = false, int ttlInput = GigEDetector::INVALID_TTLINPUT);
    int doLowPriorityBiasDataCollections(int nDaqOverall);
    void setDataAcquisitionTime(int nDaq);
    void performSingleBiasRefresh();
@@ -117,6 +118,7 @@ public slots:
    void handleAbortDAQ();
    void receiveState(GigEDetector::DetectorState detectorState);
    void handleTriggeringSelectionChanged(int triggering);
+   void handleTtlInputSelectionChanged(int ttlInput);
    void handleCollectReducedImages();
    void handleCollectFixedImages();
    void handleExecuteOffsets();
