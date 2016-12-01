@@ -36,8 +36,8 @@ unsigned int gInterpolationThreshold = 0;
 double gInducedNoiseThreshold = 0.0;
 double gGlobalThreshold     = -1.0;			// old default was no global threshold ie: -1.0;
 string gThresholdFileName;
-string gOutputFileNameDecodedFrame = "pixelHisto.hxt";
-string gOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
+string gOutputFileNameDecodedFrame = "pixelHisto.hx3";
+//string gOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
 string gGradientsFile;
 string gInterceptsFile;
 bool gEnableInCorrector = false;
@@ -446,17 +446,6 @@ bool parseArgs(int argc, char** argv) {
 			continue;
 		}
 		
-		// Output subpixel histogram file name
-		if ((arg == "--outputsubpixelfile") || (arg == "-osf")) {
-			if (iarg == argc) {
-				cerr << "Missing value for option: " << arg << endl;
-				argsOK = false;
-				continue;
-			}
-			gOutputFileNameSubPixelFrame = string(argv[iarg++]);
-			continue;
-		}
-
 		// Enable diagnostic CSV file output
 		if (( arg == "--csvfiles") || (arg == "-c")) {
 			gWriteCsvFiles = true;
@@ -535,7 +524,6 @@ void printUsage(string aAppName) {
 		 << "   --noidcor|-ni                    Disable incomplete data corrector" << endl
 		 << "   --ipcor|-ip <threshold>          Enable and set interpolate corrector threshold level" << endl
 	     << "   --outputpixelfile|-opf <name>    Output pixel file name (defaults to " << gOutputFileNameDecodedFrame << ")" << endl
-		 << "   --outputsubpixelfile|-osf <name> Output subpixel file name (defaults to " << gOutputFileNameSubPixelFrame << ", if enabled)" << endl
 	     << "   --csvfiles|-c                    Enable output of diagnostic histogram CSV files" << endl
 		 << "   --vector|-v                      Enable vector indexing (boosts ID, CSD and IN performance)" << endl
 	     << endl

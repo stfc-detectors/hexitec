@@ -355,7 +355,7 @@ void HxtRawDataProcessor::applyPixelThresholds(HxtPixelThreshold* apThreshold)
 bool HxtRawDataProcessor::parseFile(string aFileName) {
 
 //    cout << "::parseFile(string)\n";
-    //mDebug = true;  /// DEBUGGING
+    mDebug = true;  /// DEBUGGING
     // Start file timer
     mFileTimer->start();
 
@@ -382,6 +382,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
     unsigned int lastFrameIdx    = 1 - currentFrameIdx;
 
     LOG(gLogConfig, logDEBUG2) << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
+    qDebug() << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
 
     // Track pixel number (across frames)
     u64 index=0;
@@ -412,6 +413,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
                 framesDetected++;
 
             if (mDebug) LOG(gLogConfig, logDEBUG3) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
+            qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
             //if (mDebug) LOG(gLogConfig, logNOTICE) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
 
             //if (mRowIdx >0) break; /// DEBUGGING
@@ -428,6 +430,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
                     mDecodedFrame[currentFrameIdx]->setPixel(mRowIdx, colIdx, (double)(*mRawData));
                     mEventsAboveThreshold++;
                 }
+ //               .
                 eventsDetected++;
                 mEventsDetected++;
 
@@ -564,7 +567,7 @@ bool HxtRawDataProcessor::parseBuffer(unsigned short *aBufferName, unsigned long
             framesDetected++;
 
         if (mDebug) LOG(gLogConfig, logDEBUG3) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
-        //if (mDebug) LOG(gLogConfig, logNOTICE) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
+        qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
 
         //if (mRowIdx >0) break; /// DEBUGGING
 
@@ -1040,8 +1043,11 @@ bool HxtRawDataProcessor::copyPixelOutput(unsigned short* aHxtBuffer) {
 
     /// Calculate pointers for Binary Bins, Binary Contents
     char* pCharBufferAddress = (char*)(aHxtBuffer);
-    void* pBinsAddress       = (pCharBufferAddress + hxtBufferHeaderSize);
-    void* pContentsAddress   = (pCharBufferAddress + hxtBufferHeaderSize  + sizeBins);
+    void* pBinsAddress       = (pCharBufferAddress + hxtBufferHeaderSize);                // Old implementation
+    void* pContentsAddress   = (pCharBufferAddress + hxtBufferHeaderSize  + sizeBins);    // Old implementation
+//    HxtBuffer* tmpBufferPtr  = (HxtBuffer*)(aHxtBuffer);                       // Re-cast argument pointer
+//    void* pBinsAddress       = (char*)(tmpBufferPtr->allData);
+//    void* pContentsAddress   = (pBinsAddress + sizeBins);
 
     memcpy((void*)aHxtBuffer, &mHxtBuffer, hxtBufferHeaderSize);  /// Copying 184 Bytes in one go
 

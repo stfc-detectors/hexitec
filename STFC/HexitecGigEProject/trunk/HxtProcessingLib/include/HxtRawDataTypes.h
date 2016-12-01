@@ -91,7 +91,8 @@ typedef struct {
     u32 nCols;
     u32 nBins;
 //
-    double allData[6401000];
+    double allData[6401000];    // Hardcoded to 1000 bins, regardless of requirements
+//    double *allData;
 /* This is calculated from the maximum possible bins, rows and columns as follows:
 * max bins = 1000, max rows = 80, max cols = 80 therefore:
 * max channel data = 1000

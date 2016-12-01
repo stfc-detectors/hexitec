@@ -1,3 +1,4 @@
+
 /*
  * Histogram - a histogram class, creates and manages a simple
  * histogram between start and end (lower and upper) limits with

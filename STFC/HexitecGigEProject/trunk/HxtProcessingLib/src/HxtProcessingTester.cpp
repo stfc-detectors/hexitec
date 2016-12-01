@@ -29,8 +29,7 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mGlobalThreshold     = -1.0;
 
     // Make these user changeable
-    mOutputFileNameDecodedFrame = "pixelHisto.hxt";
-    //mOutputFileNameSubPixelFrame = "pixelSubResolutionHisto.hxt";
+    mOutputFileNameDecodedFrame = "pixelHisto.hx3";
 
     mEnableInCorrector = false;
     mEnableCabCorrector = false;
@@ -362,6 +361,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
     for (int i=0; i < numHxtBuffers; i++)
     {
         HxtBuffer* hxtBuffer = new HxtBuffer;
+        //hxtBuffer.allData = (double*) malloc (hxtBuffer->nBins * sizeof(double)); // Borrowed from slice.cpp
         mHxtBuffers.push_back(hxtBuffer);
     }
 
@@ -381,7 +381,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
         if (mEnableIpCorrector) dataProcessor->InterpolateDeadPixels(mInterpolationThreshold);
 
         // Write output files - use the hexitech buffer structure instead:
-        dataProcessor->writeHxtBufferToFile( string("_New_") + mOutputFileNameDecodedFrame);   cout << endl << "\t New Implementation.. Write just 0's???\n";
+        dataProcessor->writeHxtBufferToFile( string("_New_") + mOutputFileNameDecodedFrame);  // cout << endl << "\t New Implementation.. Write just 0's???\n";
         //dataProcessor->writeStructOutput( string("_Old_") + mOutputFileNameDecodedFrame);  cout << endl << "\t Old Implementation.. Write pxl values\n";
 
         // Write CSV diagnostic histograms if selected
@@ -436,7 +436,7 @@ void HxtProcessing::printUsage(string aAppName) {
          << "   --noidcor|-ni                    Disable incomplete data corrector" << endl
          << "   --ipcor|-ip <threshold>          Enable and set interpolate corrector threshold level" << endl
          << "   --outputpixelfile|-opf <name>    Output pixel file name (defaults to " << mOutputFileNameDecodedFrame << ")" << endl
-//         << "   --outputsubpixelfile|-osf <name> Output subpixel file name (defaults to " << mOutputFileNameSubPixelFrame << ", if enabled)" << endl
+
          << "   --csvfiles|-c                    Enable output of diagnostic histogram CSV files" << endl
          << "   --vector|-v                      Enable vector indexing (boosts ID, CSD and IN performance)" << endl
          << endl
