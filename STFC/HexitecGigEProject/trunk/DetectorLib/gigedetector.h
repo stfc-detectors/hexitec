@@ -33,7 +33,7 @@ public:
    enum Mode {CONTINUOUS, GIGE_DEFAULT, RECONFIGURE, INVALID_MODE};
 /**********************************************************/
    enum Triggering {NO_TRIGGERING, STANDARD_TRIGGERING, SYNCHRONISED_TRIGGERING, INVALID_TRIGGERING};
-   enum TtlInput{NONE, INPUT2, INPUT3, INVALID_TTLINPUT};
+   enum TtlInput{INPUT2, INPUT3, INVALID_TTLINPUT};
    enum DetectorState {IDLE, READY, INITIALISING, INITIALISED, WAITING_DARK, OFFSETS, OFFSETS_PREP, COLLECTING_PREP, COLLECTING, WAITING_TRIGGER, TRIGGERING_STOPPED};
    enum DetectorCommand {INITIALISE, CONFIGURE, COLLECT, COLLECT_OFFSETS, TRIGGER, ABORT, CLOSE, KILL, STATE, RESTART};
    GigEDetector(string aspectFilename);
@@ -76,6 +76,7 @@ public:
    void setHV(double voltage);
    void setSaveRaw(bool saveRaw);
    void setTriggeringMode(int triggeringMode);
+   void setTtlInput(int ttlInput);
    void collectImage();
    void acquireImages(bool startOfImage = true);
    int getLoggingInterval();
@@ -105,16 +106,17 @@ signals:
    void imageAcquired(QPixmap data);
    void imageStarted(char *path, int frameSize);
    void imageComplete(unsigned long long framesAcquired);
-   void executeAcquireImages(bool imageRestart = false);
+   void executeAcquireImages(bool startOfImage = true);
    void prepareForOffsets();
    void prepareForDataCollection();
    void enableMonitoring();
    void triggeringAvailableChanged(bool triggeringAvailable);
+   void cancelDataCollection();
 
 public slots:
    void handleShowImage();
    void handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2 = 1);
-   void handleExecuteGetImages();
+   void handleExecuteGetImages(bool startOfImage = true);
    void handleStop();
    void handleReducedDataCollection();
    void handleExecuteOffsets();
@@ -139,7 +141,7 @@ private:
    QString errorMessage;
    bool triggeringAvailable;
    Triggering triggeringMode;
-   TtlInput ttlInputMode;
+   TtlInput ttlInput;
 
    WindowsEvent *bufferReadyEvent;
 //   WindowsEvent *returnBufferReadyEvent;
@@ -201,8 +203,8 @@ private:
    void showError(const LPSTR context, long asError);
    LONG collectOffsetValues();
    void setGetImageParams();
-   int configure();
-   int configureDetector();
+   int configure(bool triggeringSuspended);
+   int configureDetector(bool triggeringSuspended = false);
 };
 
 #endif // GIGEDETECTOR_H

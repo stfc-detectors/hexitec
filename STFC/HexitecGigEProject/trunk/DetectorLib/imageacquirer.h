@@ -18,7 +18,7 @@ private:
 signals:
 
 public slots:
-   void handleExecuteAcquireImages(bool imageRestart = false);
+   void handleExecuteAcquireImages(bool startOfImage = true);
 };
 
 #endif // IMAGEACQUIRER_H

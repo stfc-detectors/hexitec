@@ -20,7 +20,7 @@ void ImageAcquirer::setDetector(GigEDetector *detector)
    connect(this->detector, SIGNAL(executeAcquireImages(bool)), this, SLOT(handleExecuteAcquireImages(bool)));
 }
 
-void ImageAcquirer::handleExecuteAcquireImages(bool imageRestart)
+void ImageAcquirer::handleExecuteAcquireImages(bool startOfImage)
 {
-   detector->acquireImages(imageRestart);
+   detector->acquireImages(startOfImage);
 }

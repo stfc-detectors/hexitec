@@ -33,6 +33,7 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
    bufferReady = transferBuffer;
    validFrames = frameCount;
    remainingFrames -=validFrames;
+//   qDebug() <<"bufferCallBack, remainingFrames = " << remainingFrames;
    WindowsEvent *bufferReadyEvent = DetectorFactory::instance()->getBufferReadyEvent();
    WindowsEvent *showImageEvent = DetectorFactory::instance()->getShowImageEvent();
 
@@ -159,6 +160,12 @@ void GigEDetector::setTargetTemperature(double targetTemperature)
 void GigEDetector::setTriggeringMode(int triggeringMode)
 {
    this->triggeringMode = (Triggering)triggeringMode;
+}
+
+void GigEDetector::setTtlInput(int ttlInput)
+{
+   this->ttlInput = (TtlInput)ttlInput;
+
 }
 
 void GigEDetector::handleSetTargetTemperature(double targetTemperature)
@@ -294,7 +301,7 @@ int GigEDetector::initialise(Triggering triggering)
    return status;
 }
 
-int GigEDetector::configure()
+int GigEDetector::configure(bool triggeringSuspended)
 {
    LONG status = -1;
 
@@ -310,19 +317,29 @@ int GigEDetector::configure()
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
 
-   status = configureDetector();
+   status = configureDetector(triggeringSuspended);
 
    updateState(READY);
 
    return status;
 }
 
-int GigEDetector::configureDetector()
+int GigEDetector::configureDetector(bool triggeringSuspended)
 {
    LONG status = -1;
    ULONG timeOut = 1000;
+   Triggering triggerConfigMode;
 
-   switch (triggeringMode)
+   if (triggeringSuspended)
+   {
+      triggerConfigMode = Triggering::NO_TRIGGERING;
+   }
+   else
+   {
+      triggerConfigMode = triggeringMode;
+   }
+   qDebug() << "triggerConfigMode" << triggerConfigMode;
+   switch (triggerConfigMode)
    {
       case Triggering::NO_TRIGGERING:
          qDebug() << "CONFIGURE: No Triggering";
@@ -380,16 +397,19 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
 {
     int status = -1;
     double v3_3, hvMon, hvOut, v1_2, v1_8, v3, v2_5, v3_31n, v1_651n, v1_8ana, v3_8ana, peltierCurrent, ntcTemperature;
-    UCHAR t1 = 100, t2 = 200, t3 = 300;
+    UCHAR t1, t2, t3;
+//    qDebug() << QTime::currentTime().toString() <<"getDetectorValues() called, timeout = " << timeout;
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
     showError("ReadEnvironmentValues", status);
+//    qDebug() << QTime::currentTime().toString() <<"ReadEnvironmentValues DONE!";
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
 
     status = GetTriggerState(detectorHandle, &t1, &t2, &t3, timeout);
     showError("GetTriggerState", status);
-//    qDebug() <<"TRIGGER STATES: " << t1 << t2 << t3 << "valid:" << status;
+//    qDebug() << QTime::currentTime().toString() <<"TRIGGER STATES: " << t1 << t2 << t3 << "valid:" << status;
+//    qDebug() << QTime::currentTime().toString() <<"getDetectorValues() DONE!";
 
     *hvCurrent = hvOut;
 /*
@@ -441,7 +461,7 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    }
    if (command == CONFIGURE)
    {
-      if ((status = configure()) == 0)
+      if ((status = configure(ival1)) == 0)
       {
          emit writeMessage("Detector configured Ok");
       }
@@ -581,11 +601,11 @@ void GigEDetector::restartImages(bool startOfImage)
    {
      setGetImageParams();
    }
-   handleExecuteGetImages();
+   handleExecuteGetImages(startOfImage);
 //   emit executeAcquireImages(startOfImage);
 }
 
-void GigEDetector::handleExecuteGetImages()
+void GigEDetector::handleExecuteGetImages(bool startOfImage)
 {
    if ((triggeringMode == STANDARD_TRIGGERING) || (triggeringMode == SYNCHRONISED_TRIGGERING))
    {
@@ -596,7 +616,7 @@ void GigEDetector::handleExecuteGetImages()
    {
       updateState(COLLECTING);
    }
-   emit executeAcquireImages();
+   emit executeAcquireImages(startOfImage);
 }
 
 void GigEDetector::handleExecuteOffsets()
@@ -657,23 +677,45 @@ void GigEDetector::acquireImages(bool startOfImage)
       frameTimeout = 100;
    }
 
-   if (triggeringMode == NONE)
+   if (triggeringMode == NO_TRIGGERING)
    {
       status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
       showError("AcquireFrames", status);
-      totalFramesAcquired += framesAcquired;
+      qDebug() << "AcquireFrames, frameCount = " << frameCount;
+//SHOULD THIS BE ADDED???
+      if (mode == CONTINUOUS)
+      {
+         qDebug() << "IN SHOULD THIS BE ADDED??? section!!!";
+         //emit imageComplete(framesAcquired);
+      }
    }
    else
    {
       qDebug() <<"Set triggered frame count HERE!";
 //      status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
-//      showError("SetTriggeredFrameCount", status);
-      qDebug() <<"Collect triggered image HERE!";
-      Sleep(frameCount * frameTime);
-//      status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout * 100);
-//      showError("AcquireFrames", status);
-      qDebug() <<"Collect triggered image over!";
+      status = SetTriggeredFrameCount(detectorHandle, 1500, frameTimeout);
+      showError("SetTriggeredFrameCount", status);
+      qDebug() << QTime::currentTime().toString() <<"Collect triggered image HERE!";
+      try
+      {
+//         status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout * 100);
+         status = AcquireFrames(detectorHandle, 1500, &framesAcquired, frameTimeout * 100);
+         showError("AcquireFrames Triggered", status);
+      }
+      catch (DetectorException &ex)
+      {
+         QString message = "Triggered collection terminated: " + ex.getMessage();
+         qDebug() << QTime::currentTime().toString() << "Triggered collection aborted - NO TRIGGER";
+         emit writeError(message);
+         remainingFrames = 0;
+         emit cancelDataCollection();
+      }
+
+      qDebug() << QTime::currentTime().toString() << "Collect triggered image over!: mode, remainingFrames " << mode << remainingFrames;
    }
+
+   totalFramesAcquired += framesAcquired;
+
    if (mode == CONTINUOUS && remainingFrames == 0)
    {
       emit imageComplete(totalFramesAcquired);
