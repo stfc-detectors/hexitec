@@ -39,7 +39,6 @@ HEADERS += windowsevent.h \
     detectorexception.h
 
 LIBS += GigE.lib Kernel32.lib
-LIBS += GigE.lib Kernel32.lib
 INCLUDEPATH += ../DetectorLib
 
 unix:!symbian {

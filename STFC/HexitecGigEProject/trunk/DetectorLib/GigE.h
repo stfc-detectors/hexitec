@@ -665,7 +665,9 @@ typedef HexitecOperationMode	**HexitecOperationModeHdl;
 ///		[out]	Returns the number of the acquired frames.
 /// </param>
 /// <param name="frameTimeOut">
-///		[in]	Frame time out (ms). Should be set to 2.5 times the frametime, but at least to 25ms.
+///		[in]	Frame time out (ms) to acquire the first frame. Should be set to 2.5 times the frame
+///		time if not triggered or to the expected time of incoming trigger time if triggered. But at
+///		least to 25ms.
 /// </param>
 /// 
 /// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
@@ -784,7 +786,8 @@ EXTERN_C	GIGE_API	LONG	CollectOffsetValues(
 /// <remarks>
 /// Configures the detector by applying the Hexitec sensor / state machine configuration, the
 /// operation mode / data path configuration and the system parameters. If the resolution is
-/// changed the acquisition pipeline has to be recreated by calling CreatePipeline().
+/// changed the acquisition pipeline has to be recreated by calling CreatePipeline(). The frame time
+/// out for the acquisition is set to 2.5 times of the frame time (at least 25ms).
 /// </remarks>
 ///
 /// <param name="deviceHdl">
@@ -837,7 +840,8 @@ EXTERN_C	GIGE_API	LONG	ConfigureDetector(
 /// <remarks>
 /// Configures the detector by applying the Hexitec sensor / state machine configuration, the
 /// operation mode / data path configuration and the system parameters. If the resolution is
-/// changed the acquisition pipeline has to be recreated by calling CreatePipeline(). The optional
+/// changed the acquisition pipeline has to be recreated by calling CreatePipeline(). The frame time
+/// out for the acquisition is set to 2.5 times of the frame time (at least 25ms). The optional
 /// trigger functionality (available since FW version 2) is set up additionally in comparison to
 /// ConfigureDetector().
 /// 
@@ -877,21 +881,17 @@ EXTERN_C	GIGE_API	LONG	ConfigureDetector(
 ///		[in]	Enables the triggered synchronous state machine start. The detector state machine is
 ///		started	and kept running with an applied high level on trigger input 1. With this
 ///		functionality a	synchronous start of multiple detectors can be achieved.
-///		 <value>
 ///		property | value
 ///		---------|--------
 ///		default	 | AS_CONTROL_DISABLED
-///		</value>
 /// </param>
 /// <param name="enTriggerMode">
 ///		[in]	Enables the triggered data acquisition mode. The detector delivers n frames
 ///		(SetTriggeredFrameCount()) after a trigger event on trigger input 2 or frames as long as an
 ///		high level is applied on trigger input 3.
-///		 <value>
 ///		property | value
 ///		---------|--------
 ///		default	 | AS_CONTROL_DISABLED
-///		</value>
 /// </param>
 ///
 /// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
@@ -1590,6 +1590,30 @@ EXTERN_C	GIGE_API	LONG	SetFrameFormatControl(
 	ULONGLONG						offsetY,
 	CONST LPSTR						sensorTaps,
 	CONST LPSTR						testPattern );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>	Sets the frame time out for the acquisition. </summary>
+///
+/// <remarks>
+///		Sets the frame time out for the second and the following frames within an acquisition. It
+///		should be set to 2.5 times of the frame time. If this is less than 25ms this function set
+///		time out to 25ms. In this case no error or warning will be returned. This function is
+///		optional as the time out is set during ConfigureDetector() or ConfigureDetectorWithTrigger()
+///		based on the frame time set up and only needed in special cases.
+/// </remarks>
+/// 
+/// <param name="deviceHdl">
+///		[in]	Handle to a valid GigE device instance.
+///	</param>
+/// <param name="frameTimeOut">
+///		[in]	Communication time out (ms).
+///	</param>
+///
+/// <returns>	Returns 0 on success or an aSpect error code on failure. </returns>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+EXTERN_C	GIGE_API	LONG	SetFrameTimeOut(
+	HANDLE							deviceHdl,
+	ULONG							frameTimeOut );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>	Set the number of frames acquired after a trigger event. </summary>

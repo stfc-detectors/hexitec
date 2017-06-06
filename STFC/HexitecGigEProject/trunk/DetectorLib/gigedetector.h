@@ -40,7 +40,7 @@ public:
    int initialiseConnection(p_bufferCallBack bufferCallBack);
    void setDataDirectory(string *directory);
    void setDataPrefix(string *prefix);
-   void setDataAcquisitionDuration(double *imageAcquisitionDuration);
+   ULONGLONG setDataAcquisitionDuration(double *imageAcquisitionDuration);
    string getDataDirectory();
    void collectOffsets();
    void setHV(double *voltage);
@@ -71,12 +71,13 @@ public:
    void setTimestampOn(bool timestampOn);
    void setDirectory(QString directory);
    void setPrefix(QString prefix);
-   void setDataAcquisitionDuration(double imageAcquisitionDuration);
+   ULONGLONG setDataAcquisitionDuration(double imageAcquisitionDuration);
    void setTargetTemperature(double targetTemperature);
    void setHV(double voltage);
    void setSaveRaw(bool saveRaw);
    void setTriggeringMode(int triggeringMode);
    void setTtlInput(int ttlInput);
+   int getTtlInput();
    void collectImage();
    void acquireImages(bool startOfImage = true);
    int getLoggingInterval();
@@ -128,6 +129,7 @@ public slots:
    void handleAppendTimestamp(bool appendTimestamp);
    void handleSaveRawChanged(bool saveRaw);
 //   void handleTriggeringSelectionChanged(int triggering);
+   void handleSetTriggerTimeout(double triggerTimeout);
 
 private:
    QThread *gigEDetectorThread;
@@ -142,6 +144,9 @@ private:
    bool triggeringAvailable;
    Triggering triggeringMode;
    TtlInput ttlInput;
+   double triggerTimeout;
+   Triggering triggerConfigMode;
+
 
    WindowsEvent *bufferReadyEvent;
 //   WindowsEvent *returnBufferReadyEvent;
