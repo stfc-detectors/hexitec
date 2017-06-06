@@ -45,7 +45,7 @@ private:
    void configureDataCollection();
    void configureBasicCollection();
    void setDirectory(int repeatCount);
-   void performContinuousDataCollection();
+   void performContinuousDataCollection(bool triggering = false);
    void performTriggeredDataCollection();
    void performFixedDataCollection();
    int doSplitDataCollections(int nDaqOverall, int repeatCount,

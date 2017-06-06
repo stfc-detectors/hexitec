@@ -316,7 +316,9 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
    int currImg = status.getCurrentImage();
    int daqImgs = status.getDaqImages();
 
+   qDebug() << QTime::currentTime().toString() << "DAQ::StatusChanged 1111";
    ui->state->setText(status.getMessage());
+
    switch (status.getMajorStatus())
    {
    case DataAcquisitionStatus::IDLE:
@@ -350,12 +352,12 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          }
          break;
       case DataAcquisitionStatus::READY:
-//         qDebug() << "status changed to INITIALISING:READY ";
+         qDebug() << QTime::currentTime().toString() << "status changed to INITIALISING:READY ";
 //         operatedForScripting = false;
 //         guiReady();
          if (!operatedForScripting)
          {
-            //qDebug() << "status changed to INITIALISING:READY ";
+            qDebug() << QTime::currentTime().toString() << "status changed to INITIALISING:READY ";
             guiReady();
          }
          break;

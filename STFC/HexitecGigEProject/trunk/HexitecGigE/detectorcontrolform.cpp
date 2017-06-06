@@ -19,6 +19,8 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    ui->loggingEnabled->setVisible(false);
    ui->triggeringSelection->setEnabled(false);
    ui->ttlInputSelection->setEnabled(false);
+   ui->triggerTimeout->setEnabled(false);
+   ui->triggerTimeoutButton->setEnabled(false);
 
    mainWindow = new QMainWindow();
    mainWindow->setCentralWidget(this);
@@ -92,11 +94,15 @@ void DetectorControlForm::handleTriggeringAvailable(bool triggeringAvailable)
    {
       ui->triggeringSelection->setEnabled(true);
       ui->ttlInputSelection->setEnabled(true);
+      ui->triggerTimeout->setEnabled(true);
+      ui->triggerTimeoutButton->setEnabled(true);
    }
    else
    {
       ui->triggeringSelection->setEnabled(false);
       ui->ttlInputSelection->setEnabled(false);
+      ui->triggerTimeout->setEnabled(false);
+      ui->triggerTimeoutButton->setEnabled(false);
    }
 }
 
@@ -111,6 +117,7 @@ void DetectorControlForm::connectSignals()
    connect(ui->setFingerTemperatureButton, SIGNAL(pressed()), this, SLOT(handleSetFingerTemperature()));
    connect(ui->triggeringSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(handleTriggeringSelectionChanged(int)));
    connect(ui->ttlInputSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(handleTtlInputSelectionChanged(int)));
+   connect(ui->triggerTimeoutButton, SIGNAL(pressed()), this, SLOT(handleSetTriggerTimeout()));
 }
 
 void DetectorControlForm::handleCollectImagesPressed()
@@ -168,6 +175,7 @@ void DetectorControlForm::initialiseDetectorPressed()
 
       /* Need to properly get status back from detector class when commnad
     * executed via signal/slot. Set GUI correctly. */
+      ui->biasVoltageButton->setChecked(false);
       ui->initialiseConnection->setEnabled(false);
       ui->terminateConnection->setEnabled(true);
    }
@@ -335,6 +343,14 @@ void DetectorControlForm::handleTtlInputSelectionChanged(int ttlInput)
    emit ttlInputSelectionChanged(ttlInput);
 }
 
+
+void DetectorControlForm::handleSetTriggerTimeout()
+{
+   double triggerTimeout = ui->triggerTimeout->value();
+   qDebug() << "DetectorControlForm::handleSetTriggerTimeout() triggerTimeout = " << triggerTimeout;
+   emit setTriggerTimeout(triggerTimeout);
+}
+
 void DetectorControlForm::handleScriptReserve(QString name)
 {
    if (name == hvName)
@@ -359,6 +375,7 @@ void DetectorControlForm::guiBiasRefreshing()
    if (!hvReservedByScripting)
    {
       ui->biasVoltageButton->setEnabled(false); // Don't allow bias to be turned off during bias refresh
+      ui->terminateConnection->setEnabled(false); // Don't allow termination during bias refresh
    }
 }
 
@@ -368,6 +385,7 @@ void DetectorControlForm::handleBiasRefreshed(QString time)
    if (!hvReservedByScripting)
    {
       ui->biasVoltageButton->setEnabled(true); // Allow bias to be turned on/off again
+      ui->terminateConnection->setEnabled(true); // Allow termination again
    }
 }
 

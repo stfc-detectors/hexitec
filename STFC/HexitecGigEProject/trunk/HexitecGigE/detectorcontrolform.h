@@ -63,6 +63,7 @@ public slots:
     void handleBiasVoltageChanged(bool biasOn);
     void handleTriggeringSelectionChanged(int triggering);
     void handleTtlInputSelectionChanged(int ttlInput);
+    void handleSetTriggerTimeout();
     void handleHVOn();
     void handleHVOff();
     void handleScriptReserve(QString name);
@@ -90,6 +91,7 @@ signals:
    void disableBiasRefresh();
    void triggeringSelectionChanged(int triggering);
    void ttlInputSelectionChanged(int ttlInput);
+   void setTriggerTimeout(double);
    void writeError(QString message);
    void writeMessage(QString message);
    void enableHVActions();

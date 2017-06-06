@@ -196,6 +196,8 @@ void DataAcquisitionModel::connectDetectorControlForm()
            dataAcquisition, SLOT(handleTriggeringSelectionChanged(int)));
    connect(detectorControlForm, SIGNAL(ttlInputSelectionChanged(int)),
            dataAcquisition, SLOT(handleTtlInputSelectionChanged(int)));
+   connect(detectorControlForm, SIGNAL(setTriggerTimeout(double)),
+           gigEDetector, SLOT(handleSetTriggerTimeout(double)));
 }
 
 void DataAcquisitionModel::connectDataAcquisitionModel()
