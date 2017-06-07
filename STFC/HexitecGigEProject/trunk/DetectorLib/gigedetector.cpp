@@ -33,7 +33,7 @@ static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
    bufferReady = transferBuffer;
    validFrames = frameCount;
    remainingFrames -=validFrames;
-   qDebug() <<"bufferCallBack, remainingFrames = " << remainingFrames;
+
    WindowsEvent *bufferReadyEvent = DetectorFactory::instance()->getBufferReadyEvent();
    WindowsEvent *showImageEvent = DetectorFactory::instance()->getShowImageEvent();
 
@@ -122,7 +122,6 @@ void GigEDetector::connectUp(const QObject *parent)
 
 void GigEDetector::handleBufferReady()
 {
-   qDebug() << "GigEDetector::handleBufferReady()";
    updateState(COLLECTING);
    emit executeBufferReady(bufferReady, validFrames);
 }
@@ -613,13 +612,8 @@ void GigEDetector::restartImages(bool startOfImage)
 
 void GigEDetector::handleExecuteGetImages(bool startOfImage)
 {
-//   qDebug() << "triggeringMode = " << triggeringMode;
-//   qDebug() << "triggerConfigMode = " << triggerConfigMode;
-
-//   if ((triggeringMode == STANDARD_TRIGGERING) || (triggeringMode == SYNCHRONISED_TRIGGERING))
    if ((triggerConfigMode == STANDARD_TRIGGERING) || (triggerConfigMode == SYNCHRONISED_TRIGGERING))
    {
-      qDebug() << "updateState(WAITING_TRIGGER) 111";
       updateState(WAITING_TRIGGER);
    }
    else
@@ -628,23 +622,7 @@ void GigEDetector::handleExecuteGetImages(bool startOfImage)
    }
    emit executeAcquireImages(startOfImage);
 }
-/*
-void GigEDetector::handleExecuteGetImages(bool startOfImage)
-{
-   qDebug() << "triggeringMode = " << triggeringMode;
-   if (startOfImage)
-//      if (startOfImage && ((triggeringMode == STANDARD_TRIGGERING) || (triggeringMode == SYNCHRONISED_TRIGGERING)))
-   {
-      qDebug() << "updateState(WAITING_TRIGGER) 111";
-      updateState(WAITING_TRIGGER);
-   }
-   else
-   {
-      updateState(COLLECTING);
-   }
-   emit executeAcquireImages(startOfImage);
-}
-*/
+
 void GigEDetector::handleExecuteOffsets()
 {
    if (offsetsOn)
@@ -714,7 +692,7 @@ void GigEDetector::acquireImages(bool startOfImage)
 ///SHOULD THIS BE ADDED???
       if (mode == CONTINUOUS)
       {
-         qDebug() << "IN SHOULD THIS BE ADDED??? section!!!";
+//         qDebug() << "IN SHOULD THIS BE ADDED??? section!!!";
          //emit imageComplete(framesAcquired);
       }
    }
@@ -722,20 +700,11 @@ void GigEDetector::acquireImages(bool startOfImage)
    {
       status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
       showError("SetTriggeredFrameCount", status);
-      qDebug() << QTime::currentTime().toString()
-               << "Collect triggered image: SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout), frameTimeout = "
-               << frameTimeout << " triggerTimeout " << triggerTimeout;
       try
       {
-//         qDebug() << QTime::currentTime().toString()
-//                  << "Collect triggered image: SetFrameTimeOut(detectorHandle, frameTimeout), frameTimeout = "
-//                  << frameTimeout;
          status = SetFrameTimeOut(detectorHandle, frameTimeout);
          status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, triggerTimeout);
          showError("AcquireFrames Triggered", status);
-//         qDebug() << QTime::currentTime().toString()
-//                  << "Collect triggered image: AcquireFrames(detectorHandle, frameCount, &framesAcquired, triggerTimeout), triggerTimeout = "
-//                  << triggerTimeout;
       }
       catch (DetectorException &ex)
       {
@@ -745,8 +714,6 @@ void GigEDetector::acquireImages(bool startOfImage)
          remainingFrames = 0;
          emit cancelDataCollection();
       }
-//PUT in on 05/06!!!!!
-//      remainingFrames = 0;
       qDebug() << QTime::currentTime().toString() << "Collect triggered image over!: mode, remainingFrames " << mode << remainingFrames;
    }
 
@@ -754,11 +721,9 @@ void GigEDetector::acquireImages(bool startOfImage)
 
    if (mode == CONTINUOUS && remainingFrames == 0)
    {
-      qDebug() <<QTime::currentTime().toString() << "!!!!!!!emit imageComplete(totalFramesAcquired);";
       emit imageComplete(totalFramesAcquired);
    }
    updateState(READY);
-   qDebug() <<QTime::currentTime().toString() << "GigEDetector::acquireImages(bool startOfImage)COMPLETE";
 }
 
 int GigEDetector::getLoggingInterval()
