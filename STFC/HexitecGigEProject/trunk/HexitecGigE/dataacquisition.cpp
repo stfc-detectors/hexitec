@@ -103,12 +103,10 @@ void DataAcquisition::configureDataCollection()
       if (biasOn && biasPriority)
       {
          splitDataCollections = ceil(((double) dataAcquisitionDefinition->getDuration()) / ((double )hv->getBiasRefreshInterval()));
-         qDebug() << "DataAcquisition::configureDataCollection() bias on splitDataCollections = " << splitDataCollections;
       }
       else
       {
          splitDataCollections = 1;
-         qDebug() << "DataAcquisition::configureDataCollection() splitDataCollections = " << splitDataCollections;
       }
 
       if ((nRepeat = dataAcquisitionDefinition->getRepeatCount()) > 1)
@@ -284,7 +282,6 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
 
       if (biasPriority)
       {
-         qDebug() << "Standard DAQ";
          nDaqOverall = doSplitDataCollections(nDaqOverall, repeatCount, triggering);
       }
       else
@@ -367,7 +364,6 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
       }
       if (suspendTriggering)
       {
-         qDebug() << "suspendTriggering: CONFIGURE DETECTOR HERE!!!";
          configuring = true;
          emit executeCommand(GigEDetector::CONFIGURE, 1, 0);
          waitForConfiguringDone();
@@ -376,9 +372,8 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
       }
    }
 
-   if (configureRequired)
+   if (configureRequired && (!abortRequired()))
    {
-      qDebug() << "configureRequired: CONFIGURE DETECTOR HERE!!!";
       configuring = true;
       emit executeCommand(GigEDetector::CONFIGURE, 0, 0);
       waitForConfiguringDone();
@@ -422,7 +417,6 @@ int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
          performMonitorEnvironmentalValues();
          biasRefreshing = true;  // NEWLY ADDED
          emit executeSingleBiasRefresh();
-         qDebug() << QTime::currentTime().toString() << "emitted the refresh signal";
          waitForBiasRefreshDone();
       }
       startOfImage = false;
@@ -519,13 +513,10 @@ void DataAcquisition::performSingleBiasRefresh()
 {
    if (biasOn)
    {
-      qDebug() << "biasOn!!!";
       changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
       biasRefreshing = true;
       emit executeSingleBiasRefresh();
-//      qDebug() << QTime::currentTime().toString() << "emitted the refresh signal";
       waitForBiasRefreshDone();
-//      qDebug() << QTime::currentTime().toString() << "bias refresh done.";
       emit disableBiasRefresh();
    }
 }
@@ -569,12 +560,10 @@ int DataAcquisition::waitForBiasRefreshDone()
    int status = 0;
 
    changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::BIAS_REFRESHING);
-//   qDebug() << QTime::currentTime().toString() << "waitForBiasRefreshDone(), biasRefreshing: " << biasRefreshing;
    while (biasRefreshing)
    {
       sleep(0.1);
    }
-//   qDebug() << QTime::currentTime().toString() << "waiting complete!!!, biasRefreshing: " << biasRefreshing;
 
    return status;
 }
@@ -594,7 +583,6 @@ int DataAcquisition::waitForConfiguringDone()
 {
    int status = 0;
 
-   qDebug() << "DataAcquisition::waitForConfiguringDone()";
    while (configuring)
       sleep(0.1);
 
@@ -608,7 +596,6 @@ int DataAcquisition::waitForCollectingDone()
    int percentage = 0;
    unsigned long long remainingFrames;
 
-   qDebug() << QTime::currentTime().toString() <<" collecting: totalImageFrames" << totalImageFrames ;
    while (collecting)
    {
       sleep(1);
@@ -625,13 +612,10 @@ int DataAcquisition::waitForCollectingDone()
          {
             remainingFrames = gigEDetector->getRemainingFrames();
             percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
-
-            qDebug() << " totalImageFrames: " << totalImageFrames << " remainingFrames: " << remainingFrames;
          }
          remainingFrames = gigEDetector->getRemainingFrames();
          percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
 
-         qDebug() << " totalImageFrames: " << totalImageFrames << " remainingFrames: " << remainingFrames;
          if (percentage > 100)
          {
             percentage = 100;
@@ -651,7 +635,6 @@ int DataAcquisition::waitForCollectingDone()
    else
    {
       percentage = 100;
-      qDebug() << QTime::currentTime().toString() << "DataAcquisition::waitForCollectingDone(): DAQ finished";
    }
 
    return status;
@@ -712,7 +695,6 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
                          DataAcquisitionStatus::NOT_INITIALIZED);
       break;
    case GigEDetector::READY:
-        qDebug() << QTime::currentTime().toString() <<" READY STATE ";
       if (daqStatus.getMajorStatus() == DataAcquisitionStatus::INITIALISING)
       {
          daqStatus.setMajorStatus(DataAcquisitionStatus::IDLE);
@@ -775,7 +757,6 @@ void DataAcquisition::handleTriggeringSelectionChanged(int triggeringMode)
    else
    {
       qDebug() << "handleTriggeringSelectionChanged all objects reserved, configuring triggering";
-      qDebug() <<"handleTriggeringSelectionChanged(int triggering):" << triggeringMode;
       configureTriggering(triggeringMode);
 //      try
 //      {

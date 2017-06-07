@@ -64,7 +64,7 @@ public:
    static DataAcquisitionModel *getInstance();
    ~DataAcquisitionModel();
    DataAcquisitionDefinition *getDataAcquisitionDefinition();
-   Q_INVOKABLE void configure(QString directory, QString prefix, bool timestampOn, bool offsets, double duration, int repeatCount, int repeatInterval);
+   Q_INVOKABLE void configure(QString directory, QString prefix, bool timestampOn, bool offsets, double duration, int repeatCount, int repeatInterval, bool triggering, int ttlInput);
    Q_INVOKABLE void setDirectory(QString directory);
    Q_INVOKABLE void setPrefix(QString prefix);
    Q_INVOKABLE void setTimestampOn(bool timestampOn);

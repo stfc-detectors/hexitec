@@ -316,7 +316,6 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
    int currImg = status.getCurrentImage();
    int daqImgs = status.getDaqImages();
 
-   qDebug() << QTime::currentTime().toString() << "DAQ::StatusChanged 1111";
    ui->state->setText(status.getMessage());
 
    switch (status.getMajorStatus())
@@ -352,12 +351,10 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          }
          break;
       case DataAcquisitionStatus::READY:
-         qDebug() << QTime::currentTime().toString() << "status changed to INITIALISING:READY ";
 //         operatedForScripting = false;
 //         guiReady();
          if (!operatedForScripting)
          {
-            qDebug() << QTime::currentTime().toString() << "status changed to INITIALISING:READY ";
             guiReady();
          }
          break;
@@ -427,6 +424,18 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
       }
       break;
    }
+}
+
+void DataAcquisitionForm::handleTriggeringSelectionChanged(int triggering)
+{
+   dataAcquisitionDefinition.setTriggering(triggering);
+   emit dataAcquisitionDefinitionChanged(dataAcquisitionDefinition);
+}
+
+void DataAcquisitionForm::handleTtlInputSelectionChanged(int ttlInput)
+{
+   dataAcquisitionDefinition.setTtlInput(ttlInput);
+   emit dataAcquisitionDefinitionChanged(dataAcquisitionDefinition);
 }
 
 void DataAcquisitionForm::guiInitialising()

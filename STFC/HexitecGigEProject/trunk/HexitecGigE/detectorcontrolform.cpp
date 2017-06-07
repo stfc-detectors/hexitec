@@ -330,16 +330,12 @@ void DetectorControlForm::handleBiasVoltageChanged(bool biasOn)
 
 void DetectorControlForm::handleTriggeringSelectionChanged(int triggering)
 {
-   qDebug() <<"DetectorControlForm::handleTriggeringSelectionChanged";
    emit disableMonitoring();
    emit triggeringSelectionChanged(triggering);
-//   terminateDetector();
-//   initialiseDetectorPressed();
 }
 
 void DetectorControlForm::handleTtlInputSelectionChanged(int ttlInput)
 {
-   qDebug() <<"handleTtlInputSelectionChanged(int ttlInput):" << ttlInput;
    emit ttlInputSelectionChanged(ttlInput);
 }
 
@@ -347,7 +343,7 @@ void DetectorControlForm::handleTtlInputSelectionChanged(int ttlInput)
 void DetectorControlForm::handleSetTriggerTimeout()
 {
    double triggerTimeout = ui->triggerTimeout->value();
-   qDebug() << "DetectorControlForm::handleSetTriggerTimeout() triggerTimeout = " << triggerTimeout;
+
    emit setTriggerTimeout(triggerTimeout);
 }
 

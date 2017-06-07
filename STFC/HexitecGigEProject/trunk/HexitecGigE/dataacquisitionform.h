@@ -72,6 +72,8 @@ public slots:
    void handleBiasRefreshed(QString time);
    void handleCollectingChanged(bool collectingOn);
    void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
+   void handleTriggeringSelectionChanged(int triggering);
+   void handleTtlInputSelectionChanged(int ttlInput);
 private slots:
 //   void modeChanged(int mode);
    void handleCollectImagesPressed();

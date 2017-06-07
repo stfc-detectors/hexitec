@@ -124,7 +124,6 @@ void DataAcquisitionDefinition::setLogging(bool logging)
 
 void DataAcquisitionDefinition::setTriggering(bool triggering)
 {
-   qDebug() << "DataAcquisitionDefinition::setTriggering called with: " << triggering;
    this->triggering = triggering;
 }
 

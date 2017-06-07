@@ -183,7 +183,7 @@ void DataAcquisitionModel::connectDetectorControlForm()
    connect(detectorControlForm, SIGNAL(biasVoltageChanged(bool)),
            this, SLOT(handleBiasVoltageChanged(bool)));
    connect(detectorControlForm, SIGNAL(triggeringSelectionChanged(int)),
-           this, SLOT(handleTriggeringChanged(int)));
+           dataAcquisition, SLOT(handleTriggeringSelectionChanged(int)));
    connect(detectorControlForm, SIGNAL(disableMonitoring()),
            detectorMonitor, SLOT(disableMonitoring()));
    connect(detectorControlForm, SIGNAL(disableBiasRefresh()),
@@ -193,9 +193,9 @@ void DataAcquisitionModel::connectDetectorControlForm()
    connect(detectorControlForm, SIGNAL(initialiseDetector()),
            dataAcquisition, SLOT(handleInitialiseDetector()));
    connect(detectorControlForm, SIGNAL(triggeringSelectionChanged(int)),
-           dataAcquisition, SLOT(handleTriggeringSelectionChanged(int)));
+           dataAcquisitionForm, SLOT(handleTriggeringSelectionChanged(int)));
    connect(detectorControlForm, SIGNAL(ttlInputSelectionChanged(int)),
-           dataAcquisition, SLOT(handleTtlInputSelectionChanged(int)));
+           dataAcquisitionForm, SLOT(handleTtlInputSelectionChanged(int)));
    connect(detectorControlForm, SIGNAL(setTriggerTimeout(double)),
            gigEDetector, SLOT(handleSetTriggerTimeout(double)));
 }
@@ -280,7 +280,9 @@ DataAcquisitionDefinition *DataAcquisitionModel::getDataAcquisitionDefinition()
    return &dataAcquisitionDefinition;
 }
 
-void DataAcquisitionModel::configure(QString directory, QString prefix, bool timestampOn, bool offsets, double duration, int repeatCount, int repeatInterval)
+void DataAcquisitionModel::configure(QString directory, QString prefix, bool timestampOn, bool offsets,
+                                     double duration, int repeatCount, int repeatInterval,
+                                     bool triggering, int ttlInput)
 {
    DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
    dataFilename->setDirectory(directory);
@@ -290,6 +292,8 @@ void DataAcquisitionModel::configure(QString directory, QString prefix, bool tim
    dataAcquisitionDefinition.setRepeatCount(repeatCount);
    dataAcquisitionDefinition.setRepeatInterval(repeatInterval * 1000);
    dataAcquisitionDefinition.setOffsets(offsets);
+   dataAcquisitionDefinition.setTriggering(triggering);
+   dataAcquisitionDefinition.setTtlInput(ttlInput);
 
    emit dataChanged(dataAcquisitionDefinition);
 }
@@ -387,8 +391,6 @@ void DataAcquisitionModel::handleDataAcquisitionDefinitionChanged(DataAcquisitio
    this->dataAcquisitionDefinition.setRepeatInterval(dataAcquisitionDefinition.getRepeatInterval());
    this->dataAcquisitionDefinition.setTriggering(dataAcquisitionDefinition.isTriggering());
    this->dataAcquisitionDefinition.setTtlInput(dataAcquisitionDefinition.getTtlInput());
-   qDebug() << "DataAcquisitionModel::handleDataAcquisitionDefinitionChanged, triggering: " << dataAcquisitionDefinition.isTriggering();
-   qDebug() << "DataAcquisitionModel::handleDataAcquisitionDefinitionChanged, ttlInput: " << dataAcquisitionDefinition.getTtlInput();
 
    changeDaqDuration();
 }
@@ -406,7 +408,6 @@ void DataAcquisitionModel::handleBiasVoltageChanged(bool biasOn)
 
 void DataAcquisitionModel::handleTriggeringChanged(int triggering)
 {
-   qDebug() << "DataAcquisitionModel::handleTriggeringChanged, triggering: " << triggering;
    if (triggering != 0)
    {
       this->dataAcquisitionDefinition.setTriggering(true);
@@ -415,4 +416,5 @@ void DataAcquisitionModel::handleTriggeringChanged(int triggering)
    {
       this->dataAcquisitionDefinition.setTriggering(false);
    }
+   emit dataChanged(dataAcquisitionDefinition);
 }
