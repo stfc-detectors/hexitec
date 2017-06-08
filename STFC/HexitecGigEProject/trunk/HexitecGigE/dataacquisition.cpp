@@ -604,7 +604,8 @@ int DataAcquisition::waitForCollectingDone()
       if (true)
       {
          elapsed++;
-         if (biasPriority)
+         if (daqStatus.getMinorStatus() == DataAcquisitionStatus::OFFSETS)
+//         if (biasPriority)
          {
             percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
          }
@@ -612,18 +613,22 @@ int DataAcquisition::waitForCollectingDone()
          {
             remainingFrames = gigEDetector->getRemainingFrames();
             percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
+            if (percentage > 0)
+            {
+               changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::COLLECTING);
+            }
          }
-         remainingFrames = gigEDetector->getRemainingFrames();
-         percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
+//         remainingFrames = gigEDetector->getRemainingFrames();
+//         percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
 
          if (percentage > 100)
          {
             percentage = 100;
          }
-         if (percentage > 0)
-         {
-            changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::COLLECTING);
-         }
+//         if (percentage > 0)
+//         {
+//            changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::COLLECTING);
+//         }
          daqStatus.setPercentage(percentage);
          emit dataAcquisitionStatusChanged(daqStatus);
       }
