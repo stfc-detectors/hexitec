@@ -166,7 +166,6 @@ void GigEDetector::setTriggeringMode(int triggeringMode)
 void GigEDetector::setTtlInput(int ttlInput)
 {
    this->ttlInput = (TtlInput)ttlInput;
-
 }
 
 int GigEDetector::getTtlInput()
