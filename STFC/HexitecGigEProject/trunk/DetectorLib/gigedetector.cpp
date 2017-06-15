@@ -18,6 +18,7 @@ static PUCHAR bufferReady;
 static PUCHAR returnBuffer;
 static ULONG validFrames;
 static ULONGLONG remainingFrames;
+static double invalidTemperatureValue = -50.0;
 
 HexitecOperationMode operationMode = {AS_CONTROL_DISABLED, AS_CONTROL_DISABLED,
                                       AS_CONTROL_DISABLED, AS_CONTROL_ENABLED,
@@ -79,7 +80,7 @@ void GigEDetector::constructorInit(const QObject *parent)
    appendTimestamp = false;
    saveRaw = true;
    triggeringAvailable = false;
-
+   triggerTimeout = 60000.0;
    readIniFile(this->aspectFilename);
 
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
@@ -416,6 +417,12 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
     status = GetTriggerState(detectorHandle, &t1, &t2, &t3, timeout);
     showError("GetTriggerState", status);
 
+    if (*t < invalidTemperatureValue)
+    {
+       status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
+       showError("ReadEnvironmentValues", status);
+    }
+
     *hvCurrent = hvOut;
 /*
     *rh = 20.0;
@@ -527,7 +534,7 @@ void GigEDetector::getImages(int count, int ndaq)
    {
      setGetImageParams();
    }
-
+qDebug() << "GigEDetector::getImages(). ndaq: " << ndaq << " offsetsOn: " << offsetsOn;
    if (ndaq == 0 && offsetsOn)
    {
       updateState(OFFSETS_PREP);
