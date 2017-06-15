@@ -88,10 +88,12 @@ void DataAcquisition::configureDataCollection()
       gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
       if (dataAcquisitionDefinition->getOffsets())
       {
+         qDebug() << "dataAcquisitionDefinition->getOffsets = TRUE";
          gigEDetector->enableDarks();
       }
       else
       {
+         qDebug() << "dataAcquisitionDefinition->getOffsets = FALSE";
          gigEDetector->disableDarks();
       }
 
@@ -885,11 +887,16 @@ void DataAcquisition::handleBiasRefreshing()
    biasRefreshing = true;
 }
 
-void DataAcquisition::handleBiasRefreshed(QString time)
+void DataAcquisition::handleBiasRefreshed(QString time, bool restartMonitoring)
 {
    changeDAQStatus(daqStatus.getMajorStatus(),
                    storedMinorStatus);
    biasRefreshing = false;
+   if (restartMonitoring)
+   {
+      qDebug() << "DataAcquisition::handleBiasRefreshed enable monitoring";
+      emit enableMonitoring();
+   }
 }
 
 void DataAcquisition::handleMonitored()

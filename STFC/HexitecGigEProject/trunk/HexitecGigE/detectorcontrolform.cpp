@@ -30,6 +30,7 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    targetTemperature = 20.0;
    targetTemperatureMin = 18.0;
    targetTemperatureMax = 35.0;
+   triggerTimeout = 60.0;
 
    readIniFile();
    ui->setFingerTemperature->setMinimum(targetTemperatureMin);
@@ -38,6 +39,7 @@ DetectorControlForm::DetectorControlForm(QWidget *parent) :
    firstMonitor = true;
 
    connectSignals();
+   ui->triggerTimeout->setValue(triggerTimeout);
    guiReady();
 }
 
@@ -48,6 +50,7 @@ void DetectorControlForm::readIniFile()
    double targetTemperature;
    double targetTemperatureMin;
    double targetTemperatureMax;
+   double triggerTimeout;
 
    if (settings.contains("hexitecGigEIniFilename"))
    {
@@ -66,6 +69,10 @@ void DetectorControlForm::readIniFile()
    if ((targetTemperatureMax = detectorIniFile->getDouble("Environmental/Target_Temperature_Max")) != QVariant(INVALID))
    {
       this->targetTemperatureMax = targetTemperatureMax;
+   }
+   if ((triggerTimeout = detectorIniFile->getDouble("Environmental/Trigger_Timeout")) != QVariant(INVALID))
+   {
+      this->triggerTimeout = triggerTimeout;
    }
 
    return;
@@ -375,7 +382,7 @@ void DetectorControlForm::guiBiasRefreshing()
    }
 }
 
-void DetectorControlForm::handleBiasRefreshed(QString time)
+void DetectorControlForm::handleBiasRefreshed(QString time, bool restartMonitoring)
 {
    ui->biasLastRefreshed->setText(time);
    if (!hvReservedByScripting)
@@ -417,6 +424,15 @@ void DetectorControlForm::guiReady()
    ui->setFingerTemperatureButton->setEnabled(true);
    ui->triggeringSelection->setEnabled(true);
    ui->ttlInputSelection->setEnabled(true);
+
+   if (ui->triggeringSelection->currentIndex() == 0)
+   {
+      ui->collectImages->setEnabled(true);
+   }
+   else
+   {
+      ui->collectImages->setEnabled(false);
+   }
 
    if (!hvReservedByScripting && tAboveTdp)
    {

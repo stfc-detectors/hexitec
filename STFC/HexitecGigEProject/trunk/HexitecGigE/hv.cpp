@@ -34,20 +34,27 @@ HV::HV(QObject *parent) :
 void HV::initialise(QString detectorFilename)
 {
    QString vbPriority;
-    detectorIniFile = new IniFile(detectorFilename);
+   detectorIniFile = new IniFile(detectorFilename);
 
-    vbPriority = detectorIniFile->getString("Bias_Voltage/Bias_Voltage_Priority").toUpper();
-    if (vbPriority == "HIGH")
-    {
-       qDebug() << "Setting bias priority TRUE";
-       biasPriority = true;
-    }
-    else if (vbPriority == "LOW")
-    {
-       qDebug() << "Setting bias priority FALSE";
-       biasPriority = false;
-    }
-    vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
+   if ((vbPriority = detectorIniFile->getString("Bias_Voltage/Bias_Voltage_Priority").toUpper()) != QVariant(INVALID))
+   {
+      if (vbPriority == "HIGH")
+      {
+         qDebug() << "Setting bias priority from ini file TRUE";
+         biasPriority = true;
+      }
+      else if (vbPriority == "LOW")
+      {
+         qDebug() << "Setting bias priority from ini file FALSE";
+         biasPriority = false;
+      }
+   }
+   else
+   {
+      qDebug() << "Setting bias priority (NOT IN INI FILE) TRUE";
+      biasPriority = true;
+   }
+   vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
     vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
     vbrTime = detectorIniFile->getInt("Bias_Voltage/Time_Refresh_Voltage_Held");
     vbSettleTime = detectorIniFile->getInt("Bias_Voltage/Bias_Voltage_Settle_Time");
@@ -214,6 +221,12 @@ void HV::executeBiasRefresh()
       waitForReady();
       qDebug() << "readyForRefresh = " << readyForRefresh;
    }
+   else
+   {
+      emit prepareForBiasRefresh();
+      waitForReady();
+   }
+   restartMonitoring = true;
    biasRefresh();
 }
 
@@ -268,7 +281,8 @@ void HV::endOfSettle()
 {
     emit stopBiasSettleTimerSignal();
     biasRefreshState = false;
-    emit biasRefreshed(QTime::currentTime().toString());
+    emit biasRefreshed(QTime::currentTime().toString(), restartMonitoring);
+    restartMonitoring = false;
 }
 
 void HV::startExecuteBiasRefreshTimer(double interval)

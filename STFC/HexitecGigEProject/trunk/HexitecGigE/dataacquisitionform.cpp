@@ -193,6 +193,7 @@ void DataAcquisitionForm::handleDataAcquisitionDefinition()
    dataAcquisitionDefinition.setRepeatInterval(ui->repeatInterval->value() * 1000.0);
    dataAcquisitionDefinition.setRepeatCount(ui->repeatCount->value());
    enableRepeats();
+   qDebug() << "emit dataAcquisitionDefinitionChanged: offsets = " << dataAcquisitionDefinition.getOffsets();
    emit dataAcquisitionDefinitionChanged(dataAcquisitionDefinition);
 }
 
@@ -297,7 +298,7 @@ void DataAcquisitionForm::guiBiasRefreshing()
    ui->collectImages->setEnabled(false); // Disable data collection during bias refresh
 }
 
-void DataAcquisitionForm::handleBiasRefreshed(QString time)
+void DataAcquisitionForm::handleBiasRefreshed(QString time, bool restartMonitoring)
 {
    ui->biasLastRefreshed->setText(time);
 }

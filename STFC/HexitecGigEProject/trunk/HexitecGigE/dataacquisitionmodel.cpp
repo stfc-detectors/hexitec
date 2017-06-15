@@ -245,9 +245,9 @@ void DataAcquisitionModel::connectHV()
    connect(hv, SIGNAL(biasRefreshing()), detectorMonitor, SLOT(handleBiasRefreshing()));
    connect(hv, SIGNAL(biasRefreshing()), dataAcquisition, SLOT(handleBiasRefreshing()));
 
-   connect(hv, SIGNAL(biasRefreshed(QString)), dataAcquisitionForm, SLOT(handleBiasRefreshed(QString)));
-   connect(hv, SIGNAL(biasRefreshed(QString)), detectorControlForm, SLOT(handleBiasRefreshed(QString)));
-   connect(hv, SIGNAL(biasRefreshed(QString)), dataAcquisition, SLOT(handleBiasRefreshed(QString)));
+   connect(hv, SIGNAL(biasRefreshed(QString, bool)), dataAcquisitionForm, SLOT(handleBiasRefreshed(QString, bool)));
+   connect(hv, SIGNAL(biasRefreshed(QString, bool)), detectorControlForm, SLOT(handleBiasRefreshed(QString, bool)));
+   connect(hv, SIGNAL(biasRefreshed(QString, bool)), dataAcquisition, SLOT(handleBiasRefreshed(QString, bool)));
 
    connect(hv, SIGNAL(biasState(bool)), dataAcquisition, SLOT(handleBiasState(bool)));
    connect(hv, SIGNAL(biasVoltageChanged(bool)), this, SLOT(handleBiasVoltageChanged(bool)));

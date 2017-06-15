@@ -38,6 +38,7 @@ private:
     bool readyForRefresh;
     bool biasRefreshState;
     bool biasPriority; //(LOW = false, HIGH = true)
+    bool restartMonitoring;
     double hV;
     double vb;
     double vr;
@@ -69,11 +70,12 @@ signals:
     void startBiasSettleTimerSignal();
     void stopBiasSettleTimerSignal();
     void biasRefreshing();
-    void biasRefreshed(QString);
+    void biasRefreshed(QString, bool);
     void biasState(bool);
     void biasVoltageChanged(bool);
     void vbOutOfRange();
     void prepareForBiasRefresh();
+    void suspendMonitoring();
 
 private slots:
     void handleExecuteCommand(HV::VoltageSourceCommand command);

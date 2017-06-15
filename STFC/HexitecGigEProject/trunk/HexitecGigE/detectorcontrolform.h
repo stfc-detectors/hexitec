@@ -37,6 +37,7 @@ private:
    double targetTemperature;
    double targetTemperatureMin;
    double targetTemperatureMax;
+   double triggerTimeout;
    void readIniFile();
    void connectSignals();
    void terminateDetector();
@@ -57,7 +58,7 @@ public slots:
     void handleTemperatureBelowDP();
     void handleTemperatureAboveDP();
     void setPixmap(QPixmap pixmap);
-    void handleBiasRefreshed(QString time);
+    void handleBiasRefreshed(QString time, bool restartMonitoring);
     void handleCollectingChanged(bool collectingOn);
     void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
     void handleBiasVoltageChanged(bool biasOn);

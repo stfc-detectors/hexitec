@@ -126,7 +126,7 @@ public slots:
    void handleExecuteReducedDataCollection();
    void handleCancelReducedDataCollection();
    void handleBiasRefreshing();
-   void handleBiasRefreshed(QString time);
+   void handleBiasRefreshed(QString time, bool restartMonitoring);
    void handleMonitored();
    void handleBiasState(bool biasOn);
    void handleSetFingerTemperature(double temperature);

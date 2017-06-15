@@ -69,7 +69,7 @@ public slots:
 //   void handleModeChanged(GigEDetector::Mode mode);
    void handleDataChanged(DataAcquisitionDefinition dataAcquisitionDefinition);
 //   void handleDataChanged(QString mode);
-   void handleBiasRefreshed(QString time);
+   void handleBiasRefreshed(QString time, bool restartMonitoring);
    void handleCollectingChanged(bool collectingOn);
    void handleDataAcquisitionStatusChanged(DataAcquisitionStatus status);
    void handleTriggeringSelectionChanged(int triggering);
