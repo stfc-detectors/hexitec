@@ -13,7 +13,8 @@ public:
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
    double *getGradientValue();
    double *getInterceptValue();
-   uint16_t *re_orderFrame(uint16_t *frame);
+   uint16_t *re_orderFrame(uint16_t *frame,
+                           double *pixelEnergy = NULL);
    uint16_t *re_orderFrame(uint16_t *frame, uint16_t thresholdValue,
                            double *pixelEnergy = NULL);
    uint16_t *re_orderFrame(uint16_t *frame, uint16_t *thresholdPerPix,

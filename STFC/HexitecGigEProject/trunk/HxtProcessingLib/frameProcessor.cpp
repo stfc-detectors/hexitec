@@ -39,7 +39,7 @@ double *FrameProcessor::getData(const char *filename)
    inFile.open(filename);
 
    if (!inFile)
-     qDebug() << "error opening c_gradients.txt";
+     qDebug() << "error opening " << filename;
    while (inFile >> dataValue[i])
    {
        i++;
@@ -60,7 +60,7 @@ uint16_t *FrameProcessor::process(uint16_t *frame)
    const char* filename = "C://karen//STFC//Technical//PLTest//re_order.bin";
 
    qDebug() << "START PROCESSING 1" << endl;
-   result = pixelProcessor->re_orderFrame(frame);
+   result = pixelProcessor->re_orderFrame(frame, (double *)NULL);
    writeFile(result, filename);
 
    return result;
@@ -89,34 +89,7 @@ uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
 
    return result;
 }
-/*
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
-                                  double *gradientValue, double *interceptValue)
-{
-   uint16_t *result;
-   double *pixelEnergy;
-   const char* filename = "C://karen//STFC//Technical//PLTest//re_orderThreshPerPix.bin";
 
-   qDebug() << "START PROCESSING 4" << endl;
-   result = pixelProcessor->re_orderFrame(frame, thresholdValue, gradientValue, interceptValue, pixelEnergy);
-   writeFile(result, filename);
-
-   return result;
-}
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix,
-                                  double *gradientValue, double *interceptValue)
-{
-   uint16_t *result;
-   double *pixelEnergy;
-   const char* filename = "C://karen//STFC//Technical//PLTest//re_orderThreshPerPix.bin";
-
-   qDebug() << "START PROCESSING 4" << endl;
-   result = pixelProcessor->re_orderFrame(frame, thresholdPerPix, gradientValue, interceptValue, pixelEnergy);
-   writeFile(result, filename);
-
-   return result;
-}
-*/
 void FrameProcessor::writeFile(uint16_t *result, const char* filename)
 {
    std::ofstream outFile;
