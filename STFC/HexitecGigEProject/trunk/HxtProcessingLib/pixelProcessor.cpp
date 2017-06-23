@@ -114,7 +114,7 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t thresholdValue
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerPix,
+uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
                                         double *pixelEnergy)
 {
    uint16_t  *re_orderedFrame;
@@ -125,7 +125,7 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerP
    {
       for (int i = 0; i < frameSize; i++)
       {
-         if (frame[pixelMap[i]] - thresholdPerPix[i] < 0)
+         if (frame[pixelMap[i]] - thresholdPerPixel[i] < 0)
          {
             re_orderedFrame[i] = 0;
          }
@@ -139,7 +139,7 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerP
    {
       for (int i = 0; i < frameSize; i++)
       {
-         if (frame[pixelMap[i]] - thresholdPerPix[i] < 0)
+         if (frame[pixelMap[i]] - thresholdPerPixel[i] < 0)
          {
             re_orderedFrame[i] = 0;
             pixelEnergy[i] = interceptValue[i];

@@ -13,13 +13,21 @@ CONFIG += staticlib
 DEFINES += OS_WIN=1
 
 SOURCES += \
-    frameProcessor.cpp \
-    pixelProcessor.cpp
+    pixelProcessor.cpp \
+    imageitem.cpp \
+    bufferitem.cpp \
+    processingdefinition.cpp \
+    imageprocessor.cpp \
+    frameprocessor.cpp
 
 
 HEADERS += \
-    frameProcessor.h \
-    pixelProcessor.h
+    pixelProcessor.h \
+    imageitem.h \
+    bufferitem.h \
+    processingdefinition.h \
+    imageprocessor.h \
+    frameprocessor.h
 
 
 INCLUDEPATH += include

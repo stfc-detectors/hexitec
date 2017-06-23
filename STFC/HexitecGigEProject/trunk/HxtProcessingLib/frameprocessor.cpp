@@ -1,4 +1,4 @@
-#include "frameProcessor.h"
+#include "frameprocessor.h"
 #include <iostream>
 #include <fstream>
 #include <QDebug>
@@ -59,7 +59,7 @@ uint16_t *FrameProcessor::process(uint16_t *frame)
    uint16_t *result;
    const char* filename = "C://karen//STFC//Technical//PLTest//re_order.bin";
 
-   qDebug() << "START PROCESSING 1" << endl;
+//   qDebug() << "START PROCESSING 1" << endl;
    result = pixelProcessor->re_orderFrame(frame, (double *)NULL);
    writeFile(result, filename);
 
@@ -68,14 +68,16 @@ uint16_t *FrameProcessor::process(uint16_t *frame)
 
 uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue)
 {
+
    uint16_t *result;
    const char* filename = "C://karen//STFC//Technical//PLTest//re_orderThreshVal.bin";
 
-   qDebug() << "START PROCESSING 2" << endl;
+//   qDebug() << "START PROCESSING 2" << endl;
    result = pixelProcessor->re_orderFrame(frame, thresholdValue);
    writeFile(result, filename);
 
    return result;
+
 }
 
 uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
@@ -84,7 +86,7 @@ uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
    const char* filename = "C://karen//STFC//Technical//PLTest//re_orderThreshPerPix.bin";
 
    qDebug() << "START PROCESSING 3";
-   result = pixelProcessor->re_orderFrame(frame, thresholdPerPix, NULL);
+   result = pixelProcessor->re_orderFrame(frame, thresholdPerPix, (double *)NULL);
    writeFile(result, filename);
 
    return result;
@@ -94,7 +96,7 @@ void FrameProcessor::writeFile(uint16_t *result, const char* filename)
 {
    std::ofstream outFile;
 
-   qDebug() <<"Write re-ordered IMAGE: address = " << result << " contents " << *result << endl;
+//   qDebug() <<"Write re-ordered IMAGE: address = " << result << " contents " << *result << endl;
 
    outFile.open(filename, std::ofstream::binary);
    outFile.write((const char *)result, 6400 * sizeof(uint16_t));

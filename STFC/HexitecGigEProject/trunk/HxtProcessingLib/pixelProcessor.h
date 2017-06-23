@@ -17,7 +17,7 @@ public:
                            double *pixelEnergy = NULL);
    uint16_t *re_orderFrame(uint16_t *frame, uint16_t thresholdValue,
                            double *pixelEnergy = NULL);
-   uint16_t *re_orderFrame(uint16_t *frame, uint16_t *thresholdPerPix,
+   uint16_t *re_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
                            double *pixelEnergy = NULL);
 
 private:
