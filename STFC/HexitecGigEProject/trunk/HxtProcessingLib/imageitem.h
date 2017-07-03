@@ -2,6 +2,7 @@
 #define IMAGEITEM_H
 
 #include "bufferitem.h"
+#include <QMutex>
 #include <QQueue>
 
 class ImageItem
@@ -13,6 +14,7 @@ public:
    int getBufferQueueSize();
 
 private:
+   QMutex mutex;
    char *name;
    int frameSize;
    QQueue <BufferItem *>bufferQueue;

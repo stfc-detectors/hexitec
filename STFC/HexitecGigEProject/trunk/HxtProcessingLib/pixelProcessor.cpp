@@ -8,9 +8,18 @@
 #include <vector>
 #include <sys/stat.h>
 
+static uint16_t pixelMap[6400];
+static bool pixelMapInitialised = false;
+static uint16_t frameSize = 80 * 80;
+
+
 PixelProcessor::PixelProcessor()
 {
-   initialisePixelMap();
+   if (!pixelMapInitialised)
+   {
+      initialisePixelMap();
+      pixelMapInitialised = true;
+   }
    gradientValue = NULL;
    interceptValue = NULL;
 }
@@ -19,7 +28,6 @@ void PixelProcessor::initialisePixelMap()
 {
    int pmIndex = 0;
 
-   frameSize = 80 * 80;
    for (int row = 0; row < 80; row++)
    {
       for (int col = 0; col < 20; col++)
@@ -27,6 +35,7 @@ void PixelProcessor::initialisePixelMap()
          for (int pix = 0; pix < 80; pix+=20)
          {
             pixelMap[pmIndex] = pix + col +(row * 80);
+            qDebug() << "pixamp " << pmIndex << " = " << pixelMap[pmIndex];
             pmIndex++;
          }
       }
@@ -52,22 +61,28 @@ double *PixelProcessor::getInterceptValue()
 uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, double *pixelEnergy)
 {
    uint16_t  *re_orderedFrame;
+   uint16_t  *re_orderedFrameIndex;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrameIndex = re_orderedFrame;
 
    if (pixelEnergy == NULL)
    {
       for (int i = 0; i < frameSize; i++)
       {
-         re_orderedFrame[i] = frame[pixelMap[i]];
+         if (pixelMap[i] >= 6400 || pixelMap[i] < 0)
+         {
+            qDebug() << "pixelMap[i] has invalid value =" << pixelMap[i];
+         }
+         re_orderedFrame[pixelMap[i]] = frame[i];
       }
    }
    else
    {
       for (int i = 0; i < frameSize; i++)
       {
-         re_orderedFrame[i] = frame[pixelMap[i]];
-         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+         re_orderedFrame[pixelMap[i]] = frame[i];
+         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
       }
    }
 
@@ -86,11 +101,11 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t thresholdValue
       {
          if (frame[pixelMap[i]] - thresholdValue < 0)
          {
-            re_orderedFrame[i] =0;
+            re_orderedFrame[pixelMap[i]] =0;
          }
          else
          {
-            re_orderedFrame[i] = frame[pixelMap[i]];
+            re_orderedFrame[pixelMap[i]] = frame[i];
          }
       }
    }
@@ -100,13 +115,13 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t thresholdValue
       {
          if (frame[pixelMap[i]] - thresholdValue < 0)
          {
-            re_orderedFrame[i] = 0;
-            pixelEnergy[i] = interceptValue[i];
+            re_orderedFrame[pixelMap[i]] = 0;
+            pixelEnergy[pixelMap[i]] = interceptValue[i];
          }
          else
          {
-            re_orderedFrame[i] = frame[pixelMap[i]];
-            pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+            re_orderedFrame[pixelMap[i]] = frame[i];
+            pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
          }
       }
    }
@@ -125,13 +140,13 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerP
    {
       for (int i = 0; i < frameSize; i++)
       {
-         if (frame[pixelMap[i]] - thresholdPerPixel[i] < 0)
+         if (frame[i] - thresholdPerPixel[i] < 0)
          {
-            re_orderedFrame[i] = 0;
+            re_orderedFrame[pixelMap[i]] = 0;
          }
          else
          {
-            re_orderedFrame[i] = frame[pixelMap[i]];
+            re_orderedFrame[pixelMap[i]] = frame[i];
          }
       }
    }
@@ -139,15 +154,15 @@ uint16_t *PixelProcessor::re_orderFrame(uint16_t *frame, uint16_t *thresholdPerP
    {
       for (int i = 0; i < frameSize; i++)
       {
-         if (frame[pixelMap[i]] - thresholdPerPixel[i] < 0)
+         if (frame[i] - thresholdPerPixel[i] < 0)
          {
-            re_orderedFrame[i] = 0;
-            pixelEnergy[i] = interceptValue[i];
+            re_orderedFrame[pixelMap[i]] = 0;
+            pixelEnergy[pixelMap[i]] = interceptValue[i];
          }
          else
          {
-            re_orderedFrame[i] = frame[pixelMap[i]];
-            pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+            re_orderedFrame[pixelMap[i]] = frame[i];
+            pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
          }
       }
    }

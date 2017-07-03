@@ -9,6 +9,7 @@ ImageProcessor::ImageProcessor(const char*name, int frameSize, ProcessingDefinit
    imageProcessorThread = new QThread();
    imageProcessorThread->start();
    moveToThread(imageProcessorThread);
+   this->frameSize = frameSize;
    imageItem = new ImageItem(name, frameSize);
    this->processingDefinition = processingDefinition;
    setImageInProgress(true);
@@ -25,50 +26,61 @@ void ImageProcessor::handleProcess()
 {
    unsigned long validFrames = 0;
    FrameProcessor fp;
+   char *bufferStart;
    char *frameIterator;
    int thresholdValue;
    uint16_t *thresholdPerPixel;
 
    processedFrameCount = 0;
-   qDebug() << "ImageProcessor current thread = " << QThread::currentThreadId();
    switch (processingDefinition->getThreshholdMode())
    {
       case ThresholdMode::NONE:
          qDebug() << "ImageProcessor::process() ThresholdMode::NONE";
          while (inProgress || (imageItem->getBufferQueueSize() > 0))
          {
-            qDebug() << "ImageProcessor::process() BufferQueueSize() = " << imageItem->getBufferQueueSize();
-            while (inProgress &&((frameIterator = imageItem->getNextBuffer(&validFrames)) == NULL))
+            while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
             {
-               //qDebug() << "ImageProcessor::process() ThresholdMode::NONE 22222";
-               Sleep(0.1);
+               Sleep(10);
             }
-            qDebug() << "ImageProcessor::process() ThresholdMode::NONE 33333";
-            if (frameIterator != NULL)
+            while (imageItem->getBufferQueueSize() > 0)
             {
-               qDebug() << "*******************validFrames = " << validFrames;
-               for (unsigned long i = 0; i < validFrames; i++)
+               bufferStart = imageItem->getNextBuffer(&validFrames);
+               frameIterator = bufferStart;
+               if (frameIterator != NULL)
                {
-                  fp.process((uint16_t *)frameIterator);
-                  frameIterator+=frameSize;
-                  processedFrameCount++;
+                  for (unsigned long i = 0; i < validFrames; i++)
+                  {
+                     fp.process((uint16_t *)frameIterator);
+                     frameIterator += frameSize;
+                     processedFrameCount++;
+                  }
+//                  free(bufferStart);
                }
+
             }
          }
          break;
       case ThresholdMode::SINGLE_VALUE:
-         qDebug() << "ImageProcessor::process() ThresholdMode::SINGLE_VALUE";
          thresholdValue = processingDefinition->getThresholdValue();
+         qDebug() << "ImageProcessor::process() ThresholdMode::SINGLE_VALUE" << thresholdValue;
          while (inProgress || (imageItem->getBufferQueueSize() > 0))
          {
-            while ((frameIterator = imageItem->getNextBuffer(&validFrames)) != NULL)
+            while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
             {
-               qDebug() << "*******************validFrames = " << validFrames;
-               for (unsigned long i = 0; i < validFrames; i++)
+               Sleep(10);
+            }
+            while (imageItem->getBufferQueueSize() > 0)
+            {
+               frameIterator = imageItem->getNextBuffer(&validFrames);
+               if (frameIterator != NULL)
                {
-                  fp.process((uint16_t *)frameIterator, thresholdValue);
-                  frameIterator+=frameSize;
-                  processedFrameCount++;
+                  for (unsigned long i = 0; i < validFrames; i++)
+                  {
+                     fp.process((uint16_t *)frameIterator, thresholdValue);
+                     frameIterator += frameSize;
+                     processedFrameCount++;
+                  }
+//                  free(bufferStart);
                }
             }
          }
@@ -76,15 +88,25 @@ void ImageProcessor::handleProcess()
       case ThresholdMode::THRESHOLD_FILE:
          qDebug() << "ImageProcessor::process() ThresholdMode::THRESHOLD_FILE";
          thresholdPerPixel = processingDefinition->getThresholdPerPixel();
-         while (inProgress)
+         while (inProgress || (imageItem->getBufferQueueSize() > 0))
          {
-            while ((frameIterator = imageItem->getNextBuffer(&validFrames)) != NULL)
+            while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
             {
-               for (unsigned long i = 0; i < validFrames; i++)
+               Sleep(10);
+            }
+            while (imageItem->getBufferQueueSize() > 0)
+            {
+               frameIterator = imageItem->getNextBuffer(&validFrames);
+               if (frameIterator != NULL)
                {
-                  fp.process((uint16_t *)frameIterator, thresholdPerPixel);
-                  frameIterator+=frameSize;
-                  processedFrameCount++;
+                  for (unsigned long i = 0; i < validFrames; i++)
+                  {
+                     fp.process((uint16_t *)frameIterator, thresholdPerPixel);
+                     frameIterator += frameSize;
+                     processedFrameCount++;
+                  }
+//                  free(bufferStart);
+
                }
             }
          }
@@ -93,13 +115,15 @@ void ImageProcessor::handleProcess()
          break;
    }
    qDebug() << "ImageProcessor::process() processedFrameCount = " << processedFrameCount;
+   emit processingComplete(this, processedFrameCount);
+   this->disconnect(SIGNAL(process));
 
 }
 
-void ImageProcessor::handleEnqueueBuffer(char *bufferToProcess, unsigned long validFrames)
+void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFrames)
 {
-   qDebug() << "ImageProcessor::enqueue thread = " << QThread::currentThreadId();
    imageItem->enqueueBuffer(bufferToProcess, validFrames);
+   emit returnBufferReady(bufferToProcess);
 }
 
 void ImageProcessor::setImageInProgress(bool inProgress)
@@ -107,7 +131,7 @@ void ImageProcessor::setImageInProgress(bool inProgress)
    this->inProgress = inProgress;
 }
 
-void ImageProcessor::handleImageComplete(unsigned long long totalFramesToProcess)
+void ImageProcessor::imageComplete(unsigned long long totalFramesToProcess)
 {
    this->totalFramesToProcress = totalFramesToProcess;
    setImageInProgress(false);

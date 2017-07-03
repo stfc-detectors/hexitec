@@ -22,8 +22,8 @@ public:
 
 private:
    void initialisePixelMap();
-   uint16_t pixelMap[6400];
-   uint16_t frameSize;
+//   uint16_t pixelMap[6400];
+//   uint16_t frameSize;
    double *gradientValue;
    double *interceptValue;
 };

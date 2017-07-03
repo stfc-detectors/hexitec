@@ -1,4 +1,8 @@
 #include "bufferitem.h"
+#include <iostream>
+#include <QDebug>
+
+using namespace std;
 
 BufferItem::BufferItem(char *address, unsigned long validFrameCount)
 {

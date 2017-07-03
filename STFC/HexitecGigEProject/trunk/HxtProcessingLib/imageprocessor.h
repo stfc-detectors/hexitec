@@ -15,6 +15,8 @@ class ImageProcessor: public QObject
 public:
    ImageProcessor(const char *name, int frameSize, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
+   void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
+   void imageComplete(unsigned long long totalFramesAcquired);
 //   void enqueue(char *bufferToProcess, unsigned long validFrames);
    void setImageInProgress(bool inProgress);
 //   void imageComplete(unsigned long long totalFramesToProcess);
@@ -34,10 +36,12 @@ private:
 
 signals:
    void process();
+   void processingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount);
+   void returnBufferReady(char *transferBuffer);
 
 public slots:
-   void handleEnqueueBuffer(char *transferBuffer, unsigned long validFrames);
-   void handleImageComplete(unsigned long long totalFramesAcquired);
+//   void handleEnqueueBuffer(char *transferBuffer, unsigned long validFrames);
+//   void handleImageComplete(unsigned long long totalFramesAcquired);
    void handleProcess();
 };
 
