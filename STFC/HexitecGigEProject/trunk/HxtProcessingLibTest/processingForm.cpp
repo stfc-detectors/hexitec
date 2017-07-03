@@ -67,24 +67,27 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
    inFile.open(filename, ifstream::binary);
    emit imageStarted(imageFilename, 6400 * 2);
 
+   int bufferCount = 0;
+
    while (inFile)
    {
-      transferBuffer = (char *) calloc(6400 * 1000, sizeof(uint16_t));
+      transferBuffer = (char *) calloc(6400 * 500, sizeof(uint16_t));
 
-      inFile.read((char *)&transferBuffer[0], 6400 * 500 * 2);
+      inFile.read(transferBuffer, 6400 * 500 * 2);
       if (!inFile)
       {
          validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << "error: only " << validFrames << " valid frames could be read";
+         qDebug() << validFrames <<" valid frames could be read";
          emit transferBufferReady(transferBuffer, validFrames);
       }
       else
       {
          validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << "frame read OK " << validFrames << " valid frames read";
+         qDebug() << validFrames <<" valid frames could be read";
          emit transferBufferReady(transferBuffer, 500);
       }
       totalFramesAcquired += validFrames;
+      bufferCount++;
    }
    inFile.close();
    emit imageComplete(totalFramesAcquired);

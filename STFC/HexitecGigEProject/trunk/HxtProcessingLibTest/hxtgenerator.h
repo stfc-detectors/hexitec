@@ -4,6 +4,7 @@
 #include "imageprocessor.h"
 #include <QObject>
 #include <QQueue>
+#include <QMutex>
 #include <cstdint>
 
 class HxtGenerator : public QObject
@@ -14,6 +15,7 @@ public:
    void enqueueImage(const char *name, int frameSize, ProcessingDefinition *processingDefinition);
 
 private:
+   QMutex mutex;
    QQueue<ImageProcessor *>imageProcessorQueue;
    ImageProcessor *currentImageProcessor;
    ProcessingDefinition *processingDefinition;
@@ -21,8 +23,8 @@ private:
    int frameSize;
 
 signals:
-   void enqueueBuffer (char *bufferToProcess, unsigned long validFrames);
-   void imageComplete(unsigned long long totalFramesAcquired);
+//   void enqueueBuffer (char *bufferToProcess, unsigned long validFrames);
+//   void imageComplete(unsigned long long totalFramesAcquired);
 
 public slots:
    void handleImageStarted(const char *path, int frameSize);
@@ -34,6 +36,7 @@ public slots:
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
+   void handleProcessingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount);
 };
 
 #endif // HXTGENERATOR_H

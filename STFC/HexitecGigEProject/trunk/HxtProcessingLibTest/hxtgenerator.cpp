@@ -1,30 +1,37 @@
 #include "hxtgenerator.h"
+#include <QMutexLocker>
 #include <QDebug>
 #include <QThread>
 
 HxtGenerator::HxtGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
+//   QMutexLocker locker(&mutex);
+
    imageProcessorQueue.clear();
    currentImageProcessor = NULL;
    this->processingDefinition = processingDefinition;
    qDebug() << "MAIN thread = " << QThread::currentThreadId();
-
 }
 
 void HxtGenerator::enqueueImage(const char *name, int frameSize, ProcessingDefinition *processingDefinition)
 {
+   if (currentImageProcessor != NULL)
+   {
+//      disconnect(???);
+   }
    this->frameSize = frameSize;
    currentImageProcessor = new ImageProcessor(name, frameSize, processingDefinition);
+   connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, unsigned long long)),
+           this, SLOT(handleProcessingComplete(ImageProcessor *, unsigned long long)));
    imageProcessorQueue.enqueue(currentImageProcessor);
-   qDebug() << "IMAGE QUEUED";
-//   connect(this, SIGNAL(enqueueBuffer(char*,ulong)),
-//currentImageProcessor,SLOT(handleEnqueueBuffer(char*,ulong)));
-//   connect(this, SIGNAL(imageComplete(unsigned long long)),
-//           currentImageProcessor, SLOT(handleImageComplete(unsigned long long)));
+   qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor
+            << "image queue size = " << imageProcessorQueue.size();
 }
 
 void HxtGenerator::handleImageStarted(const char *path, int frameSize)
 {
+   QMutexLocker locker(&mutex);
+
    qDebug() << "HxtGenerator::handleImageStarted. path: "
             << path << " frameSize " << frameSize;
    enqueueImage(path, frameSize, processingDefinition);
@@ -32,20 +39,17 @@ void HxtGenerator::handleImageStarted(const char *path, int frameSize)
 
 void HxtGenerator::handleTransferBufferReady(char *transferBuffer, unsigned long validFrames)
 {
-   qDebug() << "HxtGenerator::handleTransferBufferReady. validFrames: " << validFrames;
-   bufferToProcess = (char *) malloc(frameSize);
-   memcpy(bufferToProcess, transferBuffer, frameSize);
-   currentImageProcessor->handleEnqueueBuffer(bufferToProcess, validFrames);
-//   emit enqueueBuffer (bufferToProcess, validFrames);
+   bufferToProcess = (char *) malloc(frameSize * validFrames);
+   memcpy(bufferToProcess, transferBuffer, frameSize * validFrames);
+   currentImageProcessor->enqueueBuffer(bufferToProcess, validFrames);
+// RETURN THE TRANSFER BUFFER FOR RE-USE!!!
 }
 
 void HxtGenerator::handleImageComplete(unsigned long long totalFramesAcquired)
 {
    qDebug() << "HxtGenerator::handleImageComplete. totalFramesAcquired: "
             << totalFramesAcquired << " buffer queue size: " << currentImageProcessor->imageItem->getBufferQueueSize();
-   currentImageProcessor->handleImageComplete(totalFramesAcquired);
-//   emit imageComplete(totalFramesAcquired);
-   disconnect(currentImageProcessor);
+   currentImageProcessor->imageComplete(totalFramesAcquired);
 }
 
 void HxtGenerator::handleConfigureProcessing(int threshholdMode, int thresholdValue, uint16_t *thresholdPerPixel,
@@ -60,4 +64,11 @@ void HxtGenerator::handleConfigureProcessing(int threshholdMode, int thresholdVa
    processingDefinition->setGradientFilename((char *)gradientFilename);
    processingDefinition->setInterceptFilename((char *)interceptFilename);
    processingDefinition->setProcessedFilename((char *)processedFilename);
+}
+
+void HxtGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount)
+{
+   qDebug() << "HxtGenerator::handleProcessingComplete";
+   completedImageProcessor->disconnect();
+//   imageProcessorQueue
 }
