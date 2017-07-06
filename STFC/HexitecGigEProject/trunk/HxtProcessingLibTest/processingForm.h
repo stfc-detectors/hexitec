@@ -32,12 +32,25 @@ private:
    void readThresholdFile(char *thresholdFile);
 
    int thresholdOption;
-   uint16_t thresholdPerPix[6400];
+   uint16_t thresholdPerPixel[6400];
+   bool energyCalibration;
 
 signals:
+   void configureProcessing(bool re_order,
+                            const char *gradientFilename,
+                            const char *interceptFilename,
+                            const char *processedFilename);
    void configureProcessing(int threshholdMode,
                             int thresholdValue,
                             uint16_t *thresholdPerPixel,
+                            const char *gradientFilename,
+                            const char *interceptFilename,
+                            const char *processedFilename);
+   void configureProcessing(bool energyCalibration,
+                            uint16_t binStart,
+                            uint16_t binEnd,
+                            uint16_t binWidth,
+                            bool totalSpectrum,
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
@@ -46,11 +59,16 @@ signals:
    void imageComplete(unsigned long long totalFramesAcquired);
 
 private slots:
-   void processClicked();
    void initialise();
+   void processClicked();
+   void setRe_orderOption(bool re_order);
    void setThresholdOptions(int thresholdOption);
    void setThresholdParameters();
    void setThresholdFile();
+   void setEnergyCalibration(bool energyCalibration);
+   void setEnergyCalibrationParameters();
+   void setStarSpinBoxLimit(int upperLimit);
+   void setEndSpinBoxLimit(int lowerLimit);
 };
 
 #endif // PROCESSINGFORM_H

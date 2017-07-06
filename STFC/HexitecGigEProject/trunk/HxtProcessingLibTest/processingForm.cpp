@@ -20,9 +20,14 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    ui->outputDirectory->setReadOnly(true);
 
    connect(ui->processButton, SIGNAL(clicked()), this, SLOT(processClicked()));
+   connect(ui->re_orderCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRe_orderOption(bool)));
    connect(ui->thresholdModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setThresholdOptions(int)));
    connect(ui->thresholdFileButton, SIGNAL(clicked(bool)), this, SLOT(setThresholdFile()));
    connect(ui->thresholdButton, SIGNAL(clicked()), this, SLOT(setThresholdParameters()));
+   connect(ui->energyCalibrationCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnergyCalibration(bool)));
+   connect(ui->energyCalibrationButton, SIGNAL(clicked()), this, SLOT(setEnergyCalibrationParameters()));
+   connect(ui->binStarSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEndSpinBoxLimit(int)));
+   connect(ui->binEndSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStarSpinBoxLimit(int)));
 }
 
 ProcessingForm::~ProcessingForm()
@@ -55,6 +60,18 @@ void ProcessingForm::processClicked()
 
    qDebug() << "PROCESS BUTTON has been clicked!";
    processImage(imageFilename, "C://karen//STFC//Technical//DSoFt_Images//Size10.bin");
+}
+
+void ProcessingForm::setRe_orderOption(bool re_order)
+{
+   char *gradientFilename;
+   char *interceptFilename;
+   char *processedFilename;
+
+   emit configureProcessing(re_order,
+                            gradientFilename,
+                            interceptFilename,
+                            processedFilename);
 }
 
 void ProcessingForm::processImage(const char *imageFilename, const char *filename)
@@ -159,6 +176,56 @@ void ProcessingForm::setThresholdFile()
    ui->thresholdFile->setText(source);
 }
 
+void ProcessingForm::setEnergyCalibration(bool energyCalibration)
+{
+   this->energyCalibration = energyCalibration;
+   if (this->energyCalibration)
+   {
+      ui->binStarSpinBox->setEnabled(true);
+      ui->binEndSpinBox->setEnabled(true);
+      ui->binWidthSpinBox->setEnabled(true);
+   }
+   else
+   {
+      ui->binStarSpinBox->setEnabled(false);
+      ui->binEndSpinBox->setEnabled(false);
+      ui->binWidthSpinBox->setEnabled(false);
+   }
+}
+
+void ProcessingForm::setEnergyCalibrationParameters()
+{
+   int binStart;
+   int binEnd;
+   int binWidth;
+   bool totalSpectrum;
+   char *gradientFilename;
+   char *interceptFilename;
+   char *processedFilename;
+
+   binStart = ui->binEndSpinBox->value();
+   binEnd = ui->binEndSpinBox->value();
+   binWidth = ui->binWidthSpinBox->value();
+   totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
+
+   gradientFilename = (char *)"C://karen//STFC//Technical//PLTest//c_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//PLTest//m_intercepts.txt";
+   emit configureProcessing(energyCalibration, binStart, binEnd, binWidth, totalSpectrum,
+                            gradientFilename,
+                            interceptFilename,
+                            processedFilename);
+}
+
+void ProcessingForm::setStarSpinBoxLimit(int upperLimit)
+{
+   ui->binStarSpinBox->setMaximum(upperLimit);
+}
+
+void ProcessingForm::setEndSpinBoxLimit(int lowerLimit)
+{
+   ui->binStarSpinBox->setMinimum(lowerLimit);
+}
+
 void ProcessingForm::readThresholdFile(char *thresholdFile)
 {
    std::ifstream inFile;
@@ -166,7 +233,7 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
    inFile.open(thresholdFile, ifstream::binary);
    if (inFile.good())
    {
-      inFile.read((char *)&thresholdPerPix[0], 6400 * sizeof(uint16_t));
+      inFile.read((char *)&thresholdPerPixel[0], 6400 * sizeof(uint16_t));
       if (!inFile)
          qDebug() << "error: only " << inFile.gcount() << " could be read";
       else

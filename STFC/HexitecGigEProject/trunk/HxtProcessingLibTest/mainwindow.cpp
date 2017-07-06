@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "processingForm.h"
-#include "hxtgenerator.h"
+#include "processingbuffergenerator.h"
 #include <ostream>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
    ui(new Ui::MainWindow)
 {
    ProcessingForm *processingForm;
-   HxtGenerator *hxtGenerator;
+   ProcessingBufferGenerator *processingBufferGenerator;
    ProcessingDefinition *processingDefinition;
 
    processingForm = new ProcessingForm();
@@ -20,16 +20,21 @@ MainWindow::MainWindow(QWidget *parent) :
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
    processingDefinition = new ProcessingDefinition();
-   hxtGenerator = new HxtGenerator(processingDefinition);
+   processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
-   connect(processingForm, SIGNAL(configureProcessing(int,int,uint16_t*,const char*,const char*,const char*)),
-           hxtGenerator, SLOT(handleConfigureProcessing(int,int,uint16_t*,const char*,const char*,const char*)));
+   connect(processingForm, SIGNAL(configureProcessing(bool,const char*,const char*,const char*)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool,const char*,const char*,const char*)));
+   connect(processingForm, SIGNAL(configureProcessing(int, int, uint16_t*, const char*, const char*, const char*)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(int, int, uint16_t*, const char*, const char*, const char*)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, uint16_t, uint16_t, uint16_t, bool, const char *, const char *, const char *)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, uint16_t, uint16_t, uint16_t, bool, const char *, const char *, const char *)));
+
    connect(processingForm, SIGNAL(imageStarted(const char*, int)),
-           hxtGenerator, SLOT(handleImageStarted(const char *, int)));
+           processingBufferGenerator, SLOT(handleImageStarted(const char *, int)));
    connect(processingForm, SIGNAL(transferBufferReady(char*, unsigned long)),
-           hxtGenerator, SLOT(handleTransferBufferReady(char *, unsigned long)));
+           processingBufferGenerator, SLOT(handleTransferBufferReady(char *, unsigned long)));
    connect(processingForm, SIGNAL(imageComplete(unsigned long long)),
-           hxtGenerator, SLOT(handleImageComplete(unsigned long long)));
+           processingBufferGenerator, SLOT(handleImageComplete(unsigned long long)));
 }
 
 MainWindow::~MainWindow()
