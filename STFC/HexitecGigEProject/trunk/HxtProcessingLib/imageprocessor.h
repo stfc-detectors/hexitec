@@ -4,6 +4,10 @@
 #include "imageprocessor.h"
 #include "processingdefinition.h"
 #include "imageitem.h"
+#include "frameprocessor.h"
+#include "framere_orderprocessor.h"
+#include "hxtgenerator.h"
+#include "hxttotalspectrumgenerator.h"
 #include <QObject>
 
 using namespace std;
@@ -17,16 +21,18 @@ public:
    ~ImageProcessor();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
    void imageComplete(unsigned long long totalFramesAcquired);
-//   void enqueue(char *bufferToProcess, unsigned long validFrames);
    void setImageInProgress(bool inProgress);
 //   void imageComplete(unsigned long long totalFramesToProcess);
    //MAKE imageItem private
    ImageItem *imageItem;
 
+   
 private:
-//   void process();
+   void writeFile(char *buffer, unsigned long length, const char* filename);
    QThread *imageProcessorThread;
    ProcessingDefinition *processingDefinition;
+   GeneralHxtGenerator *hxtGenerator;
+
 //   ImageItem *imageItem;
    char *bufferToProcess;
    int frameSize;
@@ -34,14 +40,16 @@ private:
    unsigned long long processedFrameCount;
    bool inProgress;
 
+   void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filename);
+   void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result, const char* filename);
+   void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, uint16_t *result, const char* filename);
+
 signals:
    void process();
    void processingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount);
    void returnBufferReady(char *transferBuffer);
 
 public slots:
-//   void handleEnqueueBuffer(char *transferBuffer, unsigned long validFrames);
-//   void handleImageComplete(unsigned long long totalFramesAcquired);
    void handleProcess();
 };
 

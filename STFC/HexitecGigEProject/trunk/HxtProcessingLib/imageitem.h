@@ -17,6 +17,7 @@ private:
    QMutex mutex;
    char *name;
    int frameSize;
+   BufferItem *bufferItem;
    QQueue <BufferItem *>bufferQueue;
    unsigned long processedFrameCount;
 };

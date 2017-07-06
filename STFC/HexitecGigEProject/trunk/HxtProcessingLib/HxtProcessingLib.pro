@@ -18,7 +18,12 @@ SOURCES += \
     bufferitem.cpp \
     processingdefinition.cpp \
     imageprocessor.cpp \
-    frameprocessor.cpp
+    frameprocessor.cpp \
+    framere_orderprocessor.cpp \
+    generalframeprocessor.cpp \
+    hxtgenerator.cpp \
+    generalhxtgenerator.cpp \
+    hxttotalspectrumgenerator.cpp
 
 
 HEADERS += \
@@ -27,7 +32,12 @@ HEADERS += \
     bufferitem.h \
     processingdefinition.h \
     imageprocessor.h \
-    frameprocessor.h
+    frameprocessor.h \
+    framere_orderprocessor.h \
+    generalframeprocessor.h \
+    hxtgenerator.h \
+    generalhxtgenerator.h \
+    hxttotalspectrumgenerator.h
 
 
 INCLUDEPATH += include

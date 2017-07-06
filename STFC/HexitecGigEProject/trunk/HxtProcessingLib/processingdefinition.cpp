@@ -1,11 +1,13 @@
 #include "processingdefinition.h"
-//#include "parameters.h"
 #include <QSettings>
 #include <QDebug>
+#include <iostream>
+#include <fstream>
 
 ProcessingDefinition::ProcessingDefinition()
 {
-
+   gradientValue = (double *) calloc(6400, sizeof(double));
+   interceptValue = (double *) calloc(6400, sizeof(double));
 }
 
 void ProcessingDefinition::setThresholdMode(ThresholdMode threshholdMode)
@@ -21,6 +23,12 @@ void ProcessingDefinition::setThresholdValue(int thresholdValue)
 void ProcessingDefinition::setThresholdPerPixel(uint16_t *thresholdPerPixel)
 {
    this->thresholdPerPixel = thresholdPerPixel;
+}
+
+void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
+{
+   this->energyCalibration = energyCalibration;
+   qDebug() << "ProcessingDefinition::setEnergyCalibration: " << energyCalibration;
 }
 
 void ProcessingDefinition::setProcessedFilename(const char *processedFilename)
@@ -68,118 +76,101 @@ char *ProcessingDefinition::getProcessedFilename() const
    return processedFilename;
 }
 
-/*
-void ProcessingDefinition::setDataFilename(DetectorFilename dataFilename)
+double *ProcessingDefinition::getGradients()
 {
-   this->dataFilename = dataFilename;
-   twoEasyIniFile->setParameter("Data_Acquisition/Prefix", dataFilename.getPrefix());
-   twoEasyIniFile->setParameter("Data_Acquisition/Directory", dataFilename.getDirectory());
-   twoEasyIniFile->writeIniFile();
+   setGradients();
+   return gradientValue;
 }
 
-void ProcessingDefinition::setLogFilename(DetectorFilename logFilename)
+double *ProcessingDefinition::getIntercepts()
 {
-   this->logFilename = logFilename;
-   twoEasyIniFile->setParameter("Data_Acquisition/Log_Prefix", logFilename.getPrefix());
-   twoEasyIniFile->setParameter("Data_Acquisition/Log_Directory", logFilename.getDirectory());
-   twoEasyIniFile->writeIniFile();
+   setIntercepts();
+   return interceptValue;
 }
 
-void ProcessingDefinition::setOffsets(bool offsets)
+void ProcessingDefinition::setGradients()
 {
-   this->offsets = offsets;
-   twoEasyIniFile->setParameter("Data_Acquisition/Offsets", (QVariant) offsets);
-   twoEasyIniFile->writeIniFile();
+   getData(gradientFilename, gradientValue);
 }
 
-void ProcessingDefinition::setDuration(double duration)
+void ProcessingDefinition::setIntercepts()
 {
-   this->duration = duration;
-   twoEasyIniFile->setParameter("Data_Acquisition/Duration", (QVariant) (duration / 1000.0));
-   twoEasyIniFile->writeIniFile();
+   getData(interceptFilename, interceptValue);
 }
 
-void ProcessingDefinition::setRepeatCount(int repeatCount)
+void ProcessingDefinition::getData(const char *filename, double *dataValue)
 {
-   this->repeatCount = repeatCount;
-   twoEasyIniFile->setParameter("Data_Acquisition/Repeat_Count", (QVariant) repeatCount);
-   twoEasyIniFile->writeIniFile();
+   int i = 0;
+   std::ifstream inFile;
+
+   inFile.open(filename);
+
+   if (!inFile)
+     qDebug() << "error opening " << filename;
+   while (inFile >> dataValue[i])
+   {
+       i++;
+   }
+
+   if (i < 6400)
+     qDebug() << "error: only " << i << " could be read";
+   else
+     qDebug() << "file read OK ";
+   inFile.close();
 }
 
-void ProcessingDefinition::setRepeatInterval(int repeatInterval)
+bool ProcessingDefinition::getTotalSpectrum() const
 {
-   this->repeatInterval = repeatInterval;
-   twoEasyIniFile->setParameter("Data_Acquisition/Repeat_Interval", (QVariant) repeatInterval);
-   twoEasyIniFile->writeIniFile();
+    return totalSpectrum;
 }
 
-void ProcessingDefinition::setFixedImageCount(int fixedImageCount)
+void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
-   this->fixedImageCount = fixedImageCount;
+    this->totalSpectrum = totalSpectrum;
 }
 
-void ProcessingDefinition::setLogging(bool logging)
+uint16_t ProcessingDefinition::getBinWidth() const
 {
-   this->logging = logging;
+    return binWidth;
 }
 
-void ProcessingDefinition::setTriggering(bool triggering)
+void ProcessingDefinition::setBinWidth(const uint16_t &binWidth)
 {
-   this->triggering = triggering;
+    this->binWidth = binWidth;
 }
 
-void ProcessingDefinition::setTtlInput(int ttlInput)
+uint16_t ProcessingDefinition::getBinEnd() const
 {
-   this->ttlInput = ttlInput;
+   return binEnd;
 }
 
-DetectorFilename *ProcessingDefinition::getDataFilename()
+void ProcessingDefinition::setBinEnd(const uint16_t &binEnd)
 {
-   return &dataFilename;
+   this->binEnd = binEnd;
 }
 
-DetectorFilename *ProcessingDefinition::getLogFilename()
+uint16_t ProcessingDefinition::getBinStart() const
 {
-   return &logFilename;
+   return binStart;
 }
 
-bool ProcessingDefinition::getOffsets()
+void ProcessingDefinition::setBinStart(const uint16_t &binStart)
 {
-   return offsets;
+   this->binStart = binStart;
 }
 
-double ProcessingDefinition::getDuration()
+bool ProcessingDefinition::getEnergyCalibration() const
 {
-   return duration;
+   return energyCalibration;
 }
 
-int ProcessingDefinition::getRepeatCount()
+bool ProcessingDefinition::getRe_order() const
 {
-   return repeatCount;
+   return re_order;
 }
 
-int ProcessingDefinition::getRepeatInterval()
+void ProcessingDefinition::setRe_order(bool re_order)
 {
-   return repeatInterval;
+    this->re_order = re_order;
 }
 
-int ProcessingDefinition::getFixedImageCount()
-{
-   return fixedImageCount;
-}
-
-bool ProcessingDefinition::isLogging()
-{
-   return logging;
-}
-
-bool ProcessingDefinition::isTriggering()
-{
-   return triggering;
-}
-
-int ProcessingDefinition::getTtlInput()
-{
-   return ttlInput;
-}
-*/

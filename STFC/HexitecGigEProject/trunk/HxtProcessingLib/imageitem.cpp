@@ -13,6 +13,7 @@ ImageItem::ImageItem(const char *name, int frameSize)
    this->frameSize = frameSize;
    this->bufferQueue.clear();
    this->processedFrameCount = 0;
+   bufferItem = NULL;
 }
 
 void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
@@ -24,8 +25,12 @@ void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
 char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 {
    QMutexLocker locker(&mutex);
-   BufferItem *bufferItem = NULL;
    char *address = NULL;
+
+   if (bufferItem != NULL)
+   {
+      free(bufferItem);
+   }
 
    if (!bufferQueue.isEmpty())
    {
