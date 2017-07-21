@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <iostream>
 #include <fstream>
+#include <Windows.h>
 
 using namespace std;
 
@@ -26,8 +27,9 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    connect(ui->thresholdButton, SIGNAL(clicked()), this, SLOT(setThresholdParameters()));
    connect(ui->energyCalibrationCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnergyCalibration(bool)));
    connect(ui->energyCalibrationButton, SIGNAL(clicked()), this, SLOT(setEnergyCalibrationParameters()));
-   connect(ui->binStarSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEndSpinBoxLimit(int)));
-   connect(ui->binEndSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStarSpinBoxLimit(int)));
+   connect(ui->hxtCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHxtGeneration(bool)));
+   connect(ui->binStartSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEndSpinBoxLimit(int)));
+   connect(ui->binEndSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStartSpinBoxLimit(int)));
 }
 
 ProcessingForm::~ProcessingForm()
@@ -81,6 +83,8 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
    unsigned long long totalFramesAcquired = 0;
    std::ifstream inFile;
 
+   int temp = 0;
+
    inFile.open(filename, ifstream::binary);
    emit imageStarted(imageFilename, 6400 * 2);
 
@@ -95,7 +99,11 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
       {
          validFrames = inFile.gcount() / (6400 * 2);
          qDebug() << validFrames <<" valid frames could be read";
-         emit transferBufferReady(transferBuffer, validFrames);
+         if (temp == 0)
+         {
+         //emit transferBufferReady(transferBuffer, validFrames);
+            temp++;
+         }
       }
       else
       {
@@ -105,6 +113,7 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
       }
       totalFramesAcquired += validFrames;
       bufferCount++;
+      Sleep(50);
    }
    inFile.close();
    emit imageComplete(totalFramesAcquired);
@@ -181,13 +190,32 @@ void ProcessingForm::setEnergyCalibration(bool energyCalibration)
    this->energyCalibration = energyCalibration;
    if (this->energyCalibration)
    {
-      ui->binStarSpinBox->setEnabled(true);
+      ui->gradientsFile->setEnabled(true);
+      ui->gradientsFileButton->setEnabled(true);
+      ui->interceptsFile->setEnabled(true);
+      ui->interceptsFileButton->setEnabled(true);
+   }
+   else
+   {
+      ui->gradientsFile->setEnabled(false);
+      ui->gradientsFileButton->setEnabled(false);
+      ui->interceptsFile->setEnabled(false);
+      ui->interceptsFileButton->setEnabled(false);
+   }
+}
+
+void ProcessingForm::setHxtGeneration(bool hxtGeneration)
+{
+   this->hxtGeneration = hxtGeneration;
+   if (this->hxtGeneration)
+   {
+      ui->binStartSpinBox->setEnabled(true);
       ui->binEndSpinBox->setEnabled(true);
       ui->binWidthSpinBox->setEnabled(true);
    }
    else
    {
-      ui->binStarSpinBox->setEnabled(false);
+      ui->binStartSpinBox->setEnabled(false);
       ui->binEndSpinBox->setEnabled(false);
       ui->binWidthSpinBox->setEnabled(false);
    }
@@ -203,7 +231,7 @@ void ProcessingForm::setEnergyCalibrationParameters()
    char *interceptFilename;
    char *processedFilename;
 
-   binStart = ui->binEndSpinBox->value();
+   binStart = ui->binStartSpinBox->value();
    binEnd = ui->binEndSpinBox->value();
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
@@ -216,14 +244,14 @@ void ProcessingForm::setEnergyCalibrationParameters()
                             processedFilename);
 }
 
-void ProcessingForm::setStarSpinBoxLimit(int upperLimit)
+void ProcessingForm::setStartSpinBoxLimit(int upperLimit)
 {
-   ui->binStarSpinBox->setMaximum(upperLimit);
+   ui->binStartSpinBox->setMaximum(upperLimit);
 }
 
 void ProcessingForm::setEndSpinBoxLimit(int lowerLimit)
 {
-   ui->binStarSpinBox->setMinimum(lowerLimit);
+   ui->binEndSpinBox->setMinimum(lowerLimit);
 }
 
 void ProcessingForm::readThresholdFile(char *thresholdFile)

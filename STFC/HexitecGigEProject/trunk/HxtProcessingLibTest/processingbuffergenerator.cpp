@@ -75,11 +75,12 @@ void ProcessingBufferGenerator::handleConfigureProcessing(int threshholdMode, in
    processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, uint16_t binStart, uint16_t binEnd, uint16_t binWidth, bool totalSpectrum,
+void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth, bool totalSpectrum,
                                                           const char *gradientFilename,
                                                           const char *interceptFilename,
                                                           const char *processedFilename)
 {
+   qDebug() << "Configure Energy Calibration: binStart, binEnd " << binStart << ", " << binEnd;
    processingDefinition->setEnergyCalibration(energyCalibration);
    processingDefinition->setBinStart(binStart);
    processingDefinition->setBinEnd(binEnd);

@@ -34,6 +34,7 @@ private:
    int thresholdOption;
    uint16_t thresholdPerPixel[6400];
    bool energyCalibration;
+   bool hxtGeneration;
 
 signals:
    void configureProcessing(bool re_order,
@@ -47,9 +48,9 @@ signals:
                             const char *interceptFilename,
                             const char *processedFilename);
    void configureProcessing(bool energyCalibration,
-                            uint16_t binStart,
-                            uint16_t binEnd,
-                            uint16_t binWidth,
+                            unsigned long long binStart,
+                            unsigned long long binEnd,
+                            unsigned long long binWidth,
                             bool totalSpectrum,
                             const char *gradientFilename,
                             const char *interceptFilename,
@@ -67,7 +68,8 @@ private slots:
    void setThresholdFile();
    void setEnergyCalibration(bool energyCalibration);
    void setEnergyCalibrationParameters();
-   void setStarSpinBoxLimit(int upperLimit);
+   void setHxtGeneration(bool hxtGeneration);
+   void setStartSpinBoxLimit(int upperLimit);
    void setEndSpinBoxLimit(int lowerLimit);
 };
 

@@ -41,9 +41,9 @@ public slots:
                                   const char *interceptFilename,
                                   const char *processedFilename);
    void handleConfigureProcessing(bool energyCalibration,
-                                  uint16_t binStart,
-                                  uint16_t binEnd,
-                                  uint16_t binWidth,
+                                  unsigned long long binStart,
+                                  unsigned long long binEnd,
+                                  unsigned long long binWidth,
                                   bool totalSpectrum,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
