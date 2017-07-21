@@ -10,6 +10,7 @@ GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, unsigned long long binSt
 
    hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
    processedEnergyCount = 0;
+   totalEnergiesToProcess = 65535;
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
    emit process();
 }

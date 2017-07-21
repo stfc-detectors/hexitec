@@ -17,7 +17,7 @@ void HxtGenerator::handleProcess()
    double *pixelEnergy;
 
    qDebug() << "******************HxtGenerator::handleProcess() running in thread." << QThread::currentThreadId();
-   while (inProgress || (hxtItem->getPixelEnergyQueueSize() > 0))
+   while (inProgress || (hxtItem->getPixelEnergyQueueSize() > 0) || (processedEnergyCount < totalEnergiesToProcess))
    {
       while (inProgress &&((hxtItem->getPixelEnergyQueueSize() == 0)))
       {
@@ -62,5 +62,5 @@ void HxtGenerator::processEnergies(double *pixelEnergy)
 {
 //   hxtItem->addToHistogram(pixelEnergy);
    processedEnergyCount++;
-   qDebug() << "HxtGenerator::processEnergies called";
+   qDebug() << "HxtGenerator::processEnergies called: " << processedEnergyCount;
 }
