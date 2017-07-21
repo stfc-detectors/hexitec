@@ -99,11 +99,7 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
       {
          validFrames = inFile.gcount() / (6400 * 2);
          qDebug() << validFrames <<" valid frames could be read";
-         if (temp == 0)
-         {
-         //emit transferBufferReady(transferBuffer, validFrames);
-            temp++;
-         }
+         emit transferBufferReady(transferBuffer, validFrames);
       }
       else
       {
