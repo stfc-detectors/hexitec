@@ -6,11 +6,16 @@
 class HxtTotalSpectrumGenerator : public GeneralHxtGenerator
 {
 public:
-   HxtTotalSpectrumGenerator();
+   HxtTotalSpectrumGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth);
    ~HxtTotalSpectrumGenerator();
+   void processEnergies(double *pixelEnergy);
+
+private:
+   HxtItem *totalSpectrumItem;
 
 public slots:
-   void handleEnqueuePixelEnergy(double *pixelEnergy);
+   void handleProcess();
+//   void enqueuePixelEnergy(double *pixelEnergy);
 };
 
 #endif // HXTTOTALSPECTRUMGENERATOR_H

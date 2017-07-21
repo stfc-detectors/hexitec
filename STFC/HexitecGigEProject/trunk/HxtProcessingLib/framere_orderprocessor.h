@@ -8,7 +8,7 @@ using namespace std;
 class FrameRe_orderProcessor : public GeneralFrameProcessor
 {
 public:
-   FrameRe_orderProcessor();
+   FrameRe_orderProcessor(GeneralHxtGenerator *hxtGenerator);
    ~FrameRe_orderProcessor();
    uint16_t *process(uint16_t *frame);
    uint16_t *process(uint16_t *frame, uint16_t thresholdValue);

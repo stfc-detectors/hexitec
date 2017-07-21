@@ -35,14 +35,14 @@ public:
 
    bool getEnergyCalibration() const;
 
-   uint16_t getBinStart() const;
-   void setBinStart(const uint16_t &binStart);
+   unsigned long long getBinStart() const;
+   void setBinStart(const unsigned long long &binStart);
 
-   uint16_t getBinEnd() const;
-   void setBinEnd(const uint16_t &binEnd);
+   unsigned long long getBinEnd() const;
+   void setBinEnd(const unsigned long long &binEnd);
 
-   uint16_t getBinWidth() const;
-   void setBinWidth(const uint16_t &binWidth);
+   unsigned long long getBinWidth() const;
+   void setBinWidth(const unsigned long long &binWidth);
 
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
@@ -56,9 +56,9 @@ private:
    int thresholdValue;
    uint16_t *thresholdPerPixel;
    bool energyCalibration;
-   uint16_t binStart;
-   uint16_t binEnd;
-   uint16_t binWidth;
+   unsigned long long binStart;
+   unsigned long long binEnd;
+   unsigned long long binWidth;
    bool totalSpectrum;
    char *gradientFilename;
    char *interceptFilename;

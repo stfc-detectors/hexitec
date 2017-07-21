@@ -21,7 +21,8 @@ public:
    ~ImageProcessor();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
    void imageComplete(unsigned long long totalFramesAcquired);
-   void setImageInProgress(bool inProgress);
+   void setAcquisitionInProgress(bool acquisitionInProgress);
+   void setProcessingInProgress(bool processingInProgress);
 //   void imageComplete(unsigned long long totalFramesToProcess);
    //MAKE imageItem private
    ImageItem *imageItem;
@@ -38,7 +39,8 @@ private:
    int frameSize;
    unsigned long long totalFramesToProcress;
    unsigned long long processedFrameCount;
-   bool inProgress;
+   bool acquisitionInProgress;
+   bool processingInProgress;
 
    void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filename);
    void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result, const char* filename);
@@ -51,6 +53,7 @@ signals:
 
 public slots:
    void handleProcess();
+   void handleEnergyProcessingComplete(unsigned long long processedEnergyCount);
 };
 
 #endif // IMAGEPROCESSOR_H

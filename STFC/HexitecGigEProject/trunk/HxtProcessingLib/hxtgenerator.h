@@ -6,10 +6,13 @@
 class HxtGenerator : public GeneralHxtGenerator
 {
 public:
-   HxtGenerator();
+   HxtGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth);
+   double *getNextPixelEnergy();
+   void processEnergies(double *pixelEnergy);
 
 public slots:
-   void handleEnqueuePixelEnergy(double *pixelEnergy);
+  void handleProcess();
+//  void enqueuePixelEnergy(double *pixelEnergy);
 };
 
 #endif // HXTGENERATOR_H

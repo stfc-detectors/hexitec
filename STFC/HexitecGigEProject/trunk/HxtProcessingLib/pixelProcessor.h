@@ -19,12 +19,12 @@ public:
    void setInterceptValue(double *gradientValue);
    double *getGradientValue();
    double *getInterceptValue();
-   uint16_t *processFrame(uint16_t *frame);
-   uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
-   uint16_t *processRe_orderFrame(uint16_t *frame);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   uint16_t *processFrame(uint16_t *frame, double **pixelEnergyPtr = NULL);
+   uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr = NULL);
+   uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr = NULL);
+   uint16_t *processRe_orderFrame(uint16_t *frame, double **pixelEnergyPtr = NULL);
+   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr = NULL);
+   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr = NULL);
 
 
 private:

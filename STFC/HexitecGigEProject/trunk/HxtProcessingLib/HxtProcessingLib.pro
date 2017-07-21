@@ -23,7 +23,8 @@ SOURCES += \
     generalframeprocessor.cpp \
     hxtgenerator.cpp \
     generalhxtgenerator.cpp \
-    hxttotalspectrumgenerator.cpp
+    hxttotalspectrumgenerator.cpp \
+    hxtitem.cpp
 
 
 HEADERS += \
@@ -37,7 +38,8 @@ HEADERS += \
     generalframeprocessor.h \
     hxtgenerator.h \
     generalhxtgenerator.h \
-    hxttotalspectrumgenerator.h
+    hxttotalspectrumgenerator.h \
+    hxtitem.h
 
 
 INCLUDEPATH += include

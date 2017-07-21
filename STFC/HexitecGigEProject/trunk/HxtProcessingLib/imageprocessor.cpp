@@ -13,7 +13,8 @@ ImageProcessor::ImageProcessor(const char *name, int frameSize, ProcessingDefini
    this->frameSize = frameSize;
    imageItem = new ImageItem(name, frameSize);
    this->processingDefinition = processingDefinition;
-   setImageInProgress(true);
+   setAcquisitionInProgress(true);
+   setProcessingInProgress(true);
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
    emit process();
 }
@@ -30,10 +31,10 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *frameIterator;
 
    filename = "C://karen//STFC//Technical//PLTest//re_order.bin";
-   qDebug() << "ImageProcessor::process() ThresholdMode::NONE" << frameSize;
-   while (inProgress || (imageItem->getBufferQueueSize() > 0))
+   qDebug() << "ImageProcessor::process() ThresholdMode::NONE running in thread." << QThread::currentThreadId() << frameSize;
+   while (acquisitionInProgress || (imageItem->getBufferQueueSize() > 0))
    {
-      while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
+      while (acquisitionInProgress &&((imageItem->getBufferQueueSize() == 0)))
       {
          Sleep(10);
       }
@@ -68,9 +69,9 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
    filename = "C://karen//STFC//Technical//PLTest//re_orderThreshVal.bin";
    thresholdValue = processingDefinition->getThresholdValue();
    qDebug() << "ImageProcessor::process() ThresholdMode::SINGLE_VALUE" << thresholdValue;
-   while (inProgress || (imageItem->getBufferQueueSize() > 0))
+   while (acquisitionInProgress || (imageItem->getBufferQueueSize() > 0))
    {
-      while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
+      while (acquisitionInProgress &&((imageItem->getBufferQueueSize() == 0)))
       {
          Sleep(10);
       }
@@ -104,9 +105,9 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    filename = "C://karen//STFC//Technical//PLTest//re_orderThreshPerPix.bin";
    qDebug() << "ImageProcessor::process() ThresholdMode::THRESHOLD_FILE";
    thresholdPerPixel = processingDefinition->getThresholdPerPixel();
-   while (inProgress || (imageItem->getBufferQueueSize() > 0))
+   while (acquisitionInProgress || (imageItem->getBufferQueueSize() > 0))
    {
-      while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
+      while (acquisitionInProgress &&((imageItem->getBufferQueueSize() == 0)))
       {
          Sleep(10);
       }
@@ -141,32 +142,34 @@ void ImageProcessor::handleProcess()
 
    processedFrameCount = 0;
 
-   if (processingDefinition->getRe_order())
-   {
-      fp = new FrameRe_orderProcessor();
-   }
-   else
-   {
-      fp = new FrameProcessor();
-   }
-
    if ((energyCalibration = processingDefinition->getEnergyCalibration()))
    {
       if (processingDefinition->getTotalSpectrum())
       {
-         hxtGenerator = new HxtTotalSpectrumGenerator();
+         hxtGenerator = new HxtTotalSpectrumGenerator(frameSize, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
       }
       else
       {
-         hxtGenerator = new HxtGenerator();
+         hxtGenerator = new HxtGenerator(frameSize, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
       }
-      connect(fp->getPixelProcessor(), SIGNAL(enqueuePixelEnergy(double *)),
-              hxtGenerator, SLOT(handleEnqueuePixelEnergy(double *)));
    }
+
+   if (processingDefinition->getRe_order())
+   {
+      fp = new FrameRe_orderProcessor(hxtGenerator);
+   }
+   else
+   {
+      fp = new FrameProcessor(hxtGenerator);
+   }
+
 
    fp->setEnergyCalibration(energyCalibration);
    fp->setGradients(processingDefinition->getGradients());
    fp->setIntercepts(processingDefinition->getIntercepts());
+
+   connect(hxtGenerator, SIGNAL(energyProcessingComplete(unsigned long long)),
+           this, SLOT(handleEnergyProcessingComplete(unsigned long long)));
 
    switch (processingDefinition->getThreshholdMode())
    {
@@ -183,10 +186,21 @@ void ImageProcessor::handleProcess()
          break;
    }
 
+   while (processingInProgress)
+   {
+      Sleep(10);
+   }
+
    qDebug() << "ImageProcessor::process() processedFrameCount = " << processedFrameCount;
-   emit processingComplete(this, processedFrameCount);
    free(imageItem);
    free(fp);
+}
+
+void ImageProcessor::handleEnergyProcessingComplete(unsigned long long processedEnergyCount)
+{
+   qDebug() << "=================ImageProcessor::handleEnergyProcessingComplete() processedEnergyCount = " << processedEnergyCount;
+   setProcessingInProgress(false);
+   emit processingComplete(this, processedFrameCount);
 }
 
 void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFrames)
@@ -194,15 +208,21 @@ void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFra
    imageItem->enqueueBuffer(bufferToProcess, validFrames);
 }
 
-void ImageProcessor::setImageInProgress(bool inProgress)
+void ImageProcessor::setAcquisitionInProgress(bool acquisitionInProgress)
 {
-   this->inProgress = inProgress;
+   this->acquisitionInProgress = acquisitionInProgress;
+}
+
+void ImageProcessor::setProcessingInProgress(bool processingInProgress)
+{
+   this->processingInProgress = processingInProgress;
 }
 
 void ImageProcessor::imageComplete(unsigned long long totalFramesToProcess)
 {
    this->totalFramesToProcress = totalFramesToProcess;
-   setImageInProgress(false);
+   hxtGenerator->imageComplete(totalFramesToProcess);
+   setAcquisitionInProgress(false);
 }
 
 void ImageProcessor::writeFile(char *buffer, unsigned long length, const char* filename)

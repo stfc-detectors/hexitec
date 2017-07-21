@@ -14,7 +14,7 @@ class FrameProcessor : public GeneralFrameProcessor
 {
 
 public:
-   FrameProcessor();
+   FrameProcessor(GeneralHxtGenerator *hxtGenerator);
    ~FrameProcessor();
 //   void setGradients(double *gradientValue);
 //   void setIntercepts(double *interceptValue);
@@ -30,6 +30,7 @@ public:
    uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel, double *gradientValue, double *interceptValue);
 */
 private:
+//   GeneralHxtGenerator *hxtGenerator;
    void writeFile(uint16_t *result, const char *filename);
 //   double *getData(const char *filename);
 };

@@ -22,6 +22,7 @@ PixelProcessor::PixelProcessor()
    }
    gradientValue = NULL;
    interceptValue = NULL;
+   pixelEnergy = NULL;
 }
 
 void PixelProcessor::initialisePixelMap()
@@ -44,7 +45,6 @@ void PixelProcessor::initialisePixelMap()
 
 void PixelProcessor::setEnergyCalibration(bool energyCalibration)
 {
-   qDebug() << "PixelProcessor::setEnergyCalibration(): " << energyCalibration;
    this->energyCalibration = energyCalibration;
 }
 
@@ -74,7 +74,7 @@ double *PixelProcessor::getInterceptValue()
    return interceptValue;
 }
 
-uint16_t *PixelProcessor::processFrame(uint16_t *frame)
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
    uint16_t  *re_orderedFrameIndex;
@@ -91,18 +91,20 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame)
       {
          pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy)";
-      emit enqueuePixelEnergy(pixelEnergy);
+      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 111";
+      pixelEnergyPtr = &pixelEnergy;
+//      emit enqueuePixelEnergy(pixelEnergy);
    }
    else
    {
       memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+      *pixelEnergyPtr = NULL;
    }
 
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue)
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
 
@@ -124,8 +126,9 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue)
             pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
          }
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy)";
-      emit enqueuePixelEnergy(pixelEnergy);
+      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 222";
+      pixelEnergyPtr = &pixelEnergy;
+//      emit enqueuePixelEnergy(pixelEnergy);
    }
    else
    {
@@ -137,12 +140,13 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue)
             re_orderedFrame[i] = 0;
         }
       }
+      *pixelEnergyPtr = NULL;
    }
 
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel)
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
 
@@ -164,8 +168,9 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPi
             pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
          }
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy)";
-      emit enqueuePixelEnergy(pixelEnergy);
+      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 333";
+      pixelEnergyPtr = &pixelEnergy;
+//      emit enqueuePixelEnergy(pixelEnergy);
    }
    else
    {
@@ -177,16 +182,17 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPi
             re_orderedFrame[i] = 0;
          }
       }
+      *pixelEnergyPtr = NULL;
    }
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame)
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
    uint16_t  *re_orderedFrameIndex;
 
-//   qDebug() << "PixelProcessor::processRe_orderFrame()";
+   qDebug() << "PixelProcessor::processRe_orderFrame()";
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
    re_orderedFrameIndex = re_orderedFrame;
 
@@ -198,8 +204,8 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame)
          re_orderedFrame[pixelMap[i]] = frame[i];
          pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy)";
-      emit enqueuePixelEnergy(pixelEnergy);
+      *pixelEnergyPtr = pixelEnergy;
+      qDebug() << "Set pixelEnergyPtr = " << *pixelEnergyPtr;
    }
    else
    {
@@ -211,12 +217,14 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame)
          }
          re_orderedFrame[pixelMap[i]] = frame[i];
       }
+      *pixelEnergyPtr = NULL;
+      qDebug() << "pixelEnergyPtr should be NULL = " << *pixelEnergyPtr;
    }
 
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue)
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
 
@@ -238,8 +246,9 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresho
             pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
          }
       }
-      qDebug() << "emit enqueuePixelEnergy()";
-      emit enqueuePixelEnergy(pixelEnergy);
+      qDebug() << "emit enqueuePixelEnergy() 555";
+      *pixelEnergyPtr = pixelEnergy;
+//      emit enqueuePixelEnergy(pixelEnergy);
    }
    else
    {
@@ -254,12 +263,13 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresho
             re_orderedFrame[pixelMap[i]] = frame[i];
          }
       }
+      *pixelEnergyPtr = NULL;
    }
 
    return re_orderedFrame;
 }
 
-uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel)
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
 
@@ -281,8 +291,9 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresh
             pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
          }
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy)";
-      emit enqueuePixelEnergy(pixelEnergy);
+      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 666";
+      *pixelEnergyPtr = pixelEnergy;
+//      emit enqueuePixelEnergy(pixelEnergy);
    }
    else
    {
@@ -297,6 +308,7 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresh
             re_orderedFrame[pixelMap[i]] = frame[i];
          }
       }
+      *pixelEnergyPtr = NULL;
    }
    return re_orderedFrame;
 }

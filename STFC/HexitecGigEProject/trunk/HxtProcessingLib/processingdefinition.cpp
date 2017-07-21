@@ -28,7 +28,6 @@ void ProcessingDefinition::setThresholdPerPixel(uint16_t *thresholdPerPixel)
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
 {
    this->energyCalibration = energyCalibration;
-   qDebug() << "ProcessingDefinition::setEnergyCalibration: " << energyCalibration;
 }
 
 void ProcessingDefinition::setProcessedFilename(const char *processedFilename)
@@ -129,32 +128,32 @@ void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
     this->totalSpectrum = totalSpectrum;
 }
 
-uint16_t ProcessingDefinition::getBinWidth() const
+unsigned long long ProcessingDefinition::getBinWidth() const
 {
     return binWidth;
 }
 
-void ProcessingDefinition::setBinWidth(const uint16_t &binWidth)
+void ProcessingDefinition::setBinWidth(const unsigned long long &binWidth)
 {
     this->binWidth = binWidth;
 }
 
-uint16_t ProcessingDefinition::getBinEnd() const
+unsigned long long ProcessingDefinition::getBinEnd() const
 {
    return binEnd;
 }
 
-void ProcessingDefinition::setBinEnd(const uint16_t &binEnd)
+void ProcessingDefinition::setBinEnd(const unsigned long long &binEnd)
 {
    this->binEnd = binEnd;
 }
 
-uint16_t ProcessingDefinition::getBinStart() const
+unsigned long long ProcessingDefinition::getBinStart() const
 {
    return binStart;
 }
 
-void ProcessingDefinition::setBinStart(const uint16_t &binStart)
+void ProcessingDefinition::setBinStart(const unsigned long long &binStart)
 {
    this->binStart = binStart;
 }
