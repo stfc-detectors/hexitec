@@ -80,10 +80,8 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
 {
    char *transferBuffer;
    unsigned long validFrames = 0;
-   unsigned long long totalFramesAcquired = 0;
+   long long totalFramesAcquired = 0;
    std::ifstream inFile;
-
-   int temp = 0;
 
    inFile.open(filename, ifstream::binary);
    emit imageStarted(imageFilename, 6400 * 2);

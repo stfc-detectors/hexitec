@@ -29,7 +29,7 @@ signals:
 public slots:
    void handleImageStarted(const char *path, int frameSize);
    void handleTransferBufferReady(char *transferBuffer, unsigned long validFrames);
-   void handleImageComplete(unsigned long long totalFramesAcquired);
+   void handleImageComplete(long long totalFramesAcquired);
    void handleConfigureProcessing(bool re_order,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
@@ -41,14 +41,14 @@ public slots:
                                   const char *interceptFilename,
                                   const char *processedFilename);
    void handleConfigureProcessing(bool energyCalibration,
-                                  unsigned long long binStart,
-                                  unsigned long long binEnd,
-                                  unsigned long long binWidth,
+                                  long long binStart,
+                                  long long binEnd,
+                                  long long binWidth,
                                   bool totalSpectrum,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
                                   const char *processedFilename);
-   void handleProcessingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount);
+   void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
 };
 
 #endif // PROCESSINGBUFFERGENERATOR_H

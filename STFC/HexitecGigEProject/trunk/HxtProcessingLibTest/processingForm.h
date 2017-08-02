@@ -48,16 +48,16 @@ signals:
                             const char *interceptFilename,
                             const char *processedFilename);
    void configureProcessing(bool energyCalibration,
-                            unsigned long long binStart,
-                            unsigned long long binEnd,
-                            unsigned long long binWidth,
+                            long long binStart,
+                            long long binEnd,
+                            long long binWidth,
                             bool totalSpectrum,
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
    void imageStarted(const char *path, int frameSize);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
-   void imageComplete(unsigned long long totalFramesAcquired);
+   void imageComplete(long long totalFramesAcquired);
 
 private slots:
    void initialise();

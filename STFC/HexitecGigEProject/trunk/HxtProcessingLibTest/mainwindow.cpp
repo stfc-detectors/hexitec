@@ -26,15 +26,15 @@ MainWindow::MainWindow(QWidget *parent) :
            processingBufferGenerator, SLOT(handleConfigureProcessing(bool,const char*,const char*,const char*)));
    connect(processingForm, SIGNAL(configureProcessing(int, int, uint16_t*, const char*, const char*, const char*)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int, uint16_t*, const char*, const char*, const char*)));
-   connect(processingForm, SIGNAL(configureProcessing(bool, unsigned long long, unsigned long long, unsigned long long, bool, const char *, const char *, const char *)),
-           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, unsigned long long, unsigned long long, unsigned long long, bool, const char *, const char *, const char *)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, long long, long long, long long, bool, const char *, const char *, const char *)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, long long, bool, const char *, const char *, const char *)));
 
    connect(processingForm, SIGNAL(imageStarted(const char*, int)),
            processingBufferGenerator, SLOT(handleImageStarted(const char *, int)));
    connect(processingForm, SIGNAL(transferBufferReady(char*, unsigned long)),
            processingBufferGenerator, SLOT(handleTransferBufferReady(char *, unsigned long)));
-   connect(processingForm, SIGNAL(imageComplete(unsigned long long)),
-           processingBufferGenerator, SLOT(handleImageComplete(unsigned long long)));
+   connect(processingForm, SIGNAL(imageComplete(long long)),
+           processingBufferGenerator, SLOT(handleImageComplete(long long)));
 }
 
 MainWindow::~MainWindow()

@@ -17,8 +17,8 @@ void ProcessingBufferGenerator::enqueueImage(const char *name, int frameSize, Pr
 {
    this->frameSize = frameSize;
    currentImageProcessor = new ImageProcessor(name, frameSize, processingDefinition);
-   connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, unsigned long long)),
-           this, SLOT(handleProcessingComplete(ImageProcessor *, unsigned long long)));
+   connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, long long)),
+           this, SLOT(handleProcessingComplete(ImageProcessor *, long long)));
    imageProcessorList.append(currentImageProcessor);
    qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor
             << "image queue length = " << imageProcessorList.length();
@@ -42,11 +42,11 @@ void ProcessingBufferGenerator::handleTransferBufferReady(char *transferBuffer, 
    free(transferBuffer);
 }
 
-void ProcessingBufferGenerator::handleImageComplete(unsigned long long totalFramesAcquired)
+void ProcessingBufferGenerator::handleImageComplete(long long totalFramesAcquired)
 {
    qDebug() << "ProcessingBufferGenerator::handleImageComplete. totalFramesAcquired: "
             << totalFramesAcquired << " buffer queue size: " << currentImageProcessor->imageItem->getBufferQueueSize();
-   currentImageProcessor->imageComplete(totalFramesAcquired);
+   currentImageProcessor->imageAcquisitionComplete(totalFramesAcquired);
 }
 
 void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order,
@@ -75,12 +75,11 @@ void ProcessingBufferGenerator::handleConfigureProcessing(int threshholdMode, in
    processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth, bool totalSpectrum,
+void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, long long binStart, long long binEnd, long long binWidth, bool totalSpectrum,
                                                           const char *gradientFilename,
                                                           const char *interceptFilename,
                                                           const char *processedFilename)
 {
-   qDebug() << "Configure Energy Calibration: binStart, binEnd " << binStart << ", " << binEnd;
    processingDefinition->setEnergyCalibration(energyCalibration);
    processingDefinition->setBinStart(binStart);
    processingDefinition->setBinEnd(binEnd);
@@ -92,7 +91,7 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
 
 }
 
-void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount)
+void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
    imageProcessorList.removeOne(completedImageProcessor);
    free(completedImageProcessor);

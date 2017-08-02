@@ -164,7 +164,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>55</width>
            <height>0</height>
           </size>
          </property>
@@ -173,6 +173,9 @@
            <width>55</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="maximum">
+          <number>640000</number>
          </property>
         </widget>
        </item>
@@ -199,7 +202,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>55</width>
            <height>0</height>
           </size>
          </property>
@@ -231,7 +234,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>55</width>
            <height>0</height>
           </size>
          </property>
@@ -241,8 +244,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
          <property name="maximum">
-          <number>6400</number>
+          <number>640000</number>
          </property>
         </widget>
        </item>
@@ -320,6 +326,19 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="3">
+      <spacer name="verticalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item row="17" column="7">
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -367,6 +386,13 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="6">
+      <widget class="QPushButton" name="energyCalibrationButton">
        <property name="text">
         <string>Apply</string>
        </property>
@@ -562,13 +588,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item row="7" column="6">
-      <widget class="QPushButton" name="energyCalibrationButton">
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
