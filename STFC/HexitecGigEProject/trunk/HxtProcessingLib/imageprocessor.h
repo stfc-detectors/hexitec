@@ -20,10 +20,9 @@ public:
    ImageProcessor(const char *name, int frameSize, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
-   void imageComplete(unsigned long long totalFramesAcquired);
-   void setAcquisitionInProgress(bool acquisitionInProgress);
-   void setProcessingInProgress(bool processingInProgress);
-//   void imageComplete(unsigned long long totalFramesToProcess);
+   void imageAcquisitionComplete(long long totalFramesAcquired);
+   void setImageInProgress(bool inProgress);
+
    //MAKE imageItem private
    ImageItem *imageItem;
 
@@ -33,14 +32,15 @@ private:
    QThread *imageProcessorThread;
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
+   bool energyCalibration;
+   double *pixelEnergy;
 
 //   ImageItem *imageItem;
    char *bufferToProcess;
    int frameSize;
-   unsigned long long totalFramesToProcress;
-   unsigned long long processedFrameCount;
-   bool acquisitionInProgress;
-   bool processingInProgress;
+   long long totalFramesToProcess;
+   long long processedFrameCount;
+   bool inProgress;
 
    void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filename);
    void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result, const char* filename);
@@ -48,12 +48,12 @@ private:
 
 signals:
    void process();
-   void processingComplete(ImageProcessor *completedImageProcessor, unsigned long long processedFrameCount);
+   void imageComplete(long long processedFrameCount);
+   void processingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
    void returnBufferReady(char *transferBuffer);
 
 public slots:
    void handleProcess();
-   void handleEnergyProcessingComplete(unsigned long long processedEnergyCount);
 };
 
 #endif // IMAGEPROCESSOR_H

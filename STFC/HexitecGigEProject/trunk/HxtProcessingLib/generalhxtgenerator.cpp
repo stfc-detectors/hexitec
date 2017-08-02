@@ -2,42 +2,56 @@
 #include <QThread>
 #include <QDebug>
 
-GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth)
+//GeneralHxtGenerator::GeneralHxtGenerator()
+GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)
 {
+//   int frameSize = 6400;
+   qDebug() << "GeneralHxtGenerator::GeneralHxtGenerator() called";
+   hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
+
    hxtGeneratorThread = new QThread();
    hxtGeneratorThread->start();
    moveToThread(hxtGeneratorThread);
 
-   hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
    processedEnergyCount = 0;
-   totalEnergiesToProcess = 65535;
+   hxtItem->setTotalEnergiesToProcess(0);
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
+   setFrameProcessingInProgress(true);
    emit process();
 }
-
 
 void GeneralHxtGenerator::enqueuePixelEnergy(double *pixelEnergy)
 {
    hxtItem->enqueuePixelEnergy(pixelEnergy);
+//   qDebug() << "GeneralHxtGenerator::enqueuePixelEnergy(), threadId: " << QThread::currentThreadId();
 }
 
-void GeneralHxtGenerator::imageComplete(unsigned long long totalEnergiesToProcess)
+
+bool GeneralHxtGenerator::getFrameProcessingInProgress()
 {
-   this->totalEnergiesToProcess = totalEnergiesToProcess;
-   qDebug() <<"GeneralHxtGenerator::imageComplete(): " << totalEnergiesToProcess;
-//   if (processedEnergyCount)
-   setImageInProgress(false);
+   QMutexLocker locker(&mutex);
+   return inProgress;
 }
 
-void GeneralHxtGenerator::setImageInProgress(bool inProgress)
+void GeneralHxtGenerator::handleImageComplete()
 {
-   qDebug() << "================GeneralHxtGenerator::setImageInProgress(): " << inProgress;
+   setFrameProcessingInProgress(false);
+}
+
+void GeneralHxtGenerator::setFrameProcessingInProgress(bool inProgress)
+{
+   QMutexLocker locker(&mutex);
    this->inProgress = inProgress;
 }
 
-/*
-void GeneralHxtGenerator::processEnergies(double *pixelEnergy)
+void GeneralHxtGenerator::incrementProcessedEnergyCount()
 {
-   qDebug() << "================GeneralHxtGenerator::processEnergies called";
+   QMutexLocker locker(&mutex);
+   this->processedEnergyCount = processedEnergyCount++;
 }
-*/
+
+long long GeneralHxtGenerator::getProcessedEnergyCount()
+{
+   QMutexLocker locker(&mutex);
+   return processedEnergyCount;
+}

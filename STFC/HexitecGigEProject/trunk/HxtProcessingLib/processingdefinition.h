@@ -35,14 +35,14 @@ public:
 
    bool getEnergyCalibration() const;
 
-   unsigned long long getBinStart() const;
-   void setBinStart(const unsigned long long &binStart);
+   long long getBinStart() const;
+   void setBinStart(const long long &binStart);
 
-   unsigned long long getBinEnd() const;
-   void setBinEnd(const unsigned long long &binEnd);
+   long long getBinEnd() const;
+   void setBinEnd(const long long &binEnd);
 
-   unsigned long long getBinWidth() const;
-   void setBinWidth(const unsigned long long &binWidth);
+   long long getBinWidth() const;
+   void setBinWidth(const long long &binWidth);
 
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
@@ -56,28 +56,16 @@ private:
    int thresholdValue;
    uint16_t *thresholdPerPixel;
    bool energyCalibration;
-   unsigned long long binStart;
-   unsigned long long binEnd;
-   unsigned long long binWidth;
+   long long binStart;
+   long long binEnd;
+   long long binWidth;
    bool totalSpectrum;
    char *gradientFilename;
    char *interceptFilename;
    char *processedFilename;
    double *gradientValue;
    double *interceptValue;
-   /*
-   DetectorFilename dataFilename;
-   DetectorFilename logFilename;
-   IniFile *twoEasyIniFile;
-   bool logging;
-   bool offsets;
-   bool triggering;
-   int ttlInput;
-   double duration;
-   int repeatCount;
-   int repeatInterval;
-   int fixedImageCount;
-   */
+
 };
 
 #endif // PROCESSINGDEFINITION_H

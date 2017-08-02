@@ -14,25 +14,14 @@ class FrameProcessor : public GeneralFrameProcessor
 {
 
 public:
-   FrameProcessor(GeneralHxtGenerator *hxtGenerator);
+   FrameProcessor();
    ~FrameProcessor();
-//   void setGradients(double *gradientValue);
-//   void setIntercepts(double *interceptValue);
    uint16_t *process(uint16_t *frame);
    uint16_t *process(uint16_t *frame, uint16_t thresholdValue);
    uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel);
-   PixelProcessor *getPixelProcessor();
-   /*
-   uint16_t *processRe_order(uint16_t *frame);
-   uint16_t *processRe_order(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *processRe_order(uint16_t *frame, uint16_t *thresholdPerPixel);
-   uint16_t *process(uint16_t *frame, uint16_t thresholdValue, double *gradientValue, double *interceptValue);
-   uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel, double *gradientValue, double *interceptValue);
-*/
-private:
-//   GeneralHxtGenerator *hxtGenerator;
-   void writeFile(uint16_t *result, const char *filename);
-//   double *getData(const char *filename);
+   uint16_t *process(uint16_t *frame, double **pixelEnergyPtr);
+   uint16_t *process(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr);
+   uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr);
 };
 
 #endif // FRAMEPROCESSOR_H

@@ -22,7 +22,6 @@ PixelProcessor::PixelProcessor()
    }
    gradientValue = NULL;
    interceptValue = NULL;
-   pixelEnergy = NULL;
 }
 
 void PixelProcessor::initialisePixelMap()
@@ -45,6 +44,7 @@ void PixelProcessor::initialisePixelMap()
 
 void PixelProcessor::setEnergyCalibration(bool energyCalibration)
 {
+   qDebug() << "PixelProcessor::setEnergyCalibration(): " << energyCalibration;
    this->energyCalibration = energyCalibration;
 }
 
@@ -74,32 +74,75 @@ double *PixelProcessor::getInterceptValue()
    return interceptValue;
 }
 
-uint16_t *PixelProcessor::processFrame(uint16_t *frame, double **pixelEnergyPtr)
+uint16_t *PixelProcessor::processFrame(uint16_t *frame)
 {
    uint16_t  *re_orderedFrame;
    uint16_t  *re_orderedFrameIndex;
 
-   qDebug() << "PixelProcessor::processFrame()";
+   qDebug() << "PixelProcessor::processFrame() 1";
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
    re_orderedFrameIndex = re_orderedFrame;
 
-   if (energyCalibration)
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue)
+{
+   uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
+
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+
+   qDebug() << "PixelProcessor::processFrame() 2";
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      for (int i = 0; i < frameSize; i++)
+      if (re_orderedFrame[i] - thresholdValue < 0)
       {
-         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+         re_orderedFrame[i] = 0;
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 111";
-      pixelEnergyPtr = &pixelEnergy;
-//      emit enqueuePixelEnergy(pixelEnergy);
    }
-   else
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel)
+{
+   uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
+
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+
+   qDebug() << "PixelProcessor::processFrame() 3";
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   for (int i = 0; i < frameSize; i++)
    {
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      *pixelEnergyPtr = NULL;
+      if (re_orderedFrame[i] - thresholdPerPixel[i] < 0)
+      {
+         re_orderedFrame[i] = 0;
+      }
    }
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processFrame(uint16_t *frame, double **pixelEnergyPtr)
+{
+   uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
+
+   qDebug() << "PixelProcessor::processFrame()";
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   for (int i = 0; i < frameSize; i++)
+   {
+      pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+   }
+   *pixelEnergyPtr = pixelEnergy;
 
    return re_orderedFrame;
 }
@@ -107,41 +150,25 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, double **pixelEnergyPtr)
 uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
-   if (energyCalibration)
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      for (int i = 0; i < frameSize; i++)
+      if (re_orderedFrame[i] - thresholdValue < 0)
       {
-         if (re_orderedFrame[i] - thresholdValue < 0)
-         {
-            re_orderedFrame[i] = 0;
-            pixelEnergy[i] = interceptValue[i];
-         }
-         else
-         {
-            pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
-         }
+         re_orderedFrame[i] = 0;
+         pixelEnergy[i] = interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 222";
-      pixelEnergyPtr = &pixelEnergy;
-//      emit enqueuePixelEnergy(pixelEnergy);
-   }
-   else
-   {
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      for (int i = 0; i < frameSize; i++)
+      else
       {
-         if (re_orderedFrame[i] - thresholdValue < 0)
-         {
-            re_orderedFrame[i] = 0;
-        }
+         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
       }
-      *pixelEnergyPtr = NULL;
    }
+   *pixelEnergyPtr = pixelEnergy;
 
    return re_orderedFrame;
 }
@@ -149,77 +176,107 @@ uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
 uint16_t *PixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
-   if (energyCalibration)
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      for (int i = 0; i < frameSize; i++)
+      if (re_orderedFrame[i] - thresholdPerPixel[i] < 0)
       {
-         if (re_orderedFrame[i] - thresholdPerPixel[i] < 0)
-         {
-            re_orderedFrame[i] = 0;
-            pixelEnergy[i] = interceptValue[i];
-         }
-         else
-         {
-            pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
-         }
+         re_orderedFrame[i] = 0;
+         pixelEnergy[i] = interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 333";
-      pixelEnergyPtr = &pixelEnergy;
-//      emit enqueuePixelEnergy(pixelEnergy);
+      else
+      {
+         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+      }
    }
-   else
+   *pixelEnergyPtr = pixelEnergy;
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame)
+{
+   uint16_t  *re_orderedFrame;
+   uint16_t  *re_orderedFrameIndex;
+
+//   qDebug() << "PixelProcessor::processRe_orderFrame()";
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrameIndex = re_orderedFrame;
+
+   for (int i = 0; i < frameSize; i++)
    {
-      memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-      for (int i = 0; i < frameSize; i++)
+      if (pixelMap[i] >= 6400 || pixelMap[i] < 0)
       {
-         if (re_orderedFrame[i] - thresholdPerPixel[i] < 0)
-         {
-            re_orderedFrame[i] = 0;
-         }
+         qDebug() << "pixelMap[i] has invalid value =" << pixelMap[i];
       }
-      *pixelEnergyPtr = NULL;
+      re_orderedFrame[pixelMap[i]] = frame[i];
    }
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue)
+{
+   uint16_t  *re_orderedFrame;
+
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+
+   for (int i = 0; i < frameSize; i++)
+   {
+      if (frame[pixelMap[i]] - thresholdValue < 0)
+      {
+         re_orderedFrame[pixelMap[i]] =0;
+      }
+      else
+      {
+         re_orderedFrame[pixelMap[i]] = frame[i];
+      }
+   }
+
+   return re_orderedFrame;
+}
+
+uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel)
+{
+   uint16_t  *re_orderedFrame;
+
+   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+
+   for (int i = 0; i < frameSize; i++)
+   {
+      if (frame[i] - thresholdPerPixel[i] < 0)
+      {
+         re_orderedFrame[pixelMap[i]] = 0;
+      }
+      else
+      {
+         re_orderedFrame[pixelMap[i]] = frame[i];
+      }
+   }
+
    return re_orderedFrame;
 }
 
 uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
-   uint16_t  *re_orderedFrameIndex;
+   double *pixelEnergy;
 
-   qDebug() << "PixelProcessor::processRe_orderFrame()";
+//   qDebug() << "PixelProcessor::processRe_orderFrame()";
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
-   re_orderedFrameIndex = re_orderedFrame;
 
-   if (energyCalibration)
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      for (int i = 0; i < frameSize; i++)
-      {
-         re_orderedFrame[pixelMap[i]] = frame[i];
-         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
-      }
-      *pixelEnergyPtr = pixelEnergy;
-      qDebug() << "Set pixelEnergyPtr = " << *pixelEnergyPtr;
+      re_orderedFrame[pixelMap[i]] = frame[i];
+      pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
    }
-   else
-   {
-      for (int i = 0; i < frameSize; i++)
-      {
-         if (pixelMap[i] >= 6400 || pixelMap[i] < 0)
-         {
-            qDebug() << "pixelMap[i] has invalid value =" << pixelMap[i];
-         }
-         re_orderedFrame[pixelMap[i]] = frame[i];
-      }
-      *pixelEnergyPtr = NULL;
-      qDebug() << "pixelEnergyPtr should be NULL = " << *pixelEnergyPtr;
-   }
+   *pixelEnergyPtr = pixelEnergy;
 
    return re_orderedFrame;
 }
@@ -227,44 +284,25 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, double **pixelEn
 uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
-   if (energyCalibration)
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      for (int i = 0; i < frameSize; i++)
+      if (frame[pixelMap[i]] - thresholdValue < 0)
       {
-         if (frame[pixelMap[i]] - thresholdValue < 0)
-         {
-            re_orderedFrame[pixelMap[i]] = 0;
-            pixelEnergy[pixelMap[i]] = interceptValue[i];
-         }
-         else
-         {
-            re_orderedFrame[pixelMap[i]] = frame[i];
-            pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
-         }
+         re_orderedFrame[pixelMap[i]] = 0;
+         pixelEnergy[pixelMap[i]] = interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy() 555";
-      *pixelEnergyPtr = pixelEnergy;
-//      emit enqueuePixelEnergy(pixelEnergy);
-   }
-   else
-   {
-      for (int i = 0; i < frameSize; i++)
+      else
       {
-         if (frame[pixelMap[i]] - thresholdValue < 0)
-         {
-            re_orderedFrame[pixelMap[i]] =0;
-         }
-         else
-         {
-            re_orderedFrame[pixelMap[i]] = frame[i];
-         }
+         re_orderedFrame[pixelMap[i]] = frame[i];
+         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
       }
-      *pixelEnergyPtr = NULL;
    }
+   *pixelEnergyPtr = pixelEnergy;
 
    return re_orderedFrame;
 }
@@ -272,43 +310,25 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresho
 uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr)
 {
    uint16_t  *re_orderedFrame;
+   double *pixelEnergy;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
-   if (energyCalibration)
+   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
+   for (int i = 0; i < frameSize; i++)
    {
-      pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-      for (int i = 0; i < frameSize; i++)
+      if (frame[i] - thresholdPerPixel[i] < 0)
       {
-         if (frame[i] - thresholdPerPixel[i] < 0)
-         {
-            re_orderedFrame[pixelMap[i]] = 0;
-            pixelEnergy[pixelMap[i]] = interceptValue[i];
-         }
-         else
-         {
-            re_orderedFrame[pixelMap[i]] = frame[i];
-            pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
-         }
+         re_orderedFrame[pixelMap[i]] = 0;
+         pixelEnergy[pixelMap[i]] = interceptValue[i];
       }
-      qDebug() << "emit enqueuePixelEnergy(pixelEnergy) 666";
-      *pixelEnergyPtr = pixelEnergy;
-//      emit enqueuePixelEnergy(pixelEnergy);
-   }
-   else
-   {
-      for (int i = 0; i < frameSize; i++)
+      else
       {
-         if (frame[i] - thresholdPerPixel[i] < 0)
-         {
-            re_orderedFrame[pixelMap[i]] = 0;
-         }
-         else
-         {
-            re_orderedFrame[pixelMap[i]] = frame[i];
-         }
+         re_orderedFrame[pixelMap[i]] = frame[i];
+         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
       }
-      *pixelEnergyPtr = NULL;
    }
+   *pixelEnergyPtr = pixelEnergy;
+
    return re_orderedFrame;
 }

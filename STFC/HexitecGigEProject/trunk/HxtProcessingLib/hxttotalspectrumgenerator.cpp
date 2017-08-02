@@ -4,14 +4,26 @@
 #include <QDebug>
 #include <Windows.h>
 
-HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth) : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+/*
+HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator()
 {
-   qDebug() << "Create a total spectrum";
-   totalSpectrumItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
-   setImageInProgress(true);
-//   connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
-//   emit process();
 
+}
+*/
+
+HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+{
+//   int frameSize = 6400;
+   hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
+
+   hxtGeneratorThread = new QThread();
+   hxtGeneratorThread->start();
+   moveToThread(hxtGeneratorThread);
+
+   processedEnergyCount = 0;
+   hxtItem->setTotalEnergiesToProcess(0);
+   connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
+   emit process();
 }
 
 HxtTotalSpectrumGenerator::~HxtTotalSpectrumGenerator()
@@ -21,35 +33,35 @@ HxtTotalSpectrumGenerator::~HxtTotalSpectrumGenerator()
 
 void HxtTotalSpectrumGenerator::handleProcess()
 {
-   double *pixelEnergy;
+   int temp1 = -1;
+   int temp2 = -1;
 
-   qDebug() << "HxtTotalSpectrumGenerator::handleProcess() running in thread." << QThread::currentThreadId();;
-   while (inProgress || (hxtItem->getPixelEnergyQueueSize() > 0))
+   qDebug() << "HxtTotalSpectrumGenerator::handleProcess() called, running in thread." << QThread::currentThreadId();
+   while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyQueueSize() > 0) || processedEnergyCount < (temp2 = hxtItem->getTotalEnergiesToProcess()))
    {
-      while (inProgress &&((hxtItem->getPixelEnergyQueueSize() == 0)))
+      while (getFrameProcessingInProgress() &&((temp1 = hxtItem->getPixelEnergyQueueSize()) == 0))
       {
          Sleep(10);
       }
-      while (hxtItem->getPixelEnergyQueueSize() > 0)
+      qDebug() << "GOT AN ENERGY TO PROCESS";
+      while ((temp1 = hxtItem->getPixelEnergyQueueSize()) > 0)
       {
-         pixelEnergy = hxtItem->getNextPixelEnergy();
-         if (pixelEnergy != NULL)
-         {
-//               result = processEnergies(pixelEnergy);
-               processEnergies(pixelEnergy);
-               // MUST USE RESULT IN FURTHER CALCULATIONS
-//               free(result);
-//            writeFile(bufferStart, (validFrames * frameSize), filename);
-//            free(bufferStart);
-         }
+//         qDebug() <<"PixelEnergyQueueSize() = " << temp1  << "processedEnergyCount: " << processedEnergyCount
+//                 << "totalEnergies to Process: " << hxtItem->getTotalEnergiesToProcess();
+//         pixelEnergy = hxtItem->getNextPixelEnergy();
+         hxtItem->getNextPixelEnergy();
 
+        processedEnergyCount++;
+        /*
+        if (processedEnergyCount > 100)
+        {
+           setImageInProgress(false);
+        }
+        */
       }
+
    }
-}
-void HxtTotalSpectrumGenerator::processEnergies(double *pixelEnergy)
-{
-   hxtItem->addToHistogram(pixelEnergy);
-   //THIS COULD JUST ADD ALREADY CALCULATED HISTOGRAM TO TOTAL
-   totalSpectrumItem->addToHistogram(pixelEnergy);
-   qDebug() << "HxtGenerator::processEnergies called";
+   qDebug() << "HxtGenerator::handleProcess() number of energies processed: " << processedEnergyCount
+            << "totalEnergies to Process: " << temp2;
+//   emit energyProcessingComplete(processedEnergyCount);
 }

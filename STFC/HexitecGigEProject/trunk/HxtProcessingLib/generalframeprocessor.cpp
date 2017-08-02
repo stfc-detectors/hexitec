@@ -4,9 +4,9 @@
 #include <fstream>
 #include <QDebug>
 
-GeneralFrameProcessor::GeneralFrameProcessor(GeneralHxtGenerator *hxtGenerator)
+GeneralFrameProcessor::GeneralFrameProcessor()
 {
-   this->hxtGenerator = hxtGenerator;
+
 }
 
 GeneralFrameProcessor::~GeneralFrameProcessor()
@@ -35,18 +35,6 @@ PixelProcessor *GeneralFrameProcessor::getPixelProcessor()
    return pixelProcessor;
 }
 
-uint16_t *GeneralFrameProcessor::processEnergy(uint16_t *frame, double **pixelEnergyPtr)
-{
-
-   if (*pixelEnergyPtr != NULL)
-   {
-      hxtGenerator->enqueuePixelEnergy(*pixelEnergyPtr);
-   }
-
-
-   return NULL;
-}
-
 double *GeneralFrameProcessor::getData(const char *filename)
 {
    int i = 0;
@@ -71,4 +59,3 @@ double *GeneralFrameProcessor::getData(const char *filename)
 
    return dataValue;
 }
-

@@ -2,13 +2,12 @@
 #define GENERALFRAMEPROCESSOR_H
 
 #include "pixelProcessor.h"
-#include "generalhxtgenerator.h"
 #include <cstdint>
 
 class GeneralFrameProcessor
 {
 public:
-   GeneralFrameProcessor(GeneralHxtGenerator *hxtGenerator);
+   GeneralFrameProcessor();
    ~GeneralFrameProcessor();
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);
@@ -18,11 +17,12 @@ public:
    virtual uint16_t *process(uint16_t *frame) = 0;
    virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue) = 0;
    virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel) = 0;
+   virtual uint16_t *process(uint16_t *frame, double **pixelEnergy) = 0;
+   virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergy) = 0;
+   virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergy) = 0;
 
 protected:
-   GeneralHxtGenerator *hxtGenerator;
    PixelProcessor *pixelProcessor;
-   uint16_t *processEnergy(uint16_t *frame, double **pixelEnergyPtr = NULL);
    double *getData(const char *filename);
 };
 

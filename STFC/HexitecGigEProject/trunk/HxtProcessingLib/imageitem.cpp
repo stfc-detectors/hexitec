@@ -8,9 +8,9 @@ using namespace std;
 
 ImageItem::ImageItem(const char *name, int frameSize)
 {
+   QMutexLocker locker(&mutex);
    this->name = (char *)name;
    this->frameSize = frameSize;
-   QMutexLocker locker(&mutex);
    this->bufferQueue.clear();
    this->processedFrameCount = 0;
    bufferItem = NULL;
@@ -24,6 +24,7 @@ void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
 
 char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 {
+   QMutexLocker locker(&mutex);
    char *address = NULL;
 
    if (bufferItem != NULL)
@@ -31,7 +32,6 @@ char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
       free(bufferItem);
    }
 
-   QMutexLocker locker(&mutex);
    if (!bufferQueue.isEmpty())
    {
       bufferItem = bufferQueue.dequeue();

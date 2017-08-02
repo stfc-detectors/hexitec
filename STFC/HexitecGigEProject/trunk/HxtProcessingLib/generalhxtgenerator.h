@@ -3,8 +3,8 @@
 
 #include "hxtitem.h"
 #include <QObject>
-#include <QList>
 #include <QDebug>
+#include <QMutex>
 #include <cstdint>
 
 class GeneralHxtGenerator : public QObject
@@ -12,33 +12,34 @@ class GeneralHxtGenerator : public QObject
    Q_OBJECT
 
 public:
-   GeneralHxtGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth);
-   //   QList <HxtItem *>hxtItemList;
-   void setImageInProgress(bool inProgress);
+//   GeneralHxtGenerator();
+   GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth);
    void enqueuePixelEnergy(double *pixelEnergy);
+   void setFrameProcessingInProgress(bool inProgress);
+   void incrementProcessedEnergyCount();
+   long long getProcessedEnergyCount();
 
 protected:
-   unsigned int *histogram;
-   HxtItem *hxtItem;
-   int frameSize;
-   unsigned long long binStart;
-   unsigned long long binEnd;
-   unsigned long long binWidth;
-
-protected:
+   bool getFrameProcessingInProgress();
    QThread *hxtGeneratorThread;
+   QMutex mutex;
+   HxtItem *hxtItem;
+   long long *histogram;
+   int frameSize;
+   long long binStart;
+   long long binEnd;
+   long long binWidth;
+//   long long totalEnergiesToProcess;
+   long long processedEnergyCount;
    bool inProgress;
-   virtual void processEnergies(double *pixelEnergy) = 0;
-   unsigned long long totalEnergiesToProcess;
-   unsigned long long processedEnergyCount;
-
+ 
 signals:
+   void enqueue(double *pixelEnergy);
    void process();
-   void energyProcessingComplete(unsigned long long processedEnergyCount);
 
 public slots:
    virtual void handleProcess() = 0;
-   void imageComplete(unsigned long long totalEnergiesToProcess);
+   void handleImageComplete();
 
 };
 

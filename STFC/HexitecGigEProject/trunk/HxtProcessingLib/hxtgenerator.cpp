@@ -4,63 +4,53 @@
 #include <QDebug>
 #include <Windows.h>
 
-HxtGenerator::HxtGenerator(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth) : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+HxtGenerator::HxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
 {
-   setImageInProgress(true);
-//   connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
-//   emit process();
-
+   qDebug() << "HxtGenerator::HxtGenerator() called";
 }
 
 void HxtGenerator::handleProcess()
 {
    double *pixelEnergy;
+   long long gotEnergy = 0;
+   long long energyNotNull = 0;
 
-   qDebug() << "******************HxtGenerator::handleProcess() running in thread." << QThread::currentThreadId();
-   while (inProgress || (hxtItem->getPixelEnergyQueueSize() > 0) || (processedEnergyCount < totalEnergiesToProcess))
+   qDebug() << "HxtGenerator::handleProcess() called, running in thread." << QThread::currentThreadId();
+   while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyQueueSize() > 0) || processedEnergyCount < (hxtItem->getTotalEnergiesToProcess()))
    {
-      while (inProgress &&((hxtItem->getPixelEnergyQueueSize() == 0)))
+      while (getFrameProcessingInProgress() &&((hxtItem->getPixelEnergyQueueSize()) == 0))
       {
          Sleep(10);
       }
       qDebug() << "GOT AN ENERGY TO PROCESS";
-      while (hxtItem->getPixelEnergyQueueSize() > 0)
+      while ((hxtItem->getPixelEnergyQueueSize()) > 0)
       {
-         qDebug() << "11111";
+         gotEnergy++;
          pixelEnergy = hxtItem->getNextPixelEnergy();
-         qDebug() << "22222";
-
          if (pixelEnergy != NULL)
          {
-            qDebug() << "PROCESS AN ENERGY!!!!!!!!!!!!!!! " ;
-
+            energyNotNull++;
 //               result = processEnergies(pixelEnergy);
 
                  processEnergies(pixelEnergy);
+//                 free(pixelEnergy);
 
                // MUST USE RESULT IN FURTHER CALCULATIONS
 //               free(result);
 //            writeFile(bufferStart, (validFrames * frameSize), filename);
 //            free(bufferStart);
          }
-         else
-         {
-            qDebug() << "pixelEnergy is NULL!!!!!!!!!!!!!!! ";
-         }
-         qDebug() << "33333";
-
       }
-      qDebug() << "44444";
-
    }
-   qDebug() << "HxtGenerator::handleProcess() number of energies processed:" << processedEnergyCount;
-   emit energyProcessingComplete(processedEnergyCount);
-
+   qDebug() << "HxtGenerator::handleProcess() number of energies processed: " << processedEnergyCount
+            << "totalEnergies to Process: " << hxtItem->getTotalEnergiesToProcess();
+   qDebug() << "queued energies =  " << gotEnergy
+            << " energiesNotNull =  " << energyNotNull;
+//   emit energyProcessingComplete(processedEnergyCount);
 }
 
 void HxtGenerator::processEnergies(double *pixelEnergy)
 {
-//   hxtItem->addToHistogram(pixelEnergy);
-   processedEnergyCount++;
-   qDebug() << "HxtGenerator::processEnergies called: " << processedEnergyCount;
+   hxtItem->addToHistogram(pixelEnergy);
+   incrementProcessedEnergyCount();
 }

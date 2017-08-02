@@ -5,34 +5,40 @@
 #include <QQueue>
 #include <cstdint>
 
+#define MIN_ENERGY 1.0e-100
+
 class HxtItem
 {
 public:
-   HxtItem(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth);
+   HxtItem(int frameSize, long long binStart, long long binEnd, long long binWidth);
    void enqueuePixelEnergy(double *pixelEnergy);
    double *getNextPixelEnergy();
    int getPixelEnergyQueueSize();
+   void setTotalEnergiesToProcess(long long totalEnergiesToProcess);
+   void incrementTotalEnergiesToProcess();
+   long long getTotalEnergiesToProcess();
    void addToHistogram(double *pixelEnergy);
 
 private:
-   unsigned long long getBinStart() const;
-   void setBinStart(const unsigned long long value);
-   unsigned long long getBinEnd() const;
-   void setBinEnd(const unsigned long long value);
-   unsigned long long getBinWidth() const;
-   void setBinWidth(const unsigned long long value);
+   long long getBinStart() const;
+   void setBinStart(const long long value);
+   long long getBinEnd() const;
+   void setBinEnd(const long long value);
+   long long getBinWidth() const;
+   void setBinWidth(const long long value);
 //   void addToHistogram(double *pixelEnergy);
    bool pixelEnergyQueueNotEmpty();
    QMutex mutex;
    double *pixelEnergy;
    int frameSize;
-   unsigned long long binStart;
-   unsigned long long binEnd;
-   unsigned long long binWidth;
-   unsigned long long nBins;
+   long long binStart;
+   long long binEnd;
+   long long binWidth;
+   long long nBins;
    unsigned long *histogramPerPixel;
    unsigned long histogramIndex;
-   unsigned long energiesProcessed;
+   long long totalEnergiesToProcess;
+   long long energiesProcessed;
    QQueue <double *>pixelEnergyQueue;
 };
 

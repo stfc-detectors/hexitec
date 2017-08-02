@@ -28,6 +28,7 @@ void ProcessingDefinition::setThresholdPerPixel(uint16_t *thresholdPerPixel)
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
 {
    this->energyCalibration = energyCalibration;
+   qDebug() << "ProcessingDefinition::setEnergyCalibration: " << energyCalibration;
 }
 
 void ProcessingDefinition::setProcessedFilename(const char *processedFilename)
@@ -128,33 +129,36 @@ void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
     this->totalSpectrum = totalSpectrum;
 }
 
-unsigned long long ProcessingDefinition::getBinWidth() const
+long long ProcessingDefinition::getBinWidth() const
 {
     return binWidth;
 }
 
-void ProcessingDefinition::setBinWidth(const unsigned long long &binWidth)
+void ProcessingDefinition::setBinWidth(const long long &binWidth)
 {
+    qDebug() << "Set binWidth = " << binWidth;
     this->binWidth = binWidth;
 }
 
-unsigned long long ProcessingDefinition::getBinEnd() const
+long long ProcessingDefinition::getBinEnd() const
 {
    return binEnd;
 }
 
-void ProcessingDefinition::setBinEnd(const unsigned long long &binEnd)
+void ProcessingDefinition::setBinEnd(const long long &binEnd)
 {
+   qDebug() << "Set binEnd = " << binEnd;
    this->binEnd = binEnd;
 }
 
-unsigned long long ProcessingDefinition::getBinStart() const
+long long ProcessingDefinition::getBinStart() const
 {
    return binStart;
 }
 
-void ProcessingDefinition::setBinStart(const unsigned long long &binStart)
+void ProcessingDefinition::setBinStart(const long long &binStart)
 {
+   qDebug() << "Set binStart = " << binStart;
    this->binStart = binStart;
 }
 

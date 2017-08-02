@@ -6,26 +6,25 @@
 
 using namespace std;
 
-HxtItem::HxtItem(int frameSize, unsigned long long binStart, unsigned long long binEnd, unsigned long long binWidth)
+HxtItem::HxtItem(int frameSize, long long binStart, long long binEnd, long long binWidth)
 {
-//   QMutexLocker locker(&mutex);
    this->frameSize = frameSize;
    setBinStart(binStart);
    setBinEnd(binEnd);
    setBinWidth(binWidth);
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
    histogramPerPixel = (unsigned long *) calloc(nBins * frameSize, sizeof(unsigned long));
+   qDebug() << "HxtItem::HxtItem(): nBins = " << nBins << " frameSize = " << frameSize;
    pixelEnergy = NULL;
    energiesProcessed = 0;
    this->pixelEnergyQueue.clear();
-   qDebug() << "NEW HxtItem Created, histogram size = nBins: " << nBins;
 }
 
 void HxtItem::enqueuePixelEnergy(double *pixelEnergy)
 {
+   incrementTotalEnergiesToProcess();
    QMutexLocker locker(&mutex);
    pixelEnergyQueue.enqueue(pixelEnergy);
-   qDebug() << "HxtItem::enqueuePixelEnergy() called, thread = " << QThread::currentThreadId();
 }
 
 double *HxtItem::getNextPixelEnergy()
@@ -37,8 +36,6 @@ double *HxtItem::getNextPixelEnergy()
 
    if (pixelEnergyQueueNotEmpty())
    {
-      qDebug() << "HxtItem::getNextPixelEnergy called. Queue length = " << getPixelEnergyQueueSize()
-               << "thread = " << QThread::currentThreadId();
       QMutexLocker locker(&mutex);
       pixelEnergy = pixelEnergyQueue.dequeue();
    }
@@ -58,64 +55,75 @@ int HxtItem::getPixelEnergyQueueSize()
    return pixelEnergyQueue.size();
 }
 
-unsigned long long HxtItem::getBinStart() const
+void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
+{
+   QMutexLocker locker(&mutex);
+   this->totalEnergiesToProcess = totalEnergiesToProcess;
+}
+
+void HxtItem::incrementTotalEnergiesToProcess()
+{
+   QMutexLocker locker(&mutex);
+   this->totalEnergiesToProcess = totalEnergiesToProcess++;
+}
+
+long long HxtItem::getTotalEnergiesToProcess()
+{
+   QMutexLocker locker(&mutex);
+   return totalEnergiesToProcess;
+}
+
+long long HxtItem::getBinStart() const
 {
    return binStart;
 }
 
-void HxtItem::setBinStart(const unsigned long long value)
+void HxtItem::setBinStart(const long long value)
 {
    binStart = value;
 }
 
-unsigned long long HxtItem::getBinEnd() const
+long long HxtItem::getBinEnd() const
 {
    return binEnd;
 }
 
-void HxtItem::setBinEnd(const unsigned long long value)
+void HxtItem::setBinEnd(const long long value)
 {
    binEnd = value;
 }
 
-unsigned long long HxtItem::getBinWidth() const
+long long HxtItem::getBinWidth() const
 {
    return binWidth;
 }
 
-void HxtItem::setBinWidth(const unsigned long long value)
+void HxtItem::setBinWidth(const long long value)
 {
    binWidth = value;
 }
 
 void HxtItem::addToHistogram(double *pixelEnergy)
 {
-   unsigned long *currentHistogram = histogramPerPixel;
+   unsigned long *currentHistogram = &histogramPerPixel[0];
    double *thisEnergy;
    int bin;
 
-   qDebug() <<"HxtItem::addToHistogram() running in thread." << QThread::currentThreadId();
    for (int i = 0; i < frameSize; i++)
    {
-//      qDebug() <<"++++++++++++++++++++++++++++++++++++++++++++++++++";
       thisEnergy = pixelEnergy+i;
-      if (*thisEnergy  != 0)
+      if (*thisEnergy  > MIN_ENERGY)
       {
-//         bin = (int)((pixelEnergy[i] / binWidth) + 0.5);
          bin = (int)((*thisEnergy / binWidth) + 0.5);
          if (bin < nBins)
          {
             (*(currentHistogram + bin))++;
-//            qDebug() << "incrementing histogram !!!: " << bin << ", "<< pixelEnergy[i];
-         }
-         else
-         {
-//            qDebug() << "histogram index out of range!!!: " << bin << ", "<< pixelEnergy[i];
          }
       }
       currentHistogram+=nBins;
    }
+
    energiesProcessed++;
-   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
+//   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
 }
 
