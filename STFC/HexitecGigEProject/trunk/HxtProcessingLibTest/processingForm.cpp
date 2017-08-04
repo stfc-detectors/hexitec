@@ -58,7 +58,7 @@ void ProcessingForm::processClicked()
 
 void ProcessingForm::processClicked()
 {
-   const char *imageFilename = "C://karen//STFC//Technical//PLTest//image.bin";
+   const char *imageFilename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//image.bin";
 
    qDebug() << "PROCESS BUTTON has been clicked!";
    processImage(imageFilename, "C://karen//STFC//Technical//DSoFt_Images//Size10.bin");
@@ -165,8 +165,8 @@ void ProcessingForm::setThresholdParameters()
       default:
          break;
    }
-   gradientFilename = (char *)"C://karen//STFC//Technical//PLTest//c_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//PLTest//m_intercepts.txt";
+   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_intercepts.txt";
    emit configureProcessing(thresholdOption, thresholdValue, thresholdPerPixel,
                             gradientFilename,
                             interceptFilename,
@@ -175,7 +175,7 @@ void ProcessingForm::setThresholdParameters()
 
 void ProcessingForm::setThresholdFile()
 {
-   QString source = QFileDialog::getOpenFileName(this, tr("Open Threshold File"), "C://karen//STFC//Technical//PLTest//");
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Threshold File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
    ui->thresholdFile->setText(source);
 }
 
@@ -230,8 +230,8 @@ void ProcessingForm::setEnergyCalibrationParameters()
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
 
-   gradientFilename = (char *)"C://karen//STFC//Technical//PLTest//c_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//PLTest//m_intercepts.txt";
+   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_intercepts.txt";
    emit configureProcessing(energyCalibration, binStart, binEnd, binWidth, totalSpectrum,
                             gradientFilename,
                             interceptFilename,

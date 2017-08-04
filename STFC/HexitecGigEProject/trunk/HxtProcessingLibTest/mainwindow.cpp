@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
    setCentralWidget(tabs);
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
-   processingDefinition = new ProcessingDefinition();
+   processingDefinition = new ProcessingDefinition(6400);
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
    connect(processingForm, SIGNAL(configureProcessing(bool,const char*,const char*,const char*)),
