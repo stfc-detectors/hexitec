@@ -266,6 +266,7 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, double **pixelEn
 {
    uint16_t  *re_orderedFrame;
    double *pixelEnergy;
+   int index;
 
 //   qDebug() << "PixelProcessor::processRe_orderFrame()";
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
@@ -273,8 +274,9 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, double **pixelEn
    pixelEnergy = (double *) calloc(frameSize, sizeof(double));
    for (int i = 0; i < frameSize; i++)
    {
-      re_orderedFrame[pixelMap[i]] = frame[i];
-      pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
+      index = pixelMap[i];
+      re_orderedFrame[index] = frame[i];
+      pixelEnergy[index] = re_orderedFrame[index] * gradientValue[index] + interceptValue[index];
    }
    *pixelEnergyPtr = pixelEnergy;
 
@@ -285,21 +287,23 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresho
 {
    uint16_t  *re_orderedFrame;
    double *pixelEnergy;
+   int index;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
    pixelEnergy = (double *) calloc(frameSize, sizeof(double));
    for (int i = 0; i < frameSize; i++)
    {
-      if (frame[pixelMap[i]] - thresholdValue < 0)
+      index = pixelMap[i];
+      if (frame[i] - thresholdValue < 0)
       {
-         re_orderedFrame[pixelMap[i]] = 0;
-         pixelEnergy[pixelMap[i]] = interceptValue[i];
+         re_orderedFrame[index] = 0;
+         pixelEnergy[index] = interceptValue[index];
       }
       else
       {
-         re_orderedFrame[pixelMap[i]] = frame[i];
-         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
+         re_orderedFrame[index] = frame[i];
+         pixelEnergy[index] = re_orderedFrame[index] * gradientValue[index] + interceptValue[index];
       }
    }
    *pixelEnergyPtr = pixelEnergy;
@@ -311,21 +315,23 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresh
 {
    uint16_t  *re_orderedFrame;
    double *pixelEnergy;
+   int index;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
    pixelEnergy = (double *) calloc(frameSize, sizeof(double));
    for (int i = 0; i < frameSize; i++)
    {
+      index = pixelMap[i];
       if (frame[i] - thresholdPerPixel[i] < 0)
       {
-         re_orderedFrame[pixelMap[i]] = 0;
-         pixelEnergy[pixelMap[i]] = interceptValue[i];
+         re_orderedFrame[index] = 0;
+         pixelEnergy[index] = interceptValue[index];
       }
       else
       {
-         re_orderedFrame[pixelMap[i]] = frame[i];
-         pixelEnergy[pixelMap[i]] = re_orderedFrame[pixelMap[i]] * gradientValue[i] + interceptValue[i];
+         re_orderedFrame[index] = frame[i];
+         pixelEnergy[index] = re_orderedFrame[index] * gradientValue[index] + interceptValue[index];
       }
    }
    *pixelEnergyPtr = pixelEnergy;

@@ -18,6 +18,8 @@ public:
    void setFrameProcessingInProgress(bool inProgress);
    void incrementProcessedEnergyCount();
    long long getProcessedEnergyCount();
+   HxtItem::HxtV3Buffer *getHxtV3Buffer();
+   double *getHxtV3AllData();
 
 protected:
    bool getFrameProcessingInProgress();

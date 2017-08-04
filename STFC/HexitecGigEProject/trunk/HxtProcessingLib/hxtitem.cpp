@@ -3,8 +3,10 @@
 #include <QDebug>
 #include <QThread>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
+
 
 HxtItem::HxtItem(int frameSize, long long binStart, long long binEnd, long long binWidth)
 {
@@ -13,11 +15,39 @@ HxtItem::HxtItem(int frameSize, long long binStart, long long binEnd, long long 
    setBinEnd(binEnd);
    setBinWidth(binWidth);
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
-   histogramPerPixel = (unsigned long *) calloc(nBins * frameSize, sizeof(unsigned long));
+   initialiseHxtBuffer(frameSize);
+//   bin = (unsigned long *) calloc(nBins, sizeof(unsigned long));
+//   histogramPerPixel = (unsigned long *) calloc(nBins * frameSize, sizeof(unsigned long));
    qDebug() << "HxtItem::HxtItem(): nBins = " << nBins << " frameSize = " << frameSize;
    pixelEnergy = NULL;
    energiesProcessed = 0;
    this->pixelEnergyQueue.clear();
+}
+
+void HxtItem::initialiseHxtBuffer(int frameSize)
+{
+   quint32 gridSize;
+   gridSize = (int) sqrt(frameSize);
+
+   strncpy(hxtV3Buffer.hxtLabel, "HEXITECH", sizeof(hxtV3Buffer.hxtLabel));
+   hxtV3Buffer.hxtVersion = 3;
+   hxtV3Buffer.filePrefixLength = 0;
+   strncpy(hxtV3Buffer.filePrefix, "(blank)", 7);
+//   hxtV3Buffer.filePrefix = "(blank)             ";
+   hxtV3Buffer.nRows = gridSize;
+   hxtV3Buffer.nCols = gridSize;
+   hxtV3Buffer.nBins = nBins;
+   hxtV3Buffer.allData = (double *) calloc((nBins * frameSize) + nBins, sizeof(double));
+   energyBin = hxtV3Buffer.allData;
+   histogramPerPixel = hxtV3Buffer.allData + nBins;
+   qDebug() << "HxtItem::initialiseHxtBuffer, nRows: " << hxtV3Buffer.nRows << " nCols: " << hxtV3Buffer.nCols
+            << " nBins: " << hxtV3Buffer.nBins;
+
+   for (long long i = binStart; i < binEnd; i += binWidth)
+   {
+      *energyBin = i;
+      energyBin++;
+   }
 }
 
 void HxtItem::enqueuePixelEnergy(double *pixelEnergy)
@@ -105,7 +135,7 @@ void HxtItem::setBinWidth(const long long value)
 
 void HxtItem::addToHistogram(double *pixelEnergy)
 {
-   unsigned long *currentHistogram = &histogramPerPixel[0];
+   double *currentHistogram = &histogramPerPixel[0];
    double *thisEnergy;
    int bin;
 
@@ -124,6 +154,16 @@ void HxtItem::addToHistogram(double *pixelEnergy)
    }
 
    energiesProcessed++;
-//   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
+   //   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
+}
+
+HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
+{
+   return &hxtV3Buffer;
+}
+
+double *HxtItem::getHxtV3AllData()
+{
+   return hxtV3Buffer.allData;
 }
 

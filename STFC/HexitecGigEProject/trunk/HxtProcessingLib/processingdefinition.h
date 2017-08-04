@@ -2,7 +2,9 @@
 #define PROCESSINGDEFINITION_H
 
 //#include "inifile.h"
+#include "hxtitem.h"
 #include <cstdint>
+#include <string>
 
 using namespace std;
 
@@ -11,7 +13,7 @@ enum ThresholdMode {NONE, SINGLE_VALUE, THRESHOLD_FILE};
 class ProcessingDefinition
 {
 public:
-   ProcessingDefinition();
+   ProcessingDefinition(long long frameSize);
 
    void setThresholdMode(ThresholdMode threshholdMode);
    void setThresholdValue(int thresholdValue);
@@ -47,6 +49,20 @@ public:
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
 
+   string getOutputDirectory() const;
+   void setOutputDirectory(const string &value);
+
+   string getOutputPrefix() const;
+   void setOutputPrefix(const string &value);
+
+   long long getFrameSize() const;
+   void setFrameSize(long long value);
+
+   long long getHxtBufferAllDataSize() const;
+
+   long long getHxtBufferHeaderSize() const;
+   void setHxtBufferHeaderSize(long long value);
+
 private:
    void setGradients();
    void setIntercepts();
@@ -56,15 +72,20 @@ private:
    int thresholdValue;
    uint16_t *thresholdPerPixel;
    bool energyCalibration;
+   long long frameSize;
    long long binStart;
    long long binEnd;
    long long binWidth;
    bool totalSpectrum;
+   long long hxtBufferAllDataSize;
+   long long hxtBufferHeaderSize;
    char *gradientFilename;
    char *interceptFilename;
    char *processedFilename;
    double *gradientValue;
    double *interceptValue;
+   string outputDirectory;
+   string outputPrefix;
 
 };
 

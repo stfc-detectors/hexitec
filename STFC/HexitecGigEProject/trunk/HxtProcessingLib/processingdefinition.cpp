@@ -4,10 +4,13 @@
 #include <iostream>
 #include <fstream>
 
-ProcessingDefinition::ProcessingDefinition()
+ProcessingDefinition::ProcessingDefinition(long long frameSize)
 {
-   gradientValue = (double *) calloc(6400, sizeof(double));
-   interceptValue = (double *) calloc(6400, sizeof(double));
+   this->frameSize = frameSize;
+   gradientValue = (double *) calloc(frameSize, sizeof(double));
+   interceptValue = (double *) calloc(frameSize, sizeof(double));
+   outputDirectory = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images";
+   outputPrefix = "re_order";
 }
 
 void ProcessingDefinition::setThresholdMode(ThresholdMode threshholdMode)
@@ -119,14 +122,64 @@ void ProcessingDefinition::getData(const char *filename, double *dataValue)
    inFile.close();
 }
 
+long long ProcessingDefinition::getHxtBufferHeaderSize() const
+{
+   return hxtBufferHeaderSize;
+}
+
+void ProcessingDefinition::setHxtBufferHeaderSize(long long value)
+{
+   hxtBufferHeaderSize = value;
+}
+
+long long ProcessingDefinition::getHxtBufferAllDataSize() const
+{
+   return hxtBufferAllDataSize;
+}
+
+long long ProcessingDefinition::getFrameSize() const
+{
+   return frameSize;
+}
+
+void ProcessingDefinition::setFrameSize(long long value)
+{
+   frameSize = value;
+}
+
+string ProcessingDefinition::getOutputPrefix() const
+{
+   return outputPrefix;
+}
+
+void ProcessingDefinition::setOutputPrefix(const string &value)
+{
+   outputPrefix = value;
+}
+
+string ProcessingDefinition::getOutputDirectory() const
+{
+   return outputDirectory;
+}
+
+void ProcessingDefinition::setOutputDirectory(const string &value)
+{
+   outputDirectory = value;
+}
+
 bool ProcessingDefinition::getTotalSpectrum() const
 {
-    return totalSpectrum;
+   return totalSpectrum;
 }
 
 void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
-    this->totalSpectrum = totalSpectrum;
+   long long nBins;
+
+   this->totalSpectrum = totalSpectrum;
+   nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
+   hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * sizeof(double);
+   hxtBufferHeaderSize = sizeof(HxtItem::HxtV3Buffer) - sizeof(double *);
 }
 
 long long ProcessingDefinition::getBinWidth() const

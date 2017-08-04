@@ -55,3 +55,13 @@ long long GeneralHxtGenerator::getProcessedEnergyCount()
    QMutexLocker locker(&mutex);
    return processedEnergyCount;
 }
+
+HxtItem::HxtV3Buffer *GeneralHxtGenerator::getHxtV3Buffer()
+{
+   return hxtItem->getHxtV3Buffer();
+}
+
+double *GeneralHxtGenerator::getHxtV3AllData()
+{
+   return hxtItem->getHxtV3AllData();
+}

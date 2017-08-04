@@ -44,8 +44,10 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
+   const char* filenameHxt;
 
-   filename = "C://karen//STFC//Technical//PLTest//re_order.bin";
+   filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
+   filenameHxt = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.hxt";
    qDebug() << "ImageProcessor::process() ThresholdMode::NONE" << frameSize;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -70,7 +72,14 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                   processedFrameCount++;
                   free(result);
                }
-               writeFile(bufferStart, (validFrames * frameSize), filename);
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
+               qDebug() << "processingDefinition->getHxtBufferHeaderSize(), processingDefinition->getHxtBufferAllDataSize(), filenameHxt";
+               qDebug() << processingDefinition->getHxtBufferHeaderSize()
+                        <<  " : " << processingDefinition->getHxtBufferAllDataSize()<<  " : " << filenameHxt;
+
+               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                            filenameHxt);
                free(bufferStart);
             }
          }
@@ -91,7 +100,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                   processedFrameCount++;
                   free(result);
                }
-               writeFile(bufferStart, (validFrames * frameSize), filename);
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
                free(bufferStart);
             }
          }
@@ -106,7 +115,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
    char *bufferStart;
    char *frameIterator;
 
-   filename = "C://karen//STFC//Technical//PLTest//re_orderThreshVal.bin";
+   filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
    thresholdValue = processingDefinition->getThresholdValue();
    qDebug() << "ImageProcessor::process() ThresholdMode::SINGLE_VALUE" << thresholdValue;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -129,7 +138,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                processedFrameCount++;
             }
             qDebug() << "Writing to file: " << (validFrames * frameSize);
-            writeFile(bufferStart, (validFrames * frameSize), filename);
+            writeBinFile(bufferStart, (validFrames * frameSize), filename);
             free(bufferStart);
          }
       }
@@ -142,7 +151,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    char *bufferStart;
    char *frameIterator;
 
-   filename = "C://karen//STFC//Technical//PLTest//re_orderThreshPerPix.bin";
+   filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.bin";
    qDebug() << "ImageProcessor::process() ThresholdMode::THRESHOLD_FILE";
    thresholdPerPixel = processingDefinition->getThresholdPerPixel();
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -164,7 +173,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                frameIterator += frameSize;
                processedFrameCount++;
             }
-            writeFile(bufferStart, (validFrames * frameSize), filename);
+            writeBinFile(bufferStart, (validFrames * frameSize), filename);
             free(bufferStart);
          }
       }
@@ -176,7 +185,7 @@ void ImageProcessor::handleProcess()
    GeneralFrameProcessor *fp;
    int thresholdValue;
    uint16_t *thresholdPerPixel;
-   const char* filename = "C://karen//STFC//Technical//PLTest//re_orderThreshVal.bin";
+   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
    uint16_t *result;
    bool energyCalibration;
 
@@ -243,12 +252,23 @@ void ImageProcessor::imageAcquisitionComplete(long long totalFramesToProcess)
    setImageInProgress(false);
 }
 
-void ImageProcessor::writeFile(char *buffer, unsigned long length, const char* filename)
+void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char* filename)
 {
    std::ofstream outFile;
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::app);
    outFile.write((const char *)buffer, length * sizeof(char));
-   outFile.close();
+   outFile.close();   
+}
 
+void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)
+{
+   std::ofstream outFile;
+
+   qDebug() << "ImageProcessor::writeHxtFile() called";
+
+   outFile.open(filename, std::ofstream::binary | std::ofstream::out);
+   outFile.write((const char *)header, headerLength * sizeof(char));
+   outFile.write((const char *)data, dataLength * sizeof(char));
+   outFile.close();
 }

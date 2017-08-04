@@ -28,7 +28,8 @@ public:
 
    
 private:
-   void writeFile(char *buffer, unsigned long length, const char* filename);
+   void writeBinFile(char *buffer, unsigned long length, const char* filename);
+   void writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char* filename);
    QThread *imageProcessorThread;
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
