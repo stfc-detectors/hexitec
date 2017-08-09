@@ -23,6 +23,7 @@ ImageProcessor::ImageProcessor(const char *name, int frameSize, ProcessingDefini
       }
       else
       {
+//         hxtGenerator = new HxtGenerator(frameSize/2, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
          hxtGenerator = new HxtGenerator(frameSize/2, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
       }
    }
@@ -45,6 +46,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *bufferStart;
    char *frameIterator;
    const char* filenameHxt;
+   int buffNo = 0;
 
    filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
    filenameHxt = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.hxt";
@@ -73,7 +75,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filename);
-               qDebug() << "processingDefinition->getHxtBufferHeaderSize(), processingDefinition->getHxtBufferAllDataSize(), filenameHxt";
+               qDebug() << "writing buffer" << buffNo << " to binary file: validFrames: " << validFrames << " frameSize: " << frameSize;
                qDebug() << processingDefinition->getHxtBufferHeaderSize()
                         <<  " : " << processingDefinition->getHxtBufferAllDataSize()<<  " : " << filenameHxt;
 
@@ -81,6 +83,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                             (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
                             filenameHxt);
                free(bufferStart);
+               buffNo++;
             }
          }
       }
@@ -114,8 +117,10 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
+   const char* filenameHxt;
 
    filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
+   filenameHxt = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.hxt";
    thresholdValue = processingDefinition->getThresholdValue();
    qDebug() << "ImageProcessor::process() ThresholdMode::SINGLE_VALUE" << thresholdValue;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -124,22 +129,51 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       {
          Sleep(10);
       }
-      while (imageItem->getBufferQueueSize() > 0)
+      if (energyCalibration)
       {
-         bufferStart = imageItem->getNextBuffer(&validFrames);
-         frameIterator = bufferStart;
-         if (frameIterator != NULL)
+
+         while (imageItem->getBufferQueueSize() > 0)
          {
-            for (unsigned long i = 0; i < validFrames; i++)
+            bufferStart = imageItem->getNextBuffer(&validFrames);
+            frameIterator = bufferStart;
+            if (frameIterator != NULL)
             {
-               result = fp->process((uint16_t *)frameIterator, thresholdValue);
-               // MUST USE RESULT IN FURTHER CALCULATIONS
-               frameIterator += frameSize;
-               processedFrameCount++;
+               for (unsigned long i = 0; i < validFrames; i++)
+               {
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &pixelEnergy);
+                  hxtGenerator->enqueuePixelEnergy(pixelEnergy);
+                  // MUST USE RESULT IN FURTHER CALCULATIONS
+                  frameIterator += frameSize;
+                  processedFrameCount++;
+                  free(result);
+               }
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
+               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                            filenameHxt);
+               free(bufferStart);
             }
-            qDebug() << "Writing to file: " << (validFrames * frameSize);
-            writeBinFile(bufferStart, (validFrames * frameSize), filename);
-            free(bufferStart);
+         }
+      }
+      else
+      {
+         while (imageItem->getBufferQueueSize() > 0)
+         {
+            bufferStart = imageItem->getNextBuffer(&validFrames);
+            frameIterator = bufferStart;
+            if (frameIterator != NULL)
+            {
+               for (unsigned long i = 0; i < validFrames; i++)
+               {
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue);
+                  // MUST USE RESULT IN FURTHER CALCULATIONS
+                  frameIterator += frameSize;
+                  processedFrameCount++;
+                  free(result);
+               }
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
+               free(bufferStart);
+            }
          }
       }
    }
@@ -172,6 +206,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                // MUST USE RESULT IN FURTHER CALCULATIONS
                frameIterator += frameSize;
                processedFrameCount++;
+               qDebug() << "done a frame";
             }
             writeBinFile(bufferStart, (validFrames * frameSize), filename);
             free(bufferStart);

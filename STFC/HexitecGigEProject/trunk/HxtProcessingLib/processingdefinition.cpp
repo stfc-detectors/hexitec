@@ -112,7 +112,8 @@ void ProcessingDefinition::getData(const char *filename, double *dataValue)
      qDebug() << "error opening " << filename;
    while (inFile >> dataValue[i])
    {
-       i++;
+      qDebug() << "i: " << i << " value: " << dataValue[i];
+      i++;
    }
 
    if (i < 6400)
@@ -122,14 +123,44 @@ void ProcessingDefinition::getData(const char *filename, double *dataValue)
    inFile.close();
 }
 
+int ProcessingDefinition::getPixelGridSize() const
+{
+    return pixelGridSize;
+}
+
+void ProcessingDefinition::setPixelGridSize(int value)
+{
+    pixelGridSize = value;
+}
+
+bool ProcessingDefinition::getNextFrameCorrection() const
+{
+    return nextFrameCorrection;
+}
+
+void ProcessingDefinition::setNextFrameCorrection(bool value)
+{
+    nextFrameCorrection = value;
+}
+
+ChargeSharingMode ProcessingDefinition::getChargeSharingMode() const
+{
+    return chargeSharingMode;
+}
+
+void ProcessingDefinition::setChargeSharingMode(const ChargeSharingMode &value)
+{
+    chargeSharingMode = value;
+}
+
 long long ProcessingDefinition::getHxtBufferHeaderSize() const
 {
-   return hxtBufferHeaderSize;
+    return hxtBufferHeaderSize;
 }
 
 void ProcessingDefinition::setHxtBufferHeaderSize(long long value)
 {
-   hxtBufferHeaderSize = value;
+    hxtBufferHeaderSize = value;
 }
 
 long long ProcessingDefinition::getHxtBufferAllDataSize() const
@@ -182,12 +213,12 @@ void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
    hxtBufferHeaderSize = sizeof(HxtItem::HxtV3Buffer) - sizeof(double *);
 }
 
-long long ProcessingDefinition::getBinWidth() const
+double ProcessingDefinition::getBinWidth() const
 {
     return binWidth;
 }
 
-void ProcessingDefinition::setBinWidth(const long long &binWidth)
+void ProcessingDefinition::setBinWidth(const double &binWidth)
 {
     qDebug() << "Set binWidth = " << binWidth;
     this->binWidth = binWidth;

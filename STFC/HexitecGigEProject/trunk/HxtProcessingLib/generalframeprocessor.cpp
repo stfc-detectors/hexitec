@@ -48,13 +48,14 @@ double *GeneralFrameProcessor::getData(const char *filename)
      qDebug() << "error opening " << filename;
    while (inFile >> dataValue[i])
    {
-       i++;
+      qDebug() << "i: " << i << " value: " << dataValue[i];
+      i++;
    }
 
    if (i < 6400)
-     qDebug() << "error: only " << i << " could be read";
+      qDebug() << "error: only " << i << " could be read";
    else
-     qDebug() << "gradients read OK ";
+      qDebug() << "gradients read OK ";
    inFile.close();
 
    return dataValue;

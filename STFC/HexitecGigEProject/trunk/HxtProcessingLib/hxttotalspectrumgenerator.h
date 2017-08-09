@@ -7,7 +7,7 @@ class HxtTotalSpectrumGenerator : public GeneralHxtGenerator
 {
 public:
 //   HxtTotalSpectrumGenerator();
-   HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth);
+   HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, double binWidth);
    ~HxtTotalSpectrumGenerator();
 
 public slots:

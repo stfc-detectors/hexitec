@@ -36,7 +36,7 @@ public:
  * */
    };
 
-   HxtItem(int frameSize, long long binStart, long long binEnd, long long binWidth);
+   HxtItem(int frameSize, long long binStart, long long binEnd, double binWidth);
    void enqueuePixelEnergy(double *pixelEnergy);
    double *getNextPixelEnergy();
    int getPixelEnergyQueueSize();
@@ -54,8 +54,8 @@ private:
    void setBinStart(const long long value);
    long long getBinEnd() const;
    void setBinEnd(const long long value);
-   long long getBinWidth() const;
-   void setBinWidth(const long long value);
+   double getBinWidth() const;
+   void setBinWidth(double value);
 //   void addToHistogram(double *pixelEnergy);
    bool pixelEnergyQueueNotEmpty();
    QMutex mutex;
@@ -63,7 +63,7 @@ private:
    int frameSize;
    long long binStart;
    long long binEnd;
-   long long binWidth;
+   double binWidth;
    long long nBins;
    double *energyBin;
    double *histogramPerPixel;

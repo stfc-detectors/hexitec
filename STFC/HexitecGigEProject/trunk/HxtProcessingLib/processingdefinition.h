@@ -9,6 +9,7 @@
 using namespace std;
 
 enum ThresholdMode {NONE, SINGLE_VALUE, THRESHOLD_FILE};
+enum ChargeSharingMode {OFF, ADDITION, DISCRIMINATION};
 
 class ProcessingDefinition
 {
@@ -43,8 +44,8 @@ public:
    long long getBinEnd() const;
    void setBinEnd(const long long &binEnd);
 
-   long long getBinWidth() const;
-   void setBinWidth(const long long &binWidth);
+   double getBinWidth() const;
+   void setBinWidth(const double &binWidth);
 
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
@@ -63,6 +64,15 @@ public:
    long long getHxtBufferHeaderSize() const;
    void setHxtBufferHeaderSize(long long value);
 
+   ChargeSharingMode getChargeSharingMode() const;
+   void setChargeSharingMode(const ChargeSharingMode &value);
+
+   bool getNextFrameCorrection() const;
+   void setNextFrameCorrection(bool value);
+
+   int getPixelGridSize() const;
+   void setPixelGridSize(int value);
+
 private:
    void setGradients();
    void setIntercepts();
@@ -72,10 +82,13 @@ private:
    int thresholdValue;
    uint16_t *thresholdPerPixel;
    bool energyCalibration;
+   bool nextFrameCorrection;
+   ChargeSharingMode chargeSharingMode;
+   int pixelGridSize;
    long long frameSize;
    long long binStart;
    long long binEnd;
-   long long binWidth;
+   double binWidth;
    bool totalSpectrum;
    long long hxtBufferAllDataSize;
    long long hxtBufferHeaderSize;

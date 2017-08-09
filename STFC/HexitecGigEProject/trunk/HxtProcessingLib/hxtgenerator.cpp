@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <Windows.h>
 
-HxtGenerator::HxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+HxtGenerator::HxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
 {
    qDebug() << "HxtGenerator::HxtGenerator() called";
 }

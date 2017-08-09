@@ -3,7 +3,7 @@
 #include <QDebug>
 
 //GeneralHxtGenerator::GeneralHxtGenerator()
-GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)
+GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth)
 {
 //   int frameSize = 6400;
    qDebug() << "GeneralHxtGenerator::GeneralHxtGenerator() called";

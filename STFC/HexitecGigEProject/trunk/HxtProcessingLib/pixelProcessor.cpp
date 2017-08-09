@@ -298,7 +298,8 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresho
       if (frame[i] - thresholdValue < 0)
       {
          re_orderedFrame[index] = 0;
-         pixelEnergy[index] = interceptValue[index];
+         pixelEnergy[index] = 0;
+//         pixelEnergy[index] = interceptValue[index];
       }
       else
       {
@@ -326,7 +327,7 @@ uint16_t *PixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresh
       if (frame[i] - thresholdPerPixel[i] < 0)
       {
          re_orderedFrame[index] = 0;
-         pixelEnergy[index] = interceptValue[index];
+//         pixelEnergy[index] = interceptValue[index];
       }
       else
       {

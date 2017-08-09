@@ -11,7 +11,7 @@ HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator()
 }
 */
 
-HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, double binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
 {
 //   int frameSize = 6400;
    hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);

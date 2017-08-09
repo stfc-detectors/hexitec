@@ -13,7 +13,7 @@ class GeneralHxtGenerator : public QObject
 
 public:
 //   GeneralHxtGenerator();
-   GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, long long binWidth);
+   GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth);
    void enqueuePixelEnergy(double *pixelEnergy);
    void setFrameProcessingInProgress(bool inProgress);
    void incrementProcessedEnergyCount();
@@ -30,7 +30,7 @@ protected:
    int frameSize;
    long long binStart;
    long long binEnd;
-   long long binWidth;
+   double binWidth;
 //   long long totalEnergiesToProcess;
    long long processedEnergyCount;
    bool inProgress;
