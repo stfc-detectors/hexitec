@@ -61,7 +61,7 @@ void ProcessingForm::processClicked()
    const char *imageFilename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//image.bin";
 
    qDebug() << "PROCESS BUTTON has been clicked!";
-   processImage(imageFilename, "C://karen//STFC//Technical//DSoFt_Images//Size10.bin");
+   processImage(imageFilename, "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Size10.bin");
 }
 
 void ProcessingForm::setRe_orderOption(bool re_order)
@@ -90,7 +90,7 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
 
    while (inFile)
    {
-      transferBuffer = (char *) calloc(6400 * 500, sizeof(uint16_t));
+      transferBuffer = (char *) calloc(6400 * 500 * sizeof(uint16_t), sizeof(char));
 
       inFile.read(transferBuffer, 6400 * 500 * 2);
       if (!inFile)
@@ -165,8 +165,8 @@ void ProcessingForm::setThresholdParameters()
       default:
          break;
    }
-   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_intercepts.txt";
+   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
    emit configureProcessing(thresholdOption, thresholdValue, thresholdPerPixel,
                             gradientFilename,
                             interceptFilename,
@@ -219,7 +219,7 @@ void ProcessingForm::setEnergyCalibrationParameters()
 {
    int binStart;
    int binEnd;
-   int binWidth;
+   double binWidth;
    bool totalSpectrum;
    char *gradientFilename;
    char *interceptFilename;
@@ -230,8 +230,8 @@ void ProcessingForm::setEnergyCalibrationParameters()
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
 
-   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_intercepts.txt";
+   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
    emit configureProcessing(energyCalibration, binStart, binEnd, binWidth, totalSpectrum,
                             gradientFilename,
                             interceptFilename,
@@ -268,3 +268,66 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
    }
 }
 
+void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
+{
+   char *gradientFilename;
+   char *interceptFilename;
+   char *processedFilename;
+
+   emit configureProcessing(nextFrameCorrection,
+                            gradientFilename,
+                            interceptFilename,
+                            processedFilename);
+}
+
+void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
+{
+   this->chargedSharingOption = chargedSharingOption;
+   switch (chargedSharingOption)
+   {
+      case 0:
+         ui->chargedSharingComboBox->setEnabled(false);
+         ui->thresholdFileButton->setEnabled(false);
+         break;
+      case 1:
+         ui->chargedSharingComboBox->setEnabled(true);
+         ui->thresholdFileButton->setEnabled(false);
+         break;
+      case 2:
+         ui->chargedSharingComboBox->setEnabled(false);
+         ui->thresholdFileButton->setEnabled(true);
+         break;
+      default:
+         break;
+   }
+}
+
+void ProcessingForm::setChargedSharingParameters()
+{
+   int chargedSharingValue;
+   char *gradientFilename;
+   char *interceptFilename;
+   char *processedFilename;
+
+   switch (chargedSharingOption)
+   {
+      case 0:
+         chargedSharingValue = NULL;
+         break;
+      case 1:
+      case 2:
+ //        chargedSharingValue = ui->chargedSharingComboBox->
+         break;
+      default:
+         break;
+   }
+
+   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
+   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
+/*
+   emit configureProcessing(chargedSharingOption, chargedSharingValue,
+                            gradientFilename,
+                            interceptFilename,
+                            processedFilename);
+                            */
+}

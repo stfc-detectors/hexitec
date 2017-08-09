@@ -43,7 +43,7 @@ public slots:
    void handleConfigureProcessing(bool energyCalibration,
                                   long long binStart,
                                   long long binEnd,
-                                  long long binWidth,
+                                  double binWidth,
                                   bool totalSpectrum,
                                   const char *gradientFilename,
                                   const char *interceptFilename,

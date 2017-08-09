@@ -75,7 +75,7 @@ void ProcessingBufferGenerator::handleConfigureProcessing(int threshholdMode, in
    processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, long long binStart, long long binEnd, long long binWidth, bool totalSpectrum,
+void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
                                                           const char *gradientFilename,
                                                           const char *interceptFilename,
                                                           const char *processedFilename)

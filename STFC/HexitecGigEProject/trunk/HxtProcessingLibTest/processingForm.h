@@ -35,6 +35,7 @@ private:
    uint16_t thresholdPerPixel[6400];
    bool energyCalibration;
    bool hxtGeneration;
+   int chargedSharingOption;
 
 signals:
    void configureProcessing(bool re_order,
@@ -50,7 +51,7 @@ signals:
    void configureProcessing(bool energyCalibration,
                             long long binStart,
                             long long binEnd,
-                            long long binWidth,
+                            double binWidth,
                             bool totalSpectrum,
                             const char *gradientFilename,
                             const char *interceptFilename,
@@ -71,6 +72,9 @@ private slots:
    void setHxtGeneration(bool hxtGeneration);
    void setStartSpinBoxLimit(int upperLimit);
    void setEndSpinBoxLimit(int lowerLimit);
+   void NextFrameCorrectionOption(bool nextFrameCorrection);
+   void setChargedSharingOptions(int chargedSharingOption);
+   void setChargedSharingParameters();
 };
 
 #endif // PROCESSINGFORM_H
