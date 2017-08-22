@@ -2,19 +2,21 @@
 #define GENERALHXTGENERATOR_H
 
 #include "hxtitem.h"
+#include "processingdefinition.h"
 #include <QObject>
 #include <QDebug>
 #include <QMutex>
 #include <cstdint>
+#include <unordered_map>
 
 class GeneralHxtGenerator : public QObject
 {
    Q_OBJECT
 
 public:
-//   GeneralHxtGenerator();
-   GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth);
+   GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    void enqueuePixelEnergy(double *pixelEnergy);
+   void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
    void setFrameProcessingInProgress(bool inProgress);
    void incrementProcessedEnergyCount();
    long long getProcessedEnergyCount();
@@ -27,11 +29,12 @@ protected:
    QMutex mutex;
    HxtItem *hxtItem;
    long long *histogram;
+   int nRows;
+   int nCols;
    int frameSize;
-   long long binStart;
-   long long binEnd;
-   double binWidth;
-//   long long totalEnergiesToProcess;
+//   long long binStart;
+//   long long binEnd;
+//   double binWidth;
    long long processedEnergyCount;
    bool inProgress;
  

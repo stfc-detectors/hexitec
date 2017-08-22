@@ -7,6 +7,7 @@
 #include "frameprocessor.h"
 #include "framere_orderprocessor.h"
 #include "hxtgenerator.h"
+#include "hxtchargedsharinggenerator.h"
 #include "hxttotalspectrumgenerator.h"
 #include <QObject>
 
@@ -17,7 +18,7 @@ class ImageProcessor: public QObject
    Q_OBJECT
 
 public:
-   ImageProcessor(const char *name, int frameSize, ProcessingDefinition *processingDefinition);
+   ImageProcessor(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
    void imageAcquisitionComplete(long long totalFramesAcquired);
@@ -34,7 +35,10 @@ private:
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
    bool energyCalibration;
+   bool nextFrameCorrection;
+   ChargedSharingMode chargedSharingMode;
    double *pixelEnergy;
+   unordered_map<int, double> *pixelEnergyMap;
 
 //   ImageItem *imageItem;
    char *bufferToProcess;

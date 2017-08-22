@@ -30,7 +30,7 @@ void GeneralFrameProcessor::setEnergyCalibration(bool energyCalibration)
    qDebug() << "pixelProcessor->setEnergyCalibration(energyCalibration): " << energyCalibration;
 }
 
-PixelProcessor *GeneralFrameProcessor::getPixelProcessor()
+GeneralPixelProcessor *GeneralFrameProcessor::getPixelProcessor()
 {
    return pixelProcessor;
 }
@@ -48,8 +48,7 @@ double *GeneralFrameProcessor::getData(const char *filename)
      qDebug() << "error opening " << filename;
    while (inFile >> dataValue[i])
    {
-      qDebug() << "i: " << i << " value: " << dataValue[i];
-      i++;
+       i++;
    }
 
    if (i < 6400)

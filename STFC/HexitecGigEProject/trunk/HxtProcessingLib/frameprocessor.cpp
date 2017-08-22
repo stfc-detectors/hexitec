@@ -41,34 +41,37 @@ uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
    return result;
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, double **pixelEnergyPtr)
+uint16_t *FrameProcessor::process(uint16_t *frame,
+                                  unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
    const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
 
-   result = pixelProcessor->processFrame(frame, pixelEnergyPtr);
+   result = pixelProcessor->processFrame(frame, pixelEnergyMapPtr);
 //   writeFile(result, filename);
 
    return result;
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
+uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
+                                  unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
    const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
 
-   result = pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyPtr);
+   result = pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyMapPtr);
 //   writeFile(result, filename);
 
    return result;
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix, double **pixelEnergyPtr)
+uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix,
+                                  unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
    const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.bin";
 
-   result = pixelProcessor->processFrame(frame, thresholdPerPix, pixelEnergyPtr);
+   result = pixelProcessor->processFrame(frame, thresholdPerPix, pixelEnergyMapPtr);
 //   writeFile(result, filename);
 
    return result;

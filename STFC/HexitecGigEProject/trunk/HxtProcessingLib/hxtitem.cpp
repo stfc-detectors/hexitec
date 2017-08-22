@@ -8,41 +8,36 @@
 using namespace std;
 
 
-HxtItem::HxtItem(int frameSize, long long binStart, long long binEnd, double binWidth)
+HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, double binWidth)
 {
-   this->frameSize = frameSize;
+   this->frameSize = nRows * nCols;
    setBinStart(binStart);
    setBinEnd(binEnd);
    setBinWidth(binWidth);
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
-   initialiseHxtBuffer(frameSize);
-//   bin = (unsigned long *) calloc(nBins, sizeof(unsigned long));
-//   histogramPerPixel = (unsigned long *) calloc(nBins * frameSize, sizeof(unsigned long));
-   qDebug() << "HxtItem::HxtItem(): nBins = " << nBins << " frameSize = " << frameSize;
+   initialiseHxtBuffer(nRows, nCols);
+
    pixelEnergy = NULL;
+   pixelEnergyMap = NULL;
    energiesProcessed = 0;
    this->pixelEnergyQueue.clear();
+   this->pixelEnergyMapQueue.clear();
 }
 
-void HxtItem::initialiseHxtBuffer(int frameSize)
+void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
 {
-   quint32 gridSize;
-   gridSize = (int) sqrt(frameSize);
    double currentBin;
 
    strncpy(hxtV3Buffer.hxtLabel, "HEXITECH", sizeof(hxtV3Buffer.hxtLabel));
    hxtV3Buffer.hxtVersion = 3;
    hxtV3Buffer.filePrefixLength = 0;
    strncpy(hxtV3Buffer.filePrefix, "(blank)", 7);
-//   hxtV3Buffer.filePrefix = "(blank)             ";
-   hxtV3Buffer.nRows = gridSize;
-   hxtV3Buffer.nCols = gridSize;
+   hxtV3Buffer.nRows = nRows;
+   hxtV3Buffer.nCols = nCols;
    hxtV3Buffer.nBins = nBins;
    hxtV3Buffer.allData = (double *) calloc((nBins * frameSize) + nBins, sizeof(double));
    energyBin = hxtV3Buffer.allData;
    histogramPerPixel = hxtV3Buffer.allData + nBins;
-   qDebug() << "HxtItem::initialiseHxtBuffer, nRows: " << hxtV3Buffer.nRows << " nCols: " << hxtV3Buffer.nCols
-            << " nBins: " << hxtV3Buffer.nBins;
 
    currentBin = binStart;
    for (long long i = binStart; i < nBins; i++, currentBin += binWidth)
@@ -85,6 +80,45 @@ int HxtItem::getPixelEnergyQueueSize()
 {
    QMutexLocker locker(&mutex);
    return pixelEnergyQueue.size();
+}
+
+
+
+
+
+void HxtItem::enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap)
+{
+   incrementTotalEnergiesToProcess();
+   QMutexLocker locker(&mutex);
+   pixelEnergyMapQueue.enqueue(pixelEnergyMap);
+}
+
+unordered_map<int, double> *HxtItem::getNextPixelEnergyMap()
+{
+   if (pixelEnergyMap != NULL)
+   {
+      //free(pixelEnergyMap);
+   }
+
+   if (pixelEnergyMapQueueNotEmpty())
+   {
+      QMutexLocker locker(&mutex);
+      pixelEnergyMap = pixelEnergyMapQueue.dequeue();
+   }
+
+   return pixelEnergyMap;
+}
+
+bool HxtItem::pixelEnergyMapQueueNotEmpty()
+{
+   QMutexLocker locker(&mutex);
+   return !pixelEnergyMapQueue.isEmpty();
+}
+
+int HxtItem::getPixelEnergyMapQueueSize()
+{
+   QMutexLocker locker(&mutex);
+   return pixelEnergyMapQueue.size();
 }
 
 void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
@@ -135,39 +169,55 @@ void HxtItem::setBinWidth(double value)
    binWidth = value;
 }
 
-void HxtItem::addToHistogram(double *pixelEnergy)
+void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
 {
    double *currentHistogram = &histogramPerPixel[0];
-   double *thisEnergy;
+   double thisEnergy;
    int bin;
+   int pixel;
 
-   qDebug() << "frameSize = " << frameSize << " nBins: " << nBins << " binWidth: " << binWidth;
-   for (int i = 0; i < frameSize; i++)
+   unordered_map<int, double>::iterator it = pixelEnergyMap.begin();
+   unordered_map<int, double>::iterator itend = pixelEnergyMap.end();
+
+   while (it != itend)
    {
-      thisEnergy = pixelEnergy+i;
-      if (*thisEnergy  > MIN_ENERGY)
-      {
-         bin = (int)((*thisEnergy / binWidth));
-//         bin = (int)((*thisEnergy / binWidth) + 0.5);
-
-//         if (bin < nBins && bin > 0)
-         if (bin < nBins)
-        {
-            (*(currentHistogram + bin))++;
-//            qDebug() << "bin: " << bin << " energy: " << *thisEnergy;
-         }
-      }
-      else
-      {
-//         qDebug() << "!!!!!!!!!!!!!!! ZERO ENERGY";
-      }
-      currentHistogram+=nBins;
+      pixel = it->first;
+      thisEnergy = it->second;
+      bin = (int)((thisEnergy / binWidth));
+      (*(currentHistogram + (pixel * nBins) + bin))++;
+      it++;
    }
 
    energiesProcessed++;
-   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
 }
 
+/*
+void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
+{
+
+   double *currentHistogram = &histogramPerPixel[0];
+   double *summed = &summedHistogram[0];
+   double thisEnergy;
+   int bin;
+   int pixel;
+
+   unordered_map<int, double>::iterator it = pixelEnergyMap.begin();
+   unordered_map<int, double>::iterator itend = pixelEnergyMap.end();
+
+   while (it != itend)
+   {
+      pixel = it->first;
+      thisEnergy = it->second;
+      bin = (int)((thisEnergy / binWidth));
+      (*(currentHistogram + (pixel * nBins) + bin))++;
+      (*(summed + b
+      it++;
+   }
+
+   energiesProcessed++;
+//   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
+}
+*/
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
 {
    return &hxtV3Buffer;

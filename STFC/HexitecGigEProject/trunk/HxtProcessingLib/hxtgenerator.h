@@ -2,14 +2,17 @@
 #define HXTGENERATOR_H
 
 #include "generalhxtgenerator.h"
+#include <unordered_map>
+
+using namespace std;
 
 class HxtGenerator : public GeneralHxtGenerator
 {
 public:
-//   HxtGenerator();
-   HxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth);
-//   double *getNextPixelEnergy();
-   void processEnergies(double *pixelEnergy);
+   HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
+
+protected:
+   void processEnergies(unordered_map<int, double> pixelEnergyMap);
 
 public slots:
   void handleProcess();

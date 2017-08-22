@@ -6,9 +6,8 @@
 class HxtTotalSpectrumGenerator : public GeneralHxtGenerator
 {
 public:
-//   HxtTotalSpectrumGenerator();
-   HxtTotalSpectrumGenerator(int frameSize, long long binStart, long long binEnd, double binWidth);
-   ~HxtTotalSpectrumGenerator();
+   HxtTotalSpectrumGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   void processEnergies(unordered_map<int, double> pixelEnergyMap);
 
 public slots:
    void handleProcess();

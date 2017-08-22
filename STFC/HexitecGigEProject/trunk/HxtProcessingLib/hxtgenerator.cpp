@@ -4,35 +4,32 @@
 #include <QDebug>
 #include <Windows.h>
 
-HxtGenerator::HxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth)  : GeneralHxtGenerator(frameSize, binStart, binEnd, binWidth)
+HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)  :
+   GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
-   qDebug() << "HxtGenerator::HxtGenerator() called";
+
 }
 
 void HxtGenerator::handleProcess()
 {
-   double *pixelEnergy;
-   long long gotEnergy = 0;
-   long long energyNotNull = 0;
+   unordered_map <int, double> *pixelEnergyMap;
+   int temp = 0;
 
-   qDebug() << "HxtGenerator::handleProcess() called, running in thread." << QThread::currentThreadId();
-   while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyQueueSize() > 0) || processedEnergyCount < (hxtItem->getTotalEnergiesToProcess()))
+  while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyMapQueueSize() > 0) || processedEnergyCount < (hxtItem->getTotalEnergiesToProcess()))
    {
-      while (getFrameProcessingInProgress() &&((hxtItem->getPixelEnergyQueueSize()) == 0))
+      while (getFrameProcessingInProgress() &&(((temp = hxtItem->getPixelEnergyMapQueueSize())) == 0))
       {
          Sleep(10);
       }
-      qDebug() << "GOT AN ENERGY TO PROCESS";
-      while ((hxtItem->getPixelEnergyQueueSize()) > 0)
+//      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
+      while ((hxtItem->getPixelEnergyMapQueueSize()) > 0)
       {
-         gotEnergy++;
-         pixelEnergy = hxtItem->getNextPixelEnergy();
-         if (pixelEnergy != NULL)
+         pixelEnergyMap = hxtItem->getNextPixelEnergyMap();
+         if (!pixelEnergyMap->empty())
          {
-            energyNotNull++;
 //               result = processEnergies(pixelEnergy);
 
-                 processEnergies(pixelEnergy);
+                 processEnergies(*pixelEnergyMap);
 //                 free(pixelEnergy);
 
                // MUST USE RESULT IN FURTHER CALCULATIONS
@@ -42,15 +39,11 @@ void HxtGenerator::handleProcess()
          }
       }
    }
-   qDebug() << "HxtGenerator::handleProcess() number of energies processed: " << processedEnergyCount
-            << "totalEnergies to Process: " << hxtItem->getTotalEnergiesToProcess();
-   qDebug() << "queued energies =  " << gotEnergy
-            << " energiesNotNull =  " << energyNotNull;
 //   emit energyProcessingComplete(processedEnergyCount);
 }
 
-void HxtGenerator::processEnergies(double *pixelEnergy)
+void HxtGenerator::processEnergies(unordered_map <int, double>pixelEnergyMap)
 {
-   hxtItem->addToHistogram(pixelEnergy);
+   hxtItem->addToHistogram(pixelEnergyMap);
    incrementProcessedEnergyCount();
 }

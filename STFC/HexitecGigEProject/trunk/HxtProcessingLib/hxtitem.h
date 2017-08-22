@@ -4,8 +4,11 @@
 #include <QMutex>
 #include <QQueue>
 #include <cstdint>
+#include <unordered_map>
 
 #define MIN_ENERGY 1.0e-100
+
+using namespace std;
 
 class HxtItem
 {
@@ -36,14 +39,18 @@ public:
  * */
    };
 
-   HxtItem(int frameSize, long long binStart, long long binEnd, double binWidth);
+   HxtItem(int nRows, int nCols, long long binStart, long long binEnd, double binWidth);
    void enqueuePixelEnergy(double *pixelEnergy);
    double *getNextPixelEnergy();
    int getPixelEnergyQueueSize();
+   void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
+   unordered_map<int, double> *getNextPixelEnergyMap();
+   int getPixelEnergyMapQueueSize();
    void setTotalEnergiesToProcess(long long totalEnergiesToProcess);
    void incrementTotalEnergiesToProcess();
    long long getTotalEnergiesToProcess();
-   void addToHistogram(double *pixelEnergy);
+   void addToHistogram(unordered_map <int, double>pixelEnergyMap);
+   void addToHistogramWithSum(unordered_map <int, double>pixelEnergyMap);
    HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();
 
@@ -56,10 +63,11 @@ private:
    void setBinEnd(const long long value);
    double getBinWidth() const;
    void setBinWidth(double value);
-//   void addToHistogram(double *pixelEnergy);
    bool pixelEnergyQueueNotEmpty();
+   bool pixelEnergyMapQueueNotEmpty();
    QMutex mutex;
    double *pixelEnergy;
+   unordered_map<int, double> *pixelEnergyMap;
    int frameSize;
    long long binStart;
    long long binEnd;
@@ -67,11 +75,13 @@ private:
    long long nBins;
    double *energyBin;
    double *histogramPerPixel;
+   double *summedHistogram;
    unsigned long histogramIndex;
    long long totalEnergiesToProcess;
    long long energiesProcessed;
    QQueue <double *>pixelEnergyQueue;
-   void initialiseHxtBuffer(int frameSize);
+   QQueue <unordered_map <int, double> *>pixelEnergyMapQueue;
+   void initialiseHxtBuffer(int nRows, int nCols);
 };
 
 #endif // HXTITEM_H

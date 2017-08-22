@@ -2,12 +2,12 @@
 #include <QThread>
 #include <QDebug>
 
-//GeneralHxtGenerator::GeneralHxtGenerator()
-GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, long long binStart, long long binEnd, double binWidth)
+GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-//   int frameSize = 6400;
-   qDebug() << "GeneralHxtGenerator::GeneralHxtGenerator() called";
-   hxtItem = new HxtItem(frameSize, binStart, binEnd, binWidth);
+   this->nRows = nRows;
+   this->nCols = nCols;
+   frameSize = nRows * nCols;
+   hxtItem = new HxtItem(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
 
    hxtGeneratorThread = new QThread();
    hxtGeneratorThread->start();
@@ -23,7 +23,11 @@ GeneralHxtGenerator::GeneralHxtGenerator(int frameSize, long long binStart, long
 void GeneralHxtGenerator::enqueuePixelEnergy(double *pixelEnergy)
 {
    hxtItem->enqueuePixelEnergy(pixelEnergy);
-//   qDebug() << "GeneralHxtGenerator::enqueuePixelEnergy(), threadId: " << QThread::currentThreadId();
+}
+
+void GeneralHxtGenerator::enqueuePixelEnergyMap(unordered_map <int, double> *pixelEnergyMap)
+{
+   hxtItem->enqueuePixelEnergyMap(pixelEnergyMap);
 }
 
 

@@ -8,7 +8,7 @@
 class ImageItem
 {
 public:
-   ImageItem(const char *name, int frameSize);
+   ImageItem(const char *name, int nRows, int nCols);
    void enqueueBuffer(char *address, unsigned long validFrameCount);
    char *getNextBuffer(unsigned long *validFrameCount);
    int getBufferQueueSize();

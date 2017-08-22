@@ -6,11 +6,11 @@
 
 using namespace std;
 
-ImageItem::ImageItem(const char *name, int frameSize)
+ImageItem::ImageItem(const char *name, int nRows, int nCols)
 {
    QMutexLocker locker(&mutex);
    this->name = (char *)name;
-   this->frameSize = frameSize;
+//   this->frameSize = frameSize;
    this->bufferQueue.clear();
    this->processedFrameCount = 0;
    bufferItem = NULL;

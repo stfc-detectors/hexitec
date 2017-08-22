@@ -1,37 +1,40 @@
 #include "imageprocessor.h"
 #include <QThread>
 #include <QDebug>
+#include <QTime>
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
 
-ImageProcessor::ImageProcessor(const char *name, int frameSize, ProcessingDefinition *processingDefinition)
+ImageProcessor::ImageProcessor(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
+   frameSize = nRows * nCols * sizeof(uint16_t);
    imageProcessorThread = new QThread();
    imageProcessorThread->start();
    moveToThread(imageProcessorThread);
    this->frameSize = frameSize;
-   imageItem = new ImageItem(name, frameSize);
+   imageItem = new ImageItem(name, nRows, nCols);
    this->processingDefinition = processingDefinition;
    energyCalibration = processingDefinition->getEnergyCalibration();
+   nextFrameCorrection = processingDefinition->getNextFrameCorrection();
+   chargedSharingMode = processingDefinition->getChargedSharingMode();
 
    if (energyCalibration)
    {
       if (processingDefinition->getTotalSpectrum())
       {
-//         hxtGenerator = new HxtTotalSpectrumGeneratorframeSize/2, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth()
+//         hxtGenerator = new HxtTotalSpectrumGenerator(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth()
       }
       else
       {
-//         hxtGenerator = new HxtGenerator(frameSize/2, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
-         hxtGenerator = new HxtGenerator(frameSize/2, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
+//         hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
+         hxtGenerator = new HxtChargedSharingGenerator(nRows, nCols, processingDefinition);
       }
    }
 
    setImageInProgress(true);
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
-   connect(this, SIGNAL(imageComplete(long long)),
-           hxtGenerator, SLOT(handleImageComplete(long long)));
+
    emit process();
 }
 
@@ -67,8 +70,8 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, &pixelEnergy);
-                  hxtGenerator->enqueuePixelEnergy(pixelEnergy);
+                  result = fp->process((uint16_t *)frameIterator, &pixelEnergyMap);
+                  hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -131,7 +134,6 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       }
       if (energyCalibration)
       {
-
          while (imageItem->getBufferQueueSize() > 0)
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
@@ -140,8 +142,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &pixelEnergy);
-                  hxtGenerator->enqueuePixelEnergy(pixelEnergy);
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &pixelEnergyMap);
+                  hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -178,6 +180,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       }
    }
 }
+
 
 void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, uint16_t *result, const char* filename)
 {
@@ -226,15 +229,18 @@ void ImageProcessor::handleProcess()
 
    qDebug() << "ImageProcessor::handleProcess(), threadId: " << QThread::currentThreadId();
    processedFrameCount = 0;
-
+   qDebug() << "++++++++++++++START TIMER";
+   QTime time;
+   time.start();
+   // operation
 
    if (processingDefinition->getRe_order())
    {
-      fp = new FrameRe_orderProcessor();
+      fp = new FrameRe_orderProcessor(nextFrameCorrection);
    }
    else
    {
-      fp = new FrameProcessor();
+//      fp = new FrameProcessor();
    }
 
    fp->setEnergyCalibration(energyCalibration);
@@ -257,14 +263,18 @@ void ImageProcessor::handleProcess()
    }
 
    qDebug() << "ImageProcessor::process() processedFrameCount = " << processedFrameCount << " waiting for energy processing";
-   emit imageAcquisitionComplete(processedFrameCount);
+   emit imageComplete(processedFrameCount);
    while (hxtGenerator->getProcessedEnergyCount() < processedFrameCount)
    {
       qDebug() << "ImageProcessor::process() processedEnergyCount() = " << hxtGenerator->getProcessedEnergyCount() << " energy processing on-going";
       Sleep(50);
    }
+   hxtGenerator->setFrameProcessingInProgress(false);
    qDebug() << "ImageProcessor::process() processedEnergyCount() = " << hxtGenerator->getProcessedEnergyCount() << " energy processing complete";
    emit processingComplete(this, processedFrameCount);
+   qDebug() << "++++++++++++++STOP TIMER";
+   qDebug() << "PROCESSING TOOK: "<< time.elapsed() << " mSecs";
+
    free(imageItem);
    free(fp);
 }
@@ -299,8 +309,6 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)
 {
    std::ofstream outFile;
-
-   qDebug() << "ImageProcessor::writeHxtFile() called";
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::out);
    outFile.write((const char *)header, headerLength * sizeof(char));

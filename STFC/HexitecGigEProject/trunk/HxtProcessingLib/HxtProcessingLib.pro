@@ -13,7 +13,8 @@ CONFIG += staticlib
 DEFINES += OS_WIN=1
 
 SOURCES += \
-    pixelProcessor.cpp \
+    pixelprocessor.cpp \
+    pixelprocessornextframe.cpp \
     imageitem.cpp \
     bufferitem.cpp \
     processingdefinition.cpp \
@@ -24,11 +25,14 @@ SOURCES += \
     hxtgenerator.cpp \
     generalhxtgenerator.cpp \
     hxttotalspectrumgenerator.cpp \
-    hxtitem.cpp
+    hxtitem.cpp \
+    generalpixelprocessor.cpp \
+    hxtchargedsharinggenerator.cpp
 
 
 HEADERS += \
-    pixelProcessor.h \
+    pixelprocessor.h \
+    pixelprocessornextframe.h \
     imageitem.h \
     bufferitem.h \
     processingdefinition.h \
@@ -39,7 +43,9 @@ HEADERS += \
     hxtgenerator.h \
     generalhxtgenerator.h \
     hxttotalspectrumgenerator.h \
-    hxtitem.h
+    hxtitem.h \
+    generalpixelprocessor.h \
+    hxtchargedsharinggenerator.h
 
 
 INCLUDEPATH += include

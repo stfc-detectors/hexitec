@@ -112,7 +112,6 @@ void ProcessingDefinition::getData(const char *filename, double *dataValue)
      qDebug() << "error opening " << filename;
    while (inFile >> dataValue[i])
    {
-      qDebug() << "i: " << i << " value: " << dataValue[i];
       i++;
    }
 
@@ -143,14 +142,14 @@ void ProcessingDefinition::setNextFrameCorrection(bool value)
     nextFrameCorrection = value;
 }
 
-ChargeSharingMode ProcessingDefinition::getChargeSharingMode() const
+ChargedSharingMode ProcessingDefinition::getChargedSharingMode() const
 {
-    return chargeSharingMode;
+    return chargedSharingMode;
 }
 
-void ProcessingDefinition::setChargeSharingMode(const ChargeSharingMode &value)
+void ProcessingDefinition::setChargedSharingMode(const ChargedSharingMode &value)
 {
-    chargeSharingMode = value;
+    chargedSharingMode = value;
 }
 
 long long ProcessingDefinition::getHxtBufferHeaderSize() const

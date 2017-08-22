@@ -3,6 +3,7 @@
 
 #include "pixelProcessor.h"
 #include <cstdint>
+#include <unordered_map>
 
 class GeneralFrameProcessor
 {
@@ -12,17 +13,21 @@ public:
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);
    void setEnergyCalibration(bool energyCalibration);
-   PixelProcessor *getPixelProcessor();
+   GeneralPixelProcessor *getPixelProcessor();
 
    virtual uint16_t *process(uint16_t *frame) = 0;
    virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue) = 0;
    virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel) = 0;
-   virtual uint16_t *process(uint16_t *frame, double **pixelEnergy) = 0;
-   virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergy) = 0;
-   virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergy) = 0;
+
+   virtual uint16_t *process(uint16_t *frame,
+                             unordered_map<int, double>**pixelEnergyMapPtr) = 0;
+   virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue,
+                             unordered_map<int, double>**pixelEnergyMapPtr) = 0;
+   virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel,
+                             unordered_map<int, double>**pixelEnergyMapPtr) = 0;
 
 protected:
-   PixelProcessor *pixelProcessor;
+   GeneralPixelProcessor *pixelProcessor;
    double *getData(const char *filename);
 };
 
