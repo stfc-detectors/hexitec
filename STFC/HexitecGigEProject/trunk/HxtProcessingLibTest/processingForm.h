@@ -56,7 +56,7 @@ signals:
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
-   void imageStarted(const char *path, int frameSize);
+   void imageStarted(const char *path, int nRows, int nCols);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
 

@@ -2,6 +2,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QThread>
+#include <Windows.h>
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
@@ -13,10 +14,10 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    qDebug() << "MAIN thread = " << QThread::currentThreadId();
 }
 
-void ProcessingBufferGenerator::enqueueImage(const char *name, int frameSize, ProcessingDefinition *processingDefinition)
+void ProcessingBufferGenerator::enqueueImage(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-   this->frameSize = frameSize;
-   currentImageProcessor = new ImageProcessor(name, frameSize, processingDefinition);
+   this->frameSize = nRows * nCols * sizeof(uint16_t);
+   currentImageProcessor = new ImageProcessor(name, nRows, nCols, processingDefinition);
    connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, long long)),
            this, SLOT(handleProcessingComplete(ImageProcessor *, long long)));
    imageProcessorList.append(currentImageProcessor);
@@ -24,13 +25,13 @@ void ProcessingBufferGenerator::enqueueImage(const char *name, int frameSize, Pr
             << "image queue length = " << imageProcessorList.length();
 }
 
-void ProcessingBufferGenerator::handleImageStarted(const char *path, int frameSize)
+void ProcessingBufferGenerator::handleImageStarted(const char *path, int nRows, int nCols)
 {
    QMutexLocker locker(&mutex);
 
    qDebug() << "ProcessingBufferGenerator::handleImageStarted. path: "
-            << path << " frameSize " << frameSize;
-   enqueueImage(path, frameSize, processingDefinition);
+            << path << " frameSize " << nRows * nCols * sizeof(uint16_t);
+   enqueueImage(path, nRows, nCols, processingDefinition);
 }
 
 void ProcessingBufferGenerator::handleTransferBufferReady(char *transferBuffer, unsigned long validFrames)
@@ -93,6 +94,7 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
 
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
+   Sleep(500);
    imageProcessorList.removeOne(completedImageProcessor);
    free(completedImageProcessor);
    qDebug() << "ProcessingBufferGenerator::handleProcessingComplete: imageProcessorList.length()" << imageProcessorList.length();

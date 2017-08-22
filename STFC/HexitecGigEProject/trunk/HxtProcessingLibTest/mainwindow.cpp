@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
    connect(processingForm, SIGNAL(configureProcessing(bool, long long, long long, double, bool, const char *, const char *, const char *)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, double, bool, const char *, const char *, const char *)));
 
-   connect(processingForm, SIGNAL(imageStarted(const char*, int)),
-           processingBufferGenerator, SLOT(handleImageStarted(const char *, int)));
+   connect(processingForm, SIGNAL(imageStarted(const char*, int, int)),
+           processingBufferGenerator, SLOT(handleImageStarted(const char *, int, int)));
    connect(processingForm, SIGNAL(transferBufferReady(char*, unsigned long)),
            processingBufferGenerator, SLOT(handleTransferBufferReady(char *, unsigned long)));
    connect(processingForm, SIGNAL(imageComplete(long long)),

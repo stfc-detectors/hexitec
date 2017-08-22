@@ -1,5 +1,6 @@
 #include "processingForm.h"
 #include "ui_processingForm.h"
+#include <QTime>
 #include <QDebug>
 #include <iostream>
 #include <fstream>
@@ -82,9 +83,12 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
    unsigned long validFrames = 0;
    long long totalFramesAcquired = 0;
    std::ifstream inFile;
+   int temp = 0;
+   int nRows = 80;
+   int nCols = 80;
 
    inFile.open(filename, ifstream::binary);
-   emit imageStarted(imageFilename, 6400 * 2);
+   emit imageStarted(imageFilename, nRows, nCols);
 
    int bufferCount = 0;
 
@@ -96,13 +100,13 @@ void ProcessingForm::processImage(const char *imageFilename, const char *filenam
       if (!inFile)
       {
          validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << validFrames <<" valid frames could be read";
+         qDebug() << validFrames <<" valid frames could be read: " << temp++;
          emit transferBufferReady(transferBuffer, validFrames);
       }
       else
       {
          validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << validFrames <<" valid frames could be read";
+         qDebug() << validFrames <<" valid frames could be read: " << temp++;
          emit transferBufferReady(transferBuffer, 500);
       }
       totalFramesAcquired += validFrames;

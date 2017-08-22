@@ -12,7 +12,7 @@ class ProcessingBufferGenerator : public QObject
    Q_OBJECT
 public:
    explicit ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent = 0);
-   void enqueueImage(const char *name, int frameSize, ProcessingDefinition *processingDefinition);
+   void enqueueImage(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
 
 private:
    QMutex mutex;
@@ -27,7 +27,7 @@ signals:
 //   void imageComplete(unsigned long long totalFramesAcquired);
 
 public slots:
-   void handleImageStarted(const char *path, int frameSize);
+   void handleImageStarted(const char *path, int nRows, int nCols);
    void handleTransferBufferReady(char *transferBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleConfigureProcessing(bool re_order,
