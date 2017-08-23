@@ -4,7 +4,15 @@
 
 FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection)
 {
-   pixelProcessor = new PixelProcessor();
+   nextFrameCorrection = true;
+   if (nextFrameCorrection)
+   {
+      pixelProcessor = new PixelProcessorNextFrame();
+   }
+   else
+   {
+      pixelProcessor = new PixelProcessor();
+   }
 }
 
 uint16_t *FrameRe_orderProcessor::process(uint16_t *frame)

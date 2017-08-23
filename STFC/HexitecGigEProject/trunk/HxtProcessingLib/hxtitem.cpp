@@ -47,6 +47,12 @@ void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
    }
 }
 
+void HxtItem::initialiseTotalSpectrum()
+{
+   summedHistogram = (double *) calloc(nBins, sizeof(double));
+}
+
+
 void HxtItem::enqueuePixelEnergy(double *pixelEnergy)
 {
    incrementTotalEnergiesToProcess();
@@ -81,10 +87,6 @@ int HxtItem::getPixelEnergyQueueSize()
    QMutexLocker locker(&mutex);
    return pixelEnergyQueue.size();
 }
-
-
-
-
 
 void HxtItem::enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap)
 {
@@ -191,7 +193,7 @@ void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
    energiesProcessed++;
 }
 
-/*
+
 void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
 {
 
@@ -210,14 +212,14 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
       thisEnergy = it->second;
       bin = (int)((thisEnergy / binWidth));
       (*(currentHistogram + (pixel * nBins) + bin))++;
-      (*(summed + b
+      (*(summed + bin)) ++;
       it++;
    }
 
    energiesProcessed++;
 //   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
 }
-*/
+
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
 {
    return &hxtV3Buffer;

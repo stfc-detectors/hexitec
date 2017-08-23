@@ -7,6 +7,9 @@
 HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)  :
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
+   qDebug() << "HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator CONSTRUCTED";
+   hxtItem->initialiseTotalSpectrum();
+   emit process();
 }
 
 void HxtTotalSpectrumGenerator::handleProcess()
@@ -44,6 +47,6 @@ void HxtTotalSpectrumGenerator::handleProcess()
 
 void HxtTotalSpectrumGenerator::processEnergies(unordered_map <int, double>pixelEnergyMap)
 {
-   hxtItem->addToHistogram(pixelEnergyMap);
-//   incrementProcessedEnergyCount();
+   hxtItem->addToHistogramWithSum(pixelEnergyMap);
+   incrementProcessedEnergyCount();
 }

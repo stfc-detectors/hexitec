@@ -17,7 +17,6 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    hxtItem->setTotalEnergiesToProcess(0);
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
    setFrameProcessingInProgress(true);
-   emit process();
 }
 
 void GeneralHxtGenerator::enqueuePixelEnergy(double *pixelEnergy)

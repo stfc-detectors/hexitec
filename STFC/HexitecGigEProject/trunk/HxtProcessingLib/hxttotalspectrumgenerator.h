@@ -2,6 +2,9 @@
 #define HXTTOTALSPECTRUMGENERATOR_H
 
 #include "generalhxtgenerator.h"
+#include <unordered_map>
+
+using namespace std;
 
 class HxtTotalSpectrumGenerator : public GeneralHxtGenerator
 {

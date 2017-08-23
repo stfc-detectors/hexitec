@@ -13,6 +13,11 @@ class GeneralPixelProcessor : public QObject
    Q_OBJECT
 
 public:
+   static uint16_t pixelMap[6400];
+   static bool pixelMapInitialised;
+   static uint16_t frameSize;
+
+public:
    GeneralPixelProcessor();
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
    void setEnergyCalibration(bool energyCalibration);
@@ -21,6 +26,7 @@ public:
    void setInterceptValue(double *gradientValue);
    double *getGradientValue();
    double *getInterceptValue();
+
    uint16_t *processFrame(uint16_t *frame);
    uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
    uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
@@ -38,7 +44,7 @@ public:
 
    uint16_t *processRe_orderFrame(uint16_t *frame, 
 				  unordered_map<int, double>**pixelEnergyMapPtr);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
+   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
                                                   unordered_map<int, double>**pixelEnergyMapPtr);
    uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
 				  unordered_map<int, double>**pixelEnergyMapPtr);

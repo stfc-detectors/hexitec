@@ -2,6 +2,7 @@
 #define GENERALFRAMEPROCESSOR_H
 
 #include "pixelProcessor.h"
+#include "pixelprocessornextframe.h"
 #include <cstdint>
 #include <unordered_map>
 

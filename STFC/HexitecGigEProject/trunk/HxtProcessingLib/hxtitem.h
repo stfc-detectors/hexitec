@@ -40,6 +40,7 @@ public:
    };
 
    HxtItem(int nRows, int nCols, long long binStart, long long binEnd, double binWidth);
+   void initialiseTotalSpectrum();
    void enqueuePixelEnergy(double *pixelEnergy);
    double *getNextPixelEnergy();
    int getPixelEnergyQueueSize();

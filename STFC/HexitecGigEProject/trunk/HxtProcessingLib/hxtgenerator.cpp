@@ -7,7 +7,7 @@
 HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)  :
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
-
+   emit process();
 }
 
 void HxtGenerator::handleProcess()

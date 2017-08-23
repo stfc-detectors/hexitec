@@ -23,7 +23,7 @@ ImageProcessor::ImageProcessor(const char *name, int nRows, int nCols, Processin
    {
       if (processingDefinition->getTotalSpectrum())
       {
-//         hxtGenerator = new HxtTotalSpectrumGenerator(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth()
+         hxtGenerator = new HxtTotalSpectrumGenerator(nRows, nCols, processingDefinition);
       }
       else
       {
@@ -71,10 +71,14 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process((uint16_t *)frameIterator, &pixelEnergyMap);
-                  hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                  if (pixelEnergyMap->size() > 0)
+                  {
+                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                     processedFrameCount++;
+                  }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
-                  processedFrameCount++;
+//                  processedFrameCount++;
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filename);
@@ -143,10 +147,14 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &pixelEnergyMap);
-                  hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                  if (pixelEnergyMap->size() > 0)
+                  {
+                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                     processedFrameCount++;
+                  }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
-                  processedFrameCount++;
+//                  processedFrameCount++;
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filename);
