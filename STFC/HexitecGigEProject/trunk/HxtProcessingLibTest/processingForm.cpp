@@ -254,22 +254,25 @@ void ProcessingForm::setEndSpinBoxLimit(int lowerLimit)
 
 void ProcessingForm::readThresholdFile(char *thresholdFile)
 {
+   int i = 0;
    std::ifstream inFile;
 
-   inFile.open(thresholdFile, ifstream::binary);
-   if (inFile.good())
+   inFile.open(thresholdFile);
+
+   if (!inFile)
+     qDebug() << "error opening " << thresholdFile;
+   while (inFile >> thresholdPerPixel[i])
    {
-      inFile.read((char *)&thresholdPerPixel[0], 6400 * sizeof(uint16_t));
-      if (!inFile)
-         qDebug() << "error: only " << inFile.gcount() << " could be read";
-      else
-         qDebug() << "frame read OK ";
-      inFile.close();
+      qDebug() << "thresholdPerPixel[i]: " << thresholdPerPixel[i];
+      i++;
    }
+
+   if (i < 6400)
+     qDebug() << "error: only " << i << " could be read";
    else
-   {
-      qDebug() << "Threshold file open failed.";
-   }
+     qDebug() << "threshold file read OK ";
+   inFile.close();
+
 }
 
 void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
