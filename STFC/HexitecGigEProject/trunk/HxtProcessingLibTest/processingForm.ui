@@ -134,32 +134,6 @@
    </item>
    <item row="1" column="0" rowspan="4" colspan="3">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="3">
-      <spacer name="verticalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
-      <spacer name="verticalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
      <item row="0" column="2">
       <widget class="QCheckBox" name="re_orderCheckBox">
        <property name="maximumSize">
@@ -179,26 +153,26 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="thresholdModeLabel">
+     <item row="3" column="2">
+      <widget class="QLabel" name="thresholdValueLabel">
        <property name="maximumSize">
         <size>
-         <width>120</width>
+         <width>80</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
+        <enum>Qt::RightToLeft</enum>
        </property>
        <property name="text">
-        <string>Threshold Mode</string>
+        <string>Threshold Value</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
+     <item row="1" column="2">
       <widget class="QComboBox" name="thresholdModeComboBox">
        <property name="maximumSize">
         <size>
@@ -226,26 +200,52 @@
        </item>
       </widget>
      </item>
-     <item row="4" column="2">
-      <widget class="QLabel" name="thresholdValueLabel">
+     <item row="1" column="1">
+      <widget class="QLabel" name="thresholdModeLabel">
        <property name="maximumSize">
         <size>
-         <width>80</width>
+         <width>120</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
+        <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>Threshold Value</string>
+        <string>Threshold Mode</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="4" column="4">
+     <item row="19" column="6">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="5">
+      <widget class="QPushButton" name="thresholdButton">
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
       <widget class="QSpinBox" name="thresholdValue">
        <property name="enabled">
         <bool>false</bool>
@@ -273,20 +273,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="6">
-      <widget class="QPushButton" name="thresholdButton">
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
+     <item row="4" column="2">
       <widget class="QLabel" name="thresholdFileLabel">
        <property name="maximumSize">
         <size>
@@ -305,7 +292,7 @@
        </property>
       </widget>
      </item>
-     <item row="20" column="1">
+     <item row="18" column="1">
       <spacer name="verticalSpacer_3">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -318,20 +305,7 @@
        </property>
       </spacer>
      </item>
-     <item row="21" column="7">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="18" column="4">
+     <item row="16" column="3">
       <widget class="QLineEdit" name="outputDirectory">
        <property name="maximumSize">
         <size>
@@ -341,7 +315,18 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="4">
+     <item row="10" column="2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QCheckBox" name="hxtCheckBox">
+         <property name="text">
+          <string>HXT?</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="10" column="3">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLabel" name="startBinLabel">
@@ -456,48 +441,7 @@
        </item>
       </layout>
      </item>
-     <item row="11" column="2">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QCheckBox" name="hxtCheckBox">
-         <property name="text">
-          <string>HXT?</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="14" column="2">
-      <widget class="QCheckBox" name="nextFrameCorrectionCheckBox">
-       <property name="text">
-        <string>Next Frame Correction?</string>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="2">
-      <spacer name="verticalSpacer_8">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="8" column="2">
-      <widget class="QLabel" name="gradientsFileLabel">
-       <property name="text">
-        <string>Gradients File</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="4">
+     <item row="4" column="3">
       <widget class="QLineEdit" name="thresholdFile">
        <property name="enabled">
         <bool>false</bool>
@@ -510,33 +454,30 @@
        </property>
       </widget>
      </item>
+     <item row="13" column="2">
+      <spacer name="verticalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item row="7" column="2">
-      <widget class="QCheckBox" name="energyCalibrationCheckBox">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="gradientsFileLabel">
        <property name="text">
-        <string>Energy Calibration?</string>
+        <string>Gradients File</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="8" column="4">
-      <widget class="QLineEdit" name="gradientsFile">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>300</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="5">
+     <item row="7" column="4">
       <widget class="QPushButton" name="gradientsFileButton">
        <property name="enabled">
         <bool>false</bool>
@@ -552,7 +493,7 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="2">
+     <item row="8" column="2">
       <widget class="QLabel" name="interceptsFileLabel">
        <property name="text">
         <string>Intercepts File</string>
@@ -562,20 +503,33 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="2">
-      <spacer name="verticalSpacer_7">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+     <item row="7" column="3">
+      <widget class="QLineEdit" name="gradientsFile">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="sizeHint" stdset="0">
+       <property name="maximumSize">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>300</width>
+         <height>16777215</height>
         </size>
        </property>
-      </spacer>
+      </widget>
      </item>
-     <item row="16" column="2">
+     <item row="6" column="2">
+      <widget class="QCheckBox" name="energyCalibrationCheckBox">
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Energy Calibration?</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="2">
       <widget class="QComboBox" name="chargedSharingComboBox">
        <property name="currentText">
         <string>None</string>
@@ -597,27 +551,23 @@
        </item>
       </widget>
      </item>
-     <item row="17" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+     <item row="4" column="4">
+      <widget class="QPushButton" name="thresholdFileButton">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="sizeHint" stdset="0">
+       <property name="maximumSize">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>80</width>
+         <height>23</height>
         </size>
        </property>
-      </spacer>
-     </item>
-     <item row="18" column="5">
-      <widget class="QPushButton" name="outputDirectoryButton">
        <property name="text">
         <string>Browse...</string>
        </property>
       </widget>
      </item>
-     <item row="19" column="2">
+     <item row="17" column="2">
       <widget class="QLabel" name="outputPrefixLabel">
        <property name="minimumSize">
         <size>
@@ -642,23 +592,20 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="5">
-      <widget class="QPushButton" name="thresholdFileButton">
-       <property name="enabled">
-        <bool>false</bool>
+     <item row="15" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <property name="maximumSize">
+       <property name="sizeHint" stdset="0">
         <size>
-         <width>80</width>
-         <height>23</height>
+         <width>20</width>
+         <height>40</height>
         </size>
        </property>
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
+      </spacer>
      </item>
-     <item row="19" column="4">
+     <item row="17" column="3">
       <widget class="QLineEdit" name="outputPrefix">
        <property name="maximumSize">
         <size>
@@ -668,37 +615,21 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="4">
-      <widget class="QLineEdit" name="interceptsFile">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>300</width>
-         <height>16777215</height>
-        </size>
+     <item row="16" column="4">
+      <widget class="QPushButton" name="outputDirectoryButton">
+       <property name="text">
+        <string>Browse...</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="6">
+     <item row="10" column="5">
       <widget class="QPushButton" name="energyCalibrationButton">
        <property name="text">
         <string>Apply</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="5">
-      <widget class="QPushButton" name="interceptsFileButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="2">
+     <item row="9" column="2">
       <spacer name="verticalSpacer_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -711,21 +642,37 @@
        </property>
       </spacer>
      </item>
-     <item row="12" column="2">
+     <item row="8" column="4">
+      <widget class="QPushButton" name="interceptsFileButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Browse...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="2">
       <widget class="QCheckBox" name="totalSpectrumCheckBox">
        <property name="text">
         <string>Total Spectrum?</string>
        </property>
       </widget>
      </item>
-     <item row="16" column="1">
-      <widget class="QLabel" name="chargedSharingLabel">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Charged Sharing Mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <item row="8" column="3">
+      <widget class="QLineEdit" name="interceptsFile">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>
-     <item row="6" column="2">
+     <item row="5" column="2">
       <spacer name="verticalSpacer_5">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -738,7 +685,7 @@
        </property>
       </spacer>
      </item>
-     <item row="18" column="2">
+     <item row="16" column="2">
       <widget class="QLabel" name="outputDirectorylabel">
        <property name="maximumSize">
         <size>
@@ -754,7 +701,24 @@
        </property>
       </widget>
      </item>
-     <item row="16" column="4">
+     <item row="14" column="1">
+      <widget class="QLabel" name="chargedSharingLabel">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Charged Sharing Mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="5">
+      <widget class="QPushButton" name="chargedSharingButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="3">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QLabel" name="pixelGridLabel">
@@ -764,7 +728,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="pixelGridComboBox">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -795,13 +759,13 @@
        </item>
       </layout>
      </item>
-     <item row="16" column="6">
-      <widget class="QPushButton" name="chargedSharingButton">
+     <item row="1" column="3">
+      <widget class="QCheckBox" name="nextFrameCorrectionCheckBox">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Apply</string>
+        <string>Next Frame Correction?</string>
        </property>
       </widget>
      </item>

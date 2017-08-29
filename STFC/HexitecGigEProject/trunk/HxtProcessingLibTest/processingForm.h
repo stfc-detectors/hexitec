@@ -33,18 +33,23 @@ private:
 
    int thresholdOption;
    uint16_t thresholdPerPixel[6400];
+   bool nextFrame;
    bool energyCalibration;
    bool hxtGeneration;
    int chargedSharingOption;
 
 signals:
+   /*
    void configureProcessing(bool re_order,
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
-   void configureProcessing(int threshholdMode,
+                            */
+   void configureProcessing(bool re_order,
+                            bool nextFrame,
+                            int threshholdMode,
                             int thresholdValue,
-                            uint16_t *thresholdPerPixel,
+                            const char *thresholdFile,
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
@@ -56,6 +61,12 @@ signals:
                             const char *gradientFilename,
                             const char *interceptFilename,
                             const char *processedFilename);
+   void configureProcessing(int ChargedSharingMode,
+                            int pixelGridOption,
+                            const char *gradientFilename,
+                            const char *interceptFilename,
+                            const char *processedFilename);
+
    void imageStarted(const char *path, int nRows, int nCols);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
@@ -63,7 +74,6 @@ signals:
 private slots:
    void initialise();
    void processClicked();
-   void setRe_orderOption(bool re_order);
    void setThresholdOptions(int thresholdOption);
    void setThresholdParameters();
    void setThresholdFile();

@@ -30,13 +30,16 @@ public slots:
    void handleImageStarted(const char *path, int nRows, int nCols);
    void handleTransferBufferReady(char *transferBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
-   void handleConfigureProcessing(bool re_order,
+/*   void handleConfigureProcessing(bool re_order,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
                                   const char *processedFilename);
-   void handleConfigureProcessing(int threshholdMode,
+                                  */
+   void handleConfigureProcessing(bool re_order,
+                                  bool nextFrame,
+                                  int threshholdMode,
                                   int thresholdValue,
-                                  uint16_t *thresholdPerPixel,
+                                  const char *thresholdFilname,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
                                   const char *processedFilename);
@@ -45,6 +48,10 @@ public slots:
                                   long long binEnd,
                                   double binWidth,
                                   bool totalSpectrum,
+                                  const char *gradientFilename,
+                                  const char *interceptFilename,
+                                  const char *processedFilename);
+   void handleConfigureProcessing(int chargedSharingMode, int pixelGridOption,
                                   const char *gradientFilename,
                                   const char *interceptFilename,
                                   const char *processedFilename);

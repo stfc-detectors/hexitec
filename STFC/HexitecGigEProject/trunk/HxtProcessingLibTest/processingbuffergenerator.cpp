@@ -50,27 +50,41 @@ void ProcessingBufferGenerator::handleImageComplete(long long totalFramesAcquire
    currentImageProcessor->imageAcquisitionComplete(totalFramesAcquired);
 }
 
+/*
 void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order,
                                              const char *gradientFilename,
                                              const char *interceptFilename,
                                              const char *processedFilename)
 {
-   qDebug() << "ProcessingBufferGenerator::handleConfigureProcessing() called";
+   qDebug() << "111 ProcessingBufferGenerator::handleConfigureProcessing() called";
    processingDefinition->setRe_order(re_order);
    processingDefinition->setGradientFilename((char *)gradientFilename);
    processingDefinition->setInterceptFilename((char *)interceptFilename);
    processingDefinition->setProcessedFilename((char *)processedFilename);
 }
-
-void ProcessingBufferGenerator::handleConfigureProcessing(int threshholdMode, int thresholdValue, uint16_t *thresholdPerPixel,
-                                             const char *gradientFilename,
-                                             const char *interceptFilename,
-                                             const char *processedFilename)
+*/
+void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool nextFrame,
+                                                          int threshholdMode, int thresholdValue, const char *thresholdFilname,
+                                                          const char *gradientFilename,
+                                                          const char *interceptFilename,
+                                                          const char *processedFilename)
 {
-   qDebug() << "ProcessingBufferGenerator::handleConfigureProcessing() called";
+   qDebug() << "222 ProcessingBufferGenerator::handleConfigureProcessing() thresholdfilname = " << thresholdFilname;
+   processingDefinition->setRe_order(re_order);
+   processingDefinition->setNextFrameCorrection(nextFrame);
    processingDefinition->setThresholdMode((ThresholdMode)threshholdMode);
-   processingDefinition->setThresholdValue(thresholdValue);
-   processingDefinition->setThresholdPerPixel(thresholdPerPixel);
+
+   switch ((ThresholdMode)threshholdMode)
+   {
+      case SINGLE_VALUE:
+         processingDefinition->setThresholdValue(thresholdValue);
+         break;
+      case THRESHOLD_FILE:
+         processingDefinition->setThresholdPerPixel((char *)thresholdFilname);
+         break;
+      default:
+         break;
+   }
    processingDefinition->setGradientFilename((char *)gradientFilename);
    processingDefinition->setInterceptFilename((char *)interceptFilename);
    processingDefinition->setProcessedFilename((char *)processedFilename);
@@ -90,6 +104,20 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
    processingDefinition->setInterceptFilename((char *)interceptFilename);
    processingDefinition->setProcessedFilename((char *)processedFilename);
 
+}
+
+void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption,
+                                                          const char *gradientFilename,
+                                                          const char *interceptFilename,
+                                                          const char *processedFilename)
+{
+   qDebug() << "8888 ProcessingBufferGenerator::handleConfigureProcessing()pixelGridOption= " << pixelGridOption;
+   processingDefinition->setChargedSharingMode((ChargedSharingMode)chargedSharingMode);
+   processingDefinition->setPixelGridSize(pixelGridOption);
+
+   processingDefinition->setGradientFilename((char *)gradientFilename);
+   processingDefinition->setInterceptFilename((char *)interceptFilename);
+   processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
