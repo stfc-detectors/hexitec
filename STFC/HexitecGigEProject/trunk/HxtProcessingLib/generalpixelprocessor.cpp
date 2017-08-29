@@ -83,13 +83,11 @@ double *GeneralPixelProcessor::getInterceptValue()
 uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame)
 {
    uint16_t  *re_orderedFrame;
-   uint16_t  *re_orderedFrameIndex;
 
    qDebug() << "GeneralPixelProcessor::processFrame() 1";
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
-   re_orderedFrameIndex = re_orderedFrame;
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
 
    return re_orderedFrame;
 }
@@ -98,11 +96,11 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
 {
    uint16_t  *re_orderedFrame;
 
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    qDebug() << "GeneralPixelProcessor::processFrame() 2";
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-   for (int i = 0; i < frameSize; i++)
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue)
       {
@@ -117,11 +115,11 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresho
 {
    uint16_t  *re_orderedFrame;
 
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    qDebug() << "GeneralPixelProcessor::processFrame() 3";
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-   for (int i = 0; i < frameSize; i++)
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdPerPixel[i])
       {
@@ -131,78 +129,91 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresho
 
    return re_orderedFrame;
 }
-/*
-uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, double **pixelEnergyPtr)
+
+uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame,
+                                              unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t  *re_orderedFrame;
-   double *pixelEnergy;
+   unordered_map<int, double> *pixelEnergyMap;
+   double value;
 
-   qDebug() << "GeneralPixelProcessor::processFrame()";
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   qDebug() << "GeneralPixelProcessor::processFrame() 1";
+   pixelEnergyMap = new unordered_map<int, double>();
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-   for (int i = 0; i < frameSize; i++)
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
-      pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+      if (re_orderedFrame[i] != 0)
+      {
+         value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
+         pixelEnergyMap->insert(std::make_pair(i,value));
+      }
    }
-   *pixelEnergyPtr = pixelEnergy;
+   *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
 }
 
-uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue, double **pixelEnergyPtr)
+uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
+                                              unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t  *re_orderedFrame;
-   double *pixelEnergy;
+   unordered_map<int, double> *pixelEnergyMap;
+   double value;
 
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   pixelEnergyMap = new unordered_map<int, double>();
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-   for (int i = 0; i < frameSize; i++)
+   qDebug() << "GeneralPixelProcessor::processFrame() 2";
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
-      if (re_orderedFrame[i] - thresholdValue < 0)
+      if (re_orderedFrame[i] < thresholdValue)
       {
          re_orderedFrame[i] = 0;
-         pixelEnergy[i] = interceptValue[i];
       }
       else
       {
-         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+         value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
+         pixelEnergyMap->insert(std::make_pair(i,value));
       }
    }
-   *pixelEnergyPtr = pixelEnergy;
+   *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
 }
 
-uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel, double **pixelEnergyPtr)
+uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+                                              unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t  *re_orderedFrame;
-   double *pixelEnergy;
+   unordered_map<int, double> *pixelEnergyMap;
+   double value;
 
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   pixelEnergyMap = new unordered_map<int, double>();
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   pixelEnergy = (double *) calloc(frameSize, sizeof(double));
-   memcpy(re_orderedFrame, frame, frameSize * sizeof(uint16_t));
-   for (int i = 0; i < frameSize; i++)
+   qDebug() << "GeneralPixelProcessor::processFrame() 3";
+   memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
-      if (re_orderedFrame[i] - thresholdPerPixel[i] < 0)
+      if (re_orderedFrame[i] < thresholdPerPixel[i])
       {
          re_orderedFrame[i] = 0;
-         pixelEnergy[i] = interceptValue[i];
       }
       else
       {
-         pixelEnergy[i] = re_orderedFrame[i] * gradientValue[i] + interceptValue[i];
+         value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
+         pixelEnergyMap->insert(std::make_pair(i,value));
       }
    }
-   *pixelEnergyPtr = pixelEnergy;
+   *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
 }
-*/
+
 uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame)
 {
    uint16_t  *re_orderedFrame;
@@ -212,10 +223,6 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame)
 
    for (int i = 0; i < frameSize; i++)
    {
-      if (GeneralPixelProcessor::pixelMap[i] >= 6400 || GeneralPixelProcessor::pixelMap[i] < 0)
-      {
-         qDebug() << "pixelMap[i] has invalid value =" << GeneralPixelProcessor::pixelMap[i];
-      }
       re_orderedFrame[GeneralPixelProcessor::pixelMap[i]] = frame[i];
    }
 
@@ -225,18 +232,20 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame)
 uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue)
 {
    uint16_t  *re_orderedFrame;
+   int index;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
    for (int i = 0; i < frameSize; i++)
    {
-      if (frame[GeneralPixelProcessor::pixelMap[i]] - thresholdValue < 0)
+      index = GeneralPixelProcessor::pixelMap[i];
+      if (frame[index] < thresholdValue)
       {
-         re_orderedFrame[GeneralPixelProcessor::pixelMap[i]] =0;
+         re_orderedFrame[index] =0;
       }
       else
       {
-         re_orderedFrame[GeneralPixelProcessor::pixelMap[i]] = frame[i];
+         re_orderedFrame[index] = frame[i];
       }
    }
 
@@ -246,18 +255,20 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t 
 uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel)
 {
    uint16_t  *re_orderedFrame;
+   int index;
 
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
 
    for (int i = 0; i < frameSize; i++)
    {
-      if (frame[i] - thresholdPerPixel[i] < 0)
+      index = pixelMap[i];
+      if (frame[i] < thresholdPerPixel[i])
       {
-         re_orderedFrame[GeneralPixelProcessor::pixelMap[i]] = 0;
+         re_orderedFrame[index] = 0;
       }
       else
       {
-         re_orderedFrame[GeneralPixelProcessor::pixelMap[i]] = frame[i];
+         re_orderedFrame[index] = frame[i];
       }
    }
 
@@ -272,19 +283,25 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
    double value;
    int index;
 
-//   qDebug() << "GeneralPixelProcessor::processRe_orderFrame()";
+   qDebug() << "GeneralPixelProcessor::processRe_orderFrame()";
    pixelEnergyMap = new unordered_map<int, double>();
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
+   qDebug() << "GeneralPixelProcessor::processRe_orderFrame() GeneralPixelProcessor::frameSize" << GeneralPixelProcessor::frameSize;
 
-   for (int i = 0; i < frameSize; i++)
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       re_orderedFrame[index] = frame[i];
-      value = (re_orderedFrame[index] * gradientValue[index] + interceptValue[index]);
-      pixelEnergyMap->insert(std::make_pair(index,value));
+      if (re_orderedFrame[index] != 0)
+      {
+         value = (re_orderedFrame[index] * gradientValue[index] + interceptValue[index]);
+         pixelEnergyMap->insert(std::make_pair(index,value));
+         qDebug() << "added to pixelMap " << i;
+      }
    }
    *pixelEnergyMapPtr = pixelEnergyMap;
 
+   qDebug() << "GeneralPixelProcessor::processRe_orderFrame() RETURNING!!!!";
    return re_orderedFrame;
 }
 
@@ -298,9 +315,9 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t 
 
    qDebug() << "!!!!!!!!CALLING the PARENT METHOD!!!!!!!!";
    pixelEnergyMap = new unordered_map<int, double>();
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < frameSize; i++)
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] < thresholdValue)
@@ -328,12 +345,12 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t 
    double value;
 
    pixelEnergyMap = new unordered_map<int, double>();
-   re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < frameSize; i++)
+   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
-      if (frame[i] - thresholdPerPixel[i] < 0)
+      if (frame[i] < thresholdPerPixel[i])
       {
          re_orderedFrame[index] = 0;
       }

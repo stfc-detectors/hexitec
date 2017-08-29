@@ -4,11 +4,14 @@
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
 ProcessingDefinition::ProcessingDefinition(long long frameSize)
 {
    this->frameSize = frameSize;
    gradientValue = (double *) calloc(frameSize, sizeof(double));
    interceptValue = (double *) calloc(frameSize, sizeof(double));
+   thresholdPerPixel = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
    outputDirectory = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images";
    outputPrefix = "re_order";
 }
@@ -23,9 +26,14 @@ void ProcessingDefinition::setThresholdValue(int thresholdValue)
    this->thresholdValue = thresholdValue;
 }
 
-void ProcessingDefinition::setThresholdPerPixel(uint16_t *thresholdPerPixel)
+void ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
 {
-   this->thresholdPerPixel = thresholdPerPixel;
+   getData(thresholdFilename, thresholdPerPixel);
+
+   for (int i = 0; i< frameSize; i++)
+   {
+      qDebug() << "Threshold: " << this->thresholdPerPixel[i];
+   }
 }
 
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
@@ -109,7 +117,28 @@ void ProcessingDefinition::getData(const char *filename, double *dataValue)
    inFile.open(filename);
 
    if (!inFile)
-     qDebug() << "error opening " << filename;
+     qDebug() << "ProcessingDefinition::getData - error opening " << filename;
+   while (inFile >> dataValue[i])
+   {
+      i++;
+   }
+
+   if (i < 6400)
+     qDebug() << "error: only " << i << " could be read";
+   else
+     qDebug() << "file read OK ";
+   inFile.close();
+}
+
+void ProcessingDefinition::getData(const char *filename, uint16_t *dataValue)
+{
+   int i = 0;
+   std::ifstream inFile;
+
+   inFile.open(filename);
+
+   if (!inFile)
+     qDebug() << "ProcessingDefinition::getData - error opening " << filename;
    while (inFile >> dataValue[i])
    {
       i++;
@@ -129,7 +158,20 @@ int ProcessingDefinition::getPixelGridSize() const
 
 void ProcessingDefinition::setPixelGridSize(int value)
 {
-    pixelGridSize = value;
+   switch (value)
+   {
+      case 0:
+         qDebug() << "ProcessingDefinition::setPixelGridSize(): SHOULD BE 3 ";
+         pixelGridSize = 3;
+         break;
+      case 1:
+         qDebug() << "ProcessingDefinition::setPixelGridSize(): SHOULD BE 5 ";
+         pixelGridSize = 5;
+         break;
+      default:
+         break;
+   }
+   qDebug() << "value: " << value << "ProcessingDefinition::setPixelGridSize(): " << pixelGridSize;
 }
 
 bool ProcessingDefinition::getNextFrameCorrection() const

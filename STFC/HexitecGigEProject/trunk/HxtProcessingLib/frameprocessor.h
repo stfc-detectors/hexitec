@@ -14,7 +14,7 @@ class FrameProcessor : public GeneralFrameProcessor
 {
 
 public:
-   FrameProcessor();
+   FrameProcessor(bool nextFrameCorrection);
    ~FrameProcessor();
    uint16_t *process(uint16_t *frame);
    uint16_t *process(uint16_t *frame, uint16_t thresholdValue);

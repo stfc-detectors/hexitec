@@ -4,9 +4,18 @@
 #include <fstream>
 #include <QDebug>
 
-GeneralFrameProcessor::GeneralFrameProcessor()
+GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
-
+   qDebug() << "Calling GeneralFrameProcessor constructor nextFrameCorrection =" << nextFrameCorrection;
+//   nextFrameCorrection = true;
+   if (nextFrameCorrection)
+   {
+      pixelProcessor = new PixelProcessorNextFrame();
+   }
+   else
+   {
+      pixelProcessor = new PixelProcessor();
+   }
 }
 
 GeneralFrameProcessor::~GeneralFrameProcessor()

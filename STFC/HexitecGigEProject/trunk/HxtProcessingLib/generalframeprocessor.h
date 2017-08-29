@@ -9,7 +9,7 @@
 class GeneralFrameProcessor
 {
 public:
-   GeneralFrameProcessor();
+   GeneralFrameProcessor(bool nextFrameCorrection);
    ~GeneralFrameProcessor();
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);

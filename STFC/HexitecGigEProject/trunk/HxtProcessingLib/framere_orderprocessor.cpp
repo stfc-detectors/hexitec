@@ -2,26 +2,18 @@
 
 #include <QDebug>
 
-FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection)
+FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
+   GeneralFrameProcessor(nextFrameCorrection)
 {
-   nextFrameCorrection = true;
-   if (nextFrameCorrection)
-   {
-      pixelProcessor = new PixelProcessorNextFrame();
-   }
-   else
-   {
-      pixelProcessor = new PixelProcessor();
-   }
+   qDebug() << "Calling FrameRe_orderProcessor constructor";
 }
 
 uint16_t *FrameRe_orderProcessor::process(uint16_t *frame)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
 
+   qDebug() << "process 11111";
    result = pixelProcessor->processRe_orderFrame(frame);
-//   writeFile(result, filename);
 
    return result;
 }
@@ -29,10 +21,9 @@ uint16_t *FrameRe_orderProcessor::process(uint16_t *frame)
 uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdValue)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
 
+   qDebug() << "process 22222";
    result = pixelProcessor->processRe_orderFrame(frame, thresholdValue);
-//   writeFile(result, filename);
 
    return result;
 }
@@ -40,10 +31,9 @@ uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdVal
 uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.bin";
 
+   qDebug() << "process 33333";
    result = pixelProcessor->processRe_orderFrame(frame, thresholdPerPix);
-//   writeFile(result, filename);
 
    return result;
 }
@@ -51,10 +41,9 @@ uint16_t *FrameRe_orderProcessor::process(uint16_t *frame,
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
 
+   qDebug() << "process 44444";
    result = pixelProcessor->processRe_orderFrame(frame, pixelEnergyMapPtr);
-//   writeFile(result, filename);
 
    return result;
 }
@@ -63,10 +52,9 @@ uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdVal
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshVal.bin";
 
+   qDebug() << "process 55555";
    result = pixelProcessor->processRe_orderFrame(frame, thresholdValue, pixelEnergyMapPtr);
-//   writeFile(result, filename);
 
    return result;
 }
@@ -75,10 +63,9 @@ uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t *thresholdPe
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
-   const char* filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.bin";
 
+   qDebug() << "process 66666";
    result = pixelProcessor->processRe_orderFrame(frame, thresholdPerPix, pixelEnergyMapPtr);
-//   writeFile(result, filename);
 
    return result;
 }

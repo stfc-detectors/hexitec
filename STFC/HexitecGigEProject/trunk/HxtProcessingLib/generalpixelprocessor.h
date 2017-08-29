@@ -28,26 +28,26 @@ public:
    double *getInterceptValue();
 
    uint16_t *processFrame(uint16_t *frame);
-   uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   virtual uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
+   virtual uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
 
-   uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue,
+   virtual uint16_t *processFrame(uint16_t *frame,
+              unordered_map<int, double>**pixelEnergyMapPtr);
+   virtual uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
-   uint16_t *processFrame(uint16_t *frame, 
-				  unordered_map<int, double>**pixelEnergyMapPtr);
-   uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+   virtual uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
 
    uint16_t *processRe_orderFrame(uint16_t *frame);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue);
+   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
 
    uint16_t *processRe_orderFrame(uint16_t *frame, 
 				  unordered_map<int, double>**pixelEnergyMapPtr);
    virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
                                                   unordered_map<int, double>**pixelEnergyMapPtr);
-   uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-				  unordered_map<int, double>**pixelEnergyMapPtr);
+   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+              unordered_map<int, double>**pixelEnergyMapPtr);
 
 protected:
    void initialisePixelMap();

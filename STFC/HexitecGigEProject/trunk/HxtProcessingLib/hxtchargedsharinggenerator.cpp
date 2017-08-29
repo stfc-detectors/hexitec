@@ -8,14 +8,13 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
    pixelCol = (int *) calloc(nCols, sizeof(int));
    pixelValue = (double*) calloc(nRows * nCols, sizeof(double));
    chargedSharingMode = ADDITION;
-   chargedSharingMode = DISCRIMINATION;
+//   chargedSharingMode = DISCRIMINATION;
    setPixelGridSize(3);
 }
 
 void HxtChargedSharingGenerator::handleProcess()
 {
    unordered_map <int, double> *pixelEnergyMap;
-//   double
    int temp = 0;
 
   while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyMapQueueSize() > 0) || processedEnergyCount < (hxtItem->getTotalEnergiesToProcess()))
@@ -24,7 +23,7 @@ void HxtChargedSharingGenerator::handleProcess()
       {
          Sleep(10);
       }
-//      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
+      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
       while ((hxtItem->getPixelEnergyMapQueueSize()) > 0)
       {
          pixelEnergyMap = hxtItem->getNextPixelEnergyMap();
@@ -47,6 +46,7 @@ void HxtChargedSharingGenerator::handleProcess()
 
 void HxtChargedSharingGenerator::processEnergies(unordered_map <int, double> *pixelEnergyMap)
 {
+   qDebug() << "HxtChargedSharingGenerator::processEnergies()";
    calculateChargedSharing(pixelEnergyMap);
    hxtItem->addToHistogram(*pixelEnergyMap);
    incrementProcessedEnergyCount();
@@ -61,7 +61,6 @@ void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
 
 void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap)
 {
-   double thisEnergy;
    int pixel;
    int index = 0;
    int length;

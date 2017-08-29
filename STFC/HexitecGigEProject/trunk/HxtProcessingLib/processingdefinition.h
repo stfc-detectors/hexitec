@@ -18,7 +18,7 @@ public:
 
    void setThresholdMode(ThresholdMode threshholdMode);
    void setThresholdValue(int thresholdValue);
-   void setThresholdPerPixel(uint16_t *thresholdPerPixel);
+   void setThresholdPerPixel(char *thresholdFilename);
    void setEnergyCalibration(bool energyCalibration);
    void setProcessedFilename(const char *processedFilename);
    void setGradientFilename(const char *gradientFilename);
@@ -77,6 +77,7 @@ private:
    void setGradients();
    void setIntercepts();
    void getData(const char *filename, double *dataValue);
+   void getData(const char *filename, uint16_t *dataValue);
    bool re_order;
    ThresholdMode threshholdMode;
    int thresholdValue;

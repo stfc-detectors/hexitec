@@ -44,6 +44,7 @@ void HxtGenerator::handleProcess()
 
 void HxtGenerator::processEnergies(unordered_map <int, double>pixelEnergyMap)
 {
+   qDebug() << "HxtGenerator::processEnergies()";
    hxtItem->addToHistogram(pixelEnergyMap);
    incrementProcessedEnergyCount();
 }

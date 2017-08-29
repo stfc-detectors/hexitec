@@ -19,6 +19,10 @@ ImageProcessor::ImageProcessor(const char *name, int nRows, int nCols, Processin
    nextFrameCorrection = processingDefinition->getNextFrameCorrection();
    chargedSharingMode = processingDefinition->getChargedSharingMode();
 
+   qDebug() << "ImageProcessor with energyCalibration = " << energyCalibration;
+   qDebug() << "ImageProcessor with nextFrame = " << nextFrameCorrection;
+   qDebug() << "ImageProcessor with chargedSharingMode = " << chargedSharingMode;
+
    if (energyCalibration)
    {
       if (processingDefinition->getTotalSpectrum())
@@ -27,7 +31,7 @@ ImageProcessor::ImageProcessor(const char *name, int nRows, int nCols, Processin
       }
       else
       {
-//         hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
+//         hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition);
          hxtGenerator = new HxtChargedSharingGenerator(nRows, nCols, processingDefinition);
       }
    }
@@ -53,7 +57,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
 
    filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.bin";
    filenameHxt = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_order.hxt";
-   qDebug() << "ImageProcessor::process() ThresholdMode::NONE" << frameSize;
+   qDebug() << "ImageProcessor::process() ThresholdMode::NONE";
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
       while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
@@ -66,6 +70,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
+            qDebug() << "11111111";
             if (frameIterator != NULL)
             {
                for (unsigned long i = 0; i < validFrames; i++)
@@ -96,6 +101,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
       }
       else
       {
+         qDebug() << "NO Energy Calibration";
          while (imageItem->getBufferQueueSize() > 0)
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
@@ -195,8 +201,10 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
+   const char* filenameHxt;
 
    filename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.bin";
+   filenameHxt = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//re_orderThreshPerPix.hxt";
    qDebug() << "ImageProcessor::process() ThresholdMode::THRESHOLD_FILE";
    thresholdPerPixel = processingDefinition->getThresholdPerPixel();
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -205,22 +213,53 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
       {
          Sleep(10);
       }
-      while (imageItem->getBufferQueueSize() > 0)
+      if (energyCalibration)
       {
-         bufferStart = imageItem->getNextBuffer(&validFrames);
-         frameIterator = bufferStart;
-         if (frameIterator != NULL)
+         while (imageItem->getBufferQueueSize() > 0)
          {
-            for (unsigned long i = 0; i < validFrames; i++)
+            bufferStart = imageItem->getNextBuffer(&validFrames);
+            frameIterator = bufferStart;
+            if (frameIterator != NULL)
             {
-               result = fp->process((uint16_t *)frameIterator, thresholdPerPixel);
-               // MUST USE RESULT IN FURTHER CALCULATIONS
-               frameIterator += frameSize;
-               processedFrameCount++;
-               qDebug() << "done a frame";
+               for (unsigned long i = 0; i < validFrames; i++)
+               {
+                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &pixelEnergyMap);
+                  if (pixelEnergyMap->size() > 0)
+                  {
+                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                     processedFrameCount++;
+                  }
+                  // MUST USE RESULT IN FURTHER CALCULATIONS
+                  frameIterator += frameSize;
+                  qDebug() << "done a frame";
+               }
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
+               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                            filenameHxt);
+               free(bufferStart);
             }
-            writeBinFile(bufferStart, (validFrames * frameSize), filename);
-            free(bufferStart);
+         }
+      }
+      else
+      {
+         while (imageItem->getBufferQueueSize() > 0)
+         {
+            bufferStart = imageItem->getNextBuffer(&validFrames);
+            frameIterator = bufferStart;
+            if (frameIterator != NULL)
+            {
+               for (unsigned long i = 0; i < validFrames; i++)
+               {
+                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel);
+                  // MUST USE RESULT IN FURTHER CALCULATIONS
+                  frameIterator += frameSize;
+                  processedFrameCount++;
+                  free(result);
+               }
+               writeBinFile(bufferStart, (validFrames * frameSize), filename);
+               free(bufferStart);
+            }
          }
       }
    }
@@ -235,7 +274,7 @@ void ImageProcessor::handleProcess()
    uint16_t *result;
    bool energyCalibration;
 
-   qDebug() << "ImageProcessor::handleProcess(), threadId: " << QThread::currentThreadId();
+   qDebug() << "ImageProcessor::handleProcess(), nextFrameCorrection: " << nextFrameCorrection;
    processedFrameCount = 0;
    qDebug() << "++++++++++++++START TIMER";
    QTime time;
@@ -248,7 +287,7 @@ void ImageProcessor::handleProcess()
    }
    else
    {
-//      fp = new FrameProcessor();
+      fp = new FrameProcessor(nextFrameCorrection);
    }
 
    fp->setEnergyCalibration(energyCalibration);
