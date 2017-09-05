@@ -7,7 +7,6 @@
 HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)  :
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
-   qDebug() << "HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator CONSTRUCTED";
    if (processingDefinition->getTotalSpectrum())
    {
       hxtItem->initialiseTotalSpectrum();
@@ -30,7 +29,6 @@ void HxtGenerator::handleProcess()
       {
          Sleep(10);
       }
-//      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
       while ((hxtItem->getPixelEnergyMapQueueSize()) > 0)
       {
          pixelEnergyMap = hxtItem->getNextPixelEnergyMap();
@@ -39,7 +37,6 @@ void HxtGenerator::handleProcess()
 //               result = processEnergies(pixelEnergy);
 
                  processEnergies(pixelEnergyMap);
-//                 free(pixelEnergy);
 
                // MUST USE RESULT IN FURTHER CALCULATIONS
 //               free(result);
@@ -62,7 +59,6 @@ void HxtGenerator::handleProcess(bool totalSpectrum)
       {
          Sleep(10);
       }
-//      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
       while ((hxtItem->getPixelEnergyMapQueueSize()) > 0)
       {
          pixelEnergyMap = hxtItem->getNextPixelEnergyMap();
