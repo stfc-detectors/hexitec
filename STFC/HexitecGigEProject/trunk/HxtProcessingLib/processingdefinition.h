@@ -49,6 +49,8 @@ public:
    double getBinWidth() const;
    void setBinWidth(const double &binWidth);
 
+   long long getNBins();
+
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
 
@@ -90,6 +92,7 @@ private:
    long long binStart;
    long long binEnd;
    double binWidth;
+   long long nBins;
    bool totalSpectrum;
    long long hxtBufferAllDataSize;
    long long hxtBufferHeaderSize;

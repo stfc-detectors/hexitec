@@ -16,6 +16,7 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    processedEnergyCount = 0;
    hxtItem->setTotalEnergiesToProcess(0);
    connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
+   connect(this, SIGNAL(process(bool)), this, SLOT(handleProcess(bool)));
    setFrameProcessingInProgress(true);
 }
 
@@ -74,3 +75,17 @@ double *GeneralHxtGenerator::getHxtV3AllData()
 {
    return hxtItem->getHxtV3AllData();
 }
+
+double *GeneralHxtGenerator::getEnergyBin()
+{
+   QMutexLocker locker(&mutex);
+   return hxtItem->getEnergyBin();
+}
+
+long long *GeneralHxtGenerator::getSummedHistogram()
+{
+   QMutexLocker locker(&mutex);
+   return hxtItem->getSummedHistogram();
+}
+
+

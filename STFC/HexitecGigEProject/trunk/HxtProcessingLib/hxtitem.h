@@ -54,6 +54,8 @@ public:
    void addToHistogramWithSum(unordered_map <int, double>pixelEnergyMap);
    HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();
+   double *getEnergyBin();
+   long long *getSummedHistogram();
 
 
 private:
@@ -76,7 +78,7 @@ private:
    long long nBins;
    double *energyBin;
    double *histogramPerPixel;
-   double *summedHistogram;
+   long long *summedHistogram;
    unsigned long histogramIndex;
    long long totalEnergiesToProcess;
    long long energiesProcessed;

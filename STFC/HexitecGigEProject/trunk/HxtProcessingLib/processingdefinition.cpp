@@ -243,13 +243,13 @@ void ProcessingDefinition::setOutputDirectory(char  *value)
 
 bool ProcessingDefinition::getTotalSpectrum() const
 {
+   qDebug() << "ProcessingDefinition::getTotalSpectrum(): " << totalSpectrum;
    return totalSpectrum;
 }
 
 void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
-   long long nBins;
-
+   qDebug() << "ProcessingDefinition::setTotalSpectrum(): " << totalSpectrum;
    this->totalSpectrum = totalSpectrum;
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
    hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * sizeof(double);
@@ -263,7 +263,12 @@ double ProcessingDefinition::getBinWidth() const
 
 void ProcessingDefinition::setBinWidth(const double &binWidth)
 {
-    this->binWidth = binWidth;
+   this->binWidth = binWidth;
+}
+
+long long ProcessingDefinition::getNBins()
+{
+   return nBins;
 }
 
 long long ProcessingDefinition::getBinEnd() const

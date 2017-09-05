@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
@@ -50,7 +51,7 @@ ImageProcessor::~ImageProcessor()
    imageProcessorThread->exit();
 }
 
-void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filenameBin, const char* filenameHxt)
+void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filenameBin, const char* filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
    char *bufferStart;
@@ -115,13 +116,16 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                free(bufferStart);
             }
          }
-
+      }
+      if (processingDefinition->getTotalSpectrum())
+      {
+         writeCsvFile(hxtGenerator->getEnergyBin(), hxtGenerator->getSummedHistogram(), filenameCsv);
       }
    }
 }
 
 void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result,
-                                           const char* filenameBin, const char *filenameHxt)
+                                           const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
    char *bufferStart;
@@ -185,12 +189,16 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             }
          }
       }
+      if (processingDefinition->getTotalSpectrum())
+      {
+         writeCsvFile(hxtGenerator->getEnergyBin(), hxtGenerator->getSummedHistogram(), filenameCsv);
+      }
    }
 }
 
 
 void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, uint16_t *result,
-                                          const char* filenameBin, const char *filenameHxt)
+                                          const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
    char *bufferStart;
@@ -252,6 +260,10 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
             }
          }
       }
+      if (processingDefinition->getTotalSpectrum())
+      {
+         writeCsvFile(hxtGenerator->getEnergyBin(), hxtGenerator->getSummedHistogram(), filenameCsv);
+      }
    }
 }
 
@@ -264,11 +276,14 @@ void ImageProcessor::handleProcess()
    bool energyCalibration;
    char* filenameBin = new char[1024];
    char* filenameHxt = new char[1024];
+   char* filenameCsv = new char[1024];
 
    strcpy(filenameBin, imageItem->getFilename());
    strcpy(filenameHxt, filenameBin);
+   strcpy(filenameCsv, filenameBin);
    strcat(filenameBin,".bin");
    strcat(filenameHxt,".hxt");
+   strcat(filenameCsv,"_total.csv");
 
    processedFrameCount = 0;
    qDebug() << "++++++++++++++START TIMER";
@@ -292,13 +307,13 @@ void ImageProcessor::handleProcess()
    switch (processingDefinition->getThreshholdMode())
    {
       case ThresholdMode::NONE:
-         processThresholdNone(fp, result, filenameBin, filenameHxt);
+         processThresholdNone(fp, result, filenameBin, filenameHxt, filenameCsv);
          break;
       case ThresholdMode::SINGLE_VALUE:
-         processThresholdValue(fp, thresholdValue, result, filenameBin, filenameHxt);
+         processThresholdValue(fp, thresholdValue, result, filenameBin, filenameHxt, filenameCsv);
          break;
       case ThresholdMode::THRESHOLD_FILE:
-         processThresholdFile(fp, thresholdPerPixel, result, filenameBin, filenameHxt);
+         processThresholdFile(fp, thresholdPerPixel, result, filenameBin, filenameHxt, filenameCsv);
          break;
       default:
          break;
@@ -354,4 +369,32 @@ void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char
    outFile.write((const char *)header, headerLength * sizeof(char));
    outFile.write((const char *)data, dataLength * sizeof(char));
    outFile.close();
+}
+
+void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,  const char *filename)
+{
+   std::ofstream outFile;
+   long long nBins = processingDefinition->getNBins();
+   double *energyBinPtr;
+   long long *summedHistogramPtr = summedHistogram;
+   energyBinPtr = energyBin;
+
+   qDebug() <<"ImageProcessor::writeCsvFile: " << filename;
+
+   ostringstream csvOutput;
+   for (int i = 0; i < nBins; i++)
+   {
+      csvOutput << *energyBinPtr << "," << *summedHistogramPtr << "\n";
+      energyBinPtr++;
+      summedHistogramPtr++;
+   }
+   std::string s = csvOutput.str();
+   outFile.open(filename, std::ofstream::out);
+   outFile << s;
+   /*
+   outFile.open(filename, std::ofstream::out);
+   outFile << csvOutput;
+   */
+   outFile.close();
+
 }

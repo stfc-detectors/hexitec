@@ -11,7 +11,6 @@
 PixelProcessorNextFrame::PixelProcessorNextFrame() :
    GeneralPixelProcessor()
 {
-   qDebug() << "PixelProcessorNextFrame CONSTRUCTED";
    lastRe_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 }
 
@@ -21,7 +20,6 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresh
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   qDebug() << "PixelProcessorNextFrame::processFrame() 2";
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
@@ -41,7 +39,6 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thres
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   qDebug() << "PixelProcessorNextFrame::processFrame() 3";
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
@@ -63,7 +60,6 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresh
    unordered_map<int, double> *pixelEnergyMap;
    double value;
 
-   qDebug() << "PixelProcessorNextFrame::processFrame() 4";
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
@@ -93,7 +89,6 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thres
    unordered_map<int, double> *pixelEnergyMap;
    double value;
 
-   qDebug() << "PixelProcessorNextFrame::processFrame() 5";
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
@@ -123,7 +118,6 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   qDebug() << "PixelProcessorNextFrame::processRe_orderFrame() called";
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
@@ -146,7 +140,6 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
    uint16_t  *re_orderedFrame;
    int index;
 
-   qDebug() << "PixelProcessorNextFrame::processFrame() 6";
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
@@ -176,7 +169,6 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
 
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
-   qDebug() << "PixelProcessorNextFrame::processFrame() 7, frameSize = " << GeneralPixelProcessor::frameSize;
 
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
@@ -187,7 +179,6 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
       }
       else
       {
-         qDebug() << "inserting value for pixel " << i;
          re_orderedFrame[index] = frame[i];
          value = (re_orderedFrame[index] * gradientValue[index] + interceptValue[index]);
          pixelEnergyMap->insert(std::make_pair(index,value));
@@ -207,15 +198,12 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
    int index;
    double value;
 
-   qDebug() << "PixelProcessorNextFrame::processRe_orderFrame() 8";
-
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
-      qDebug() << "thresholdPerPixel[index] : " << thresholdPerPixel[index];
       if (frame[i] < thresholdPerPixel[index] || lastRe_orderedFrame[index] > 0)
       {
          re_orderedFrame[index] = 0;

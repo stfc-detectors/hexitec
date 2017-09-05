@@ -23,6 +23,8 @@ public:
    long long getProcessedEnergyCount();
    HxtItem::HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();
+   double *getEnergyBin();
+   long long *getSummedHistogram();
 
 protected:
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap) = 0;

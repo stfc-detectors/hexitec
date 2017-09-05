@@ -31,6 +31,7 @@ public:
 private:
    void writeBinFile(char *buffer, unsigned long length, const char* filename);
    void writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char* filename);
+   void writeCsvFile(double *energyBin, long long *summedHistogram, const char *filename);
    QThread *imageProcessorThread;
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
@@ -48,11 +49,11 @@ private:
    bool inProgress;
 
    void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result,
-                             const char* filenameBin, const char *filenameHxt);
+                             const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result,
-                              const char* filenameBin, const char *filenameHxt);
+                              const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
-                             uint16_t *result, const char* filenameBin, const char *filenameHxt);
+                             uint16_t *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
 
 signals:
    void process();

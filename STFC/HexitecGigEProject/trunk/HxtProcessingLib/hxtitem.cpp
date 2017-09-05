@@ -45,11 +45,12 @@ void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
       *energyBin = currentBin;
       energyBin++;
    }
+   energyBin = hxtV3Buffer.allData;
 }
 
 void HxtItem::initialiseTotalSpectrum()
 {
-   summedHistogram = (double *) calloc(nBins, sizeof(double));
+   summedHistogram = (long long *) calloc(nBins, sizeof(long long));
 }
 
 
@@ -198,7 +199,7 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
 {
 
    double *currentHistogram = &histogramPerPixel[0];
-   double *summed = &summedHistogram[0];
+   long long *summed = &summedHistogram[0];
    double thisEnergy;
    int bin;
    int pixel;
@@ -217,7 +218,7 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    }
 
    energiesProcessed++;
-//   qDebug() << "HxtItem::addToHistogram(), energiesProcessed: " << energiesProcessed;
+   qDebug() << "HxtItem::addToHistogramWithSum(), energiesProcessed: " << energiesProcessed;
 }
 
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
@@ -228,5 +229,15 @@ HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
 double *HxtItem::getHxtV3AllData()
 {
    return hxtV3Buffer.allData;
+}
+
+double *HxtItem::getEnergyBin()
+{
+   return energyBin;
+}
+
+long long *HxtItem::getSummedHistogram()
+{
+   return summedHistogram;
 }
 
