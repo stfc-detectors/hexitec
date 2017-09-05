@@ -27,11 +27,16 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    connect(ui->thresholdButton, SIGNAL(clicked()), this, SLOT(setThresholdParameters()));
    connect(ui->energyCalibrationCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnergyCalibration(bool)));
    connect(ui->energyCalibrationButton, SIGNAL(clicked()), this, SLOT(setEnergyCalibrationParameters()));
+   connect(ui->gradientsFileButton, SIGNAL(clicked(bool)), this, SLOT(setGradientsFile()));
+   connect(ui->interceptsFileButton, SIGNAL(clicked(bool)), this, SLOT(setInterceptsFile()));
    connect(ui->hxtCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHxtGeneration(bool)));
    connect(ui->binStartSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEndSpinBoxLimit(int)));
    connect(ui->binEndSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStartSpinBoxLimit(int)));
    connect(ui->chargedSharingComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setChargedSharingOptions(int)));
    connect(ui->chargedSharingButton, SIGNAL(clicked()), this, SLOT(setChargedSharingParameters()));
+   connect(ui->inputFilesListButton, SIGNAL(clicked(bool)), this, SLOT(setInputFilesList()));
+   connect(ui->outputDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(setOutputDirectory()));
+   connect(ui->dataFileButton, SIGNAL(clicked(bool)), this, SLOT(setDataFileParameters()));
 }
 
 ProcessingForm::~ProcessingForm()
@@ -46,64 +51,19 @@ QMainWindow *ProcessingForm::getMainWindow()
 
 void ProcessingForm::initialise()
 {
+   qDebug()<< "ProcessingForm::initialise()";
+   gradientFilename =  new char[1024];
+   interceptFilename =  new char[1024];
+//   outputDirectory =  new char[1024];
+//   outputPrefix =  new char[1024];
+
    setThresholdParameters();
 }
 
-/*
 void ProcessingForm::processClicked()
 {
-   rotate90();
-   rotate180();
-   rotate270();
-}
-*/
-
-void ProcessingForm::processClicked()
-{
-   const char *imageFilename = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//image.bin";
-
    qDebug() << "PROCESS BUTTON has been clicked!";
-   processImage(imageFilename, "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Size10.bin");
-}
-
-void ProcessingForm::processImage(const char *imageFilename, const char *filename)
-{
-   char *transferBuffer;
-   unsigned long validFrames = 0;
-   long long totalFramesAcquired = 0;
-   std::ifstream inFile;
-   int temp = 0;
-   int nRows = 80;
-   int nCols = 80;
-
-   inFile.open(filename, ifstream::binary);
-   emit imageStarted(imageFilename, nRows, nCols);
-
-   int bufferCount = 0;
-
-   while (inFile)
-   {
-      transferBuffer = (char *) calloc(6400 * 500 * sizeof(uint16_t), sizeof(char));
-
-      inFile.read(transferBuffer, 6400 * 500 * 2);
-      if (!inFile)
-      {
-         validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << validFrames <<" valid frames could be read: " << temp++;
-         emit transferBufferReady(transferBuffer, validFrames);
-      }
-      else
-      {
-         validFrames = inFile.gcount() / (6400 * 2);
-         qDebug() << validFrames <<" valid frames could be read: " << temp++;
-         emit transferBufferReady(transferBuffer, 500);
-      }
-      totalFramesAcquired += validFrames;
-      bufferCount++;
-      Sleep(50);
-   }
-   inFile.close();
-   emit imageComplete(totalFramesAcquired);
+   emit processImages();
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)
@@ -140,9 +100,6 @@ void ProcessingForm::setThresholdOptions(int thresholdOption)
 void ProcessingForm::setThresholdParameters()
 {
    int thresholdValue;
-   char *gradientFilename;
-   char *interceptFilename;
-   char *processedFilename;
    char *thresholdFile;
 
    switch (thresholdOption)
@@ -165,18 +122,9 @@ void ProcessingForm::setThresholdParameters()
       default:
          break;
    }
-   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
-//   thresholdFile = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Thresholds_500V_28C_135_1_5clk_1501190172.txt";
 
-   qDebug() << "emit configureProcessing() with re_order = " << ui->re_orderCheckBox->isChecked();
-   qDebug() << "emit configureProcessing() with nextFrame = " << nextFrame;
-   qDebug() << "emit configureProcessing() with thresholdOption = " << thresholdOption;
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
-                            thresholdOption, thresholdValue, thresholdFile,
-                            gradientFilename,
-                            interceptFilename,
-                            processedFilename);
+                            thresholdOption, thresholdValue, thresholdFile);
 }
 
 void ProcessingForm::setThresholdFile()
@@ -190,17 +138,30 @@ void ProcessingForm::setEnergyCalibration(bool energyCalibration)
    this->energyCalibration = energyCalibration;
    if (this->energyCalibration)
    {
-      ui->gradientsFile->setEnabled(true);
+      ui->gradientFilename->setEnabled(true);
       ui->gradientsFileButton->setEnabled(true);
-      ui->interceptsFile->setEnabled(true);
+      ui->interceptFilename->setEnabled(true);
       ui->interceptsFileButton->setEnabled(true);
+      ui->chargedSharingComboBox->setEnabled(true);
+      if (ui->chargedSharingComboBox->currentIndex() > 0)
+      {
+         ui->pixelGridComboBox->setEnabled(true);
+      }
+      else
+      {
+         ui->pixelGridComboBox->setEnabled(false);
+      }
+      ui->chargedSharingButton->setEnabled(true);
    }
    else
    {
-      ui->gradientsFile->setEnabled(false);
+      ui->gradientFilename->setEnabled(false);
       ui->gradientsFileButton->setEnabled(false);
-      ui->interceptsFile->setEnabled(false);
+      ui->interceptFilename->setEnabled(false);
       ui->interceptsFileButton->setEnabled(false);
+      ui->chargedSharingComboBox->setEnabled(false);
+      ui->pixelGridComboBox->setEnabled(false);
+      ui->chargedSharingButton->setEnabled(false);
    }
 }
 
@@ -227,31 +188,43 @@ void ProcessingForm::setEnergyCalibrationParameters()
    int binEnd;
    double binWidth;
    bool totalSpectrum;
-   char *gradientFilename;
-   char *interceptFilename;
-   char *processedFilename;
 
    binStart = ui->binStartSpinBox->value();
    binEnd = ui->binEndSpinBox->value();
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
 
-   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
+//   gradientFilename = (char *)ui->gradientFilename->text().toStdString().c_str();
+//   interceptFilename = (char *)ui->interceptFilename->text().toStdString().c_str();
+   strcpy(gradientFilename, (char *)ui->gradientFilename->text().toStdString().c_str());
+   strcpy(interceptFilename, (char *)ui->interceptFilename->text().toStdString().c_str());
+
    emit configureProcessing(energyCalibration, binStart, binEnd, binWidth, totalSpectrum,
                             gradientFilename,
                             interceptFilename,
                             processedFilename);
 }
 
+void ProcessingForm::setGradientsFile()
+{
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Gradients File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
+   ui->gradientFilename->setText(source);
+}
+
+void ProcessingForm::setInterceptsFile()
+{
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Intercepts File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
+   ui->interceptFilename->setText(source);
+}
+
 void ProcessingForm::setStartSpinBoxLimit(int upperLimit)
 {
-   ui->binStartSpinBox->setMaximum(upperLimit);
+   ui->binStartSpinBox->setMaximum(upperLimit - 1);
 }
 
 void ProcessingForm::setEndSpinBoxLimit(int lowerLimit)
 {
-   ui->binEndSpinBox->setMinimum(lowerLimit);
+   ui->binEndSpinBox->setMinimum(lowerLimit + 1);
 }
 
 void ProcessingForm::readThresholdFile(char *thresholdFile)
@@ -259,7 +232,7 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
    int i = 0;
    std::ifstream inFile;
 
-   thresholdFile = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Thresholds_500V_28C_135_1_5clk_1501190172.txt";
+//   thresholdFile = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Thresholds_500V_28C_135_1_5clk_1501190172.txt";
    inFile.open(thresholdFile);
 
    if (!inFile)
@@ -282,14 +255,6 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
 
 void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
 {
-   char *gradientFilename;
-   char *interceptFilename;
-   char *processedFilename;
-
-//   emit configureProcessing(nextFrameCorrection,
-//                            gradientFilename,
-//                            interceptFilename,
-//                            processedFilename);
 }
 
 void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
@@ -317,18 +282,33 @@ void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
 void ProcessingForm::setChargedSharingParameters()
 {
    int pixelGridOption;
-   char *gradientFilename;
-   char *interceptFilename;
-   char *processedFilename;
 
    pixelGridOption = ui->pixelGridComboBox->currentIndex();
 
-   gradientFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//m_gradients.txt";
-   interceptFilename = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//c_intercepts.txt";
+   emit configureProcessing(chargedSharingOption, pixelGridOption);
 
-   emit configureProcessing(chargedSharingOption, pixelGridOption,
-                            gradientFilename,
-                            interceptFilename,
-                            processedFilename);
+}
 
+void ProcessingForm::setInputFilesList()
+{
+   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", "Raw Data (*.bin)");
+   ui->inputFilesList->setText(source.join(", "));
+}
+
+void ProcessingForm::setOutputDirectory()
+{
+   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", QFileDialog::ShowDirsOnly);
+   ui->outputDirectory->setText(source);
+}
+
+
+void ProcessingForm::setDataFileParameters()
+{
+
+   inputFilesList = ui->inputFilesList->text().split(", ");
+   outputDirectory = ui->outputDirectory->text();
+   outputPrefix = ui->outputPrefix->text();
+
+   qDebug() << "setDataFileParameters() outputPrefix = " << outputPrefix;
+   emit configureProcessing(inputFilesList, outputDirectory, outputPrefix);
 }

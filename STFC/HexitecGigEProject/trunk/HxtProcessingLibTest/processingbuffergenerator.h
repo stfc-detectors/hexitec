@@ -12,12 +12,13 @@ class ProcessingBufferGenerator : public QObject
    Q_OBJECT
 public:
    explicit ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent = 0);
-   void enqueueImage(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   void enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition);
 
 private:
    QMutex mutex;
    QList<ImageProcessor *>imageProcessorList;
    ImageProcessor *currentImageProcessor;
+   QStringList inputFilesList;
    ProcessingDefinition *processingDefinition;
    char *bufferToProcess;
    int frameSize;
@@ -25,36 +26,32 @@ private:
 signals:
 //   void enqueueBuffer (char *bufferToProcess, unsigned long validFrames);
 //   void imageComplete(unsigned long long totalFramesAcquired);
+   void imageStarted(const char *path, int nRows, int nCols);
+   void transferBufferReady(char *transferBuffer, unsigned long validFrames);
+   void imageComplete(long long totalFramesAcquired);
 
 public slots:
-   void handleImageStarted(const char *path, int nRows, int nCols);
+   void handleProcessImages();
+   void handleImageStarted(const char *filename, int nRows, int nCols);
    void handleTransferBufferReady(char *transferBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
-/*   void handleConfigureProcessing(bool re_order,
-                                  const char *gradientFilename,
-                                  const char *interceptFilename,
-                                  const char *processedFilename);
-                                  */
+
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,
                                   int threshholdMode,
                                   int thresholdValue,
-                                  const char *thresholdFilname,
-                                  const char *gradientFilename,
-                                  const char *interceptFilename,
-                                  const char *processedFilename);
+                                  const char *thresholdFilname);
    void handleConfigureProcessing(bool energyCalibration,
                                   long long binStart,
                                   long long binEnd,
                                   double binWidth,
                                   bool totalSpectrum,
-                                  const char *gradientFilename,
-                                  const char *interceptFilename,
+                                  char *gradientFilename,
+                                  char *interceptFilename,
                                   const char *processedFilename);
-   void handleConfigureProcessing(int chargedSharingMode, int pixelGridOption,
-                                  const char *gradientFilename,
-                                  const char *interceptFilename,
-                                  const char *processedFilename);
+   void handleConfigureProcessing(int chargedSharingMode, int pixelGridOption);
+   void handleConfigureProcessing(QStringList inputFilesList,
+                                  QString outputDirectory, QString outputPrefix);
    void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
 };
 

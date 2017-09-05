@@ -1,23 +1,30 @@
 #include "processingbuffergenerator.h"
 #include <QMutexLocker>
+#include <QFileInfo>
 #include <QDebug>
 #include <QThread>
+#include <iostream>
+#include <fstream>
 #include <Windows.h>
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
-//   QMutexLocker locker(&mutex);
-
    imageProcessorList.clear();
    currentImageProcessor = NULL;
    this->processingDefinition = processingDefinition;
-   qDebug() << "MAIN thread = " << QThread::currentThreadId();
+
+   connect(this, SIGNAL(imageStarted(const char*, int, int)),
+           this, SLOT(handleImageStarted(const char *, int, int)));
+   connect(this, SIGNAL(transferBufferReady(char*, unsigned long)),
+           this, SLOT(handleTransferBufferReady(char *, unsigned long)));
+   connect(this, SIGNAL(imageComplete(long long)),
+           this, SLOT(handleImageComplete(long long)));
 }
 
-void ProcessingBufferGenerator::enqueueImage(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition)
+void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
    this->frameSize = nRows * nCols * sizeof(uint16_t);
-   currentImageProcessor = new ImageProcessor(name, nRows, nCols, processingDefinition);
+   currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, long long)),
            this, SLOT(handleProcessingComplete(ImageProcessor *, long long)));
    imageProcessorList.append(currentImageProcessor);
@@ -25,13 +32,10 @@ void ProcessingBufferGenerator::enqueueImage(const char *name, int nRows, int nC
             << "image queue length = " << imageProcessorList.length();
 }
 
-void ProcessingBufferGenerator::handleImageStarted(const char *path, int nRows, int nCols)
+void ProcessingBufferGenerator::handleImageStarted(const char *filename, int nRows, int nCols)
 {
    QMutexLocker locker(&mutex);
-
-   qDebug() << "ProcessingBufferGenerator::handleImageStarted. path: "
-            << path << " frameSize " << nRows * nCols * sizeof(uint16_t);
-   enqueueImage(path, nRows, nCols, processingDefinition);
+   enqueueImage(filename, nRows, nCols, processingDefinition);
 }
 
 void ProcessingBufferGenerator::handleTransferBufferReady(char *transferBuffer, unsigned long validFrames)
@@ -50,26 +54,9 @@ void ProcessingBufferGenerator::handleImageComplete(long long totalFramesAcquire
    currentImageProcessor->imageAcquisitionComplete(totalFramesAcquired);
 }
 
-/*
-void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order,
-                                             const char *gradientFilename,
-                                             const char *interceptFilename,
-                                             const char *processedFilename)
-{
-   qDebug() << "111 ProcessingBufferGenerator::handleConfigureProcessing() called";
-   processingDefinition->setRe_order(re_order);
-   processingDefinition->setGradientFilename((char *)gradientFilename);
-   processingDefinition->setInterceptFilename((char *)interceptFilename);
-   processingDefinition->setProcessedFilename((char *)processedFilename);
-}
-*/
 void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool nextFrame,
-                                                          int threshholdMode, int thresholdValue, const char *thresholdFilname,
-                                                          const char *gradientFilename,
-                                                          const char *interceptFilename,
-                                                          const char *processedFilename)
+                                                          int threshholdMode, int thresholdValue, const char *thresholdFilname)
 {
-   qDebug() << "222 ProcessingBufferGenerator::handleConfigureProcessing() thresholdfilname = " << thresholdFilname;
    processingDefinition->setRe_order(re_order);
    processingDefinition->setNextFrameCorrection(nextFrame);
    processingDefinition->setThresholdMode((ThresholdMode)threshholdMode);
@@ -85,45 +72,108 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool ne
       default:
          break;
    }
-   processingDefinition->setGradientFilename((char *)gradientFilename);
-   processingDefinition->setInterceptFilename((char *)interceptFilename);
-   processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
 void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
-                                                          const char *gradientFilename,
-                                                          const char *interceptFilename,
+                                                          char *gradientFilename,
+                                                          char *interceptFilename,
                                                           const char *processedFilename)
 {
+
    processingDefinition->setEnergyCalibration(energyCalibration);
    processingDefinition->setBinStart(binStart);
    processingDefinition->setBinEnd(binEnd);
    processingDefinition->setBinWidth(binWidth);
    processingDefinition->setTotalSpectrum(totalSpectrum);
-   processingDefinition->setGradientFilename((char *)gradientFilename);
-   processingDefinition->setInterceptFilename((char *)interceptFilename);
-   processingDefinition->setProcessedFilename((char *)processedFilename);
-
+   processingDefinition->setGradientFilename(gradientFilename);
+   processingDefinition->setInterceptFilename(interceptFilename);
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption,
-                                                          const char *gradientFilename,
-                                                          const char *interceptFilename,
-                                                          const char *processedFilename)
+void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption)
 {
-   qDebug() << "8888 ProcessingBufferGenerator::handleConfigureProcessing()pixelGridOption= " << pixelGridOption;
    processingDefinition->setChargedSharingMode((ChargedSharingMode)chargedSharingMode);
    processingDefinition->setPixelGridSize(pixelGridOption);
-
-   processingDefinition->setGradientFilename((char *)gradientFilename);
-   processingDefinition->setInterceptFilename((char *)interceptFilename);
-   processingDefinition->setProcessedFilename((char *)processedFilename);
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
    Sleep(500);
    imageProcessorList.removeOne(completedImageProcessor);
-   free(completedImageProcessor);
-   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete: imageProcessorList.length()" << imageProcessorList.length();
+   delete completedImageProcessor;
+}
+
+void ProcessingBufferGenerator::handleConfigureProcessing(QStringList inputFilesList,
+                                                          QString outputDirectory, QString outputPrefix)
+{
+   this->inputFilesList = inputFilesList;
+   processingDefinition->setOutputDirectory((char *)outputDirectory.toStdString().c_str());
+   processingDefinition->setOutputPrefix((char *)outputPrefix.toStdString().c_str());
+
+}
+
+void ProcessingBufferGenerator::handleProcessImages()
+{
+   int fileExtensionPos;
+   QString outputFilename;
+   char *transferBuffer;
+   unsigned long validFrames = 0;
+   long long totalFramesAcquired = 0;
+   std::ifstream inFile;
+   int nRows = 80;
+   int nCols = 80;
+   char *processingFilename;
+   char *inputFilename;
+
+   processingFilename = new char[1024];
+   inputFilename = new char[1024];
+
+   foreach (const QString &str, inputFilesList)
+   {
+      QFileInfo fi(str);
+      QString filename = fi.fileName();
+      fileExtensionPos = filename.lastIndexOf(".");
+      filename.truncate(fileExtensionPos);
+
+      outputFilename = processingDefinition->getOutputDirectory();
+      if (!outputFilename.endsWith("/"))
+      {
+         outputFilename.append("/");
+      }
+      outputFilename.append(processingDefinition->getOutputPrefix());
+      outputFilename.append(filename);
+
+      processingFilename = (char *)outputFilename.toStdString().c_str();
+      inputFilename = (char *)str.toStdString().c_str();
+      qDebug() << " ProcessingBufferGenerator::handleProcessImages() in foreach loop output name:"
+               << outputFilename;
+   }
+
+   inFile.open(inputFilename, ifstream::binary);
+   emit imageStarted((const char *)processingFilename, nRows, nCols);
+
+   int bufferCount = 0;
+
+   while (inFile)
+   {
+      transferBuffer = (char *) calloc(6400 * 500 * sizeof(uint16_t), sizeof(char));
+
+      inFile.read(transferBuffer, 6400 * 500 * 2);
+      if (!inFile)
+      {
+         validFrames = inFile.gcount() / (6400 * 2);
+         emit transferBufferReady(transferBuffer, validFrames);
+      }
+      else
+      {
+         validFrames = inFile.gcount() / (6400 * 2);
+         emit transferBufferReady(transferBuffer, 500);
+      }
+      totalFramesAcquired += validFrames;
+      bufferCount++;
+      Sleep(50);
+   }
+   inFile.close();
+   emit imageComplete(totalFramesAcquired);
+//   delete processingFilename;
+//   delete inputFilename;
 }
