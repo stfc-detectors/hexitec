@@ -17,6 +17,7 @@ public:
 private:
    QMutex mutex;
    QList<ImageProcessor *>imageProcessorList;
+   QList<char *>processingFilenameList;
    ImageProcessor *currentImageProcessor;
    QStringList inputFilesList;
    ProcessingDefinition *processingDefinition;

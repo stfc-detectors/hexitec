@@ -124,13 +124,17 @@ void ProcessingBufferGenerator::handleProcessImages()
    char *processingFilename;
    char *inputFilename;
 
-   processingFilename = new char[1024];
+   processingFilenameList.clear();
+
    inputFilename = new char[1024];
 
    foreach (const QString &str, inputFilesList)
    {
       QFileInfo fi(str);
       QString filename = fi.fileName();
+
+      processingFilename = new char[1024];
+
       fileExtensionPos = filename.lastIndexOf(".");
       filename.truncate(fileExtensionPos);
 
@@ -146,34 +150,36 @@ void ProcessingBufferGenerator::handleProcessImages()
       inputFilename = (char *)str.toStdString().c_str();
       qDebug() << " ProcessingBufferGenerator::handleProcessImages() in foreach loop output name:"
                << outputFilename;
-   }
 
-   inFile.open(inputFilename, ifstream::binary);
-   emit imageStarted((const char *)processingFilename, nRows, nCols);
+      inFile.open(inputFilename, ifstream::binary);
+      processingFilenameList.append(processingFilename);
 
-   int bufferCount = 0;
+      emit imageStarted((const char *)processingFilenameList.back(), nRows, nCols);
 
-   while (inFile)
-   {
-      transferBuffer = (char *) calloc(6400 * 500 * sizeof(uint16_t), sizeof(char));
+      int bufferCount = 0;
 
-      inFile.read(transferBuffer, 6400 * 500 * 2);
-      if (!inFile)
+      while (inFile)
       {
-         validFrames = inFile.gcount() / (6400 * 2);
-         emit transferBufferReady(transferBuffer, validFrames);
+         transferBuffer = (char *) calloc(6400 * 500 * sizeof(uint16_t), sizeof(char));
+
+         inFile.read(transferBuffer, 6400 * 500 * 2);
+         if (!inFile)
+         {
+            validFrames = inFile.gcount() / (6400 * 2);
+            emit transferBufferReady(transferBuffer, validFrames);
+         }
+         else
+         {
+            validFrames = inFile.gcount() / (6400 * 2);
+            emit transferBufferReady(transferBuffer, 500);
+         }
+         totalFramesAcquired += validFrames;
+         bufferCount++;
+         Sleep(50);
       }
-      else
-      {
-         validFrames = inFile.gcount() / (6400 * 2);
-         emit transferBufferReady(transferBuffer, 500);
-      }
-      totalFramesAcquired += validFrames;
-      bufferCount++;
-      Sleep(50);
+      inFile.close();
+      emit imageComplete(totalFramesAcquired);
    }
-   inFile.close();
-   emit imageComplete(totalFramesAcquired);
-//   delete processingFilename;
-//   delete inputFilename;
+   //   delete processingFilename;
+   //   delete inputFilename;
 }
