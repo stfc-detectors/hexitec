@@ -24,7 +24,6 @@ SOURCES += \
     generalframeprocessor.cpp \
     hxtgenerator.cpp \
     generalhxtgenerator.cpp \
-    hxttotalspectrumgenerator.cpp \
     hxtitem.cpp \
     generalpixelprocessor.cpp \
     hxtchargedsharinggenerator.cpp
@@ -42,7 +41,6 @@ HEADERS += \
     generalframeprocessor.h \
     hxtgenerator.h \
     generalhxtgenerator.h \
-    hxttotalspectrumgenerator.h \
     hxtitem.h \
     generalpixelprocessor.h \
     hxtchargedsharinggenerator.h

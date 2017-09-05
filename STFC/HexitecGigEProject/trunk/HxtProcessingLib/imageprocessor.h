@@ -36,7 +36,7 @@ private:
    GeneralHxtGenerator *hxtGenerator;
    bool energyCalibration;
    bool nextFrameCorrection;
-   ChargedSharingMode chargedSharingMode;
+   bool chargedSharing;
    double *pixelEnergy;
    unordered_map<int, double> *pixelEnergyMap;
 
@@ -47,9 +47,12 @@ private:
    long long processedFrameCount;
    bool inProgress;
 
-   void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filename);
-   void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result, const char* filename);
-   void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, uint16_t *result, const char* filename);
+   void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result,
+                             const char* filenameBin, const char *filenameHxt);
+   void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result,
+                              const char* filenameBin, const char *filenameHxt);
+   void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
+                             uint16_t *result, const char* filenameBin, const char *filenameHxt);
 
 signals:
    void process();

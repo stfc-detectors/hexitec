@@ -15,6 +15,7 @@ class GeneralHxtGenerator : public QObject
 
 public:
    GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   ~GeneralHxtGenerator();
    void enqueuePixelEnergy(double *pixelEnergy);
    void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
    void setFrameProcessingInProgress(bool inProgress);
@@ -24,6 +25,8 @@ public:
    double *getHxtV3AllData();
 
 protected:
+   virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap) = 0;
+   virtual void processEnergiesWithSum(unordered_map<int, double> *pixelEnergyMap) = 0;
    bool getFrameProcessingInProgress();
    QThread *hxtGeneratorThread;
    QMutex mutex;
@@ -41,9 +44,11 @@ protected:
 signals:
    void enqueue(double *pixelEnergy);
    void process();
+   void process(bool totalSpectrum);
 
 public slots:
    virtual void handleProcess() = 0;
+   virtual void handleProcess(bool totalSpectrum) = 0;
    void handleImageComplete();
 
 };

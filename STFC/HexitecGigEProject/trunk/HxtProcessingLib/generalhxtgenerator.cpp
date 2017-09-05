@@ -19,6 +19,12 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    setFrameProcessingInProgress(true);
 }
 
+GeneralHxtGenerator::~GeneralHxtGenerator()
+{
+   qDebug() << "GeneralHxtGenerator::~GeneralHxtGenerator()";
+   delete hxtItem;
+}
+
 void GeneralHxtGenerator::enqueuePixelEnergy(double *pixelEnergy)
 {
    hxtItem->enqueuePixelEnergy(pixelEnergy);

@@ -7,7 +7,6 @@
 GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
    qDebug() << "Calling GeneralFrameProcessor constructor nextFrameCorrection =" << nextFrameCorrection;
-//   nextFrameCorrection = true;
    if (nextFrameCorrection)
    {
       pixelProcessor = new PixelProcessorNextFrame();
@@ -20,7 +19,7 @@ GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 
 GeneralFrameProcessor::~GeneralFrameProcessor()
 {
-   free(pixelProcessor);
+   delete pixelProcessor;
 }
 
 void GeneralFrameProcessor::setGradients(double *gradientValue)
@@ -44,27 +43,3 @@ GeneralPixelProcessor *GeneralFrameProcessor::getPixelProcessor()
    return pixelProcessor;
 }
 
-double *GeneralFrameProcessor::getData(const char *filename)
-{
-   int i = 0;
-   double *dataValue;
-   std::ifstream inFile;
-
-   dataValue = (double *) calloc(6400, sizeof(double));
-   inFile.open(filename);
-
-   if (!inFile)
-     qDebug() << "error opening " << filename;
-   while (inFile >> dataValue[i])
-   {
-       i++;
-   }
-
-   if (i < 6400)
-      qDebug() << "error: only " << i << " could be read";
-   else
-      qDebug() << "gradients read OK ";
-   inFile.close();
-
-   return dataValue;
-}

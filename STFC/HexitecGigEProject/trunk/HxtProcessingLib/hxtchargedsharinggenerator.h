@@ -7,11 +7,16 @@ class HxtChargedSharingGenerator : public HxtGenerator
 {
 public:
    HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
-   void processEnergies(unordered_map<int, double> *pixelEnergyMap);
+//   void processEnergies(unordered_map<int, double> *pixelEnergyMap);
    void setPixelGridSize(int pixelGridSize);
+
+protected:
+   virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
+   virtual void processEnergiesWithSum(unordered_map<int, double> *pixelEnergyMap);
 
 public slots:
   void handleProcess();
+  void handleProcess(bool totalSpectrum);
 
 private:
   void calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap);

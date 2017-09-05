@@ -8,12 +8,25 @@ using namespace std;
 
 ProcessingDefinition::ProcessingDefinition(long long frameSize)
 {
+   gradientFilename =  new char[1024];
+   interceptFilename =  new char[1024];
    this->frameSize = frameSize;
    gradientValue = (double *) calloc(frameSize, sizeof(double));
    interceptValue = (double *) calloc(frameSize, sizeof(double));
    thresholdPerPixel = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
-   outputDirectory = "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images";
-   outputPrefix = "re_order";
+   outputDirectory = new char[1024];
+   outputPrefix = new char[1024];
+}
+
+ProcessingDefinition::~ProcessingDefinition()
+{
+   delete outputDirectory;
+   delete outputPrefix;
+   delete gradientFilename;
+   delete interceptFilename;
+   delete gradientValue;
+   delete interceptValue;
+   delete thresholdPerPixel;
 }
 
 void ProcessingDefinition::setThresholdMode(ThresholdMode threshholdMode)
@@ -29,32 +42,24 @@ void ProcessingDefinition::setThresholdValue(int thresholdValue)
 void ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
 {
    getData(thresholdFilename, thresholdPerPixel);
-
-   for (int i = 0; i< frameSize; i++)
-   {
-      qDebug() << "Threshold: " << this->thresholdPerPixel[i];
-   }
 }
 
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
 {
    this->energyCalibration = energyCalibration;
-   qDebug() << "ProcessingDefinition::setEnergyCalibration: " << energyCalibration;
 }
 
-void ProcessingDefinition::setProcessedFilename(const char *processedFilename)
+
+void ProcessingDefinition::setGradientFilename(char *gradientFilename)
 {
-   this->processedFilename = (char *)processedFilename;
+   strcpy(this->gradientFilename, (const char *)gradientFilename);
+   setGradients();
 }
 
-void ProcessingDefinition::setGradientFilename(const char *gradientFilename)
+void ProcessingDefinition::setInterceptFilename(char *interceptFilename)
 {
-   this->gradientFilename = (char *)gradientFilename;
-}
-
-void ProcessingDefinition::setInterceptFilename(const char *interceptFilename)
-{
-   this->interceptFilename = (char *)interceptFilename;
+   strcpy(this->interceptFilename, (const char *)interceptFilename);
+   setIntercepts();
 }
 
 ThresholdMode ProcessingDefinition::getThreshholdMode() const
@@ -72,12 +77,12 @@ uint16_t *ProcessingDefinition::getThresholdPerPixel() const
    return thresholdPerPixel;
 }
 
-char *ProcessingDefinition::getGradientFilename() const
+char *ProcessingDefinition::getGradientFilename()
 {
    return gradientFilename;
 }
 
-char *ProcessingDefinition::getInterceptFilename() const
+char *ProcessingDefinition::getInterceptFilename()
 {
    return interceptFilename;
 }
@@ -89,13 +94,12 @@ char *ProcessingDefinition::getProcessedFilename() const
 
 double *ProcessingDefinition::getGradients()
 {
-   setGradients();
+//   setGradients();
    return gradientValue;
 }
 
 double *ProcessingDefinition::getIntercepts()
 {
-   setIntercepts();
    return interceptValue;
 }
 
@@ -109,7 +113,7 @@ void ProcessingDefinition::setIntercepts()
    getData(interceptFilename, interceptValue);
 }
 
-void ProcessingDefinition::getData(const char *filename, double *dataValue)
+void ProcessingDefinition::getData(char *filename, double *dataValue)
 {
    int i = 0;
    std::ifstream inFile;
@@ -161,11 +165,9 @@ void ProcessingDefinition::setPixelGridSize(int value)
    switch (value)
    {
       case 0:
-         qDebug() << "ProcessingDefinition::setPixelGridSize(): SHOULD BE 3 ";
          pixelGridSize = 3;
          break;
       case 1:
-         qDebug() << "ProcessingDefinition::setPixelGridSize(): SHOULD BE 5 ";
          pixelGridSize = 5;
          break;
       default:
@@ -219,24 +221,24 @@ void ProcessingDefinition::setFrameSize(long long value)
    frameSize = value;
 }
 
-string ProcessingDefinition::getOutputPrefix() const
+char *ProcessingDefinition::getOutputPrefix()
 {
    return outputPrefix;
 }
 
-void ProcessingDefinition::setOutputPrefix(const string &value)
+void ProcessingDefinition::setOutputPrefix(char *value)
 {
-   outputPrefix = value;
+   strcpy(this->outputPrefix, value);
 }
 
-string ProcessingDefinition::getOutputDirectory() const
+char *ProcessingDefinition::getOutputDirectory()
 {
    return outputDirectory;
 }
 
-void ProcessingDefinition::setOutputDirectory(const string &value)
+void ProcessingDefinition::setOutputDirectory(char  *value)
 {
-   outputDirectory = value;
+   strcpy(this->outputDirectory, value);
 }
 
 bool ProcessingDefinition::getTotalSpectrum() const
@@ -261,7 +263,6 @@ double ProcessingDefinition::getBinWidth() const
 
 void ProcessingDefinition::setBinWidth(const double &binWidth)
 {
-    qDebug() << "Set binWidth = " << binWidth;
     this->binWidth = binWidth;
 }
 
@@ -272,7 +273,6 @@ long long ProcessingDefinition::getBinEnd() const
 
 void ProcessingDefinition::setBinEnd(const long long &binEnd)
 {
-   qDebug() << "Set binEnd = " << binEnd;
    this->binEnd = binEnd;
 }
 
@@ -283,7 +283,6 @@ long long ProcessingDefinition::getBinStart() const
 
 void ProcessingDefinition::setBinStart(const long long &binStart)
 {
-   qDebug() << "Set binStart = " << binStart;
    this->binStart = binStart;
 }
 

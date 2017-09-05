@@ -15,20 +15,22 @@ class ProcessingDefinition
 {
 public:
    ProcessingDefinition(long long frameSize);
-
+   ~ProcessingDefinition();
    void setThresholdMode(ThresholdMode threshholdMode);
    void setThresholdValue(int thresholdValue);
    void setThresholdPerPixel(char *thresholdFilename);
    void setEnergyCalibration(bool energyCalibration);
-   void setProcessedFilename(const char *processedFilename);
-   void setGradientFilename(const char *gradientFilename);
-   void setInterceptFilename(const char *interceptFilename);
+   void setProcessedFilename();
+   void setGradientFilename(char *gradientFilename);
+   void setInterceptFilename(char *interceptFilename);
+   void setOutputDirectory(char *outputDirectory);
+   void setOutputPrefix(char *outputPrefix);
 
    ThresholdMode getThreshholdMode() const;
    int getThresholdValue() const;
    uint16_t *getThresholdPerPixel() const;
-   char *getGradientFilename() const;
-   char *getInterceptFilename() const;
+   char *getGradientFilename();
+   char *getInterceptFilename();
    char *getProcessedFilename() const;
    double *getGradients();
    double *getIntercepts();
@@ -50,11 +52,8 @@ public:
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
 
-   string getOutputDirectory() const;
-   void setOutputDirectory(const string &value);
-
-   string getOutputPrefix() const;
-   void setOutputPrefix(const string &value);
+   char * getOutputDirectory();
+   char * getOutputPrefix();
 
    long long getFrameSize() const;
    void setFrameSize(long long value);
@@ -76,7 +75,7 @@ public:
 private:
    void setGradients();
    void setIntercepts();
-   void getData(const char *filename, double *dataValue);
+   void getData(char *filename, double *dataValue);
    void getData(const char *filename, uint16_t *dataValue);
    bool re_order;
    ThresholdMode threshholdMode;
@@ -99,8 +98,9 @@ private:
    char *processedFilename;
    double *gradientValue;
    double *interceptValue;
-   string outputDirectory;
-   string outputPrefix;
+   char *outputDirectory;
+   char *outputPrefix;
+   char *outputFilename;
 
 };
 

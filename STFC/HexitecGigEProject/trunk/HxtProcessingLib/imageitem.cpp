@@ -6,14 +6,19 @@
 
 using namespace std;
 
-ImageItem::ImageItem(const char *name, int nRows, int nCols)
+ImageItem::ImageItem(const char *filename, int nRows, int nCols)
 {
+   this->filename = new char[1024];
+   strcpy(this->filename, filename);
    QMutexLocker locker(&mutex);
-   this->name = (char *)name;
-//   this->frameSize = frameSize;
    this->bufferQueue.clear();
    this->processedFrameCount = 0;
    bufferItem = NULL;
+}
+
+ImageItem::~ImageItem()
+{
+   delete filename;
 }
 
 void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
@@ -29,7 +34,7 @@ char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 
    if (bufferItem != NULL)
    {
-      free(bufferItem);
+      delete bufferItem;
    }
 
    if (!bufferQueue.isEmpty())
@@ -51,3 +56,7 @@ int ImageItem::getBufferQueueSize()
    return bufferQueue.size();
 }
 
+char *ImageItem::getFilename()
+{
+   return filename;
+}

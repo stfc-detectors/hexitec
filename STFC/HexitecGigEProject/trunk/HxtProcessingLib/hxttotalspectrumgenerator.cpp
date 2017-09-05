@@ -8,7 +8,10 @@ HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator(int nRows, int nCols, Proce
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
    qDebug() << "HxtTotalSpectrumGenerator::HxtTotalSpectrumGenerator CONSTRUCTED";
-   hxtItem->initialiseTotalSpectrum();
+   if (processingDefinition->getTotalSpectrum())
+   {
+      hxtItem->initialiseTotalSpectrum();
+   }
    emit process();
 }
 

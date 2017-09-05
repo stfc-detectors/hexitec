@@ -44,12 +44,54 @@ void HxtChargedSharingGenerator::handleProcess()
   //   emit energyProcessingComplete(processedEnergyCount);
 }
 
+void HxtChargedSharingGenerator::handleProcess(bool totalSpectrum)
+{
+   unordered_map <int, double> *pixelEnergyMap;
+   int temp = 0;
+
+  while (getFrameProcessingInProgress() || (hxtItem->getPixelEnergyMapQueueSize() > 0) || processedEnergyCount < (hxtItem->getTotalEnergiesToProcess()))
+   {
+      while (getFrameProcessingInProgress() &&(((temp = hxtItem->getPixelEnergyMapQueueSize())) == 0))
+      {
+         Sleep(10);
+      }
+      qDebug() << "NUMBER OF ENERGIES TO PROCESS: " << temp;
+      while ((hxtItem->getPixelEnergyMapQueueSize()) > 0)
+      {
+         pixelEnergyMap = hxtItem->getNextPixelEnergyMap();
+         if (!pixelEnergyMap->empty())
+         {
+//               result = processEnergies(pixelEnergy);
+
+                 processEnergiesWithSum(pixelEnergyMap);
+//                 free(pixelEnergy);
+
+               // MUST USE RESULT IN FURTHER CALCULATIONS
+//               free(result);
+//            writeFile(bufferStart, (validFrames * frameSize), filename);
+//            free(bufferStart);
+         }
+      }
+   }
+  //   emit energyProcessingComplete(processedEnergyCount);
+}
+
 void HxtChargedSharingGenerator::processEnergies(unordered_map <int, double> *pixelEnergyMap)
 {
    qDebug() << "HxtChargedSharingGenerator::processEnergies()";
    calculateChargedSharing(pixelEnergyMap);
    hxtItem->addToHistogram(*pixelEnergyMap);
    incrementProcessedEnergyCount();
+   delete pixelEnergyMap;
+}
+
+void HxtChargedSharingGenerator::processEnergiesWithSum(unordered_map <int, double> *pixelEnergyMap)
+{
+   qDebug() << "HxtChargedSharingGenerator::processEnergiesWithSum()";
+   calculateChargedSharing(pixelEnergyMap);
+   hxtItem->addToHistogramWithSum(*pixelEnergyMap);
+   incrementProcessedEnergyCount();
+   delete pixelEnergyMap;
 }
 
 void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
@@ -140,8 +182,6 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
                   pixelValue[i] = 0.0;
                   pixelEnergyMap->erase(row * nCols + column);
                   map[rowShare * nCols + columnShare] = pixelValue[j];
-//                  qDebug() << "=================New Value: "
-//                          << " pixel: " << (rowShare * nCols + columnShare) << " value: " << map[rowShare * nCols + columnShare];
 
                }
                else
@@ -150,8 +190,6 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
                   pixelValue[j] = 0.0;
                   pixelEnergyMap->erase(rowShare * nCols + columnShare);
                   map[row * nCols + column] = pixelValue[i];
-//                  qDebug() << "=================New Value: "
-//                           << " pixel: " << (row * nCols + column) << " value: " << map[row * nCols + column];
                }
             }
          }
