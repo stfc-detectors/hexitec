@@ -12,7 +12,6 @@
 #include <QDateTime>
 
 DataAcquisition *DataAcquisition::daqInstance = 0;
-hexitech::HxtProcessing *DataAcquisition::hxtProcessor = 0;
 double DataAcquisition::motorPosition = 0;
 QHash<QString, int> DataAcquisition::motorPositions;
 
@@ -88,12 +87,10 @@ void DataAcquisition::configureDataCollection()
       gigEDetector->setDataAcquisitionDuration(dataAcquisitionDefinition->getDuration());
       if (dataAcquisitionDefinition->getOffsets())
       {
-         qDebug() << "dataAcquisitionDefinition->getOffsets = TRUE";
          gigEDetector->enableDarks();
       }
       else
       {
-         qDebug() << "dataAcquisitionDefinition->getOffsets = FALSE";
          gigEDetector->disableDarks();
       }
 
@@ -126,41 +123,6 @@ void DataAcquisition::configureDataCollection()
       changeDAQStatus(DataAcquisitionStatus::ACQUIRING_DATA,
                       daqStatus.getMinorStatus());
    }
-}
-
-void DataAcquisition::initHexitechProcessor()
-{
-   unsigned int iDebugLevel = 0;
-   unsigned int iHistoStartVal = 0;
-   unsigned int iHistoEndVal = 10000;
-   unsigned int iHistoBins = 1000;
-   unsigned int iInterpolationThreshold = 0;
-   double gGlobalThreshold = -1.0;
-   string sGradientsFile = "";   //"C:\\Temp\\CA_develop\\Gradients.txt";
-   string sInterceptsFile = "";   //C:\\Temp\\CA_develop\\Intercepts.txt";
-   bool bEnableInCorrector = false;
-   bool bEnableCabCorrector = false;
-   bool bEnableCsaspCorrector = false;
-   bool bEnableCsdCorrector = true;
-   bool bEnableIdCorrector = true;
-   bool bEnableIpCorrector = false;
-   bool bEnableDbPxlsCorrector = false;
-
-   hxtProcessor->setDebugLevel(iDebugLevel);
-   hxtProcessor->setHistoStartVal(iHistoStartVal);
-   hxtProcessor->setHistoEndVal(iHistoEndVal);
-   hxtProcessor->setHistoBins(iHistoBins);
-   hxtProcessor->setInterpolationThreshold(iInterpolationThreshold);
-   hxtProcessor->setGradientsFile(sGradientsFile);
-   hxtProcessor->setInterceptsFile(sInterceptsFile);
-   hxtProcessor->setGlobalThreshold(gGlobalThreshold);
-   hxtProcessor->setEnableInCorrector(bEnableInCorrector);
-   hxtProcessor->setEnableCabCorrector(bEnableCabCorrector);
-   hxtProcessor->setEnableCsaspCorrector(bEnableCsaspCorrector);
-   hxtProcessor->setEnableCsdCorrector(bEnableCsdCorrector);
-   hxtProcessor->setEnableIdCorrector(bEnableIdCorrector);
-   hxtProcessor->setEnableIpCorrector(bEnableIpCorrector);
-   hxtProcessor->setEnableDbPxlsCorrector(bEnableDbPxlsCorrector);
 }
 
 DataAcquisition::~DataAcquisition()
@@ -293,6 +255,7 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
       }
 
       emit imageComplete(totalFramesAcquired);
+      emit imageComplete((long long)totalFramesAcquired);
 
       // Break the outer loop too.
       if (abortRequired())
@@ -440,12 +403,14 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit disableMonitoring();
 //   waitForMonitoringDone();
 
+   qDebug() << "DataAcquisition::performGigEDefaultDataCollection() imageCount: " << dataAcquisitionDefinition->getFixedImageCount();
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
    collecting = false;
    emit restoreBiasSettings();
    emit enableMonitoring();
+   qDebug() << "DataAcquisition::performGigEDefaultDataCollection() DONE ";
 }
 
 bool DataAcquisition::repeatPauseRequired(int repeatCount)
@@ -468,6 +433,7 @@ void DataAcquisition::performFixedDataCollection()
    emit storeBiasSettings();
    emit disableBiasRefresh();
 
+   qDebug() << "DataAcquisition::performGigEFixedDataCollection() imageCount: " << dataAcquisitionDefinition->getFixedImageCount();
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
 
@@ -475,6 +441,7 @@ void DataAcquisition::performFixedDataCollection()
    collecting = false;
 
    emit restoreBiasSettings();
+   qDebug() << "DataAcquisition::performGigEFixedDataCollection() DONE";
 }
 
 void DataAcquisition::setDataAcquisitionTime(int nDaq)
@@ -548,11 +515,6 @@ DataAcquisition *DataAcquisition::instance()
    if (daqInstance == 0)
    {
       daqInstance = new DataAcquisition();
-      // Create hxtProcessing object
-      hxtProcessor = ProcessingWindow::getHxtProcessor();
-      //hxtProcessor = new hexitech::HxtProcessing("Test", 0);
-      // Initialise hxtProcessing object
-      //initHexitechProcessor();
    }
    return daqInstance;
 }
@@ -597,13 +559,12 @@ int DataAcquisition::waitForCollectingDone()
    int elapsed = 0;
    int percentage = 0;
    unsigned long long remainingFrames;
+   qDebug() << "mode: " << mode << "daqStatus.getMinorStatus(): " << daqStatus.getMinorStatus();
 
    while (collecting)
    {
       sleep(1);
-//      if (daqStatus.getMinorStatus() == DataAcquisitionStatus::COLLECTING &&
-//          mode == GigEDetector::CONTINUOUS)
-      if (true)
+      if (mode == GigEDetector::CONTINUOUS)
       {
          elapsed++;
          if (daqStatus.getMinorStatus() == DataAcquisitionStatus::OFFSETS)
@@ -620,22 +581,23 @@ int DataAcquisition::waitForCollectingDone()
                changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::COLLECTING);
             }
          }
-//         remainingFrames = gigEDetector->getRemainingFrames();
-//         percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
 
          if (percentage > 100)
          {
             percentage = 100;
          }
-//         if (percentage > 0)
-//         {
-//            changeDAQStatus(daqStatus.getMajorStatus(), DataAcquisitionStatus::COLLECTING);
-//         }
          daqStatus.setPercentage(percentage);
          emit dataAcquisitionStatusChanged(daqStatus);
       }
    }
-   if ((remainingFrames = gigEDetector->getRemainingFrames()) != 0)
+
+   if (mode == GigEDetector::GIGE_DEFAULT)
+   {
+      percentage = 100;
+      daqStatus.setPercentage(percentage);
+      emit dataAcquisitionStatusChanged(daqStatus);
+   }
+   else if ((remainingFrames = gigEDetector->getRemainingFrames()) != 0)
    {
       percentage = ((double)totalImageFrames - (double)remainingFrames) / (double)totalImageFrames * 100.0;
    }
@@ -643,7 +605,6 @@ int DataAcquisition::waitForCollectingDone()
    {
       percentage = 100;
    }
-
    return status;
 }
 
@@ -814,19 +775,21 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 {
    if (mode != GigEDetector::GIGE_DEFAULT)
    {
+      emit transferBufferReady(transferBuffer, validFrames);
       triggered = true;
-      hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
+//      hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
+
    }
    ///  HexitecGigE Addition:
    /// Must provide a set of motorPositions also,
    /// or bufferQueue fills up while motorQueue remains empty..
-   hxtProcessor->pushMotorPositions(&motorPositions);
+//   hxtProcessor->pushMotorPositions(&motorPositions);
 }
 
 void DataAcquisition::handleImageStarted(char *path, int frameSize)
 {
-   qDebug() << "DataAcquisition::handleImageStarted path: " << path;
-   hxtProcessor->pushRawFileName(path, frameSize);
+   qDebug() << "DataAcquisition::handleImageStarted(), path = " << path;
+//   hxtProcessor->pushRawFileName(path, frameSize);
 //   hxtProcessor->pushMotorPositions(&motorPositions); /// Provide motorPositions together with buffer instead
 }
 
@@ -870,7 +833,6 @@ void DataAcquisition::handleExecuteReducedDataCollection()
 
 void DataAcquisition::handleCancelReducedDataCollection()
 {
-   qDebug() << "DataAcquisition::handleCancelReducedDataCollection()";
    abort = true;
    collecting = false;
    emit executeCommand(GigEDetector::STATE, GigEDetector::READY, 0);
@@ -894,7 +856,6 @@ void DataAcquisition::handleBiasRefreshed(QString time, bool restartMonitoring)
    biasRefreshing = false;
    if (restartMonitoring)
    {
-      qDebug() << "DataAcquisition::handleBiasRefreshed enable monitoring";
       emit enableMonitoring();
    }
 }
@@ -911,8 +872,10 @@ void DataAcquisition::handleBiasState(bool biasOn)
 
 void DataAcquisition::handleAbortDAQ()
 {
+//   setAbort(true);
+//   gigEDetector->abort(true);
    setAbort(true);
-   gigEDetector->abort(true);
+   gigEDetector->abort(false);
 }
 
 void DataAcquisition::setAbort(bool abort)

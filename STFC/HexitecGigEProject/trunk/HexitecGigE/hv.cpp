@@ -40,37 +40,36 @@ void HV::initialise(QString detectorFilename)
    {
       if (vbPriority == "HIGH")
       {
-         qDebug() << "Setting bias priority from ini file TRUE";
          biasPriority = true;
       }
       else if (vbPriority == "LOW")
       {
-         qDebug() << "Setting bias priority from ini file FALSE";
          biasPriority = false;
       }
    }
    else
    {
-      qDebug() << "Setting bias priority (NOT IN INI FILE) TRUE";
       biasPriority = true;
    }
-   vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
-    vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
-    vbrTime = detectorIniFile->getInt("Bias_Voltage/Time_Refresh_Voltage_Held");
-    vbSettleTime = detectorIniFile->getInt("Bias_Voltage/Bias_Voltage_Settle_Time");
-    currentLimit = detectorIniFile->getDouble("Bias_Voltage/Current_Limit");
-    biasRefreshInterval = detectorIniFile->getInt("Bias_Voltage/Bias_Refresh_Interval");
-    totalBiasRefreshTime = vbrTime + vbSettleTime;
-    voltage = vb;
-    voltageAfterRefresh = voltage;
-    storedBiasOn = false;
-    readyForRefresh = true;
 
-    off();
-    if (vb < -500 || vb > 5)
-    {
-       emit vbOutOfRange();
-    }
+   vb = detectorIniFile->getFloat("Bias_Voltage/Bias_Voltage");
+   vr = detectorIniFile->getFloat("Bias_Voltage/Refresh_Voltage");
+   vbrTime = detectorIniFile->getInt("Bias_Voltage/Time_Refresh_Voltage_Held");
+   vbSettleTime = detectorIniFile->getInt("Bias_Voltage/Bias_Voltage_Settle_Time");
+   currentLimit = detectorIniFile->getDouble("Bias_Voltage/Current_Limit");
+   biasRefreshInterval = detectorIniFile->getInt("Bias_Voltage/Bias_Refresh_Interval");
+   totalBiasRefreshTime = vbrTime + vbSettleTime;
+   voltage = vb;
+   voltageAfterRefresh = voltage;
+   storedBiasOn = false;
+   readyForRefresh = true;
+
+   off();
+
+   if (vb < -500 || vb > 5)
+   {
+      emit vbOutOfRange();
+   }
 
 }
 
@@ -105,8 +104,6 @@ void HV::on(double voltage)
     emit biasState(true);
     if ((fabs(voltage - vr) < 0.0000001) && (!executeBiasRefreshTimer->isActive()))
     {
-//       qDebug() << QTime::currentTime().toString() << "emit startRefreshTimerSignal from HV::on(), biasRefreshTimer->isActive()"
-//                << executeBiasRefreshTimer->isActive();
        emit startExecuteBiasRefreshTimerSignal(biasRefreshInterval + totalBiasRefreshTime);
     }
 }
@@ -216,10 +213,8 @@ void HV::executeBiasRefresh()
 {
    if (!biasPriority)
    {
-      qDebug() << "prepare for a refresh, readyForRefresh = " << readyForRefresh;
       emit prepareForBiasRefresh();
       waitForReady();
-      qDebug() << "readyForRefresh = " << readyForRefresh;
    }
    else
    {

@@ -13,7 +13,6 @@
 #include "hv.h"
 #include "dataacquisitionmodel.h"
 #include "dataacquisitiondefinition.h"
-#include "hxtprocessing.h"
 #include "dataacquisitionstatus.h"
 #include "reservable.h"
 
@@ -31,7 +30,6 @@ protected:
    explicit DataAcquisition(QObject *parent = 0);
 private:
    static DataAcquisition *daqInstance;
-   static hexitech::HxtProcessing *hxtProcessor;
    static double motorPosition;
    static void initHexitechProcessor();
    static QHash<QString, int> motorPositions;
@@ -112,7 +110,9 @@ signals:
    void setTargetTemperature(double targetTemperature);
    void appendTimestamp(bool appendTimestamp);
    void imageComplete(unsigned long long totalFramesAcquired);
+   void imageComplete(long long totalFramesAcquired);
    void imageStarting(double daqCollectionDuration, int repeatCount, int nRepeat);
+   void transferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
 
 public slots:
    void handleAbortDAQ();

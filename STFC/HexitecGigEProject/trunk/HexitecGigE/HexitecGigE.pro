@@ -4,7 +4,6 @@
 #
 #-------------------------------------------------
 QT       += core gui script serialport
-CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -70,8 +69,6 @@ SOURCES += main.cpp \
     dataacquisitionmodel.cpp \
     detectorfilename.cpp \
     dataacquisitiondefinition.cpp \
-    hxtprocessing.cpp \
-    processingwindow.cpp \
     dataacquisitionstatus.cpp \
     newportxpsmotor.cpp \
     setaxesdialog.cpp \
@@ -80,7 +77,9 @@ SOURCES += main.cpp \
     hv.cpp \
     badinifiledialog.cpp \  
     progressform.cpp \
-    pixelmanipulationform.cpp
+    pixelmanipulationform.cpp \
+    processingbuffergenerator.cpp \
+    processingForm.cpp
 
 HEADERS += mainwindow.h \
     voxel.h \
@@ -137,8 +136,6 @@ HEADERS += mainwindow.h \
     dataacquisitionmodel.h \
     detectorfilename.h \
     dataacquisitiondefinition.h \
-    hxtprocessing.h \
-    processingwindow.h \
     dataacquisitionstatus.h \
     newportxpsmotor.h \
     setaxesdialog.h \
@@ -147,7 +144,9 @@ HEADERS += mainwindow.h \
     hv.h \
     badinifiledialog.h \
     progressform.h \
-    pixelmanipulationform.h
+    pixelmanipulationform.h \
+    processingbuffergenerator.h \
+    processingForm.h
 
 FORMS += \
     gridsizequery.ui \
@@ -162,12 +161,12 @@ FORMS += \
     motioncontrolform.ui \
     detectorcontrolform.ui \
     dataacquisitionform.ui \
-    processingwindow.ui \
     setaxesdialog.ui \
     displaylegendsdialog.ui \
     badinifiledialog.ui \
     progressform.ui \
-    pixelmanipulationform.ui
+    pixelmanipulationform.ui \
+    processingForm.ui
 
 RESOURCES += \
     HexitecGigE.qrc
@@ -186,14 +185,17 @@ DSoFt64 {
   CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2
   CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
   CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
+  CONFIG(release, debug|release): LIBS += C:/karen/STFC/Technical/ProcessingRe-write/HxtProcessingLib/release/HxtProcessingLib.lib
   CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2
   CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
   CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib
+  CONFIG(debug, debug|release): LIBS += C:/karen/STFC/Technical/ProcessingRe-write/HxtProcessingLib/debug/HxtProcessingLib.lib
   INCLUDEPATH += "C:/Program Files/MATLAB/R2012b/extern/include/"
   INCLUDEPATH += "C:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64"
   INCLUDEPATH += ../Eigen/3_1_2/Eigen
   INCLUDEPATH += ../DetectorLib
   INCLUDEPATH  += ../HxtProcessingLib/include
+  INCLUDEPATH  += C:/karen/STFC/Technical/ProcessingRe-write/HxtProcessingLib
   INCLUDEPATH += ../XpsLib
   INCLUDEPATH += ../SerialPortLib
 } else:DSoFt32 {

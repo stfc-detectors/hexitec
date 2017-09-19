@@ -113,6 +113,7 @@ signals:
    /// HexitechGigE Addition:
    void hxtProcessingPrepSettings();
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
+   void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames, int mode);
    void executeReturnBufferReady(unsigned char * transferBuffer);
    void executeShowImage();
    void startDAQ();
@@ -136,8 +137,6 @@ private slots:
    void externalChargeShare();
    void initializeSlice(Slice *slice, int sliceNumber = -1);
    void save();
-   // Called by processNowButton in processingWindow
-   void processNow();
    void handleSpectrumFile(QString fileName);
 
    // The public slots can also be used from scripting and other parts of the code

@@ -10,6 +10,7 @@ DataAcquisitionModel *DataAcquisitionModel::damInstance = 0;
 DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionForm,
                                            DetectorControlForm *detectorControlForm,
                                            ProgressForm *progressForm,
+                                           ProcessingBufferGenerator *processingBufferGenerator,
                                            QObject *parent) :
    QObject(parent)
 {
@@ -19,6 +20,7 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
    this->progressForm = progressForm;
+   this->processingBufferGenerator = processingBufferGenerator;
 
    hv = VoltageSourceFactory::instance()->getHV();
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
@@ -45,12 +47,12 @@ DataAcquisitionModel::~DataAcquisitionModel()
 }
 
 DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                                     ProgressForm *progressForm, QObject *parent)
+                                                     ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
 {
    if (damInstance == 0)
    {
       damInstance = new DataAcquisitionModel(dataAcquisitionForm, detectorControlForm,
-                                             progressForm, parent);
+                                             progressForm, processingBufferGenerator, parent);
    }
 
    return damInstance;
@@ -122,8 +124,8 @@ void DataAcquisitionModel::connectDataAcquisition()
 
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            detectorControlForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
-   connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
-           ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
+//REPLACE THIS    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
+//REPLACE THIS            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(setTargetTemperature(double)),
            gigEDetector, SLOT(handleSetTargetTemperature(double)));
    connect(dataAcquisition, SIGNAL(appendTimestamp(bool)),
@@ -135,8 +137,10 @@ void DataAcquisitionModel::connectDataAcquisition()
            detectorMonitor, SLOT(enableMonitoring()));
    connect(dataAcquisition, SIGNAL(disableMonitoring()),
            detectorMonitor, SLOT(disableMonitoring()));
-   connect(dataAcquisition, SIGNAL(imageComplete(unsigned long long)),
-           ProcessingWindow::getHxtProcessor(), SLOT(pushImageComplete(unsigned long long)));
+   connect(dataAcquisition, SIGNAL(imageComplete(long long)),
+           processingBufferGenerator, SLOT(handleImageComplete(long long)));
+   connect(dataAcquisition, SIGNAL(transferBufferReady(unsigned char*,ulong)),
+              processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
    connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
            progressForm, SLOT(handleImageStarting(double, int, int)));
 
@@ -152,8 +156,12 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
    connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
            dataAcquisition, SLOT(handleImageStarted(char *, int)));
+   connect(gigEDetector, SIGNAL(imageStarted(char *, int, int)),
+           processingBufferGenerator, SLOT(handleImageStarted(char *, int, int)));
    connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
+//   connect(gigEDetector, SIGNAL(executeBufferReady(unsigned char*,ulong)),
+//           dataAcquisition, SLOT(handleBufferReady(unsigned char*,ulong));
    connect(gigEDetector, SIGNAL(enableMonitoring()),
            detectorMonitor, SLOT(enableMonitoring()));
 // The next 2 lines have been added. Check why???

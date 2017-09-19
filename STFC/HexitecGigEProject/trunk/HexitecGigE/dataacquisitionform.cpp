@@ -192,8 +192,8 @@ void DataAcquisitionForm::handleDataAcquisitionDefinition()
    dataAcquisitionDefinition.setDuration(microSeconds);
    dataAcquisitionDefinition.setRepeatInterval(ui->repeatInterval->value() * 1000.0);
    dataAcquisitionDefinition.setRepeatCount(ui->repeatCount->value());
+
    enableRepeats();
-   qDebug() << "emit dataAcquisitionDefinitionChanged: offsets = " << dataAcquisitionDefinition.getOffsets();
    emit dataAcquisitionDefinitionChanged(dataAcquisitionDefinition);
 }
 
@@ -407,10 +407,13 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
             guiWaitingDarks();
          }
          break;
+      case DataAcquisitionStatus::WAITING_TRIGGER:
+            guiDetectorBusy();
+            break;
       case DataAcquisitionStatus::COLLECTING:
          guiCollecting();
          break;
-     case DataAcquisitionStatus::DONE:
+      case DataAcquisitionStatus::DONE:
          if (!operatedForScripting)
          {
             guiReady();

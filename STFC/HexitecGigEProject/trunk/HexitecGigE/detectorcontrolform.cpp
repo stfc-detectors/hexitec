@@ -146,7 +146,6 @@ void DetectorControlForm::handleFixedImageCountChanged(int fixedImageCount)
 void DetectorControlForm::handleSetFingerTemperature()
 {
    double temperature = ui->setFingerTemperature->value();
-   qDebug() << "DetectorControlForm::handleSetFingerTemperature() temperature = " << temperature;
    emit setFingerTemperature(temperature);
 }
 

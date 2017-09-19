@@ -26,6 +26,8 @@
 #include "hxtfilereader.h"
 #include "hexitecsofttrigger.h"
 #include "dataacquisitionmodel.h"
+#include "processingForm.h"
+#include "processingbuffergenerator.h"
 #include "serialport.h"
 #include "badinifiledialog.h"
 
@@ -34,10 +36,14 @@ MainWindow::MainWindow()
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
    MotionControlForm *motionControlform;
+   ProcessingForm *processingForm;
+   ProcessingBufferGenerator *processingBufferGenerator;
+   ProcessingDefinition *processingDefinition;
+
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
 
-   QString version = "HexitecGigE V1.0";
-   QString nonDAQVersion = "HexitecGigE V1.0 (excluding DAQ)";
+   QString version = "HexitecGigE V1.1";
+   QString nonDAQVersion = "HexitecGigE V1.1 (excluding DAQ)";
 
    activeDAQ = checkDAQChoice();
 
@@ -162,10 +168,13 @@ MainWindow::MainWindow()
    scriptingWidget->runInitScript();
 
    // The processing window needs to have been created before the data acquisition factory!
-   processingWindow = ProcessingWindow::instance(this);
+   processingForm = new ProcessingForm();
+   processingDefinition = new ProcessingDefinition(6400);
+   processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
    if (activeDAQ)
    {
-      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm, progressForm, this);
+      dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
+                                                                progressForm, processingBufferGenerator, this);
       motionControlform = new MotionControlForm();
    }
 
@@ -182,7 +191,20 @@ MainWindow::MainWindow()
    }
 
    createStatusBar();
-   tabs->addTab(processingWindow->getMainWindow(), QString("Processing"));
+   tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
+   qDebug() << "MAKING PROCESSINGFORM CONNECTIONS!!!";
+   connect(processingForm, SIGNAL(processImages()),
+           processingBufferGenerator, SLOT(handlePostProcessImages()));
+   connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, int, int, QString)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, long long, long long, double, bool, QString, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, double, bool, QString, QString)));
+   connect(processingForm, SIGNAL(configureProcessing(int, int)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
+   connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(QStringList, QString, QString)));
+   processingForm->initialiseProcessingForm();
+
    if (activeDAQ)
    {
       tabs->addTab(detectorControlForm->getMainWindow(), QString("Detector Control"));
@@ -195,35 +217,32 @@ MainWindow::MainWindow()
    }
 
    tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
-   connect(processingWindow, SIGNAL(removeSlice()), this, SLOT(deleteFirstSlice( ) ));
+//REPLACE THIS   connect(processingWindow, SIGNAL(removeSlice()), this, SLOT(deleteFirstSlice( ) ));
 
    // Need to signal to processingWindow to initialise itself with settings from 2Easy.ini file
-   connect(this, SIGNAL(initialiseProcessingWindow()), processingWindow, SLOT(initialiseProcessingWindow()));
+//REPLACE THIS    connect(this, SIGNAL(initialiseProcessingWindow()), processingWindow, SLOT(initialiseProcessingWindow()));
 
-   // Allow processingWindow to signal when User may (not) be allowed to collect data
-//   connect(processingWindow, SIGNAL(updateMainWindowDataTakingSignal(bool)), fileMenu->actions().at(1), SLOT(setEnabled(bool)));
-//   qDebug() <<"mainwindow.cpp:192 updateMainWindowDataTakingIn(Bool) Commented out - User May Now Access deleteSliceAct Component Freely?";
    // Allow MainWindow signal to processingWindow if manual processing has begun/been abandoned
-   connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
-   connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
+//REPLACE THIS   connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
+//REPLACE THIS   connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
    // Allow MainWindow signal to processWindow to discard unprocessed raw files
-   connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
+//REPLACE THIS   connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
    // Allow MainWindow signal to processWindow's HxtProcessor when config updated
-   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
+//REPLACE THIS   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
 
    if (activeDAQ)
    {
       GigEDetector *gigEDetector = DetectorFactory::instance()->getGigEDetector();
       connect(this, SIGNAL(executeBufferReady(unsigned char*, unsigned long)), dataAcquisitionFactory->getDataAcquisition(),
               SLOT(handleBufferReady(unsigned char*, unsigned long)));
-      connect(processingWindow->getHxtProcessor(), SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
+      connect(processingBufferGenerator, SIGNAL(returnBufferReady(unsigned char*, unsigned long)),
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
       connect(this, SIGNAL(executeShowImage()),
               gigEDetector, SLOT(handleShowImage()));
       connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
    }
 
-   emit initialiseProcessingWindow();
+//REPLACE THIS?   emit initialiseProcessingWindow();
 }
 
 MainWindow::~MainWindow()
@@ -358,14 +377,14 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
       emit addObject(slice);
       MainViewer::instance()->showNewActiveSlice();
       thumbViewer->addSlice(slice);
-      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
+//REPLACE THIS?      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
 
    }
    else
    {
       DataModel::instance()->setActiveSlice(slice);
       MainViewer::instance()->showNewActiveSlice();
-      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
+//REPLACE THIS?       emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
    }
    update();
 }
@@ -750,50 +769,6 @@ void MainWindow::externalChargeShare()
    connect(chargeSharingInstance, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(chargeSharingInstance, SIGNAL(readData(QString)), this, SLOT(readData(QString)));
    chargeSharingInstance->exec();
-}
-
-void MainWindow::processNow()
-{
-    /// Called when User pressed processNowButton in processingWindow
-
-    // Ensure Number of Bins up-to-date before proceeding
-    processingWindow->updateNumberOfBins();
-
-    // Signal to processingWindow to lock all GUI components while manually processing data
-    emit manualProcessingStarted();
-
-    QString currentDirectory = QString("");
-
-    QStringList hxtFileNames = QFileDialog::getOpenFileNames(this, tr("Select HXT File(s)"), currentDirectory, tr("Data Files (*.bin)") );
-
-    // Enable bManualProcessingEnabled in HxtProcessor (member of processingWindow) before
-    //  communicating the file(s) selected in hxtFileNames, that are to be manually processed
-    processingWindow->toggleManualProcessingNow(true);
-
-    if (!hxtFileNames.empty())
-    {
-        /// DEBUG:
-//        qDebug() << "MainWindow::processNow() - Number of files selected = " << hxtFileNames.count();
-        QStringList::iterator fileIterator = hxtFileNames.begin();
-        for ( ; fileIterator != hxtFileNames.end(); fileIterator++)
-        {
-//            qDebug() << "Selected file: " << (*fileIterator).toStdString().c_str();
-        }
-        /// DEBUG END
-
-        // User decided to process selected file(s); Ensure config updated before processing
-        emit hxtProcessingPrepSettings();
-
-        // Hand over file(s) to HxtProcessor to process them
-        processingWindow->setRawFilesToProcess(hxtFileNames);
-    }
-    else
-    {
-        // User didn't select anything - re-enable all GUI components
-        emit manualProcessingAbandoned();
-        // Disable bManualProcessingEnabled in HxtProcessor
-        processingWindow->toggleManualProcessingNow(false);
-    }
 }
 
 
