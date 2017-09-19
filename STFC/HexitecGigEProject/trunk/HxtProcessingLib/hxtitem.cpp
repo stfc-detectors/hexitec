@@ -218,7 +218,7 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    }
 
    energiesProcessed++;
-   qDebug() << "HxtItem::addToHistogramWithSum(), energiesProcessed: " << energiesProcessed;
+//   qDebug() << "HxtItem::addToHistogramWithSum(), energiesProcessed: " << energiesProcessed;
 }
 
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()

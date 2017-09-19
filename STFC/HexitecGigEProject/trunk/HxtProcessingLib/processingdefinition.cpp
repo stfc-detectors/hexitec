@@ -46,6 +46,7 @@ void ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
 
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
 {
+   qDebug() << "In method" << energyCalibration;
    this->energyCalibration = energyCalibration;
 }
 
@@ -243,13 +244,11 @@ void ProcessingDefinition::setOutputDirectory(char  *value)
 
 bool ProcessingDefinition::getTotalSpectrum() const
 {
-   qDebug() << "ProcessingDefinition::getTotalSpectrum(): " << totalSpectrum;
    return totalSpectrum;
 }
 
 void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
-   qDebug() << "ProcessingDefinition::setTotalSpectrum(): " << totalSpectrum;
    this->totalSpectrum = totalSpectrum;
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
    hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * sizeof(double);

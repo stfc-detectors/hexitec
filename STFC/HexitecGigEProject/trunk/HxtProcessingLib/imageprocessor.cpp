@@ -342,6 +342,7 @@ void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFra
 
 void ImageProcessor::setImageInProgress(bool inProgress)
 {
+   qDebug() << "Setting image inProgress: " << inProgress;
    this->inProgress = inProgress;
 }
 

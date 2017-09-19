@@ -89,7 +89,7 @@ void HxtGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
 
 void HxtGenerator::processEnergiesWithSum(unordered_map <int, double>*pixelEnergyMap)
 {
-   qDebug() << "HxtGenerator::processEnergiesWithSum";
+//   qDebug() << "HxtGenerator::processEnergiesWithSum";
    hxtItem->addToHistogramWithSum(*pixelEnergyMap);
    incrementProcessedEnergyCount();
    delete pixelEnergyMap;

@@ -8,6 +8,7 @@ using namespace std;
 
 ImageItem::ImageItem(const char *filename, int nRows, int nCols)
 {
+   qDebug() << "Creating an image item with filename: " << filename;
    this->filename = new char[1024];
    strcpy(this->filename, filename);
    QMutexLocker locker(&mutex);
