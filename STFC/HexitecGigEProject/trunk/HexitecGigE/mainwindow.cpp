@@ -201,6 +201,8 @@ MainWindow::MainWindow()
            processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, double, bool, QString, QString)));
    connect(processingForm, SIGNAL(configureProcessing(int, int)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
+   connect(processingBufferGenerator, SIGNAL(hxtFileWritten(unsigned short*, QString)),
+           this, SLOT(readBuffer(unsigned short*, QString)));
    connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(QStringList, QString, QString)));
    processingForm->initialiseProcessingForm();
@@ -838,11 +840,11 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 
    MainViewer::instance()->getRenderArea()->setMouseEnabled(false);
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
-
    sliceNumber = slice->getSliceToReplace();
    initializeSlice(slice, sliceNumber);
 
    emit returnHxtBuffer(buffer);
+
    if (saveCsv)
    {
       writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());

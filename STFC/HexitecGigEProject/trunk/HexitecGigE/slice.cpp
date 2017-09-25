@@ -1031,12 +1031,15 @@ bool Slice::readHXT(unsigned short *buffer)
     unsigned short *tmpBuffer;
 
     unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
-//    qDebug() << "Slice::readHXT processing a hxtBuffer allocated bytes:" << MAX_SPECTRUM_SIZE * sizeof(double);
     memcpy((void *) &hxtBuffer, (void *) buffer, bufferSize);
 
     tmpBuffer = buffer + bufferSize/sizeof(unsigned short);
     bufferSize = ((hxtBuffer.nBins * hxtBuffer.nRows * hxtBuffer.nCols) + hxtBuffer.nBins) * sizeof(double);
-    memcpy((void *) allDataPointer, (void *) tmpBuffer, bufferSize);
+
+    unsigned long long dataAddress;
+    memcpy((void *) &dataAddress, (void *) tmpBuffer, 8);
+
+    memcpy((void *) allDataPointer, (void *) (dataAddress), bufferSize);
 
     gridSizeX = hxtBuffer.nRows;
     gridSizeY = hxtBuffer.nCols;

@@ -310,6 +310,7 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
 
       nDaqOverall++;
       waitForCollectingDone();
+      qDebug() <<"11111 waitForCollectingDone() RETURNED";
 
       daqStatus.setCurrentImage(nDaqOverall);
       if (abortRequired())
@@ -371,6 +372,7 @@ int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
       collecting = true;
       emit executeCommand(GigEDetector::RESTART, startOfImage, 0);
       waitForCollectingDone();
+      qDebug() <<"22222 waitForCollectingDone() RETURNED";
       if (abortRequired())
       {
          break;
@@ -407,6 +409,7 @@ void DataAcquisition::performGigEDefaultDataCollection()
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
+   qDebug() <<"33333 waitForCollectingDone() RETURNED";
    collecting = false;
    emit restoreBiasSettings();
    emit enableMonitoring();
@@ -438,6 +441,7 @@ void DataAcquisition::performFixedDataCollection()
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
 
    waitForCollectingDone();
+   qDebug() <<"44444 waitForCollectingDone() RETURNED";
    collecting = false;
 
    emit restoreBiasSettings();
@@ -655,6 +659,7 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
 {
    this->detectorState = detectorState;
    busy = true;
+   qDebug() << "DataAcquisition::receiveState" << detectorState;
 
    switch (detectorState)
    {
