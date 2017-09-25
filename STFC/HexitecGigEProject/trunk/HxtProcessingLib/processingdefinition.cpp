@@ -46,7 +46,6 @@ void ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
 
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
 {
-   qDebug() << "In method" << energyCalibration;
    this->energyCalibration = energyCalibration;
 }
 

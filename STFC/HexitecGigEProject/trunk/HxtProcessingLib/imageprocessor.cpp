@@ -323,10 +323,11 @@ void ImageProcessor::handleProcess()
    emit imageComplete(processedFrameCount);
    while (hxtGenerator->getProcessedEnergyCount() < processedFrameCount)
    {
-      Sleep(50);
+      Sleep(10);
    }
    hxtGenerator->setFrameProcessingInProgress(false);
-   qDebug() << "ImageProcessor::process() processedEnergyCount() = " << hxtGenerator->getProcessedEnergyCount() << " energy processing complete";
+   qDebug() << "ImageProcessor::process() processedEnergyCount() = " << hxtGenerator->getProcessedEnergyCount()
+            << " energy processing complete. File writen " << imageItem->getFilename();
    emit processingComplete(this, processedFrameCount);
    qDebug() << "++++++++++++++STOP TIMER";
    qDebug() << "PROCESSING TOOK: "<< time.elapsed() << " mSecs";
@@ -365,11 +366,15 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)
 {
    std::ofstream outFile;
+   unsigned long long theAddress;
+   memcpy((void *) &theAddress, (void *) (header+184), 8);
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::out);
    outFile.write((const char *)header, headerLength * sizeof(char));
    outFile.write((const char *)data, dataLength * sizeof(char));
    outFile.close();
+   emit hxtFileWritten(header, filename);
+//   Sleep(500);
 }
 
 void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,  const char *filename)
@@ -389,13 +394,10 @@ void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,
       energyBinPtr++;
       summedHistogramPtr++;
    }
+
    std::string s = csvOutput.str();
    outFile.open(filename, std::ofstream::out);
    outFile << s;
-   /*
-   outFile.open(filename, std::ofstream::out);
-   outFile << csvOutput;
-   */
    outFile.close();
 
 }

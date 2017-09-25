@@ -58,6 +58,7 @@ private:
 signals:
    void process();
    void imageComplete(long long processedFrameCount);
+   void hxtFileWritten(char *buffer, const char*filename);
    void processingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
    void returnBufferReady(char *transferBuffer);
 
