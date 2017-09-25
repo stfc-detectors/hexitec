@@ -123,6 +123,7 @@ void GigEDetector::connectUp(const QObject *parent)
 
 void GigEDetector::handleBufferReady()
 {
+   qDebug() <<"GigEDetector::handleBufferReady()!!!";
    updateState(COLLECTING);
    emit executeBufferReady(bufferReady, validFrames);
 }
@@ -534,7 +535,7 @@ void GigEDetector::getImages(int count, int ndaq)
    {
      setGetImageParams();
    }
-qDebug() << "GigEDetector::getImages(). ndaq: " << ndaq << " offsetsOn: " << offsetsOn;
+
    if (ndaq == 0 && offsetsOn)
    {
       updateState(OFFSETS_PREP);
@@ -565,6 +566,7 @@ void GigEDetector::setGetImageParams()
    path.replace(QString("/"), QString("\\"));
    sprintf_s(processingFilename, "%s", path.toUtf8().data());
    emit imageStarted(processingFilename, frameSize);
+   emit imageStarted(processingFilename,80, 80);
    sprintf_s(pathString, "%s.bin", processingFilename);
 
    if ( !QDir(directory).exists())
@@ -612,6 +614,13 @@ void GigEDetector::restartImages(bool startOfImage)
    {
      setGetImageParams();
    }
+
+   if (startOfImage && offsetsOn)
+   {
+      updateState(OFFSETS_PREP);
+      emit prepareForOffsets();
+   }
+
    handleExecuteGetImages(startOfImage);
 //   emit executeAcquireImages(startOfImage);
 }
@@ -687,13 +696,10 @@ void GigEDetector::acquireImages(bool startOfImage)
       frameTimeout = 100;
    }
 
-//   if (triggeringMode == NO_TRIGGERING)
    if (triggerConfigMode == NO_TRIGGERING)
-//   if (false)
    {
       status = SetFrameTimeOut(detectorHandle, frameTimeout);
       status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
-//      status = AcquireFrames(detectorHandle, 5000, &framesAcquired, frameTimeout);
       showError("AcquireFrames", status);
 ///SHOULD THIS BE ADDED???
       if (mode == CONTINUOUS)
@@ -715,12 +721,12 @@ void GigEDetector::acquireImages(bool startOfImage)
       catch (DetectorException &ex)
       {
          QString message = "Triggered collection terminated: " + ex.getMessage();
-         qDebug() << QTime::currentTime().toString() << "Triggered collection aborted - NO TRIGGER";
+         qDebug() << "Triggered collection aborted - NO TRIGGER";
          emit writeError(message);
          remainingFrames = 0;
          emit cancelDataCollection();
       }
-      qDebug() << QTime::currentTime().toString() << "Collect triggered image over!: mode, remainingFrames " << mode << remainingFrames;
+      qDebug() << "Collect triggered image over!";
    }
 
    totalFramesAcquired += framesAcquired;
@@ -758,11 +764,12 @@ void GigEDetector::abort(bool restart)
    if (restart)
    {
       StopAcquisition(detectorHandle);
-      qDebug() << QTime::currentTime().toString() << "Acquisition STOPPED!!!";
+      qDebug() << "Acquisition STOPPED - WITH restart";
    }
    else
    {
       StopAcquisition(detectorHandle);
+      qDebug() << "Acquisition STOPPED - NO restart";
       updateState(READY);
    }
 }
@@ -899,6 +906,7 @@ unsigned char *GigEDetector::getImage(int imageNumber)
    unsigned char *buffer;
    unsigned char *image;
    short current, min = 32767, max = -32768, range;
+
 
    buffer = getBufferReady();
    imageDest = (short *) malloc(imageSize * sizeof(short));
