@@ -1,4 +1,5 @@
 #include "framere_orderprocessor.h"
+#include <QDebug>
 
 
 FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
@@ -6,29 +7,34 @@ FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
 {
 }
 
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame)
+uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
+                                          uint16_t *frame)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processRe_orderFrame(frame);
+   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame);
 
    return result;
 }
 
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdValue)
+uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
+                                          uint16_t *frame, uint16_t thresholdValue)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processRe_orderFrame(frame, thresholdValue);
+   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue);
+   qDebug() << " pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue) DONE!!!";
 
    return result;
 }
 
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
+uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
+                                          uint16_t *frame, uint16_t *thresholdPerPix)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processRe_orderFrame(frame, thresholdPerPix);
+   qDebug() << "calling pixelProcessor->processRe_orderFrame()";
+   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdPerPix);
 
    return result;
 }

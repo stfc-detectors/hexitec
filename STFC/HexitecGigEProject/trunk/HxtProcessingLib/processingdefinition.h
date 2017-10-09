@@ -1,7 +1,6 @@
 #ifndef PROCESSINGDEFINITION_H
 #define PROCESSINGDEFINITION_H
 
-//#include "inifile.h"
 #include "hxtitem.h"
 #include <cstdint>
 #include <string>
@@ -20,6 +19,7 @@ public:
    void setThresholdValue(int thresholdValue);
    void setThresholdPerPixel(char *thresholdFilename);
    void setEnergyCalibration(bool energyCalibration);
+   void setHxtGeneration(bool hxtGeneration);
    void setProcessedFilename();
    void setGradientFilename(char *gradientFilename);
    void setInterceptFilename(char *interceptFilename);
@@ -39,6 +39,7 @@ public:
    void setRe_order(bool re_order);
 
    bool getEnergyCalibration() const;
+   bool getHxtGeneration() const;
 
    long long getBinStart() const;
    void setBinStart(const long long &binStart);
@@ -84,6 +85,7 @@ private:
    int thresholdValue;
    uint16_t *thresholdPerPixel;
    bool energyCalibration;
+   bool hxtGeneration;
    bool nextFrameCorrection;
    ChargedSharingMode chargedSharingMode;
    int chargedSharingPixels;

@@ -15,11 +15,12 @@ class GeneralPixelProcessor : public QObject
 public:
    static uint16_t pixelMap[6400];
    static bool pixelMapInitialised;
-   static uint16_t frameSize;
+   static uint32_t frameSize;
 
 public:
    GeneralPixelProcessor();
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
+   void setFrameSize(int frameSize);
    void setEnergyCalibration(bool energyCalibration);
    void setLastFrameCorrection(bool lastFrameCorrection);
    void setGradientValue(double *gradientValue);
@@ -27,9 +28,12 @@ public:
    double *getGradientValue();
    double *getInterceptValue();
 
-   uint16_t *processFrame(uint16_t *frame);
-   virtual uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
-   virtual uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                          uint16_t *frame);
+   virtual uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                                  uint16_t *frame, uint16_t thresholdValue);
+   virtual uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                                  uint16_t *frame, uint16_t *thresholdPerPixel);
 
    virtual uint16_t *processFrame(uint16_t *frame,
               unordered_map<int, double>**pixelEnergyMapPtr);
@@ -38,9 +42,9 @@ public:
    virtual uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
 
-   uint16_t *processRe_orderFrame(uint16_t *frame);
-   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue);
-   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
+   virtual uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue);
+   virtual uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPixel);
 
    uint16_t *processRe_orderFrame(uint16_t *frame, 
 				  unordered_map<int, double>**pixelEnergyMapPtr);

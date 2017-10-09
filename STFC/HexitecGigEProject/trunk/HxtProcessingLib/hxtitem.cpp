@@ -17,9 +17,10 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
    initialiseHxtBuffer(nRows, nCols);
 
+   qDebug() << "initialiseHxtBuffer(nRows, nCols) nBins = " << nBins << " frameSize = " << frameSize;
    pixelEnergy = NULL;
    pixelEnergyMap = NULL;
-   energiesProcessed = 0;
+   hxtsProcessed = 0;
    this->pixelEnergyQueue.clear();
    this->pixelEnergyMapQueue.clear();
 }
@@ -36,16 +37,16 @@ void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
    hxtV3Buffer.nCols = nCols;
    hxtV3Buffer.nBins = nBins;
    hxtV3Buffer.allData = (double *) calloc((nBins * frameSize) + nBins, sizeof(double));
-   energyBin = hxtV3Buffer.allData;
+   hxtBin = hxtV3Buffer.allData;
    histogramPerPixel = hxtV3Buffer.allData + nBins;
 
    currentBin = binStart;
    for (long long i = binStart; i < nBins; i++, currentBin += binWidth)
    {
-      *energyBin = currentBin;
-      energyBin++;
+      *hxtBin = currentBin;
+      hxtBin++;
    }
-   energyBin = hxtV3Buffer.allData;
+   hxtBin = hxtV3Buffer.allData;
 }
 
 void HxtItem::initialiseTotalSpectrum()
@@ -187,11 +188,20 @@ void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
       pixel = it->first;
       thisEnergy = it->second;
       bin = (int)((thisEnergy / binWidth));
-      (*(currentHistogram + (pixel * nBins) + bin))++;
+      if (bin <= nBins)
+      {
+         (*(currentHistogram + (pixel * nBins) + bin))++;
+//         qDebug() << "HxtItem::addToHistogram pixel = " << pixel << " bin " << bin
+//                  << " offset into histograms = " << (pixel * nBins) + bin;
+      }
+      else
+      {
+//         qDebug() << "BAD BIN = " << bin;
+      }
       it++;
    }
 
-   energiesProcessed++;
+   hxtsProcessed++;
 }
 
 
@@ -212,12 +222,21 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
       pixel = it->first;
       thisEnergy = it->second;
       bin = (int)((thisEnergy / binWidth));
-      (*(currentHistogram + (pixel * nBins) + bin))++;
-      (*(summed + bin)) ++;
+      if (bin <= nBins)
+      {
+         (*(currentHistogram + (pixel * nBins) + bin))++;
+         (*(summed + bin)) ++;
+//         qDebug() << "HxtItem::addToHistogram pixel = " << pixel << " bin " << bin
+//                  << " offset into histograms = " << (pixel * nBins) + bin;
+      }
+      else
+      {
+//         qDebug() << "BAD BIN = " << bin;
+      }
       it++;
    }
 
-   energiesProcessed++;
+   hxtsProcessed++;
 //   qDebug() << "HxtItem::addToHistogramWithSum(), energiesProcessed: " << energiesProcessed;
 }
 
@@ -233,7 +252,7 @@ double *HxtItem::getHxtV3AllData()
 
 double *HxtItem::getEnergyBin()
 {
-   return energyBin;
+   return hxtBin;
 }
 
 long long *HxtItem::getSummedHistogram()

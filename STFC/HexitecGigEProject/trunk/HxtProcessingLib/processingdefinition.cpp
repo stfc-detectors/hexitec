@@ -49,6 +49,10 @@ void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
    this->energyCalibration = energyCalibration;
 }
 
+void ProcessingDefinition::setHxtGeneration(bool hxtGeneration)
+{
+   this->hxtGeneration = hxtGeneration;
+}
 
 void ProcessingDefinition::setGradientFilename(char *gradientFilename)
 {
@@ -127,7 +131,7 @@ void ProcessingDefinition::getData(char *filename, double *dataValue)
       i++;
    }
 
-   if (i < 6400)
+   if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "file read OK ";
@@ -148,7 +152,7 @@ void ProcessingDefinition::getData(const char *filename, uint16_t *dataValue)
       i++;
    }
 
-   if (i < 6400)
+   if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "file read OK ";
@@ -292,6 +296,11 @@ void ProcessingDefinition::setBinStart(const long long &binStart)
 bool ProcessingDefinition::getEnergyCalibration() const
 {
    return energyCalibration;
+}
+
+bool ProcessingDefinition::getHxtGeneration() const
+{
+   return hxtGeneration;
 }
 
 bool ProcessingDefinition::getRe_order() const

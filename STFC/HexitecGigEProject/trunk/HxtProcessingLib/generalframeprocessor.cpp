@@ -22,6 +22,12 @@ GeneralFrameProcessor::~GeneralFrameProcessor()
    delete pixelProcessor;
 }
 
+void GeneralFrameProcessor::setFrameSize(int frameSize)
+{
+   qDebug() <<"GeneralFrameProcessor::setFrameSize() " << frameSize;
+   pixelProcessor->setFrameSize(frameSize);
+}
+
 void GeneralFrameProcessor::setGradients(double *gradientValue)
 {
    pixelProcessor->setGradientValue(gradientValue);

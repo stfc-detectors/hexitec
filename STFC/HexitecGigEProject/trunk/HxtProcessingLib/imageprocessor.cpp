@@ -17,6 +17,7 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    imageItem = new ImageItem(filename, nRows, nCols);
    this->processingDefinition = processingDefinition;
    energyCalibration = processingDefinition->getEnergyCalibration();
+   hxtGeneration = processingDefinition->getHxtGeneration();
    nextFrameCorrection = processingDefinition->getNextFrameCorrection();
    if (processingDefinition->getChargedSharingMode() == OFF)
    {
@@ -26,7 +27,6 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    {
       chargedSharing = true;
    }
-
 
    if (energyCalibration)
    {
@@ -38,6 +38,10 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
       {
          hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition);
       }
+   }
+   else
+   {
+      hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition);
    }
 
    setImageInProgress(true);
@@ -76,11 +80,11 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, &pixelEnergyMap);
+                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
 
-                  if (pixelEnergyMap->size() > 0)
+                  if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
                      processedFrameCount++;
                   }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
@@ -88,9 +92,6 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
-               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                            filenameHxt);
                free(bufferStart);
                buffNo++;
             }
@@ -106,7 +107,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator);
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator);
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -116,6 +117,13 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                free(bufferStart);
             }
          }
+      }
+      if (hxtGeneration)
+      {
+         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                      filenameHxt);
+
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -149,21 +157,19 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &pixelEnergyMap);
-                  if (pixelEnergyMap->size() > 0)
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+                  if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
-                     processedFrameCount++;
+                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
+//                     processedFrameCount++;
                   }
+
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
-//                  processedFrameCount++;
+                  processedFrameCount++;
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
-               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                            filenameHxt);
                free(bufferStart);
             }
          }
@@ -178,8 +184,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdValue);
-                  // MUST USE RESULT IN FURTHER CALCULATIONS
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue);
+                  hxtGenerator->enqueuePixelEnergyMap(hxtMap);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -188,6 +194,14 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                free(bufferStart);
             }
          }
+      }
+      qDebug() <<"hxtGeneration: " << hxtGeneration;
+      if (hxtGeneration)
+      {
+         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                      filenameHxt);
+
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -222,19 +236,16 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &pixelEnergyMap);
-                  if (pixelEnergyMap->size() > 0)
+                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
+                  if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(pixelEnergyMap);
+                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
                      processedFrameCount++;
                   }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
-               writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                            (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                            filenameHxt);
                free(bufferStart);
             }
          }
@@ -249,7 +260,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel);
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdPerPixel);
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -259,6 +270,13 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                free(bufferStart);
             }
          }
+      }
+      if (hxtGeneration)
+      {
+         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                      filenameHxt);
+
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -300,7 +318,8 @@ void ImageProcessor::handleProcess()
       fp = new FrameProcessor(nextFrameCorrection);
    }
 
-   fp->setEnergyCalibration(energyCalibration);
+   fp->setFrameSize(processingDefinition->getFrameSize());
+   fp->setEnergyCalibration(processingDefinition->getEnergyCalibration());
    fp->setGradients(processingDefinition->getGradients());
    fp->setIntercepts(processingDefinition->getIntercepts());
 

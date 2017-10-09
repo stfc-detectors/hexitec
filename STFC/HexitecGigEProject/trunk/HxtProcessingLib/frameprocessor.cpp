@@ -9,29 +9,29 @@ FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
    qDebug() << "Calling FrameProcessor constructor";
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame)
+uint16_t *FrameProcessor::process(unordered_map<int, double> **pixelRawValMapPtr, uint16_t *frame)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processFrame(frame);
+   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame);
 
    return result;
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue)
+uint16_t *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processFrame(frame, thresholdValue);
+   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdValue);
 
    return result;
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix)
+uint16_t *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPix)
 {
    uint16_t *result;
 
-   result = pixelProcessor->processFrame(frame, thresholdPerPix);
+   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdPerPix);
 
    return result;
 }

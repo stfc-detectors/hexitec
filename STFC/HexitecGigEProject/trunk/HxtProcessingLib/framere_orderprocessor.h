@@ -10,9 +10,12 @@ class FrameRe_orderProcessor : public GeneralFrameProcessor
 public:
    FrameRe_orderProcessor(bool nextFrameCorrection);
    ~FrameRe_orderProcessor();
-   uint16_t *process(uint16_t *frame);
-   uint16_t *process(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel);
+   uint16_t *process(unordered_map<int, double> **pixelRawValMapPtr, 
+                     uint16_t *frame);
+   uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+                     uint16_t *frame, uint16_t thresholdValue);
+   uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+                     uint16_t *frame, uint16_t *thresholdPerPixel);
 
    uint16_t *process(uint16_t *frame,
                      unordered_map<int, double>**pixelEnergyMapPtr);

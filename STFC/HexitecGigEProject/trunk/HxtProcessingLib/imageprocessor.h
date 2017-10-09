@@ -36,10 +36,11 @@ private:
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
    bool energyCalibration;
+   bool hxtGeneration;
    bool nextFrameCorrection;
    bool chargedSharing;
    double *pixelEnergy;
-   unordered_map<int, double> *pixelEnergyMap;
+   unordered_map<int, double> *hxtMap;
 
 //   ImageItem *imageItem;
    char *bufferToProcess;

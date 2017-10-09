@@ -26,9 +26,9 @@ GeneralHxtGenerator::~GeneralHxtGenerator()
    delete hxtItem;
 }
 
-void GeneralHxtGenerator::enqueuePixelEnergy(double *pixelEnergy)
+void GeneralHxtGenerator::enqueuePixelRawVals(double *pixelRawVals)
 {
-   hxtItem->enqueuePixelEnergy(pixelEnergy);
+   hxtItem->enqueuePixelEnergy(pixelRawVals);
 }
 
 void GeneralHxtGenerator::enqueuePixelEnergyMap(unordered_map <int, double> *pixelEnergyMap)

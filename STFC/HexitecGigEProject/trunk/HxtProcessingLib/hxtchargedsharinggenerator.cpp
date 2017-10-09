@@ -7,9 +7,10 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
    pixelRow = (int *) calloc(nRows, sizeof(int));
    pixelCol = (int *) calloc(nCols, sizeof(int));
    pixelValue = (double*) calloc(nRows * nCols, sizeof(double));
-   chargedSharingMode = ADDITION;
-//   chargedSharingMode = DISCRIMINATION;
-   setPixelGridSize(3);
+   chargedSharingMode = processingDefinition->getChargedSharingMode();
+   setPixelGridSize(processingDefinition->getPixelGridSize());
+   qDebug() << "HxtChargedSharingGenerator: chargedSharingMode, pixelGridSize"
+            << chargedSharingMode << pixelGridSize;
 }
 
 void HxtChargedSharingGenerator::handleProcess()
@@ -98,7 +99,7 @@ void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
 {
    this->pixelGridSize = pixelGridSize;
    directionalDistance = (int)pixelGridSize/2;
-//   qDebug() << "directionalDistance: " << directionalDistance;
+   qDebug() << "directionalDistance: " << directionalDistance;
 }
 
 void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap)
@@ -120,8 +121,9 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
       pixelRow[index] = (int) (pixel / nRows);
       pixelCol[index] = (int) (pixel - (pixelRow[index] * nCols));
       pixelValue[index] = it->second;
-//      qDebug() << "pixel: " << pixel << " row " << pixelRow[index] << " col " << pixelCol[index]
-//                  << " value: " << pixelValue[index];
+//      qDebug() << "pixel: " << pixel << " index " << index
+//               << " row " << pixelRow[index] << " col " << pixelCol[index]
+//               << " value: " << pixelValue[index];
       it++;
       index++;
    }
@@ -156,6 +158,7 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
       row = pixelRow[i];
       column = pixelCol[i];
       maxValue = pixelValue[i];
+//      qDebug() << "EXAMINE PIXEL: "<< (row*80)+column << " row, column " << row << column;
 
       rowIndexBegin = row - directionalDistance;
       rowIndexEnd = row + directionalDistance;
@@ -170,7 +173,7 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
             {
                rowShare = pixelRow[j];
                columnShare = pixelCol[j];
-//               qDebug() << "=================FOUND CHARGE SHARING AT: row, col: " << row << ", " << column
+ //              qDebug() << "=================FOUND CHARGE SHARING AT: row, col: " << row << ", " << column
 //                        << " pixel: " << (row * nCols + column) << " value: " << pixelValue[i];
 //               qDebug() << "=================SHARED WITH            : row, col: " << rowShare << ", " << columnShare
 //                        << " pixel: " << (rowShare * nCols + columnShare) << " value: " << pixelValue[j];

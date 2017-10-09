@@ -16,9 +16,11 @@ class FrameProcessor : public GeneralFrameProcessor
 public:
    FrameProcessor(bool nextFrameCorrection);
    ~FrameProcessor();
-   uint16_t *process(uint16_t *frame);
-   uint16_t *process(uint16_t *frame, uint16_t thresholdValue);
-   uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel);
+   uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
+   uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, 
+                     uint16_t thresholdValue);
+   uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+                     uint16_t *frame, uint16_t *thresholdPerPixel);
 
    uint16_t *process(uint16_t *frame,
                      unordered_map<int, double>**pixelEnergyMapPtr);
