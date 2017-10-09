@@ -11,7 +11,9 @@ TARGET = Test
 SOURCES += main.cpp \
     mainwindow.cpp \
     processingForm.cpp \
-    processingbuffergenerator.cpp
+    processingbuffergenerator.cpp \
+    inifile.cpp \
+    parameters.cpp
 
 INCLUDEPATH += ../HxtProcessingLib
 
@@ -20,7 +22,9 @@ LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib
 HEADERS += \
     mainwindow.h \
     processingForm.h \
-    processingbuffergenerator.h
+    processingbuffergenerator.h \
+    inifile.h \
+    parameters.h
 
 FORMS += \
     mainwindow.ui \

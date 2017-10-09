@@ -1,6 +1,7 @@
 #ifndef PROCESSINGFORM_H
 #define PROCESSINGFORM_H
 
+#include <QString>
 #include <QMainWindow>
 #include <QWidget>
 #include <QFileDialog>
@@ -24,25 +25,30 @@ public:
    ~ProcessingForm();
    QMainWindow *getMainWindow();
 
+   void initialiseProcessingForm();
    void Qt2CppListHandler();
    
+   int getFrameSize();
+
 private:
    Ui::ProcessingForm *ui;
    QMainWindow *mainWindow;
    void processImage(const char *imageFilename, const char *filename);
    void readThresholdFile(char *thresholdFile);
 
+   int nRows;
+   int nCols;
+   int frameSize;
    int thresholdOption;
-   uint16_t thresholdPerPixel[6400];
+   uint16_t thresholdPerPixel[160000];
    bool nextFrame;
    bool energyCalibration;
    bool hxtGeneration;
    int chargedSharingOption;
-   char *gradientFilename;
-   char *interceptFilename;
+   QString gradientFilename;
+   QString interceptFilename;
    QString outputDirectory;
    QString outputPrefix;
-   char *processedFilename;
    QStringList inputFilesList;
 
 signals:
@@ -50,22 +56,22 @@ signals:
                             bool nextFrame,
                             int threshholdMode,
                             int thresholdValue,
-                            const char *thresholdFile);
+                            QString thresholdFile);
    void configureProcessing(bool energyCalibration,
+                            bool hxtGeneration,
                             long long binStart,
                             long long binEnd,
                             double binWidth,
                             bool totalSpectrum,
-                            char *gradientFilename,
-                            char *interceptFilename,
-                            const char *processedFilename);
+                            QString gradientFilename,
+                            QString interceptFilename);
    void configureProcessing(int ChargedSharingMode,
                             int pixelGridOption);
    void configureProcessing(QStringList inputFilesList,
                             QString outputDirectory,
                             QString outputPrefix);
 
-   void processImages();
+   void processImages(int nRows, int nCols);
    void imageStarted(const char *path, int nRows, int nCols);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);

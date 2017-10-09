@@ -19,15 +19,15 @@ MainWindow::MainWindow(QWidget *parent) :
    setCentralWidget(tabs);
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
-   processingDefinition = new ProcessingDefinition(6400);
+   processingDefinition = new ProcessingDefinition(processingForm->getFrameSize());
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
-   connect(processingForm, SIGNAL(processImages()),
-           processingBufferGenerator, SLOT(handleProcessImages()));
-   connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, const char*)),
-           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, int, int, const char*)));
-   connect(processingForm, SIGNAL(configureProcessing(bool, long long, long long, double, bool, char *, char *, const char *)),
-           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, double, bool, char *, char *, const char *)));
+   connect(processingForm, SIGNAL(processImages(int, int)),
+           processingBufferGenerator, SLOT(handlePostProcessImages(int, int)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, int, int, QString)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, bool, long long, long long, double, bool, QString, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, long long, long long, double, bool, QString, QString)));
    connect(processingForm, SIGNAL(configureProcessing(int, int)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
    connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),

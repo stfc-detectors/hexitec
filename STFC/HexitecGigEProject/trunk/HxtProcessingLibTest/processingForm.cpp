@@ -1,5 +1,10 @@
 #include "processingForm.h"
 #include "ui_processingForm.h"
+#include "parameters.h"
+#include "inifile.h"
+
+#include <QSettings>
+#include <QStringList>
 #include <QTime>
 #include <QDebug>
 #include <iostream>
@@ -37,6 +42,7 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    connect(ui->inputFilesListButton, SIGNAL(clicked(bool)), this, SLOT(setInputFilesList()));
    connect(ui->outputDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(setOutputDirectory()));
    connect(ui->dataFileButton, SIGNAL(clicked(bool)), this, SLOT(setDataFileParameters()));
+   initialiseProcessingForm();
 }
 
 ProcessingForm::~ProcessingForm()
@@ -49,13 +55,208 @@ QMainWindow *ProcessingForm::getMainWindow()
    return mainWindow;
 }
 
+void ProcessingForm::initialiseProcessingForm()
+{
+   QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
+   QString twoEasyFilename = "C:\\Detector\\hexitecGigE.ini";
+   QString inputFilesList;
+   IniFile *twoEasyIniFile;
+
+   qDebug() <<"twoEasyFilename = " << twoEasyFilename;
+   char *filename =  new char[1024];
+   char *gradientFilename =  new char[1024];
+   char *interceptFilename =  new char[1024];
+   QString outputPrefix;
+   QString boolString = "true";
+   long long binStart = 0;
+   long long binEnd = 100;
+   double binWidth = 0.5;
+   QString thresholdOptionString = "Value";
+   QString chargedSharingOptionString = "None";
+   QString pixelGridOptionString = "3 * 3";
+   long long thresholdValue = 100;
+   char *thresholdFile =  new char[1024];
+   int fileStartPos;
+   int rows = 80;
+   int columns = 80;
+
+   strcpy(filename, "DEFAULT");
+   ui->thresholdModeComboBox->setCurrentIndex(1);
+   ui->thresholdFile->setText("");
+   ui->energyCalibrationCheckBox->setChecked(true);
+   ui->totalSpectrumCheckBox->setChecked(true);
+   ui->binStartSpinBox->setValue(binStart);
+   ui->binEndSpinBox->setValue(binEnd);
+   ui->binWidthSpinBox->setValue(binWidth);
+
+   twoEasyIniFile = new IniFile(twoEasyFilename);
+   QString defaultDirectory = twoEasyFilename;
+   fileStartPos = defaultDirectory.lastIndexOf("/");
+   defaultDirectory.truncate(fileStartPos);
+
+   if ((boolString = twoEasyIniFile->getString("Processing/Re-order").toLower()) != QVariant(INVALID))
+   {
+      if (boolString == QLatin1String("true"))
+      {
+         ui->re_orderCheckBox->setChecked(true);
+      }
+      else if (boolString == QLatin1String("false"))
+      {
+         ui->re_orderCheckBox->setChecked(false);
+      }
+   }
+
+   if ((thresholdOptionString = twoEasyIniFile->getString("Processing/Threshold_Option")) != QVariant(INVALID))
+   {
+      ui->thresholdModeComboBox->setCurrentText(thresholdOptionString);
+   }
+   setThresholdOptions(ui->thresholdModeComboBox->currentIndex());
+
+   if ((thresholdValue = twoEasyIniFile->getInt("Processing/Threshold_Value")) != QVariant(INVALID))
+   {
+      ui->thresholdValue->setValue(thresholdValue);
+   }
+
+   if ((thresholdFile = twoEasyIniFile->getCharArray("Processing/Threshold_File")) != QVariant(INVALID))
+   {
+      ui->thresholdFile->setText(thresholdFile);
+   }
+   if ((gradientFilename = twoEasyIniFile->getCharArray("Processing/Gradient_File")) != QVariant(INVALID))
+   {
+      ui->gradientFilename->setText(gradientFilename);
+   }
+   else
+   {
+      ui->gradientFilename->setText(filename);
+   }
+
+   if ((interceptFilename = twoEasyIniFile->getCharArray("Processing/Intercept_File")) != QVariant(INVALID))
+   {
+      ui->interceptFilename->setText(interceptFilename);
+   }
+   else
+   {
+      ui->interceptFilename->setText(filename);
+   }
+
+   boolString = "true";
+   if ((boolString = twoEasyIniFile->getString("Processing/Energy_Calibration").toLower()) != QVariant(INVALID))
+   {
+      if (boolString == QLatin1String("true"))
+      {
+         ui->energyCalibrationCheckBox->setChecked(true);
+      }
+      else if (boolString == QLatin1String("false"))
+      {
+         ui->energyCalibrationCheckBox->setChecked(false);
+      }
+   }
+   nRows = rows;
+   if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
+   {
+      qDebug() << "Set rows = " << rows;
+      nRows = rows;
+   }
+   else
+   {
+      qDebug() << "failed " << rows;
+   }
+   nCols = columns;
+   if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
+   {
+      qDebug() << "Set columns = " << columns;
+      nCols = columns;
+   }
+   else
+   {
+      qDebug() << "failed " << columns;
+   }
+   frameSize = nRows * nCols;
+
+   if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
+   {
+      ui->binStartSpinBox->setValue(binStart);
+   }
+   if ((binEnd = twoEasyIniFile->getInt("Processing/Bin_End")) != QVariant(INVALID))
+   {
+      ui->binEndSpinBox->setValue(binEnd);
+   }
+   if ((binWidth = twoEasyIniFile->getDouble("Processing/Bin_Width")) != QVariant(INVALID))
+   {
+      ui->binWidthSpinBox->setValue(binWidth);
+   }
+   qDebug() <<"Bin values: "<< binStart << binEnd << binWidth;
+
+   ui->hxtCheckBox->setChecked(true);
+   boolString = "true";
+   if ((boolString = twoEasyIniFile->getString("Processing/Total_Spectrum").toLower()) != QVariant(INVALID))
+   {
+      if (boolString == QLatin1String("true"))
+      {
+         ui->totalSpectrumCheckBox->setChecked(true);
+      }
+      else if (boolString == QLatin1String("false"))
+      {
+         ui->totalSpectrumCheckBox->setChecked(false);
+      }
+   }
+
+   if ((chargedSharingOptionString = twoEasyIniFile->getString("Processing/Charged_Sharing_Option")) != QVariant(INVALID))
+   {
+      ui->chargedSharingComboBox->setCurrentText(chargedSharingOptionString);
+   }
+   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_grid_Option")) != QVariant(INVALID))
+   {
+      ui->pixelGridComboBox->setCurrentText(pixelGridOptionString);
+   }
+
+   if ((filename = twoEasyIniFile->getCharArray("Processing/Output_Directory")) != QVariant(INVALID))
+   {
+      defaultDirectory = QString(filename);
+   }
+   ui->outputDirectory->setText(defaultDirectory);
+
+   strcpy(filename, "DEFAULT");
+
+//   if ((outputPrefix = twoEasyIniFile->getCharArray("Processing/Output_Prefix")) != QVariant(INVALID))
+      if ((outputPrefix = twoEasyIniFile->getString("Processing/Output_Prefix")) != QVariant(INVALID))
+   {
+      qDebug() << "outputPrefix = " << outputPrefix;
+      ui->outputPrefix->setText(outputPrefix);
+   }
+   else
+   {
+      ui->outputPrefix->setText(filename);
+   }
+
+
+   strcpy(filename, "DEFAULT");
+
+   if ((inputFilesList = twoEasyIniFile->getString("Processing/Input_File_List")) != QVariant(INVALID))
+   {
+      ui->inputFilesList->setText(inputFilesList);
+   }
+   else
+   {
+      ui->inputFilesList->setText(filename);
+   }
+
+   emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
+                            ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
+   emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),
+                            ui->binStartSpinBox->value(), ui->binEndSpinBox->value(),
+                            ui->binWidthSpinBox->value(), ui->totalSpectrumCheckBox->isChecked(),
+                            ui->gradientFilename->text(),
+                            ui->interceptFilename->text());
+   emit configureProcessing(ui->chargedSharingComboBox->currentIndex(), ui->pixelGridComboBox->currentIndex());
+   emit configureProcessing(ui->inputFilesList->text().split(','), ui->outputDirectory->text(), ui->outputPrefix->text());
+}
+
 void ProcessingForm::initialise()
 {
    qDebug()<< "ProcessingForm::initialise()";
-   gradientFilename =  new char[1024];
-   interceptFilename =  new char[1024];
-//   outputDirectory =  new char[1024];
-//   outputPrefix =  new char[1024];
+//   gradientFilename =  new char[1024];
+//   interceptFilename =  new char[1024];
 
    setThresholdParameters();
 }
@@ -63,7 +264,7 @@ void ProcessingForm::initialise()
 void ProcessingForm::processClicked()
 {
    qDebug() << "PROCESS BUTTON has been clicked!";
-   emit processImages();
+   emit processImages(nRows, nCols);
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)
@@ -100,23 +301,21 @@ void ProcessingForm::setThresholdOptions(int thresholdOption)
 void ProcessingForm::setThresholdParameters()
 {
    int thresholdValue;
-   char *thresholdFile;
+   QString thresholdFile;
 
    switch (thresholdOption)
    {
       case 0:
          thresholdValue = NULL;
-         thresholdFile = NULL;
          nextFrame = false;
          break;
       case 1:
          thresholdValue = ui->thresholdValue->value();
-         thresholdFile = NULL;
          nextFrame = ui->nextFrameCorrectionCheckBox->isChecked();
          break;
       case 2:
          thresholdValue = NULL;
-         thresholdFile = (char *)ui->thresholdFile->text().toStdString().c_str();
+         thresholdFile = ui->thresholdFile->text();
          nextFrame = ui->nextFrameCorrectionCheckBox->isChecked();
          break;
       default:
@@ -194,15 +393,13 @@ void ProcessingForm::setEnergyCalibrationParameters()
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
 
-//   gradientFilename = (char *)ui->gradientFilename->text().toStdString().c_str();
-//   interceptFilename = (char *)ui->interceptFilename->text().toStdString().c_str();
-   strcpy(gradientFilename, (char *)ui->gradientFilename->text().toStdString().c_str());
-   strcpy(interceptFilename, (char *)ui->interceptFilename->text().toStdString().c_str());
+   gradientFilename = ui->gradientFilename->text();
+   interceptFilename = ui->interceptFilename->text();
 
-   emit configureProcessing(energyCalibration, binStart, binEnd, binWidth, totalSpectrum,
+   emit configureProcessing(energyCalibration, hxtGeneration,
+                            binStart, binEnd, binWidth, totalSpectrum,
                             gradientFilename,
-                            interceptFilename,
-                            processedFilename);
+                            interceptFilename);
 }
 
 void ProcessingForm::setGradientsFile()
@@ -245,12 +442,17 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
       i++;
    }
 
-   if (i < 6400)
+   if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "threshold file read OK ";
    inFile.close();
 
+}
+
+int ProcessingForm::getFrameSize()
+{
+   return frameSize;
 }
 
 void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
