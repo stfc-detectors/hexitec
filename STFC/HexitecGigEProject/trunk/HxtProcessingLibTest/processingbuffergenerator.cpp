@@ -15,9 +15,11 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    imageProcessorList.clear();
    currentImageProcessor = NULL;
    this->processingDefinition = processingDefinition;
+   nRows = this->processingDefinition->getRows();
+   nCols = this->processingDefinition->getCols();
 
-   connect(this, SIGNAL(imageStarted(char*, int, int)),
-           this, SLOT(handleImageStarted(char *, int, int)));
+   connect(this, SIGNAL(imageStarted(char*)),
+           this, SLOT(handleImageStarted(char *)));
    connect(this, SIGNAL(fileBufferReady(unsigned char*, unsigned long)),
            this, SLOT(handleFileBufferReady(unsigned char *, unsigned long)));
    connect(this, SIGNAL(imageComplete(long long)),
@@ -26,7 +28,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
 
 void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-   qDebug() <<" ENQUEUE NEW IMAGE ";
+   qDebug() <<" ENQUEUE NEW IMAGE, nRows, nCols: " << nRows << nCols;
    this->frameSize = nRows * nCols * sizeof(uint16_t);
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    connect(currentImageProcessor, SIGNAL(processingComplete(ImageProcessor *, long long)),
@@ -38,12 +40,12 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
             << "image queue length = " << imageProcessorList.length();
 }
 
-void ProcessingBufferGenerator::handleImageStarted(char *filename, int nRows, int nCols)
+void ProcessingBufferGenerator::handleImageStarted(char *filename)
 {
    qDebug() << "ProcessingBufferGenerator::handleImageStarted getting a mutex lock, threadId: " << QThread::currentThreadId()
-            << " nRows = " << nRows << " nCols = " << nCols;
+            << " nRows = " << processingDefinition->getRows() << " nCols = " << processingDefinition->getCols();
    QMutexLocker locker(&mutex);
-   enqueueImage(filename, nRows, nCols, processingDefinition);
+   enqueueImage(filename, processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
    qDebug() <<"imaged Enqueued.";
 }
 
@@ -93,7 +95,8 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool ne
    }
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, bool hxtGeneration, long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
+void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, bool hxtGeneration, 
+                                                          long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
                                                           QString gradientFilename, QString interceptFilename)
 {
    qDebug() << "22222 ProcessingBufferGenerator::handleConfigureProcessing() hxtGeneration " << hxtGeneration;
@@ -128,6 +131,13 @@ void ProcessingBufferGenerator::handleHxtFileWritten(char * buffer, const char *
    hxtFilename = QString(filename);
 //   qDebug() << "ProcessingBufferGenerator::handleHxtFileWritten: " << hxtFilename;
    emit hxtFileWritten((unsigned short *)buffer, hxtFilename);
+}
+
+void ProcessingBufferGenerator::handleConfigureProcessing(int nRows, int nCols, long long frameSize)
+{
+   processingDefinition->setRows(nRows);
+   processingDefinition->setCols(nCols);
+   processingDefinition->setFrameSize(frameSize);
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
@@ -180,7 +190,7 @@ void ProcessingBufferGenerator::handleProcessImages()
       inFile.open(inputFilename, ifstream::binary);
       processingFilenameList.append(processingFilename);
 
-      emit imageStarted(processingFilenameList.back(), nRows, nCols);
+      emit imageStarted(processingFilenameList.back());
       if (!inFile)
       {
         qDebug() << "ProcessingBufferGenerator::handleProcessImages() - error opening " << inputFilename;
@@ -225,6 +235,8 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
    char *processingFilename;
    char *inputFilename;
 
+   processingDefinition->setRows(nRows);
+   processingDefinition->setCols(nCols);
    processingFilenameList.clear();
 
    inputFilename = new char[1024];
@@ -255,7 +267,7 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       inFile.open(inputFilename, ifstream::binary);
       processingFilenameList.append(processingFilename);
 
-      emit imageStarted(processingFilenameList.back(), nRows, nCols);
+      emit imageStarted(processingFilenameList.back());
       if (!inFile)
       {
         qDebug() << "ProcessingBufferGenerator::handlePostProcessImages() - error opening " << inputFilename;
@@ -278,9 +290,6 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
          else
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-//            qDebug() << "MODIFY TRANSFER BUFFER!!! size = " << (nRows * nCols  * 2);
-//            fill((uint16_t *)transferBuffer, (uint16_t *)(transferBuffer + 160000), 150);
-//            fill(transferBuffer, transferBuffer + (160000 * 50), 150);
             emit fileBufferReady(transferBuffer, 500);
          }
          totalFramesAcquired += validFrames;

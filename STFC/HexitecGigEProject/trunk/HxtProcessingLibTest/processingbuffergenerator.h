@@ -27,12 +27,14 @@ private:
    QString hxtFilename;
    char *bufferToProcess;
    int frameSize;
+   int nRows;
+   int nCols;
 
 signals:
 //   void enqueueBuffer (char *bufferToProcess, unsigned long validFrames);
 //   void imageComplete(unsigned long long totalFramesAcquired);
 //   void imageStarted(const char *path, int nRows, int nCols);
-   void imageStarted(char *path, int nRows, int nCols);
+   void imageStarted(char *path);
    void fileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
@@ -41,13 +43,15 @@ signals:
 public slots:
    void handleProcessImages();
    void handlePostProcessImages(int nRows, int nCols);
-   void handleImageStarted(char *filename, int nRows, int nCols);
+   void handleImageStarted(char *filename);
 //   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames, int mode);
    void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleHxtFileWritten(char *buffer, const char * filename);
 
+   void handleConfigureProcessing(int nRows, int nCols,
+                                  long long frameSize);
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,
                                   int threshholdMode,

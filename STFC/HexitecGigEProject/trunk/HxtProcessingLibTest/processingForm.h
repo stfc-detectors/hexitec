@@ -52,6 +52,7 @@ private:
    QStringList inputFilesList;
 
 signals:
+   void configureProcessing(int nRows, int nCols, long long frameSize);
    void configureProcessing(bool re_order,
                             bool nextFrame,
                             int threshholdMode,
@@ -72,7 +73,7 @@ signals:
                             QString outputPrefix);
 
    void processImages(int nRows, int nCols);
-   void imageStarted(const char *path, int nRows, int nCols);
+   void imageStarted(const char *path);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
 

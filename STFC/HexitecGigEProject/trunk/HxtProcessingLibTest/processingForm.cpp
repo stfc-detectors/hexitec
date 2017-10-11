@@ -151,7 +151,7 @@ void ProcessingForm::initialiseProcessingForm()
          ui->energyCalibrationCheckBox->setChecked(false);
       }
    }
-   nRows = rows;
+
    if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
    {
       qDebug() << "Set rows = " << rows;
@@ -160,8 +160,9 @@ void ProcessingForm::initialiseProcessingForm()
    else
    {
       qDebug() << "failed " << rows;
+      nRows = 80;
    }
-   nCols = columns;
+
    if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
    {
       qDebug() << "Set columns = " << columns;
@@ -170,6 +171,7 @@ void ProcessingForm::initialiseProcessingForm()
    else
    {
       qDebug() << "failed " << columns;
+      nCols = 80;
    }
    frameSize = nRows * nCols;
 
@@ -241,6 +243,7 @@ void ProcessingForm::initialiseProcessingForm()
       ui->inputFilesList->setText(filename);
    }
 
+   emit configureProcessing(nRows, nCols, frameSize);
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
    emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),
@@ -263,7 +266,7 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!";
+   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols;
    emit processImages(nRows, nCols);
 }
 
