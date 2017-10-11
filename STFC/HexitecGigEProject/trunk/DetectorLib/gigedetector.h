@@ -106,7 +106,7 @@ signals:
    void notifyStop();
    void imageAcquired(QPixmap data);
    void imageStarted(char *path, int frameSize);
-   void imageStarted(char *path, int nRows, int nCols);
+   void imageStarted(char *path);
    void imageComplete(unsigned long long framesAcquired);
    void executeAcquireImages(bool startOfImage = true);
    void prepareForOffsets();

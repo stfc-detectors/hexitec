@@ -565,8 +565,7 @@ void GigEDetector::setGetImageParams()
 
    path.replace(QString("/"), QString("\\"));
    sprintf_s(processingFilename, "%s", path.toUtf8().data());
-   emit imageStarted(processingFilename, frameSize);
-   emit imageStarted(processingFilename,80, 80);
+   emit imageStarted(processingFilename);
    sprintf_s(pathString, "%s.bin", processingFilename);
 
    if ( !QDir(directory).exists())
