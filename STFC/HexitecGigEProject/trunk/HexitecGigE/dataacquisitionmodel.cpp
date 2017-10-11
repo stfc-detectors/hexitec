@@ -143,6 +143,8 @@ void DataAcquisitionModel::connectDataAcquisition()
               processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
    connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
            progressForm, SLOT(handleImageStarting(double, int, int)));
+//   connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
+//           processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));
 
 }
 
@@ -156,8 +158,8 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
    connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
            dataAcquisition, SLOT(handleImageStarted(char *, int)));
-   connect(gigEDetector, SIGNAL(imageStarted(char *, int, int)),
-           processingBufferGenerator, SLOT(handleImageStarted(char *, int, int)));
+   connect(gigEDetector, SIGNAL(imageStarted(char *)),
+           processingBufferGenerator, SLOT(handleImageStarted(char *)));
    connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
 //   connect(gigEDetector, SIGNAL(executeBufferReady(unsigned char*,ulong)),

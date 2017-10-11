@@ -241,6 +241,7 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
+      qDebug() << "DataAcquisition::performContinuousDataCollection(), repeatCount: " << repeatCount;
       emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);
       performMonitorEnvironmentalValues();
 
@@ -310,7 +311,6 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
 
       nDaqOverall++;
       waitForCollectingDone();
-      qDebug() <<"11111 waitForCollectingDone() RETURNED";
 
       daqStatus.setCurrentImage(nDaqOverall);
       if (abortRequired())
@@ -372,7 +372,6 @@ int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
       collecting = true;
       emit executeCommand(GigEDetector::RESTART, startOfImage, 0);
       waitForCollectingDone();
-      qDebug() <<"22222 waitForCollectingDone() RETURNED";
       if (abortRequired())
       {
          break;
@@ -409,7 +408,6 @@ void DataAcquisition::performGigEDefaultDataCollection()
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
-   qDebug() <<"33333 waitForCollectingDone() RETURNED";
    collecting = false;
    emit restoreBiasSettings();
    emit enableMonitoring();
@@ -659,7 +657,6 @@ void DataAcquisition::receiveState(GigEDetector::DetectorState detectorState)
 {
    this->detectorState = detectorState;
    busy = true;
-   qDebug() << "DataAcquisition::receiveState" << detectorState;
 
    switch (detectorState)
    {
@@ -780,6 +777,7 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 {
    if (mode != GigEDetector::GIGE_DEFAULT)
    {
+//      qDebug() << "!!!!!!!!!!!!!!!!!!!!!!DataAcquisition::handleBufferReady()";
       emit transferBufferReady(transferBuffer, validFrames);
       triggered = true;
 //      hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
@@ -833,6 +831,7 @@ void DataAcquisition::handleCancelOffsets()
 
 void DataAcquisition::handleExecuteReducedDataCollection()
 {
+   qDebug() <<"DataAcquisition::handleExecuteReducedDataCollection()";
    emit executeReducedDataCollection();
 }
 

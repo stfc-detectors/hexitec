@@ -168,8 +168,8 @@ MainWindow::MainWindow()
    scriptingWidget->runInitScript();
 
    // The processing window needs to have been created before the data acquisition factory!
-   processingForm = new ProcessingForm();
    processingDefinition = new ProcessingDefinition(6400);
+   processingForm = new ProcessingForm();
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
    if (activeDAQ)
    {
@@ -192,13 +192,15 @@ MainWindow::MainWindow()
 
    createStatusBar();
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
-   qDebug() << "MAKING PROCESSINGFORM CONNECTIONS!!!";
+
+   connect(processingForm, SIGNAL(configureSensor(int, int, long long)),
+           processingBufferGenerator, SLOT(handleConfigureSensor(int, int, long long)));
    connect(processingForm, SIGNAL(processImages()),
            processingBufferGenerator, SLOT(handlePostProcessImages()));
    connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, int, int, QString)));
-   connect(processingForm, SIGNAL(configureProcessing(bool, long long, long long, double, bool, QString, QString)),
-           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, long long, long long, double, bool, QString, QString)));
+   connect(processingForm, SIGNAL(configureProcessing(bool, bool, long long, long long, double, bool, QString, QString)),
+           processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, long long, long long, double, bool, QString, QString)));
    connect(processingForm, SIGNAL(configureProcessing(int, int)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
    connect(processingBufferGenerator, SIGNAL(hxtFileWritten(unsigned short*, QString)),
@@ -377,6 +379,7 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
       connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
       DataModel::instance()->setActiveSlice(slice);
       emit addObject(slice);
+
       MainViewer::instance()->showNewActiveSlice();
       thumbViewer->addSlice(slice);
 //REPLACE THIS?      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
@@ -844,11 +847,13 @@ void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
    initializeSlice(slice, sliceNumber);
 
    emit returnHxtBuffer(buffer);
-
+/*
    if (saveCsv)
    {
       writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
    }
+*/
+   
 }
 
 void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, int numberOfBins)
@@ -1007,6 +1012,7 @@ bool MainWindow::checkDAQChoice()
 
 void MainWindow::handleBufferReady()
 {
+//   qDebug() << "!!!!!!!!!!!!!!!!!!!!!!MainWindow::handleBufferReady() " << GigEDetector::getBufferReady();
    emit executeBufferReady(GigEDetector::getBufferReady(), GigEDetector::getValidFrames());
 }
 
