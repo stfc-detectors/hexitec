@@ -23,7 +23,6 @@ uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawVa
    uint16_t *result;
 
    result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue);
-   qDebug() << " pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue) DONE!!!";
 
    return result;
 }
@@ -33,7 +32,6 @@ uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawVa
 {
    uint16_t *result;
 
-   qDebug() << "calling pixelProcessor->processRe_orderFrame()";
    result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdPerPix);
 
    return result;

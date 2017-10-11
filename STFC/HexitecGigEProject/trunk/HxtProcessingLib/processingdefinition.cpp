@@ -159,9 +159,28 @@ void ProcessingDefinition::getData(const char *filename, uint16_t *dataValue)
    inFile.close();
 }
 
+int ProcessingDefinition::getRows()
+{
+   return nRows;
+}
+
+void ProcessingDefinition::setRows(int nRows)
+{
+   this->nRows = nRows;
+}
+
+int ProcessingDefinition::getCols()
+{
+   return nCols;
+}
+
+void ProcessingDefinition::setCols(int nCols)
+{
+   this->nCols = nCols;
+}
 int ProcessingDefinition::getPixelGridSize() const
 {
-    return pixelGridSize;
+   return pixelGridSize;
 }
 
 void ProcessingDefinition::setPixelGridSize(int value)

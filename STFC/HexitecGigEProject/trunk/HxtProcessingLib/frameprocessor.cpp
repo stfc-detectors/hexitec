@@ -6,7 +6,6 @@
 FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
    GeneralFrameProcessor(nextFrameCorrection)
 {
-   qDebug() << "Calling FrameProcessor constructor";
 }
 
 uint16_t *FrameProcessor::process(unordered_map<int, double> **pixelRawValMapPtr, uint16_t *frame)

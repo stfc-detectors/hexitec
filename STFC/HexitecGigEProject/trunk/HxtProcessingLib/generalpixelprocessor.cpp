@@ -69,7 +69,6 @@ void GeneralPixelProcessor::initialiseEnergyCalibration(double *gradientValue, d
 void GeneralPixelProcessor::setFrameSize(int frameSize)
 {
    GeneralPixelProcessor::frameSize = frameSize;
-   qDebug() <<"GeneralPixelProcessor::setFrameSize() " << GeneralPixelProcessor::frameSize;
 }
 
 double *GeneralPixelProcessor::getGradientValue()
@@ -251,7 +250,6 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>
    unordered_map<int, double> *pixelRawValMap;
    int index;
 
-   qDebug() << "GeneralPixelProcessor::processRe_orderFrame() 00000";
    pixelRawValMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
@@ -279,7 +277,6 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>
 
    pixelRawValMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
-   qDebug() << "GeneralPixelProcessor::processRe_orderFrame() 11111";
 
    for (int i = 0; i < frameSize; i++)
    {
@@ -295,8 +292,6 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>
       }
    }
    *pixelRawValMapPtr = pixelRawValMap;
-   qDebug() << "GeneralPixelProcessor::processRe_orderFrame() 22222";
-
 
    return re_orderedFrame;
 }

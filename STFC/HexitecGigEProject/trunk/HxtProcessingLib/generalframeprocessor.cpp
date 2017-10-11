@@ -6,7 +6,6 @@
 
 GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
-   qDebug() << "Calling GeneralFrameProcessor constructor nextFrameCorrection =" << nextFrameCorrection;
    if (nextFrameCorrection)
    {
       pixelProcessor = new PixelProcessorNextFrame();
@@ -24,7 +23,6 @@ GeneralFrameProcessor::~GeneralFrameProcessor()
 
 void GeneralFrameProcessor::setFrameSize(int frameSize)
 {
-   qDebug() <<"GeneralFrameProcessor::setFrameSize() " << frameSize;
    pixelProcessor->setFrameSize(frameSize);
 }
 
@@ -41,7 +39,6 @@ void GeneralFrameProcessor::setIntercepts(double *interceptValue)
 void GeneralFrameProcessor::setEnergyCalibration(bool energyCalibration)
 {
    pixelProcessor->setEnergyCalibration(energyCalibration);
-   qDebug() << "pixelProcessor->setEnergyCalibration(energyCalibration): " << energyCalibration;
 }
 
 GeneralPixelProcessor *GeneralFrameProcessor::getPixelProcessor()

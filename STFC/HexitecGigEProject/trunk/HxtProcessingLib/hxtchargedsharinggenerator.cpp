@@ -9,8 +9,6 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
    pixelValue = (double*) calloc(nRows * nCols, sizeof(double));
    chargedSharingMode = processingDefinition->getChargedSharingMode();
    setPixelGridSize(processingDefinition->getPixelGridSize());
-   qDebug() << "HxtChargedSharingGenerator: chargedSharingMode, pixelGridSize"
-            << chargedSharingMode << pixelGridSize;
 }
 
 void HxtChargedSharingGenerator::handleProcess()

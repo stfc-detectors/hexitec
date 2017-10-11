@@ -32,16 +32,16 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    {
       if (chargedSharing)
       {
-         hxtGenerator = new HxtChargedSharingGenerator(nRows, nCols, processingDefinition);
+         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
       }
       else
       {
-         hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition);
+         hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
       }
    }
    else
    {
-      hxtGenerator = new HxtGenerator(nRows, nCols, processingDefinition);
+      hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
    }
 
    setImageInProgress(true);
@@ -61,8 +61,6 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *bufferStart;
    char *frameIterator;
    int buffNo = 0;
-
-   qDebug() << " ImageProcessor output files: " << filenameBin << filenameHxt;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -147,6 +145,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       {
          Sleep(10);
       }
+
       if (energyCalibration)
       {
          while (imageItem->getBufferQueueSize() > 0)
@@ -339,8 +338,10 @@ void ImageProcessor::handleProcess()
    }
 
    qDebug() << "ImageProcessor::process() processedFrameCount = " << processedFrameCount << " waiting for energy processing";
-   emit imageComplete(processedFrameCount);
-   while (hxtGenerator->getProcessedEnergyCount() < processedFrameCount)
+//   emit imageComplete(processedFrameCount);
+//   while (hxtGenerator->getProcessedEnergyCount() < processedFrameCount)
+   emit imageComplete(totalFramesToProcess);
+   while (hxtGenerator->getProcessedEnergyCount() < totalFramesToProcess)
    {
       Sleep(10);
    }
@@ -362,7 +363,6 @@ void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFra
 
 void ImageProcessor::setImageInProgress(bool inProgress)
 {
-   qDebug() << "Setting image inProgress: " << inProgress;
    this->inProgress = inProgress;
 }
 
@@ -377,6 +377,7 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 {
    std::ofstream outFile;
 
+   qDebug() <<"ImageProcessor::writeBinFile: " << filename;
    outFile.open(filename, std::ofstream::binary | std::ofstream::app);
    outFile.write((const char *)buffer, length * sizeof(char));
    outFile.close();   
@@ -393,7 +394,6 @@ void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char
    outFile.write((const char *)data, dataLength * sizeof(char));
    outFile.close();
    emit hxtFileWritten(header, filename);
-//   Sleep(500);
 }
 
 void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,  const char *filename)

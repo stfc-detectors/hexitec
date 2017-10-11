@@ -75,6 +75,11 @@ public:
    int getPixelGridSize() const;
    void setPixelGridSize(int value);
 
+   int getRows();
+   void setRows(int nRows);
+   int getCols();
+   void setCols(int nCols);
+
 private:
    void setGradients();
    void setIntercepts();
@@ -91,6 +96,8 @@ private:
    int chargedSharingPixels;
    int pixelGridSize;
    long long frameSize;
+   int nRows;
+   int nCols;
    long long binStart;
    long long binEnd;
    double binWidth;

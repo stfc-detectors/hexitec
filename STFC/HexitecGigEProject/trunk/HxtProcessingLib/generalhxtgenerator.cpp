@@ -22,7 +22,6 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
-   qDebug() << "GeneralHxtGenerator::~GeneralHxtGenerator()";
    delete hxtItem;
 }
 

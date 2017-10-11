@@ -17,7 +17,6 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
    initialiseHxtBuffer(nRows, nCols);
 
-   qDebug() << "initialiseHxtBuffer(nRows, nCols) nBins = " << nBins << " frameSize = " << frameSize;
    pixelEnergy = NULL;
    pixelEnergyMap = NULL;
    hxtsProcessed = 0;
