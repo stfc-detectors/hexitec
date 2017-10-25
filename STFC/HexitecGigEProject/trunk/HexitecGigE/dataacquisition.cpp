@@ -241,7 +241,6 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
-      qDebug() << "DataAcquisition::performContinuousDataCollection(), repeatCount: " << repeatCount;
       emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);
       performMonitorEnvironmentalValues();
 
@@ -251,7 +250,6 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
       }
       else
       {
-         qDebug() << "LowPriorityBias DAQ";
          nDaqOverall = doLowPriorityBiasDataCollections(nDaqOverall);
       }
 
@@ -404,14 +402,12 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit disableMonitoring();
 //   waitForMonitoringDone();
 
-   qDebug() << "DataAcquisition::performGigEDefaultDataCollection() imageCount: " << dataAcquisitionDefinition->getFixedImageCount();
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
    collecting = false;
    emit restoreBiasSettings();
    emit enableMonitoring();
-   qDebug() << "DataAcquisition::performGigEDefaultDataCollection() DONE ";
 }
 
 bool DataAcquisition::repeatPauseRequired(int repeatCount)
@@ -434,16 +430,13 @@ void DataAcquisition::performFixedDataCollection()
    emit storeBiasSettings();
    emit disableBiasRefresh();
 
-   qDebug() << "DataAcquisition::performGigEFixedDataCollection() imageCount: " << dataAcquisitionDefinition->getFixedImageCount();
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
 
    waitForCollectingDone();
-   qDebug() <<"44444 waitForCollectingDone() RETURNED";
    collecting = false;
 
    emit restoreBiasSettings();
-   qDebug() << "DataAcquisition::performGigEFixedDataCollection() DONE";
 }
 
 void DataAcquisition::setDataAcquisitionTime(int nDaq)
@@ -561,7 +554,6 @@ int DataAcquisition::waitForCollectingDone()
    int elapsed = 0;
    int percentage = 0;
    unsigned long long remainingFrames;
-   qDebug() << "mode: " << mode << "daqStatus.getMinorStatus(): " << daqStatus.getMinorStatus();
 
    while (collecting)
    {
@@ -570,7 +562,6 @@ int DataAcquisition::waitForCollectingDone()
       {
          elapsed++;
          if (daqStatus.getMinorStatus() == DataAcquisitionStatus::OFFSETS)
-//         if (biasPriority)
          {
             percentage = (100000.0 * (double) elapsed / dataCollectionTime) + 0.5;
          }
@@ -645,7 +636,6 @@ void DataAcquisition::changeDAQStatus(DataAcquisitionStatus::MajorStatus majorSt
    if ((majorStatus == DataAcquisitionStatus::IDLE) && (minorStatus == DataAcquisitionStatus::READY))
    {
       busy = false;
-      //qDebug() << "RELEASING";
       ObjectReserver::instance()->release(reservation.getReserved(), "GUIReserver");
    }
    daqStatus.setMajorStatus(majorStatus);
@@ -777,25 +767,23 @@ void DataAcquisition::handleBufferReady(unsigned char *transferBuffer, unsigned 
 {
    if (mode != GigEDetector::GIGE_DEFAULT)
    {
-//      qDebug() << "!!!!!!!!!!!!!!!!!!!!!!DataAcquisition::handleBufferReady()";
       emit transferBufferReady(transferBuffer, validFrames);
       triggered = true;
-//      hxtProcessor->pushTransferBuffer(transferBuffer, validFrames);
 
    }
    ///  HexitecGigE Addition:
    /// Must provide a set of motorPositions also,
    /// or bufferQueue fills up while motorQueue remains empty..
-//   hxtProcessor->pushMotorPositions(&motorPositions);
 }
 
+/*
 void DataAcquisition::handleImageStarted(char *path, int frameSize)
 {
    qDebug() << "DataAcquisition::handleImageStarted(), path = " << path;
 //   hxtProcessor->pushRawFileName(path, frameSize);
 //   hxtProcessor->pushMotorPositions(&motorPositions); /// Provide motorPositions together with buffer instead
 }
-
+*/
 void DataAcquisition::handleImageComplete(unsigned long long framesAcquired)
 {
    totalFramesAcquired += framesAcquired;
@@ -831,7 +819,6 @@ void DataAcquisition::handleCancelOffsets()
 
 void DataAcquisition::handleExecuteReducedDataCollection()
 {
-   qDebug() <<"DataAcquisition::handleExecuteReducedDataCollection()";
    emit executeReducedDataCollection();
 }
 

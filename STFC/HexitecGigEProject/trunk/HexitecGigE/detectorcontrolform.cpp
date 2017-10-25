@@ -199,7 +199,6 @@ void DetectorControlForm::terminateDetectorPressed()
 
 void DetectorControlForm::terminateDetector()
 {
-   qDebug() << "DetectorControlForm::terminateDetector() called";
    emit disableMonitoring();
    emit disableBiasRefresh();
    emit executeCommand(GigEDetector::CLOSE, 0, 0);

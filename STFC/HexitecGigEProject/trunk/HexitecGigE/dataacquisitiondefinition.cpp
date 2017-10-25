@@ -1,7 +1,6 @@
 #include "dataacquisitiondefinition.h"
 #include "parameters.h"
 #include <QSettings>
-#include <QDebug>
 
 DataAcquisitionDefinition::DataAcquisitionDefinition()
 {

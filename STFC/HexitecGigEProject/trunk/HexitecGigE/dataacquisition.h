@@ -133,7 +133,7 @@ public slots:
    void handleMonitorData(MonitorData *md);
    void positionChanged(Motor *motor, const QVariant & value);
    void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
-   void handleImageStarted(char *path, int frameSize);
+//   void handleImageStarted(char *path, int frameSize);
    void handleImageComplete(unsigned long long framesAcquired);
    void handleInitialiseDetector();
    void prepareForBiasRefresh();

@@ -90,13 +90,11 @@ void DataAcquisitionForm::handleDaqDurationChanged(double daqDuration)
 void DataAcquisitionForm::handleControlledByGui()
 {
    operatedForScripting = true;
-   //qDebug() << "Scripting wants GUI to control script.";
    disableGui();
 }
 
 void DataAcquisitionForm::handleScriptRelease(QString name)
 {
-      //qDebug() <<"Handling script release of " << name;
       operatedForScripting = false;
       guiReady();
 }

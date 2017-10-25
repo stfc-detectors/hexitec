@@ -79,7 +79,8 @@ SOURCES += main.cpp \
     progressform.cpp \
     pixelmanipulationform.cpp \
     processingbuffergenerator.cpp \
-    processingForm.cpp
+    processingForm.cpp \
+    imageprocessorhandler.cpp
 
 HEADERS += mainwindow.h \
     voxel.h \
@@ -146,7 +147,8 @@ HEADERS += mainwindow.h \
     progressform.h \
     pixelmanipulationform.h \
     processingbuffergenerator.h \
-    processingForm.h
+    processingForm.h \
+    imageprocessorhandler.h
 
 FORMS += \
     gridsizequery.ui \
