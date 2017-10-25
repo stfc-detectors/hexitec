@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
    connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(QStringList, QString, QString)));
+   connect(processingBufferGenerator, SIGNAL(processingComplete()),
+           processingForm, SLOT(handleProcessingComplete()));
 
 }
 

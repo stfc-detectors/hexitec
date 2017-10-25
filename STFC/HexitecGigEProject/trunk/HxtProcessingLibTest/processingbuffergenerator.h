@@ -45,6 +45,8 @@ signals:
    void fileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
+   void processingComplete(long long totalFramesAcquired);
+   void processingComplete();
    void hxtFileWritten(unsigned short *buffer, QString filename);
 
 
@@ -56,6 +58,7 @@ public slots:
    void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
+   void handleProcessingComplete();
    void handleHxtFileWritten(char *buffer, const char * filename);
    void handleHxtFileWritten();
 

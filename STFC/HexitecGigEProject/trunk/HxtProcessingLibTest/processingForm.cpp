@@ -258,9 +258,6 @@ void ProcessingForm::initialiseProcessingForm()
 void ProcessingForm::initialise()
 {
    qDebug()<< "ProcessingForm::initialise()";
-//   gradientFilename =  new char[1024];
-//   interceptFilename =  new char[1024];
-
    setThresholdParameters();
 }
 
@@ -268,6 +265,7 @@ void ProcessingForm::processClicked()
 {
    qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId();
    emit processImages(nRows, nCols);
+   guiBusy();
    qDebug() << "PROCESSING CONTINUING!!!";
 }
 
@@ -454,6 +452,24 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
 
 }
 
+void ProcessingForm::guiBusy()
+{
+   ui->thresholdButton->setEnabled(false);
+   ui->energyCalibrationButton->setEnabled(false);
+   ui->chargedSharingButton->setEnabled(false);
+   ui->dataFileButton->setEnabled(false);
+   ui->processButton->setEnabled(false);
+}
+
+void ProcessingForm::guiIdle()
+{
+   ui->thresholdButton->setEnabled(true);
+   ui->energyCalibrationButton->setEnabled(true);
+   ui->chargedSharingButton->setEnabled(true);
+   ui->dataFileButton->setEnabled(true);
+   ui->processButton->setEnabled(true);
+}
+
 int ProcessingForm::getFrameSize()
 {
    return frameSize;
@@ -517,4 +533,9 @@ void ProcessingForm::setDataFileParameters()
 
    qDebug() << "setDataFileParameters() outputPrefix = " << outputPrefix;
    emit configureProcessing(inputFilesList, outputDirectory, outputPrefix);
+}
+
+void ProcessingForm::handleProcessingComplete()
+{
+   guiIdle();
 }

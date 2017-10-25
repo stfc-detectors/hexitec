@@ -7,12 +7,18 @@
 
 class ImageProcessorHandler  : public QThread
 {
+   Q_OBJECT
+
 public:
    ImageProcessorHandler(ImageProcessor *imageProcessor);
+
+signals:
+   void processingComplete();
 
 private:
    ImageProcessor *imageProcessor;
    void run();
+
 };
 
 #endif // IMAGEPROCESSORHANDLER_H

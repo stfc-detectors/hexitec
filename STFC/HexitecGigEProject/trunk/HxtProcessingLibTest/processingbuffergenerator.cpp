@@ -41,6 +41,8 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
 
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
+   connect(currentImageProcessorHandler, SIGNAL(processingComplete()),
+           this, SLOT(handleProcessingComplete()));
 
    HANDLE hxtHandle = currentImageProcessor->getHxtFileWrittenEvent();
    if (hxtHandle != NULL)
@@ -170,6 +172,15 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, long
    processingDefinition->setCols(nCols);
    processingDefinition->setFrameSize(frameSize);
 }
+
+void ProcessingBufferGenerator::handleProcessingComplete()
+{
+   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
+   emit processingComplete();
+//   imageProcessorList.removeOne(completedImageProcessor);
+//   delete completedImageProcessor;
+}
+
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
 //   imageProcessorList.removeOne(completedImageProcessor);
@@ -249,8 +260,8 @@ void ProcessingBufferGenerator::handleProcessImages()
       inFile.close();
       emit imageComplete(totalFramesAcquired);
    }
-   //   delete processingFilename;
-   //   delete inputFilename;
+   delete processingFilename;
+   delete inputFilename;
 }
 
 void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)

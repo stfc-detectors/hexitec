@@ -17,4 +17,5 @@ void ImageProcessorHandler::run()
    imageProcessor->handleProcess();
    qDebug()<< "ImageProcessorHandler::run()ENDING!!! "<< QThread::currentThreadId();
    delete imageProcessor;
+   emit processingComplete();
 }

@@ -35,6 +35,8 @@ private:
    QMainWindow *mainWindow;
    void processImage(const char *imageFilename, const char *filename);
    void readThresholdFile(char *thresholdFile);
+   void guiBusy();
+   void guiIdle();
 
    int nRows;
    int nCols;
@@ -96,6 +98,7 @@ private slots:
    void setInputFilesList();
    void setOutputDirectory();
    void setDataFileParameters();
+   void handleProcessingComplete();
 };
 
 #endif // PROCESSINGFORM_H
