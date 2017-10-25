@@ -1,7 +1,6 @@
 #ifndef PIXELPROCESSORNEXTFRAME_H
 #define PIXELPROCESSORNEXTFRAME_H
 
-#include <QObject>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -11,7 +10,6 @@ using namespace std;
 
 class PixelProcessorNextFrame : public GeneralPixelProcessor
 {
-   Q_OBJECT
 
 public:
    PixelProcessorNextFrame();

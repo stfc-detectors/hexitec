@@ -1,18 +1,13 @@
 #include "imageitem.h"
-#include <QMutexLocker>
-#include <QDebug>
-#include <QThread>
 #include <iostream>
 
 using namespace std;
 
 ImageItem::ImageItem(const char *filename, int nRows, int nCols)
 {
-   qDebug() << "Creating an image item with filename: " << filename;
    this->filename = new char[1024];
    strcpy(this->filename, filename);
-   QMutexLocker locker(&mutex);
-   this->bufferQueue.clear();
+   lock_guard<mutex> lock(iiMutex);
    this->processedFrameCount = 0;
    bufferItem = NULL;
 }
@@ -24,13 +19,13 @@ ImageItem::~ImageItem()
 
 void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
 {
-   QMutexLocker locker(&mutex);
-   bufferQueue.enqueue(new BufferItem(address, validFrameCount));
+   lock_guard<mutex> lock(iiMutex);
+   bufferQueue.push(new BufferItem(address, validFrameCount));
 }
 
 char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 {
-   QMutexLocker locker(&mutex);
+   lock_guard<mutex> lock(iiMutex);
    char *address = NULL;
 
    if (bufferItem != NULL)
@@ -38,9 +33,10 @@ char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
       delete bufferItem;
    }
 
-   if (!bufferQueue.isEmpty())
+   if (!bufferQueue.empty())
    {
-      bufferItem = bufferQueue.dequeue();
+      bufferItem = bufferQueue.front();
+      bufferQueue.pop();
       address = bufferItem->getAddress();
       *validFrameCount = bufferItem->getValidFrameCount();
    }
@@ -53,7 +49,7 @@ char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 
 int ImageItem::getBufferQueueSize()
 {
-   QMutexLocker locker(&mutex);
+   lock_guard<mutex> lock(iiMutex);
    return bufferQueue.size();
 }
 

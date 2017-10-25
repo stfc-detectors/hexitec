@@ -1,24 +1,20 @@
 #include "hxtgenerator.h"
 
-#include <QThread>
+//#include <QThread>
 #include <QDebug>
 #include <Windows.h>
 
-HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)  :
+HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
    qDebug() << "processingDefinition->getTotalSpectrum(): " << processingDefinition->getTotalSpectrum();
    if (processingDefinition->getTotalSpectrum())
    {
       hxtItem->initialiseTotalSpectrum();
-      emit process(true);
-   }
-   else
-   {
-      emit process();
    }
 }
 
+/*
 void HxtGenerator::handleProcess()
 {
    unordered_map <int, double> *pixelEnergyMap;
@@ -67,7 +63,7 @@ void HxtGenerator::handleProcess(bool totalSpectrum)
          {
 //               result = processEnergies(pixelEnergy);
 
-                 processEnergiesWithSum(pixelEnergyMap);
+//                 processEnergiesWithSum(pixelEnergyMap);
 //                 free(pixelEnergy);
 
                // MUST USE RESULT IN FURTHER CALCULATIONS
@@ -79,14 +75,14 @@ void HxtGenerator::handleProcess(bool totalSpectrum)
    }
 //   emit energyProcessingComplete(processedEnergyCount);
 }
-
+*/
 void HxtGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
 {
    hxtItem->addToHistogram(*pixelEnergyMap);
    incrementProcessedEnergyCount();
    delete pixelEnergyMap;
 }
-
+/*
 void HxtGenerator::processEnergiesWithSum(unordered_map <int, double>*pixelEnergyMap)
 {
 //   qDebug() << "HxtGenerator::processEnergiesWithSum";
@@ -94,3 +90,4 @@ void HxtGenerator::processEnergiesWithSum(unordered_map <int, double>*pixelEnerg
    incrementProcessedEnergyCount();
    delete pixelEnergyMap;
 }
+*/

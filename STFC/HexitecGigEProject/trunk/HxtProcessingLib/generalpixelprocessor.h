@@ -1,16 +1,14 @@
 #ifndef GENREALPIXELPROCESSOR_H
 #define GENREALPIXELPROCESSOR_H
 
-#include <QObject>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 
 using namespace std;
 
-class GeneralPixelProcessor : public QObject
+class GeneralPixelProcessor
 {
-   Q_OBJECT
 
 public:
    static uint16_t pixelMap[6400];
@@ -61,9 +59,6 @@ protected:
    double *gradientValue;
    double *interceptValue;
    uint16_t *lastFrame;
-
-signals:
-   void enqueuePixelEnergy(double *pixelEnergy);
 
 };
 

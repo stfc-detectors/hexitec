@@ -7,22 +7,39 @@
 #include "frameprocessor.h"
 #include "framere_orderprocessor.h"
 #include "hxtgenerator.h"
+#include "hxtsumgenerator.h"
 #include "hxtchargedsharinggenerator.h"
+#include "hxtchargedsharingsumgenerator.h"
 #include "hxttotalspectrumgenerator.h"
-#include <QObject>
+#include <windows.h>
+
+//#include <QObject>
 
 using namespace std;
 
-class ImageProcessor: public QObject
+#define IMAGE_COMPLETE TEXT("ImageComplete")
+#define PROCESSING_COMPLETE TEXT("ProcessingComplete")
+#define HXT_FILE_WRITTEN TEXT("HxtFileWritten")
+static HANDLE imageCompleteEvent;
+static HANDLE processingCompleteEvent;
+static HANDLE hxtFileWrittenEvent;
+
+class ImageProcessor
 {
-   Q_OBJECT
 
 public:
+   HANDLE getProcessingCompleteEvent();
+   HANDLE getImageCompleteEvent();
+   HANDLE getHxtFileWrittenEvent();
+
    ImageProcessor(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
    void imageAcquisitionComplete(long long totalFramesAcquired);
    void setImageInProgress(bool inProgress);
+   void handleProcess();
+   char *getHxtFilename();
+   GeneralHxtGenerator *getHxtGenerator();
 
    //MAKE imageItem private
    ImageItem *imageItem;
@@ -32,15 +49,18 @@ private:
    void writeBinFile(char *buffer, unsigned long length, const char* filename);
    void writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char* filename);
    void writeCsvFile(double *energyBin, long long *summedHistogram, const char *filename);
-   QThread *imageProcessorThread;
    ProcessingDefinition *processingDefinition;
    GeneralHxtGenerator *hxtGenerator;
    bool energyCalibration;
    bool hxtGeneration;
    bool nextFrameCorrection;
    bool chargedSharing;
+   bool totalSpectrum;
    double *pixelEnergy;
    unordered_map<int, double> *hxtMap;
+   char* filenameBin;
+   char* filenameHxt;
+   char* filenameCsv;
 
 //   ImageItem *imageItem;
    char *bufferToProcess;
@@ -55,16 +75,12 @@ private:
                               const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
                              uint16_t *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
-
+/*
 signals:
-   void process();
    void imageComplete(long long processedFrameCount);
    void hxtFileWritten(char *buffer, const char*filename);
    void processingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
-   void returnBufferReady(char *transferBuffer);
-
-public slots:
-   void handleProcess();
+   */
 };
 
 #endif // IMAGEPROCESSOR_H

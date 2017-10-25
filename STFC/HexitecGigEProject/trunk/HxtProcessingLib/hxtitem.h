@@ -1,10 +1,9 @@
 #ifndef HXTITEM_H
 #define HXTITEM_H
 
-#include <QMutex>
-#include <QQueue>
 #include <cstdint>
 #include <unordered_map>
+#include <queue>
 
 #define MIN_ENERGY 1.0e-100
 
@@ -15,14 +14,14 @@ class HxtItem
 public:
    struct HxtV3Buffer {
        char hxtLabel[8];
-       quint64 hxtVersion;
+       uint64_t hxtVersion;
        int motorPositions[9];
        int filePrefixLength;
        char filePrefix[100];
        char dataTimeStamp[16];
-       quint32 nRows;
-       quint32 nCols;
-       quint32 nBins;
+       uint32_t nRows;
+       uint32_t nCols;
+       uint32_t nBins;
        double *allData;
 //       double channel[MAX_BINS];
 //       double *spectrum;
@@ -66,9 +65,6 @@ private:
    void setBinEnd(const long long value);
    double getBinWidth() const;
    void setBinWidth(double value);
-   bool pixelEnergyQueueNotEmpty();
-   bool pixelEnergyMapQueueNotEmpty();
-   QMutex mutex;
    double *pixelEnergy;
    double *pixelRawVals;
    unordered_map<int, double> *pixelEnergyMap;
@@ -83,8 +79,6 @@ private:
    unsigned long histogramIndex;
    long long totalEnergiesToProcess;
    long long hxtsProcessed;
-   QQueue <double *>pixelEnergyQueue;
-   QQueue <unordered_map <int, double> *>pixelEnergyMapQueue;
    void initialiseHxtBuffer(int nRows, int nCols);
 };
 

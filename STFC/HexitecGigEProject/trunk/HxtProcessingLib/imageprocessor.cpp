@@ -1,24 +1,40 @@
 #include "imageprocessor.h"
-#include <QThread>
-#include <QDebug>
-#include <QTime>
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
+HANDLE ImageProcessor::getProcessingCompleteEvent()
+{
+   return processingCompleteEvent;
+}
+
+HANDLE ImageProcessor::getImageCompleteEvent()
+{
+   return imageCompleteEvent;
+}
+
+HANDLE ImageProcessor::getHxtFileWrittenEvent()
+{
+   return hxtFileWrittenEvent;
+}
+
 ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
+   imageCompleteEvent = CreateEvent(NULL, FALSE, FALSE, IMAGE_COMPLETE);
+   processingCompleteEvent = CreateEvent(NULL, FALSE, FALSE, PROCESSING_COMPLETE);
+   hxtFileWrittenEvent = CreateEvent(NULL, FALSE, FALSE, HXT_FILE_WRITTEN);
+
    frameSize = nRows * nCols * sizeof(uint16_t);
-   imageProcessorThread = new QThread();
-   imageProcessorThread->start();
-   moveToThread(imageProcessorThread);
+
    this->frameSize = frameSize;
    imageItem = new ImageItem(filename, nRows, nCols);
    this->processingDefinition = processingDefinition;
    energyCalibration = processingDefinition->getEnergyCalibration();
    hxtGeneration = processingDefinition->getHxtGeneration();
    nextFrameCorrection = processingDefinition->getNextFrameCorrection();
+   totalSpectrum = processingDefinition->getTotalSpectrum();
+
    if (processingDefinition->getChargedSharingMode() == OFF)
    {
       chargedSharing = false;
@@ -32,11 +48,25 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    {
       if (chargedSharing)
       {
-         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         if(totalSpectrum)
+         {
+            hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         }
+         else
+         {
+            hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         }
       }
       else
       {
-         hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         if(totalSpectrum)
+         {
+            hxtGenerator = new HxtSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         }
+         else
+         {
+            hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         }
       }
    }
    else
@@ -45,14 +75,10 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    }
 
    setImageInProgress(true);
-   connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
-
-   emit process();
 }
 
 ImageProcessor::~ImageProcessor()
 {
-   imageProcessorThread->exit();
 }
 
 void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filenameBin, const char* filenameHxt, const char *filenameCsv)
@@ -82,14 +108,21 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
 
                   if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
-                     processedFrameCount++;
+                     hxtGenerator->processEnergies(hxtMap);
                   }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
+                  processedFrameCount++;
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
                free(bufferStart);
                buffNo++;
             }
@@ -112,16 +145,16 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
                free(bufferStart);
             }
          }
-      }
-      if (hxtGeneration)
-      {
-         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                      filenameHxt);
-
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -159,8 +192,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
                   if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
-//                     processedFrameCount++;
+                     hxtGenerator->processEnergies(hxtMap);
                   }
 
                   // MUST USE RESULT IN FURTHER CALCULATIONS
@@ -169,6 +201,13 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
                free(bufferStart);
             }
          }
@@ -184,23 +223,22 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue);
-                  hxtGenerator->enqueuePixelEnergyMap(hxtMap);
+                  hxtGenerator->processEnergies(hxtMap);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
                free(bufferStart);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
             }
          }
-      }
-      qDebug() <<"hxtGeneration: " << hxtGeneration;
-      if (hxtGeneration)
-      {
-         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                      filenameHxt);
-
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -238,13 +276,20 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
                   if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->enqueuePixelEnergyMap(hxtMap);
-                     processedFrameCount++;
+                     hxtGenerator->processEnergies(hxtMap);
                   }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
+                  processedFrameCount++;
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
                free(bufferStart);
             }
          }
@@ -266,16 +311,16 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
-               free(bufferStart);
+               if (hxtGeneration)
+               {
+                  writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
+                               (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
+                               filenameHxt);
+
+               }
+              free(bufferStart);
             }
          }
-      }
-      if (hxtGeneration)
-      {
-         writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
-                      (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
-                      filenameHxt);
-
       }
       if (processingDefinition->getTotalSpectrum())
       {
@@ -291,9 +336,9 @@ void ImageProcessor::handleProcess()
    uint16_t *thresholdPerPixel;
    uint16_t *result;
    bool energyCalibration;
-   char* filenameBin = new char[1024];
-   char* filenameHxt = new char[1024];
-   char* filenameCsv = new char[1024];
+   filenameBin = new char[1024];
+   filenameHxt = new char[1024];
+   filenameCsv = new char[1024];
 
    strcpy(filenameBin, imageItem->getFilename());
    strcpy(filenameHxt, filenameBin);
@@ -303,10 +348,6 @@ void ImageProcessor::handleProcess()
    strcat(filenameCsv,"_total.csv");
 
    processedFrameCount = 0;
-   qDebug() << "++++++++++++++START TIMER";
-   QTime time;
-   time.start();
-   // operation
 
    if (processingDefinition->getRe_order())
    {
@@ -337,23 +378,24 @@ void ImageProcessor::handleProcess()
          break;
    }
 
-   qDebug() << "ImageProcessor::process() processedFrameCount = " << processedFrameCount << " waiting for energy processing";
-//   emit imageComplete(processedFrameCount);
-//   while (hxtGenerator->getProcessedEnergyCount() < processedFrameCount)
-   emit imageComplete(totalFramesToProcess);
-   while (hxtGenerator->getProcessedEnergyCount() < totalFramesToProcess)
-   {
-      Sleep(10);
-   }
+
    hxtGenerator->setFrameProcessingInProgress(false);
-   qDebug() << "ImageProcessor::process() processedEnergyCount() = " << hxtGenerator->getProcessedEnergyCount()
-            << " energy processing complete. File writen " << imageItem->getFilename();
-   emit processingComplete(this, processedFrameCount);
-   qDebug() << "++++++++++++++STOP TIMER";
-   qDebug() << "PROCESSING TOOK: "<< time.elapsed() << " mSecs";
+   SetEvent(processingCompleteEvent);
+
 
    delete imageItem;
    delete fp;
+   delete hxtGenerator;
+}
+
+char *ImageProcessor::getHxtFilename()
+{
+   return filenameHxt;
+}
+
+GeneralHxtGenerator *ImageProcessor::getHxtGenerator()
+{
+   return hxtGenerator;
 }
 
 void ImageProcessor::enqueueBuffer(char *bufferToProcess, unsigned long validFrames)
@@ -368,7 +410,6 @@ void ImageProcessor::setImageInProgress(bool inProgress)
 
 void ImageProcessor::imageAcquisitionComplete(long long totalFramesToProcess)
 {
-   qDebug() << "ImageProcessor::imageComplete() totalFramesToProcess = " << totalFramesToProcess;
    this->totalFramesToProcess = totalFramesToProcess;
    setImageInProgress(false);
 }
@@ -377,7 +418,6 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 {
    std::ofstream outFile;
 
-   qDebug() <<"ImageProcessor::writeBinFile: " << filename;
    outFile.open(filename, std::ofstream::binary | std::ofstream::app);
    outFile.write((const char *)buffer, length * sizeof(char));
    outFile.close();   
@@ -393,7 +433,7 @@ void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char
    outFile.write((const char *)header, headerLength * sizeof(char));
    outFile.write((const char *)data, dataLength * sizeof(char));
    outFile.close();
-   emit hxtFileWritten(header, filename);
+   SetEvent(hxtFileWrittenEvent);
 }
 
 void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,  const char *filename)
@@ -403,8 +443,6 @@ void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,
    double *energyBinPtr;
    long long *summedHistogramPtr = summedHistogram;
    energyBinPtr = energyBin;
-
-   qDebug() <<"ImageProcessor::writeCsvFile: " << filename;
 
    ostringstream csvOutput;
    for (int i = 0; i < nBins; i++)

@@ -2,8 +2,10 @@
 #define IMAGEITEM_H
 
 #include "bufferitem.h"
-#include <QMutex>
-#include <QQueue>
+#include <queue>
+#include <mutex>
+
+using namespace std;
 
 class ImageItem
 {
@@ -16,11 +18,11 @@ public:
    char *getFilename();
 
 private:
-   QMutex mutex;
+   mutex iiMutex;
    char *filename;
    int frameSize;
    BufferItem *bufferItem;
-   QQueue <BufferItem *>bufferQueue;
+   queue<BufferItem *> bufferQueue;
    unsigned long processedFrameCount;
 };
 

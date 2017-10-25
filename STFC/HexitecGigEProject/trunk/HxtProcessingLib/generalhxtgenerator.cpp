@@ -1,5 +1,5 @@
 #include "generalhxtgenerator.h"
-#include <QThread>
+//#include <QThread>
 #include <QDebug>
 
 GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
@@ -9,14 +9,9 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    frameSize = nRows * nCols;
    hxtItem = new HxtItem(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
 
-   hxtGeneratorThread = new QThread();
-   hxtGeneratorThread->start();
-   moveToThread(hxtGeneratorThread);
-
    processedEnergyCount = 0;
    hxtItem->setTotalEnergiesToProcess(0);
-   connect(this, SIGNAL(process()), this, SLOT(handleProcess()));
-   connect(this, SIGNAL(process(bool)), this, SLOT(handleProcess(bool)));
+
    setFrameProcessingInProgress(true);
 }
 
@@ -25,43 +20,23 @@ GeneralHxtGenerator::~GeneralHxtGenerator()
    delete hxtItem;
 }
 
-void GeneralHxtGenerator::enqueuePixelRawVals(double *pixelRawVals)
-{
-   hxtItem->enqueuePixelEnergy(pixelRawVals);
-}
-
-void GeneralHxtGenerator::enqueuePixelEnergyMap(unordered_map <int, double> *pixelEnergyMap)
-{
-   hxtItem->enqueuePixelEnergyMap(pixelEnergyMap);
-}
-
-
 bool GeneralHxtGenerator::getFrameProcessingInProgress()
 {
-   QMutexLocker locker(&mutex);
    return inProgress;
-}
-
-void GeneralHxtGenerator::handleImageComplete()
-{
-   setFrameProcessingInProgress(false);
 }
 
 void GeneralHxtGenerator::setFrameProcessingInProgress(bool inProgress)
 {
-   QMutexLocker locker(&mutex);
    this->inProgress = inProgress;
 }
 
 void GeneralHxtGenerator::incrementProcessedEnergyCount()
 {
-   QMutexLocker locker(&mutex);
    this->processedEnergyCount = processedEnergyCount++;
 }
 
 long long GeneralHxtGenerator::getProcessedEnergyCount()
 {
-   QMutexLocker locker(&mutex);
    return processedEnergyCount;
 }
 
@@ -77,13 +52,11 @@ double *GeneralHxtGenerator::getHxtV3AllData()
 
 double *GeneralHxtGenerator::getEnergyBin()
 {
-   QMutexLocker locker(&mutex);
    return hxtItem->getEnergyBin();
 }
 
 long long *GeneralHxtGenerator::getSummedHistogram()
 {
-   QMutexLocker locker(&mutex);
    return hxtItem->getSummedHistogram();
 }
 

@@ -26,7 +26,9 @@ SOURCES += \
     generalhxtgenerator.cpp \
     hxtitem.cpp \
     generalpixelprocessor.cpp \
-    hxtchargedsharinggenerator.cpp
+    hxtchargedsharinggenerator.cpp \
+    hxtsumgenerator.cpp \
+    hxtchargedsharingsumgenerator.cpp
 
 
 HEADERS += \
@@ -43,7 +45,9 @@ HEADERS += \
     generalhxtgenerator.h \
     hxtitem.h \
     generalpixelprocessor.h \
-    hxtchargedsharinggenerator.h
+    hxtchargedsharinggenerator.h \
+    hxtsumgenerator.h \
+    hxtchargedsharingsumgenerator.h
 
 
 INCLUDEPATH += include

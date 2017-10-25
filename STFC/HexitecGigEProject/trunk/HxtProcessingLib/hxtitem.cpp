@@ -1,7 +1,5 @@
 #include "hxtitem.h"
 #include <QMutexLocker>
-#include <QDebug>
-#include <QThread>
 #include <iostream>
 #include <math.h>
 
@@ -20,8 +18,6 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    pixelEnergy = NULL;
    pixelEnergyMap = NULL;
    hxtsProcessed = 0;
-   this->pixelEnergyQueue.clear();
-   this->pixelEnergyMapQueue.clear();
 }
 
 void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
@@ -54,91 +50,18 @@ void HxtItem::initialiseTotalSpectrum()
 }
 
 
-void HxtItem::enqueuePixelEnergy(double *pixelEnergy)
-{
-   incrementTotalEnergiesToProcess();
-   QMutexLocker locker(&mutex);
-   pixelEnergyQueue.enqueue(pixelEnergy);
-}
-
-double *HxtItem::getNextPixelEnergy()
-{
-   if (pixelEnergy != NULL)
-   {
-      //free(pixelEnergy);
-   }
-
-   if (pixelEnergyQueueNotEmpty())
-   {
-      QMutexLocker locker(&mutex);
-      pixelEnergy = pixelEnergyQueue.dequeue();
-   }
-
-   return pixelEnergy;
-}
-
-bool HxtItem::pixelEnergyQueueNotEmpty()
-{
-   QMutexLocker locker(&mutex);
-   return !pixelEnergyQueue.isEmpty();
-}
-
-int HxtItem::getPixelEnergyQueueSize()
-{
-   QMutexLocker locker(&mutex);
-   return pixelEnergyQueue.size();
-}
-
-void HxtItem::enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap)
-{
-   incrementTotalEnergiesToProcess();
-   QMutexLocker locker(&mutex);
-   pixelEnergyMapQueue.enqueue(pixelEnergyMap);
-}
-
-unordered_map<int, double> *HxtItem::getNextPixelEnergyMap()
-{
-   if (pixelEnergyMap != NULL)
-   {
-      //free(pixelEnergyMap);
-   }
-
-   if (pixelEnergyMapQueueNotEmpty())
-   {
-      QMutexLocker locker(&mutex);
-      pixelEnergyMap = pixelEnergyMapQueue.dequeue();
-   }
-
-   return pixelEnergyMap;
-}
-
-bool HxtItem::pixelEnergyMapQueueNotEmpty()
-{
-   QMutexLocker locker(&mutex);
-   return !pixelEnergyMapQueue.isEmpty();
-}
-
-int HxtItem::getPixelEnergyMapQueueSize()
-{
-   QMutexLocker locker(&mutex);
-   return pixelEnergyMapQueue.size();
-}
-
 void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
 {
-   QMutexLocker locker(&mutex);
    this->totalEnergiesToProcess = totalEnergiesToProcess;
 }
 
 void HxtItem::incrementTotalEnergiesToProcess()
 {
-   QMutexLocker locker(&mutex);
    this->totalEnergiesToProcess = totalEnergiesToProcess++;
 }
 
 long long HxtItem::getTotalEnergiesToProcess()
 {
-   QMutexLocker locker(&mutex);
    return totalEnergiesToProcess;
 }
 
@@ -236,7 +159,6 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    }
 
    hxtsProcessed++;
-//   qDebug() << "HxtItem::addToHistogramWithSum(), energiesProcessed: " << energiesProcessed;
 }
 
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
