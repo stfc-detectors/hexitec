@@ -43,9 +43,6 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    connect(ui->inputFilesListButton, SIGNAL(clicked(bool)), this, SLOT(setInputFilesList()));
    connect(ui->outputDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(setOutputDirectory()));
    connect(ui->dataFileButton, SIGNAL(clicked(bool)), this, SLOT(setDataFileParameters()));
-//   initialiseProcessingForm();
-//   connect(HxtProcessor,                         SIGNAL(hexitechBufferToDisplay(unsigned short*, QString)),
-//                 reinterpret_cast<const QObject*>(mw), SLOT(readBuffer(unsigned short*, QString)));
 }
 
 ProcessingForm::~ProcessingForm()
@@ -282,6 +279,8 @@ void ProcessingForm::initialise()
 void ProcessingForm::processClicked()
 {
    qDebug() << "PROCESS BUTTON has been clicked!";
+//   emit processImages(nRows, nCols);
+   guiBusy();
    emit processImages();
 }
 
@@ -466,6 +465,33 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
 
 }
 
+void ProcessingForm::guiBusy()
+{
+   qDebug() << "ProcessingForm::guiBusy()";
+   ui->thresholdButton->setEnabled(false);
+   ui->energyCalibrationButton->setEnabled(false);
+   ui->chargedSharingButton->setEnabled(false);
+   ui->dataFileButton->setEnabled(false);
+   ui->processButton->setEnabled(false);
+}
+
+void ProcessingForm::guiIdle()
+{
+   qDebug() << "ProcessingForm::guiIdle()";
+   ui->thresholdButton->setEnabled(true);
+   ui->energyCalibrationButton->setEnabled(true);
+   ui->chargedSharingButton->setEnabled(true);
+   ui->dataFileButton->setEnabled(true);
+   ui->processButton->setEnabled(true);
+}
+
+/*
+int ProcessingForm::getFrameSize()
+{
+   return frameSize;
+}
+*/
+
 void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
 {
 }
@@ -523,4 +549,14 @@ void ProcessingForm::setDataFileParameters()
    outputPrefix = ui->outputPrefix->text();
 
    emit configureProcessing(inputFilesList, outputDirectory, outputPrefix);
+}
+
+void ProcessingForm::handleProcessingComplete()
+{
+   guiIdle();
+}
+
+void ProcessingForm::handleImageStarted()
+{
+   guiBusy();
 }

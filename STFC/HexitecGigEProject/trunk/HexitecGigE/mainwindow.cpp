@@ -207,6 +207,11 @@ MainWindow::MainWindow()
            this, SLOT(readBuffer(unsigned short*, QString)));
    connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(QStringList, QString, QString)));
+   connect(processingBufferGenerator, SIGNAL(processingComplete()),
+           processingForm, SLOT(handleProcessingComplete()));
+   connect(processingBufferGenerator, SIGNAL(imageStarted()),
+           processingForm, SLOT(handleImageStarted()));
+
    processingForm->initialiseProcessingForm();
 
    if (activeDAQ)

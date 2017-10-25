@@ -42,9 +42,11 @@ private:
 
 signals:
    void imageStarted(char *path);
+   void imageStarted();
    void fileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
+   void processingComplete();
    void hxtFileWritten(unsigned short *buffer, QString filename);
 
 public slots:
@@ -80,6 +82,7 @@ public slots:
                                   QString outputDirectory,
                                   QString outputPrefix);
    void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
+   void handleProcessingComplete();
 };
 
 #endif // PROCESSINGBUFFERGENERATOR_H

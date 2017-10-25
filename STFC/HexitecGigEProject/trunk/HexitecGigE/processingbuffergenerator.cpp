@@ -40,6 +40,8 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
 
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
+   connect(currentImageProcessorHandler, SIGNAL(processingComplete()),
+           this, SLOT(handleProcessingComplete()));
 
    HANDLE hxtHandle = currentImageProcessor->getHxtFileWrittenEvent();
    if (hxtHandle != NULL)
@@ -57,6 +59,7 @@ void ProcessingBufferGenerator::handleImageStarted(char *filename)
 {
    qDebug() << "ProcessingBufferGenerator::handleImageStarted getting a mutex lock, threadId: " << QThread::currentThreadId()
             << " nRows = " << processingDefinition->getRows() << " nCols = " << processingDefinition->getCols();
+   emit imageStarted();
    QMutexLocker locker(&mutex);
    enqueueImage(filename, processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
 
@@ -162,10 +165,20 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, long
    processingDefinition->setFrameSize(frameSize);
 }
 
+void ProcessingBufferGenerator::handleProcessingComplete()
+{
+   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
+   emit processingComplete();
+//   imageProcessorList.removeOne(completedImageProcessor);
+//   delete completedImageProcessor;
+}
+
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
+   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
+   emit processingComplete();
 //   imageProcessorList.removeOne(completedImageProcessor);
-   delete completedImageProcessor;
+//   delete completedImageProcessor;
 }
 
 void ProcessingBufferGenerator::handleProcessImages()
@@ -241,8 +254,8 @@ void ProcessingBufferGenerator::handleProcessImages()
       inFile.close();
       emit imageComplete(totalFramesAcquired);
    }
-   //   delete processingFilename;
-   //   delete inputFilename;
+   delete processingFilename;
+   delete inputFilename;
 }
 
 void ProcessingBufferGenerator::handlePostProcessImages()

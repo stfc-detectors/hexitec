@@ -143,6 +143,7 @@ void DataAcquisitionModel::connectDataAcquisition()
               processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
    connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
            progressForm, SLOT(handleImageStarting(double, int, int)));
+
 //   connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
 //           processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));
 

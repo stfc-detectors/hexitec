@@ -26,12 +26,16 @@ public:
 
    void initialiseProcessingForm();
    void Qt2CppListHandler();
-   
+
+   int getFrameSize();
+
 private:
    Ui::ProcessingForm *ui;
    QMainWindow *mainWindow;
    void processImage(const char *imageFilename, const char *filename);
    void readThresholdFile(char *thresholdFile);
+   void guiBusy();
+   void guiIdle();
 
    int thresholdOption;
    uint16_t thresholdPerPixel[6400];
@@ -91,6 +95,8 @@ private slots:
    void setInputFilesList();
    void setOutputDirectory();
    void setDataFileParameters();
+   void handleProcessingComplete();
+   void handleImageStarted();
 };
 
 #endif // PROCESSINGFORM_H
