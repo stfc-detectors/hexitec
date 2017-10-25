@@ -1,6 +1,5 @@
 #include "processingForm.h"
 #include "ui_processingForm.h"
-//#include "parameters.h"
 #include "inifile.h"
 
 #include <QThread>
