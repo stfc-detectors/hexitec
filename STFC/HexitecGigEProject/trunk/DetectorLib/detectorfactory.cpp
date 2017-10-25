@@ -1,5 +1,4 @@
 #include "detectorfactory.h"
-#include <QDebug>
 #include "windowsevent.h"
 #include <Windows.h>
 

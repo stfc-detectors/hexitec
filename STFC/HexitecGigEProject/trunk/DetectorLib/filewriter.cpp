@@ -1,6 +1,5 @@
 #include "filewriter.h"
 #include <QTextStream>
-#include <QDebug>
 #include <QDateTime>
 
 FileWriter::FileWriter(const QString directory, const QString file)

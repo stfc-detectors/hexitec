@@ -123,7 +123,6 @@ void GigEDetector::connectUp(const QObject *parent)
 
 void GigEDetector::handleBufferReady()
 {
-   qDebug() <<"GigEDetector::handleBufferReady()!!!";
    updateState(COLLECTING);
    emit executeBufferReady(bufferReady, validFrames);
 }
@@ -145,13 +144,14 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
+   /*
    if ((saveRaw) && (mode == CONTINUOUS))
    {
       outFile.open(pathString, std::ofstream::binary | std::ofstream::app);
       outFile.write((const char *)returnBuffer, validFrames * frameSize);
       outFile.close();
    }
-
+*/
    ReturnBuffer(detectorHandle, returnBuffer);
 }
 

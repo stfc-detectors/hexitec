@@ -1,6 +1,5 @@
 #include "detectormonitor.h"
 
-#include <QDebug>
 #include <QDateTime>
 #include <cmath>
 

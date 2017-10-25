@@ -1,5 +1,4 @@
 #include "inifile.h"
-#include <QDebug>
 
 IniFile::IniFile(QString filename)
 {

@@ -1,5 +1,4 @@
 #include "detectorfilename.h"
-#include <QDebug>
 
 DetectorFilename::DetectorFilename()
 {
