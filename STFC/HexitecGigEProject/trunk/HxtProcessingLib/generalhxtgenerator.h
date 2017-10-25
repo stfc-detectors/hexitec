@@ -3,7 +3,6 @@
 
 #include "hxtitem.h"
 #include "processingdefinition.h"
-#include <QDebug>
 #include <cstdint>
 #include <unordered_map>
 

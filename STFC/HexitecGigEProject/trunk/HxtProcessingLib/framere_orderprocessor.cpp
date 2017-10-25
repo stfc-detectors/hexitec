@@ -1,6 +1,4 @@
 #include "framere_orderprocessor.h"
-#include <QDebug>
-
 
 FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
    GeneralFrameProcessor(nextFrameCorrection)

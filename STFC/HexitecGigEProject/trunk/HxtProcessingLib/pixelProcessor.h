@@ -10,7 +10,6 @@ using namespace std;
 
 class PixelProcessor : public GeneralPixelProcessor
 {
-//   Q_OBJECT
 
 public:
    PixelProcessor();

@@ -1,6 +1,4 @@
 #include "processingdefinition.h"
-#include <QSettings>
-#include <QDebug>
 #include <iostream>
 #include <fstream>
 
@@ -124,17 +122,20 @@ void ProcessingDefinition::getData(char *filename, double *dataValue)
 
    inFile.open(filename);
 
+/*
    if (!inFile)
      qDebug() << "ProcessingDefinition::getData - error opening " << filename;
+*/
    while (inFile >> dataValue[i])
    {
       i++;
    }
-
+/*
    if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "file read OK ";
+*/
    inFile.close();
 }
 
@@ -144,18 +145,21 @@ void ProcessingDefinition::getData(const char *filename, uint16_t *dataValue)
    std::ifstream inFile;
 
    inFile.open(filename);
-
+/*
    if (!inFile)
      qDebug() << "ProcessingDefinition::getData - error opening " << filename;
+*/
    while (inFile >> dataValue[i])
    {
       i++;
    }
 
+/*
    if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "file read OK ";
+*/
    inFile.close();
 }
 
@@ -196,7 +200,6 @@ void ProcessingDefinition::setPixelGridSize(int value)
       default:
          break;
    }
-   qDebug() << "value: " << value << "ProcessingDefinition::setPixelGridSize(): " << pixelGridSize;
 }
 
 bool ProcessingDefinition::getNextFrameCorrection() const

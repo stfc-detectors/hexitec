@@ -1,7 +1,6 @@
 #include "frameprocessor.h"
 #include <iostream>
 #include <fstream>
-#include <QDebug>
 
 FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
    GeneralFrameProcessor(nextFrameCorrection)

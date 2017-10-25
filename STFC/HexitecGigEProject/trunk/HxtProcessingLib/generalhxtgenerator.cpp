@@ -1,6 +1,4 @@
 #include "generalhxtgenerator.h"
-//#include <QThread>
-#include <QDebug>
 
 GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {

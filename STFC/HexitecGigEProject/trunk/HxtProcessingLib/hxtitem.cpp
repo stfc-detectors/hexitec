@@ -1,5 +1,4 @@
 #include "hxtitem.h"
-#include <QMutexLocker>
 #include <iostream>
 #include <math.h>
 

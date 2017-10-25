@@ -10,10 +10,7 @@
 #include "hxtsumgenerator.h"
 #include "hxtchargedsharinggenerator.h"
 #include "hxtchargedsharingsumgenerator.h"
-#include "hxttotalspectrumgenerator.h"
 #include <windows.h>
-
-//#include <QObject>
 
 using namespace std;
 
@@ -75,12 +72,7 @@ private:
                               const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
                              uint16_t *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
-/*
-signals:
-   void imageComplete(long long processedFrameCount);
-   void hxtFileWritten(char *buffer, const char*filename);
-   void processingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
-   */
+
 };
 
 #endif // IMAGEPROCESSOR_H

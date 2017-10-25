@@ -1,6 +1,5 @@
 #include "bufferitem.h"
 #include <iostream>
-#include <QDebug>
 
 using namespace std;
 
