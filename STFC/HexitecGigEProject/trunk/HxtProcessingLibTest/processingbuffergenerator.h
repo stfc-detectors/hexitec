@@ -2,10 +2,14 @@
 #define PROCESSINGBUFFERGENERATOR_H
 
 #include "imageprocessor.h"
+#include "imageprocessorhandler.h"
+#include "hxtgenerator.h"
 #include "inifile.h"
 #include <QObject>
 #include <QList>
 #include <QMutex>
+#include <QThread>
+#include <QWinEventNotifier>
 #include <cstdint>
 
 class ProcessingBufferGenerator : public QObject
@@ -18,10 +22,14 @@ public:
 private:
    void bufferReady(unsigned char *buffer, unsigned long validFrames);
    IniFile *twoEasyIniFile;
+   QThread *pbgThread;
    QMutex mutex;
-   QList<ImageProcessor *>imageProcessorList;
+//   QList<ImageProcessor *>imageProcessorList;
+   QList<ImageProcessorHandler *>imageProcessorHandlerList;
    QList<char *>processingFilenameList;
    ImageProcessor *currentImageProcessor;
+   ImageProcessorHandler *currentImageProcessorHandler;
+   GeneralHxtGenerator *currentHxtGenerator;
    QStringList inputFilesList;
    ProcessingDefinition *processingDefinition;
    QString hxtFilename;
@@ -29,16 +37,16 @@ private:
    int frameSize;
    int nRows;
    int nCols;
+   QWinEventNotifier *hxtNotifier;
+
 
 signals:
-//   void enqueueBuffer (char *bufferToProcess, unsigned long validFrames);
-//   void imageComplete(unsigned long long totalFramesAcquired);
-//   void imageStarted(const char *path, int nRows, int nCols);
    void imageStarted(char *path);
    void fileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
    void hxtFileWritten(unsigned short *buffer, QString filename);
+
 
 public slots:
    void handleProcessImages();
@@ -49,7 +57,10 @@ public slots:
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleHxtFileWritten(char *buffer, const char * filename);
+   void handleHxtFileWritten();
 
+   void handleConfigureSensor(int nRows, int nCols,
+                                  long long frameSize);
    void handleConfigureProcessing(int nRows, int nCols,
                                   long long frameSize);
    void handleConfigureProcessing(bool re_order,

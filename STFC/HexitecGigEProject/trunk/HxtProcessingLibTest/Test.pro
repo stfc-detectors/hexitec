@@ -13,7 +13,7 @@ SOURCES += main.cpp \
     processingForm.cpp \
     processingbuffergenerator.cpp \
     inifile.cpp \
-    parameters.cpp
+    imageprocessorhandler.cpp
 
 INCLUDEPATH += ../HxtProcessingLib
 
@@ -24,7 +24,7 @@ HEADERS += \
     processingForm.h \
     processingbuffergenerator.h \
     inifile.h \
-    parameters.h
+    imageprocessorhandler.h
 
 FORMS += \
     mainwindow.ui \

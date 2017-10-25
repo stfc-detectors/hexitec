@@ -1,8 +1,9 @@
 #include "processingForm.h"
 #include "ui_processingForm.h"
-#include "parameters.h"
+//#include "parameters.h"
 #include "inifile.h"
 
+#include <QThread>
 #include <QSettings>
 #include <QStringList>
 #include <QTime>
@@ -266,8 +267,9 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols;
+   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId();
    emit processImages(nRows, nCols);
+   qDebug() << "PROCESSING CONTINUING!!!";
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)
