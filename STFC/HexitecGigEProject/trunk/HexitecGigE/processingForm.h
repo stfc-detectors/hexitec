@@ -28,6 +28,7 @@ public:
    void Qt2CppListHandler();
 
    int getFrameSize();
+   void handleDetectorResolutionSet(unsigned char xRes, unsigned char yRes);
 
 private:
    Ui::ProcessingForm *ui;
@@ -37,8 +38,11 @@ private:
    void guiBusy();
    void guiIdle();
 
+   int nRows;
+   int nCols;
+   int frameSize;
    int thresholdOption;
-   uint16_t thresholdPerPixel[6400];
+   uint16_t thresholdPerPixel[160000];
    bool nextFrame;
    bool energyCalibration;
    bool hxtGeneration;
@@ -50,8 +54,7 @@ private:
    QStringList inputFilesList;
 
 signals:
-   void configureSensor(int nRows, int nCols,
-                        long long frameSize);
+   void configureSensor(int nRows, int nCols);
    void configureProcessing(bool re_order,
                             bool nextFrame,
                             int threshholdMode,

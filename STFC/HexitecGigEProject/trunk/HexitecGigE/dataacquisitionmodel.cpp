@@ -167,11 +167,12 @@ void DataAcquisitionModel::connectGigEDetector()
 //           dataAcquisition, SLOT(handleBufferReady(unsigned char*,ulong));
    connect(gigEDetector, SIGNAL(enableMonitoring()),
            detectorMonitor, SLOT(enableMonitoring()));
-// The next 2 lines have been added. Check why???
    connect(gigEDetector, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(gigEDetector, SIGNAL(triggeringAvailableChanged(bool)),
            detectorControlForm, SLOT(handleTriggeringAvailable(bool)));
+//   connect(gigEDetector, SIGNAL(detectorResolutionSet(int, int)),
+//           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(gigEDetector, SIGNAL(cancelDataCollection()),
            dataAcquisition, SLOT(handleCancelReducedDataCollection()));
 

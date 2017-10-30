@@ -61,8 +61,7 @@ public slots:
    void handleHxtFileWritten(char *buffer, const char * filename);
    void handleHxtFileWritten();
 
-   void handleConfigureSensor(int nRows, int nCols,
-                                  long long frameSize);
+   void handleConfigureSensor(int nRows, int nCols);
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,
                                   int threshholdMode,

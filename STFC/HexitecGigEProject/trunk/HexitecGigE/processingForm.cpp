@@ -66,9 +66,10 @@ void ProcessingForm::initialiseProcessingForm()
    QString interceptFilename;
    QString outputPrefix;
    QString boolString = "true";
-   int rows;
-   int columns;
-   long long frameSize;
+   int nRows = 80;
+   int nCols = 80;
+   int rows = 80;
+   int columns = 80;
    long long binStart = 0;
    long long binEnd = 100;
    double binWidth = 0.5;
@@ -96,27 +97,6 @@ void ProcessingForm::initialiseProcessingForm()
    QString defaultDirectory = twoEasyFilename;
    fileStartPos = defaultDirectory.lastIndexOf("/");
    defaultDirectory.truncate(fileStartPos);
-
-
-   if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
-   {
-      qDebug() << "Set rows = " << rows;
-   }
-   else
-   {
-      qDebug() << "failed " << rows;
-      rows = 80;
-   }
-   if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
-   {
-      qDebug() << "Set columns = " << columns;
-   }
-   else
-   {
-      qDebug() << "failed " << columns;
-      columns = 80;
-   }
-   frameSize = rows * columns;
 
    if ((boolString = twoEasyIniFile->getString("Processing/Re-order").toLower()) != QVariant(INVALID))
    {
@@ -188,6 +168,28 @@ void ProcessingForm::initialiseProcessingForm()
          ui->hxtCheckBox->setChecked(false);
       }
    }
+   if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
+   {
+      qDebug() << "Set rows = " << rows;
+      nRows = rows;
+   }
+   else
+   {
+      qDebug() << "failed " << rows;
+      nRows = 80;
+   }
+
+   if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
+   {
+      qDebug() << "Set columns = " << columns;
+      nCols = columns;
+   }
+   else
+   {
+      qDebug() << "failed " << columns;
+      nCols = 80;
+   }
+   frameSize = nRows * nCols;
 
    if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
    {
@@ -253,7 +255,13 @@ void ProcessingForm::initialiseProcessingForm()
       ui->inputFilesList->setText(filename);
    }
 
-   emit configureSensor(rows, columns, frameSize);
+   if ((nRows != 80) || (nCols !=80))
+   {
+      ui->re_orderCheckBox->setChecked(false);
+      ui->re_orderCheckBox->setEnabled(false);
+   }
+
+   emit configureSensor(nRows, nCols);
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
    emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),
@@ -267,12 +275,6 @@ void ProcessingForm::initialiseProcessingForm()
 
 void ProcessingForm::initialise()
 {
-//   gradientFilename =  new char[1024];
-//   interceptFilename =  new char[1024];
-//   outputDirectory =  new char[1024];
-//   outputPrefix =  new char[1024];
-//   initialiseProcessingForm();
-
    setThresholdParameters();
 }
 
@@ -457,7 +459,7 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
       i++;
    }
 
-   if (i < 6400)
+   if (i < frameSize)
      qDebug() << "error: only " << i << " could be read";
    else
      qDebug() << "threshold file read OK ";
@@ -485,12 +487,7 @@ void ProcessingForm::guiIdle()
    ui->processButton->setEnabled(true);
 }
 
-/*
-int ProcessingForm::getFrameSize()
-{
-   return frameSize;
-}
-*/
+
 
 void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
 {
@@ -559,4 +556,18 @@ void ProcessingForm::handleProcessingComplete()
 void ProcessingForm::handleImageStarted()
 {
    guiBusy();
+}
+
+void ProcessingForm::handleDetectorResolutionSet(unsigned char xRes, unsigned char yRes)
+{
+   qDebug() << "ProcessingForm::handleDetectorResolutionSet";
+   if ((xRes != 80) || (yRes !=80))
+   {
+      ui->re_orderCheckBox->setChecked(false);
+      ui->re_orderCheckBox->setEnabled(false);
+   }
+
+   emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
+                            ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
+
 }

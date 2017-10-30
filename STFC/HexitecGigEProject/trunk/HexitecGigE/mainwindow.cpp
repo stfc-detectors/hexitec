@@ -193,8 +193,8 @@ MainWindow::MainWindow()
    createStatusBar();
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
-   connect(processingForm, SIGNAL(configureSensor(int, int, long long)),
-           processingBufferGenerator, SLOT(handleConfigureSensor(int, int, long long)));
+   connect(processingForm, SIGNAL(configureSensor(int, int)),
+           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(processingForm, SIGNAL(processImages()),
            processingBufferGenerator, SLOT(handlePostProcessImages()));
    connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),
@@ -211,6 +211,10 @@ MainWindow::MainWindow()
            processingForm, SLOT(handleProcessingComplete()));
    connect(processingBufferGenerator, SIGNAL(imageStarted()),
            processingForm, SLOT(handleImageStarted()));
+//   connect(processingForm, SIGNAL(processImages(int, int)),
+//           processingBufferGenerator, SLOT(handlePostProcessImages(int, int)));
+//   connect(DetectorFactory::instance()->getGigEDetector(), SIGNAL(detectorResolutionSet(unsigned char, unsigned char)),
+//           processingForm, SLOT(handleDetectorResolutionSet(unsigned char, unsigned char)));
 
    processingForm->initialiseProcessingForm();
 
