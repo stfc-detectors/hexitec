@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
    connect(processingForm, SIGNAL(processImages(int, int)),
            processingBufferGenerator, SLOT(handlePostProcessImages(int, int)));
-   connect(processingForm, SIGNAL(configureProcessing(int, int, long long)),
-           processingBufferGenerator, SLOT(handleConfigureProcessing(int, int, long long)));
+   connect(processingForm, SIGNAL(configureSensor(int,int)),
+           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(bool, bool, int, int, QString)));
    connect(processingForm, SIGNAL(configureProcessing(bool, bool, long long, long long, double, bool, QString, QString)),

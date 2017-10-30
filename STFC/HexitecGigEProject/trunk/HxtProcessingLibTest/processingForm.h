@@ -54,7 +54,7 @@ private:
    QStringList inputFilesList;
 
 signals:
-   void configureProcessing(int nRows, int nCols, long long frameSize);
+   void configureSensor(int nRows, int nCols);
    void configureProcessing(bool re_order,
                             bool nextFrame,
                             int threshholdMode,

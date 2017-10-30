@@ -243,7 +243,13 @@ void ProcessingForm::initialiseProcessingForm()
       ui->inputFilesList->setText(filename);
    }
 
-   emit configureProcessing(nRows, nCols, frameSize);
+   emit configureSensor(nRows, nCols);
+   if ((nRows != 80) || (nCols !=80))
+   {
+      ui->re_orderCheckBox->setChecked(false);
+      ui->re_orderCheckBox->setEnabled(false);
+   }
+
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
    emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),

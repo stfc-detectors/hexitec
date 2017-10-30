@@ -59,12 +59,8 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
 
 void ProcessingBufferGenerator::handleImageStarted(char *filename)
 {
-   qDebug() << "ProcessingBufferGenerator::handleImageStarted getting a mutex lock, threadId: " << QThread::currentThreadId()
-            << " nRows = " << processingDefinition->getRows() << " nCols = " << processingDefinition->getCols();
    QMutexLocker locker(&mutex);
    enqueueImage(filename, processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
-
-   qDebug() <<"imaged Enqueued.";
 }
 
 void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames)
@@ -76,7 +72,6 @@ void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer,
 void ProcessingBufferGenerator::handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
 {
    bufferReady(transferBuffer, validFrames);
-   qDebug() << "ProcessingBufferGenerator::handleTransferBufferReady: " << validFrames<< " currentImageProcessor " << currentImageProcessor;
    emit returnBufferReady(transferBuffer, validFrames);
 }
 
@@ -95,7 +90,6 @@ void ProcessingBufferGenerator::handleImageComplete(long long totalFramesAcquire
 void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool nextFrame,
                                                           int threshholdMode, int thresholdValue, QString thresholdFile)
 {
-//   qDebug() << "11111 ProcessingBufferGenerator::handleConfigureProcessing() threshholdMode = " << threshholdMode;
    processingDefinition->setRe_order(re_order);
    processingDefinition->setNextFrameCorrection(nextFrame);
    processingDefinition->setThresholdMode((ThresholdMode)threshholdMode);
@@ -117,7 +111,6 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
                                                           long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
                                                           QString gradientFilename, QString interceptFilename)
 {
-   qDebug() << "22222 ProcessingBufferGenerator::handleConfigureProcessing() hxtGeneration " << hxtGeneration;
    processingDefinition->setEnergyCalibration(energyCalibration);
    processingDefinition->setHxtGeneration(hxtGeneration);
    processingDefinition->setBinStart(binStart);
@@ -130,7 +123,6 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
 
 void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption)
 {
-//   qDebug() << "33333 ProcessingBufferGenerator::handleConfigureProcessing() chargedSharingMode = " << chargedSharingMode;
    processingDefinition->setChargedSharingMode((ChargedSharingMode)chargedSharingMode);
    processingDefinition->setPixelGridSize(pixelGridOption);
 }
@@ -163,27 +155,22 @@ void ProcessingBufferGenerator::handleConfigureProcessing(int nRows, int nCols, 
    processingDefinition->setFrameSize(frameSize);
 }
 
-void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, long long frameSize)
+void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
 {
    this->nRows = nRows;
    this->nCols = nCols;
-//   qDebug() << "SET processingDefinition nRows, nCols " << nRows << nCols;
    processingDefinition->setRows(nRows);
    processingDefinition->setCols(nCols);
-   processingDefinition->setFrameSize(frameSize);
+   processingDefinition->setFrameSize(nRows * nCols);
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete()
 {
-   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
    emit processingComplete();
-//   imageProcessorList.removeOne(completedImageProcessor);
-//   delete completedImageProcessor;
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
 {
-//   imageProcessorList.removeOne(completedImageProcessor);
    delete completedImageProcessor;
 }
 
@@ -224,8 +211,6 @@ void ProcessingBufferGenerator::handleProcessImages()
 
       strcpy(processingFilename, (char *)outputFilename.toStdString().c_str());
       strcpy(inputFilename, (char *)str.toStdString().c_str());
-      qDebug() << " ProcessingBufferGenerator::handleProcessImages() in foreach loop, inputFilename: "<< inputFilename
-               <<" output name:" << outputFilename;
 
       inFile.open(inputFilename, ifstream::binary);
       processingFilenameList.append(processingFilename);
