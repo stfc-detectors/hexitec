@@ -469,7 +469,6 @@ void ProcessingForm::readThresholdFile(char *thresholdFile)
 
 void ProcessingForm::guiBusy()
 {
-   qDebug() << "ProcessingForm::guiBusy()";
    ui->thresholdButton->setEnabled(false);
    ui->energyCalibrationButton->setEnabled(false);
    ui->chargedSharingButton->setEnabled(false);
@@ -479,7 +478,6 @@ void ProcessingForm::guiBusy()
 
 void ProcessingForm::guiIdle()
 {
-   qDebug() << "ProcessingForm::guiIdle()";
    ui->thresholdButton->setEnabled(true);
    ui->energyCalibrationButton->setEnabled(true);
    ui->chargedSharingButton->setEnabled(true);

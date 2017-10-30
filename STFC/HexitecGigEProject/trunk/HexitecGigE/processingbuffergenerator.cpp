@@ -33,9 +33,6 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
 
 void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-   qDebug() <<" ENQUEUE NEW IMAGE, nRows, nCols: " << nRows << nCols;
-
-   qDebug() << "PBG enqueueImage ThreadId: " <<QThread::currentThreadId();
    this->frameSize = nRows * nCols * sizeof(uint16_t);
 
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
@@ -50,7 +47,6 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
       connect(hxtNotifier, SIGNAL(activated(HANDLE)), this, SLOT(handleHxtFileWritten()));
    }
 
-//   imageProcessorList.append(currentImageProcessor);
    currentHxtGenerator = currentImageProcessor->getHxtGenerator();
    qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
 }
@@ -259,10 +255,8 @@ void ProcessingBufferGenerator::handlePostProcessImages()
 
    int nRows = processingDefinition->getRows();
    int nCols = processingDefinition->getCols();
-   qDebug() << "CHECK nRows, nCols " << nRows << nCols;
-//   processingDefinition->setRows(nRows);
-//   processingDefinition->setCols(nCols);
-    processingFilenameList.clear();
+
+   processingFilenameList.clear();
 
    inputFilename = new char[1024];
 
