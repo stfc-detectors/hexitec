@@ -70,8 +70,8 @@ void GigEDetector::constructorInit(const QObject *parent)
    framesPerBuffer = 500;
    directory = "C:";
    prefix = "GigE_";
-   xRes = 80;
-   yRes = 80;
+   xRes = 0;
+   yRes = 0;
    vCal = 0.5;
    uMid = 1.0;
    detCtrl = 0;
@@ -292,9 +292,10 @@ int GigEDetector::initialise(Triggering triggering)
    status = configureDetector();
    if (!status)
    {
-      qDebug() <<"Configure Detector - frames per buffer:" << framesPerBuffer;
+      qDebug() << "Configure Detector - frames per buffer:" << framesPerBuffer;
       qDebug() << "Configure Detector - frameTime:" << frameTime ;
-      qDebug() <<"Configure Detector - collectDcTime:" << collectDcTime ;
+      qDebug() << "Configure Detector - collectDcTime:" << collectDcTime ;
+      qDebug() << "Configure Detector - resolution:" << xRes << "x" << yRes;
    }
 
 
@@ -309,6 +310,7 @@ int GigEDetector::initialise(Triggering triggering)
    message.append (" initialised Ok");
    emit writeMessage(message);
    emit triggeringAvailableChanged(triggeringAvailable);
+//   emit detectorResolutionSet(xRes * sensorColumns, yRes * sensorRows);
 
    return status;
 }

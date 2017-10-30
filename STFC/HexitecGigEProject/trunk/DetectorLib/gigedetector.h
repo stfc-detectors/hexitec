@@ -114,6 +114,7 @@ signals:
    void enableMonitoring();
    void triggeringAvailableChanged(bool triggeringAvailable);
    void cancelDataCollection();
+   void detectorResolutionSet(int totalXRes, int totalYRes);
 
 public slots:
    void handleShowImage();
@@ -173,8 +174,11 @@ private:
    char processingFilename[1024];
    // Data acquisition time in mSecs
    double dataAcquisitionDuration;
-   unsigned char xRes, xResAcquiredImage;
-   unsigned char yRes, yResAcquiredImage;
+   unsigned char xRes;
+   int sensorRows;
+   unsigned char yRes;
+   int sensorColumns;
+
    ULONGLONG totalFramesAcquired;
    ULONG collectDcTime;
    double frameTime;
