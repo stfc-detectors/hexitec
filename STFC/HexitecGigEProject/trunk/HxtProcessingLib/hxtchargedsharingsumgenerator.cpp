@@ -8,7 +8,7 @@ HxtChargedSharingSumGenerator::HxtChargedSharingSumGenerator(int nRows, int nCol
 
 void HxtChargedSharingSumGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
 {
-//   qDebug() << "HxtGenerator::processEnergiesWithSum";
+   calculateChargedSharing(pixelEnergyMap);
    hxtItem->addToHistogramWithSum(*pixelEnergyMap);
    incrementProcessedEnergyCount();
    delete pixelEnergyMap;

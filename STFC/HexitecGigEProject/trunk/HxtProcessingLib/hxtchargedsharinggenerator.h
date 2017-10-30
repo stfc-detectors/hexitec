@@ -11,8 +11,10 @@ public:
 
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
 
-private:
+protected:
   void calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap);
+
+private:
   void processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
   void processDiscriminationChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
   void setChargedSharingMode(ChargedSharingMode chargedSharingMode);
