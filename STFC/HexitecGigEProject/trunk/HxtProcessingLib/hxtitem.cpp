@@ -112,8 +112,6 @@ void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
       if (bin <= nBins)
       {
          (*(currentHistogram + (pixel * nBins) + bin))++;
-//         qDebug() << "HxtItem::addToHistogram pixel = " << pixel << " bin " << bin
-//                  << " offset into histograms = " << (pixel * nBins) + bin;
       }
       else
       {
@@ -147,8 +145,6 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
       {
          (*(currentHistogram + (pixel * nBins) + bin))++;
          (*(summed + bin)) ++;
-//         qDebug() << "HxtItem::addToHistogram pixel = " << pixel << " bin " << bin
-//                  << " offset into histograms = " << (pixel * nBins) + bin;
       }
       else
       {

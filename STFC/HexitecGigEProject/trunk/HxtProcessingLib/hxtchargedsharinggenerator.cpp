@@ -1,5 +1,6 @@
 #include "hxtchargedsharinggenerator.h"
 #include <Windows.h>
+#include <QDebug>
 
 HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    HxtGenerator(nRows, nCols, processingDefinition)
@@ -74,8 +75,6 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
    int rowShare;
    int columnShare;
 
-   unordered_map<int, double> map = *pixelEnergyMap;
-
    for (int i = 0; i < length; i++)
    {
       row = pixelRow[i];
@@ -102,7 +101,7 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
                   pixelValue[j] += pixelValue[i];
                   pixelValue[i] = 0.0;
                   pixelEnergyMap->erase(row * nCols + column);
-                  map[rowShare * nCols + columnShare] = pixelValue[j];
+                  (*pixelEnergyMap)[rowShare * nCols + columnShare] = pixelValue[j];
 
                }
                else
@@ -110,7 +109,7 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
                   pixelValue[i] += pixelValue[j];
                   pixelValue[j] = 0.0;
                   pixelEnergyMap->erase(rowShare * nCols + columnShare);
-                  map[row * nCols + column] = pixelValue[i];
+                  (*pixelEnergyMap)[row * nCols + column] = pixelValue[i];
                }
             }
          }
@@ -118,7 +117,6 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
 
    }
 }
-
 
 void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
 {
