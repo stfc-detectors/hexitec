@@ -18,6 +18,11 @@ GeneralHxtGenerator::~GeneralHxtGenerator()
    delete hxtItem;
 }
 
+void GeneralHxtGenerator::freeAllocedMemory()
+{
+   hxtItem->freeAllocedMemory();
+}
+
 bool GeneralHxtGenerator::getFrameProcessingInProgress()
 {
    return inProgress;

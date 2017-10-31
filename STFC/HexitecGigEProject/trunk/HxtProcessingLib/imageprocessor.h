@@ -31,6 +31,7 @@ public:
 
    ImageProcessor(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
+   void freeAllocedMemory();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
    void imageAcquisitionComplete(long long totalFramesAcquired);
    void setImageInProgress(bool inProgress);

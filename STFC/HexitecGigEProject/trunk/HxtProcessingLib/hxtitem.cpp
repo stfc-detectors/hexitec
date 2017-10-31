@@ -19,6 +19,16 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    hxtsProcessed = 0;
 }
 
+HxtItem::~HxtItem()
+{
+   free(summedHistogram);
+}
+
+void HxtItem::freeAllocedMemory()
+{
+   free(hxtBin);
+}
+
 void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
 {
    double currentBin;
@@ -47,7 +57,6 @@ void HxtItem::initialiseTotalSpectrum()
 {
    summedHistogram = (long long *) calloc(nBins, sizeof(long long));
 }
-
 
 void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
 {

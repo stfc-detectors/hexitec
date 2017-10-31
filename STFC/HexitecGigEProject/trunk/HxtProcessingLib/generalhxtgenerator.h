@@ -12,6 +12,7 @@ class GeneralHxtGenerator
 public:
    GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~GeneralHxtGenerator();
+   void freeAllocedMemory();
    void enqueuePixelRawVals(double *pixelRawVals);
    void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
    void setFrameProcessingInProgress(bool inProgress);

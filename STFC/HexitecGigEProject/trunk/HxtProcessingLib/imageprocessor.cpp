@@ -382,10 +382,14 @@ void ImageProcessor::handleProcess()
    hxtGenerator->setFrameProcessingInProgress(false);
    SetEvent(processingCompleteEvent);
 
-
    delete imageItem;
    delete fp;
    delete hxtGenerator;
+}
+
+void ImageProcessor::freeAllocedMemory()
+{
+   hxtGenerator->freeAllocedMemory();
 }
 
 char *ImageProcessor::getHxtFilename()

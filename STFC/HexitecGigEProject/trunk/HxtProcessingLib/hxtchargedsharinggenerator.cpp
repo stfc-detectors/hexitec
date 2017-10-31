@@ -62,7 +62,9 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
       default:
          break;
    }
-
+   free(pixelRow);
+   free(pixelCol);
+   free(pixelValue);
 }
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
 {
