@@ -86,6 +86,10 @@ void ProcessingBufferGenerator::handleImageComplete(long long totalFramesAcquire
 void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool nextFrame,
                                                           int threshholdMode, int thresholdValue, QString thresholdFile)
 {
+   bool thresholdsStatus = true;
+   bool gradientsStatus = true;
+   bool interceptsStatus = true;
+
    processingDefinition->setRe_order(re_order);
    processingDefinition->setNextFrameCorrection(nextFrame);
    processingDefinition->setThresholdMode((ThresholdMode)threshholdMode);
@@ -96,10 +100,14 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool ne
          processingDefinition->setThresholdValue(thresholdValue);
          break;
       case THRESHOLD_FILE:
-         processingDefinition->setThresholdPerPixel((char *)thresholdFile.toStdString().c_str());
+         thresholdsStatus = processingDefinition->setThresholdPerPixel((char *)thresholdFile.toStdString().c_str());
          break;
       default:
          break;
+   }
+   if (!gradientsStatus || !interceptsStatus || !thresholdsStatus)
+   {
+      emit invalidParameterFiles(thresholdsStatus, gradientsStatus, interceptsStatus);
    }
 }
 
@@ -107,14 +115,23 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration
                                                           long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
                                                           QString gradientFilename, QString interceptFilename)
 {
+   bool gradientsStatus = true;
+   bool interceptsStatus = true;
+   bool thresholdsStatus = true;
+
    processingDefinition->setEnergyCalibration(energyCalibration);
    processingDefinition->setHxtGeneration(hxtGeneration);
    processingDefinition->setBinStart(binStart);
    processingDefinition->setBinEnd(binEnd);
    processingDefinition->setBinWidth(binWidth);
    processingDefinition->setTotalSpectrum(totalSpectrum);
-   processingDefinition->setGradientFilename((char *)gradientFilename.toStdString().c_str());
-   processingDefinition->setInterceptFilename((char *)interceptFilename.toStdString().c_str());
+   gradientsStatus = processingDefinition->setGradientFilename((char *)gradientFilename.toStdString().c_str());
+   interceptsStatus = processingDefinition->setInterceptFilename((char *)interceptFilename.toStdString().c_str());
+
+   if (!gradientsStatus || !interceptsStatus || !thresholdsStatus)
+   {
+      emit invalidParameterFiles(thresholdsStatus, gradientsStatus, interceptsStatus);
+   }
 }
 
 void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption)

@@ -48,7 +48,7 @@ signals:
    void processingComplete(long long totalFramesAcquired);
    void processingComplete();
    void hxtFileWritten(unsigned short *buffer, QString filename);
-
+   void invalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
 
 public slots:
    void handleProcessImages();

@@ -4,10 +4,8 @@
 ImageProcessorHandler::ImageProcessorHandler(ImageProcessor *imageProcessor) :
    QThread()
 {
-   qDebug()<< "In ImageProcessorHandler CONSTRUCTOR threadId: "<< QThread::currentThreadId();
    this->imageProcessor = imageProcessor;
    start();
-   qDebug()<< "In ImageProcessorHandler CONSTRUCTOR started - returning ";
 }
 
 void ImageProcessorHandler::run()

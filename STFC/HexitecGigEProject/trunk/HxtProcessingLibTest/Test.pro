@@ -28,7 +28,7 @@ HEADERS += \
 
 FORMS += \
     mainwindow.ui \
-    processingForm.ui
+    processingForm.ui \
 
 RESOURCES += \
     Test.qrc

@@ -99,6 +99,8 @@ private slots:
    void setOutputDirectory();
    void setDataFileParameters();
    void handleProcessingComplete();
+   void setAllParameters();
+   void handleInvalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
 };
 
 #endif // PROCESSINGFORM_H
