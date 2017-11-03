@@ -37,9 +37,12 @@ void ProcessingDefinition::setThresholdValue(int thresholdValue)
    this->thresholdValue = thresholdValue;
 }
 
-void ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
+bool ProcessingDefinition::setThresholdPerPixel(char * thresholdFilename)
 {
-   getData(thresholdFilename, thresholdPerPixel);
+   uint16_t defaultValue = 0;
+   thresholdsStatus = getData(thresholdFilename, thresholdPerPixel, defaultValue);
+
+   return thresholdsStatus;
 }
 
 void ProcessingDefinition::setEnergyCalibration(bool energyCalibration)
@@ -52,16 +55,20 @@ void ProcessingDefinition::setHxtGeneration(bool hxtGeneration)
    this->hxtGeneration = hxtGeneration;
 }
 
-void ProcessingDefinition::setGradientFilename(char *gradientFilename)
+bool ProcessingDefinition::setGradientFilename(char *gradientFilename)
 {
    strcpy(this->gradientFilename, (const char *)gradientFilename);
    setGradients();
+
+   return gradientsStatus;
 }
 
-void ProcessingDefinition::setInterceptFilename(char *interceptFilename)
+bool ProcessingDefinition::setInterceptFilename(char *interceptFilename)
 {
    strcpy(this->interceptFilename, (const char *)interceptFilename);
    setIntercepts();
+
+   return interceptsStatus;
 }
 
 ThresholdMode ProcessingDefinition::getThreshholdMode() const
@@ -107,60 +114,90 @@ double *ProcessingDefinition::getIntercepts()
 
 void ProcessingDefinition::setGradients()
 {
-   getData(gradientFilename, gradientValue);
+   double defaultValue = 1;
+   gradientsStatus = getData(gradientFilename, gradientValue, defaultValue);
 }
 
 void ProcessingDefinition::setIntercepts()
 {
-   getData(interceptFilename, interceptValue);
+   double defaultValue = 0;
+   interceptsStatus = getData(interceptFilename, interceptValue, defaultValue);
 }
 
-void ProcessingDefinition::getData(char *filename, double *dataValue)
+bool ProcessingDefinition::getData(char *filename, double *dataValue, double defaultValue)
 {
    int i = 0;
    std::ifstream inFile;
+   bool success = false;
 
    inFile.open(filename);
 
-/*
+
    if (!inFile)
-     qDebug() << "ProcessingDefinition::getData - error opening " << filename;
-*/
-   while (inFile >> dataValue[i])
    {
-      i++;
+     for (int val = 0; val < frameSize; val ++)
+     {
+        dataValue[val] = defaultValue;
+     }
    }
-/*
-   if (i < frameSize)
-     qDebug() << "error: only " << i << " could be read";
-   else
-     qDebug() << "file read OK ";
-*/
-   inFile.close();
-}
 
-void ProcessingDefinition::getData(const char *filename, uint16_t *dataValue)
-{
-   int i = 0;
-   std::ifstream inFile;
-
-   inFile.open(filename);
-/*
-   if (!inFile)
-     qDebug() << "ProcessingDefinition::getData - error opening " << filename;
-*/
    while (inFile >> dataValue[i])
    {
       i++;
    }
 
-/*
    if (i < frameSize)
-     qDebug() << "error: only " << i << " could be read";
+   {
+      for (int val = i; val < frameSize; val ++)
+      {
+         dataValue[val] = defaultValue;
+      }
+   }
    else
-     qDebug() << "file read OK ";
-*/
+   {
+     success = true;
+   }
    inFile.close();
+
+   return success;
+}
+
+bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, uint16_t defaultValue)
+{
+   int i = 0;
+   std::ifstream inFile;
+   bool success;
+
+   inFile.open(filename);
+
+   if (!inFile)
+   {
+     for (int val = 0; val < frameSize; val ++)
+     {
+        dataValue[val] = defaultValue;
+     }
+   }
+
+
+   while (inFile >> dataValue[i])
+   {
+      i++;
+   }
+
+   if (i < frameSize)
+   {
+      for (int val = i; val < frameSize; val ++)
+      {
+         dataValue[val] = defaultValue;
+      }
+   }
+   else
+   {
+     success = true;
+   }
+   inFile.close();
+
+   return success;
 }
 
 int ProcessingDefinition::getRows()
@@ -182,6 +219,22 @@ void ProcessingDefinition::setCols(int nCols)
 {
    this->nCols = nCols;
 }
+
+bool ProcessingDefinition::getThresholdsStatus()
+{
+   return thresholdsStatus;
+}
+
+bool ProcessingDefinition::getGradientsStatus()
+{
+   return gradientsStatus;
+}
+
+bool ProcessingDefinition::getInterceptsStatus()
+{
+   return interceptsStatus;
+}
+
 int ProcessingDefinition::getPixelGridSize() const
 {
    return pixelGridSize;

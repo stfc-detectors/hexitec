@@ -22,9 +22,6 @@ private:
   int directionalDistance;
   long long **pixelGrid;
   double maxCharge;
-  int *pixelRow;
-  int *pixelCol;
-  double *pixelValue;
   double maxValue;
   int maxIndex;
   ChargedSharingMode chargedSharingMode;

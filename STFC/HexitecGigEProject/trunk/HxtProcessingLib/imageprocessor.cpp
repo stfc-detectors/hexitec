@@ -44,8 +44,6 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
       chargedSharing = true;
    }
 
-   if (energyCalibration)
-   {
       if (chargedSharing)
       {
          if(totalSpectrum)
@@ -68,11 +66,6 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
             hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
          }
       }
-   }
-   else
-   {
-      hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
-   }
 
    setImageInProgress(true);
 }
@@ -192,6 +185,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
                   if (hxtMap->size() > 0)
                   {
+
                      hxtGenerator->processEnergies(hxtMap);
                   }
 

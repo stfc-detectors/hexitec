@@ -1,12 +1,14 @@
 #include "hxtchargedsharinggenerator.h"
 #include <Windows.h>
-#include <QDebug>
 
 HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    HxtGenerator(nRows, nCols, processingDefinition)
 {
-   pixelRow = (int *) calloc(nRows, sizeof(int));
-   pixelCol = (int *) calloc(nCols, sizeof(int));
+   this->nRows = nRows;
+   this->nCols = nCols;
+
+   pixelRow = (int *) calloc(nRows * nCols, sizeof(int));
+   pixelCol = (int *) calloc(nCols * nCols, sizeof(int));
    pixelValue = (double*) calloc(nRows * nCols, sizeof(double));
    chargedSharingMode = processingDefinition->getChargedSharingMode();
    setPixelGridSize(processingDefinition->getPixelGridSize());
@@ -45,12 +47,10 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
       pixelRow[index] = (int) (pixel / nRows);
       pixelCol[index] = (int) (pixel - (pixelRow[index] * nCols));
       pixelValue[index] = it->second;
-//      qDebug() << "pixel: " << pixel << " index " << index
-//               << " row " << pixelRow[index] << " col " << pixelCol[index]
-//               << " value: " << pixelValue[index];
       it++;
       index++;
    }
+
    switch (chargedSharingMode)
    {
       case ADDITION:
@@ -62,10 +62,8 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
       default:
          break;
    }
-   free(pixelRow);
-   free(pixelCol);
-   free(pixelValue);
 }
+
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
 {
    int rowIndexBegin;
@@ -88,8 +86,27 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
       colIndexBegin = column - directionalDistance;
       colIndexEnd = column + directionalDistance;
 
-      for (int j = i + 1; j < length; j++)
+      if (rowIndexBegin < 0)
       {
+         rowIndexBegin = 0;
+      }
+      if (colIndexBegin < 0)
+      {
+         colIndexBegin = 0;
+      }
+      if (rowIndexEnd >= nRows)
+      {
+         rowIndexEnd = nRows - 1;
+      }
+      if (colIndexEnd >= nCols)
+      {
+         colIndexEnd = nCols - 1;
+      }
+
+      for (int j = 0; j < length; j++)
+      {
+         if (i != j && (pixelValue[i] !=0) && (pixelValue[j] !=0))
+         {
          if ((pixelRow[j] >= rowIndexBegin) && (pixelRow[j] <= rowIndexEnd))
          {
             if ((pixelCol[j] >= colIndexBegin) && (pixelCol[j] <= colIndexEnd))
@@ -99,24 +116,24 @@ void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <in
 
                if (pixelValue[j] > maxValue)
                {
-                  maxValue = pixelValue[j];
                   pixelValue[j] += pixelValue[i];
+                  maxValue = pixelValue[j];
                   pixelValue[i] = 0.0;
                   pixelEnergyMap->erase(row * nCols + column);
                   (*pixelEnergyMap)[rowShare * nCols + columnShare] = pixelValue[j];
-
                }
                else
                {
                   pixelValue[i] += pixelValue[j];
+                  maxValue = pixelValue[i];
                   pixelValue[j] = 0.0;
                   pixelEnergyMap->erase(rowShare * nCols + columnShare);
                   (*pixelEnergyMap)[row * nCols + column] = pixelValue[i];
                }
             }
          }
+         }
       }
-
    }
 }
 
@@ -131,8 +148,6 @@ void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_m
    int rowShare;
    int columnShare;
 
-   unordered_map<int, double> map = *pixelEnergyMap;
-
    for (int i = 0; i < length; i++)
    {
       row = pixelRow[i];
@@ -143,6 +158,23 @@ void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_m
       rowIndexEnd = row + directionalDistance;
       colIndexBegin = column - directionalDistance;
       colIndexEnd = column + directionalDistance;
+
+      if (rowIndexBegin < 0)
+      {
+         rowIndexBegin = 0;
+      }
+      if (colIndexBegin < 0)
+      {
+         colIndexBegin = 0;
+      }
+      if (rowIndexEnd >= nRows)
+      {
+         rowIndexEnd = nRows - 1;
+      }
+      if (colIndexEnd >= nCols)
+      {
+         colIndexEnd = nCols - 1;
+      }
 
       for (int j = i + 1; j < length; j++)
       {

@@ -18,3 +18,4 @@ void HxtGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
    delete pixelEnergyMap;
 }
 
+

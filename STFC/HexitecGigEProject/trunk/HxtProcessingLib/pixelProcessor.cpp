@@ -1,5 +1,4 @@
 #include "pixelProcessor.h"
-//#include <QDebug>
 
 #include <iostream>
 #include <fstream>

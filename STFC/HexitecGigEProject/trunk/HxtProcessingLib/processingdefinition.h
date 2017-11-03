@@ -17,12 +17,12 @@ public:
    ~ProcessingDefinition();
    void setThresholdMode(ThresholdMode threshholdMode);
    void setThresholdValue(int thresholdValue);
-   void setThresholdPerPixel(char *thresholdFilename);
+   bool setThresholdPerPixel(char *thresholdFilename);
    void setEnergyCalibration(bool energyCalibration);
    void setHxtGeneration(bool hxtGeneration);
    void setProcessedFilename();
-   void setGradientFilename(char *gradientFilename);
-   void setInterceptFilename(char *interceptFilename);
+   bool setGradientFilename(char *gradientFilename);
+   bool setInterceptFilename(char *interceptFilename);
    void setOutputDirectory(char *outputDirectory);
    void setOutputPrefix(char *outputPrefix);
 
@@ -37,54 +37,43 @@ public:
 
    bool getRe_order() const;
    void setRe_order(bool re_order);
-
    bool getEnergyCalibration() const;
    bool getHxtGeneration() const;
-
    long long getBinStart() const;
    void setBinStart(const long long &binStart);
-
    long long getBinEnd() const;
    void setBinEnd(const long long &binEnd);
-
    double getBinWidth() const;
    void setBinWidth(const double &binWidth);
-
    long long getNBins();
-
    bool getTotalSpectrum() const;
    void setTotalSpectrum(bool totalSpectrum);
-
    char * getOutputDirectory();
    char * getOutputPrefix();
-
    long long getFrameSize() const;
    void setFrameSize(long long value);
-
    long long getHxtBufferAllDataSize() const;
-
    long long getHxtBufferHeaderSize() const;
    void setHxtBufferHeaderSize(long long value);
-
    ChargedSharingMode getChargedSharingMode() const;
    void setChargedSharingMode(const ChargedSharingMode &value);
-
    bool getNextFrameCorrection() const;
    void setNextFrameCorrection(bool value);
-
    int getPixelGridSize() const;
    void setPixelGridSize(int value);
-
    int getRows();
    void setRows(int nRows);
    int getCols();
    void setCols(int nCols);
+   bool getThresholdsStatus();
+   bool getGradientsStatus();
+   bool getInterceptsStatus();
 
 private:
    void setGradients();
    void setIntercepts();
-   void getData(char *filename, double *dataValue);
-   void getData(const char *filename, uint16_t *dataValue);
+   bool getData(char *filename, double *dataValue, double defaultValue);
+   bool getData(const char *filename, uint16_t *dataValue, uint16_t defaultValue);
    bool re_order;
    ThresholdMode threshholdMode;
    int thresholdValue;
@@ -113,6 +102,9 @@ private:
    char *outputDirectory;
    char *outputPrefix;
    char *outputFilename;
+   bool thresholdsStatus;
+   bool gradientsStatus;
+   bool interceptsStatus;
 
 };
 

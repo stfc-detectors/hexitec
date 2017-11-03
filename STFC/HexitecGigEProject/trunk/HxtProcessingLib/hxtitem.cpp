@@ -21,7 +21,7 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
 
 HxtItem::~HxtItem()
 {
-   free(summedHistogram);
+//   free(summedHistogram);
 }
 
 void HxtItem::freeAllocedMemory()

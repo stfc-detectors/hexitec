@@ -34,6 +34,9 @@ protected:
    int frameSize;
    long long processedEnergyCount;
    bool inProgress;
+   int *pixelRow;
+   int *pixelCol;
+   double *pixelValue;
 
 };
 

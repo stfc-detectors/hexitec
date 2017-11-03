@@ -7,6 +7,7 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    frameSize = nRows * nCols;
    hxtItem = new HxtItem(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
 
+   pixelValue = NULL;
    processedEnergyCount = 0;
    hxtItem->setTotalEnergiesToProcess(0);
 
@@ -15,7 +16,15 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
+
+   if (pixelValue != NULL)
+   {
+      free(pixelRow);
+      free(pixelCol);
+      free(pixelValue);
+   }
    delete hxtItem;
+
 }
 
 void GeneralHxtGenerator::freeAllocedMemory()
