@@ -211,6 +211,9 @@ MainWindow::MainWindow()
            processingForm, SLOT(handleProcessingComplete()));
    connect(processingBufferGenerator, SIGNAL(imageStarted()),
            processingForm, SLOT(handleImageStarted()));
+   connect(processingBufferGenerator, SIGNAL(invalidParameterFiles(bool,bool,bool)),
+           processingForm, SLOT(handleInvalidParameterFiles(bool,bool,bool)));
+
 //   connect(processingForm, SIGNAL(processImages(int, int)),
 //           processingBufferGenerator, SLOT(handlePostProcessImages(int, int)));
 //   connect(DetectorFactory::instance()->getGigEDetector(), SIGNAL(detectorResolutionSet(unsigned char, unsigned char)),

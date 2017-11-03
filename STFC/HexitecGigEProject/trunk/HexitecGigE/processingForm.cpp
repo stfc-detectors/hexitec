@@ -3,6 +3,8 @@
 #include "parameters.h"
 #include "inifile.h"
 
+#include <QMessageBox>
+#include <QThread>
 #include <QSettings>
 #include <QStringList>
 #include <QTime>
@@ -43,6 +45,7 @@ ProcessingForm::ProcessingForm(QWidget *parent) :
    connect(ui->inputFilesListButton, SIGNAL(clicked(bool)), this, SLOT(setInputFilesList()));
    connect(ui->outputDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(setOutputDirectory()));
    connect(ui->dataFileButton, SIGNAL(clicked(bool)), this, SLOT(setDataFileParameters()));
+   connect(ui->applyAllButton, SIGNAL(clicked(bool)), this, SLOT(setAllParameters()));
 }
 
 ProcessingForm::~ProcessingForm()
@@ -220,11 +223,15 @@ void ProcessingForm::initialiseProcessingForm()
 
    if ((chargedSharingOptionString = twoEasyIniFile->getString("Processing/Charged_Sharing_Option")) != QVariant(INVALID))
    {
-      ui->chargedSharingComboBox->setCurrentText(chargedSharingOptionString);
+      int index = ui->chargedSharingComboBox->findText(chargedSharingOptionString);
+      qDebug() << "chargedSharingOptionString = " << chargedSharingOptionString << " index " << index;
+      ui->chargedSharingComboBox->setCurrentIndex(index);
    }
-   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_grid_Option")) != QVariant(INVALID))
+   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_Grid_Option")) != QVariant(INVALID))
    {
-      ui->pixelGridComboBox->setCurrentText(pixelGridOptionString);
+      int index = ui->pixelGridComboBox->findText(pixelGridOptionString);
+      qDebug() << "pixelGridOptionString = " << pixelGridOptionString << " index " << index;
+      ui->pixelGridComboBox->setCurrentIndex(index);
    }
 
    if ((filename = twoEasyIniFile->getCharArray("Processing/Output_Directory")) != QVariant(INVALID))
@@ -361,7 +368,6 @@ void ProcessingForm::setEnergyCalibration(bool energyCalibration)
       ui->gradientsFileButton->setEnabled(true);
       ui->interceptFilename->setEnabled(true);
       ui->interceptsFileButton->setEnabled(true);
-      ui->chargedSharingComboBox->setEnabled(true);
       if (ui->chargedSharingComboBox->currentIndex() > 0)
       {
          ui->pixelGridComboBox->setEnabled(true);
@@ -378,9 +384,6 @@ void ProcessingForm::setEnergyCalibration(bool energyCalibration)
       ui->gradientsFileButton->setEnabled(false);
       ui->interceptFilename->setEnabled(false);
       ui->interceptsFileButton->setEnabled(false);
-      ui->chargedSharingComboBox->setEnabled(false);
-      ui->pixelGridComboBox->setEnabled(false);
-      ui->chargedSharingButton->setEnabled(false);
    }
 }
 
@@ -413,6 +416,9 @@ void ProcessingForm::setEnergyCalibrationParameters()
    binWidth = ui->binWidthSpinBox->value();
    totalSpectrum = ui->totalSpectrumCheckBox->isChecked();
 
+   gradientFilename = ui->gradientFilename->text();
+   interceptFilename = ui->interceptFilename->text();
+
    emit configureProcessing(energyCalibration, hxtGeneration,
                             binStart, binEnd, binWidth, totalSpectrum,
                             ui->gradientFilename->text(),
@@ -441,38 +447,13 @@ void ProcessingForm::setEndSpinBoxLimit(int lowerLimit)
    ui->binEndSpinBox->setMinimum(lowerLimit + 1);
 }
 
-void ProcessingForm::readThresholdFile(char *thresholdFile)
-{
-   int i = 0;
-   std::ifstream inFile;
-
-//   thresholdFile = (char *)"C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//Thresholds_500V_28C_135_1_5clk_1501190172.txt";
-   inFile.open(thresholdFile);
-
-   if (!inFile)
-   {
-     qDebug() << "ProcessingForm::readThresholdFile - error opening " << thresholdFile;
-   }
-
-   while (inFile >> thresholdPerPixel[i])
-   {
-      i++;
-   }
-
-   if (i < frameSize)
-     qDebug() << "error: only " << i << " could be read";
-   else
-     qDebug() << "threshold file read OK ";
-   inFile.close();
-
-}
-
 void ProcessingForm::guiBusy()
 {
    ui->thresholdButton->setEnabled(false);
    ui->energyCalibrationButton->setEnabled(false);
    ui->chargedSharingButton->setEnabled(false);
    ui->dataFileButton->setEnabled(false);
+   ui->applyAllButton->setEnabled(false);
    ui->processButton->setEnabled(false);
 }
 
@@ -482,6 +463,7 @@ void ProcessingForm::guiIdle()
    ui->energyCalibrationButton->setEnabled(true);
    ui->chargedSharingButton->setEnabled(true);
    ui->dataFileButton->setEnabled(true);
+   ui->applyAllButton->setEnabled(true);
    ui->processButton->setEnabled(true);
 }
 
@@ -544,6 +526,32 @@ void ProcessingForm::setDataFileParameters()
    outputPrefix = ui->outputPrefix->text();
 
    emit configureProcessing(inputFilesList, outputDirectory, outputPrefix);
+}
+
+void ProcessingForm::setAllParameters()
+{
+   setThresholdParameters();
+   setEnergyCalibrationParameters();
+   setChargedSharingParameters();
+   setDataFileParameters();
+}
+
+void ProcessingForm::handleInvalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus)
+{
+   QMessageBox msgBox;
+   QString thresholdsText = thresholdsStatus ? "valid." : "invalid - missing values set to default.";
+   QString gradientsText = gradientsStatus ? "valid." : "invalid - missing values set to default.";
+   QString interceptsText = interceptsStatus ? "valid." : "invalid - missing values set to default.";
+   QString messageText = "\tThresholds File : " + thresholdsText
+                         + "\n\tGradients File: " + gradientsText
+                         + "\n\tIntercepts File: " + interceptsText;
+
+   msgBox.setWindowTitle("Parameter File Warning");
+   msgBox.setText("WARNING: Some of the processing parameter files are invalid.");
+   msgBox.setInformativeText(messageText);
+   msgBox.setStandardButtons(QMessageBox::Ok);
+   msgBox.setDefaultButton(QMessageBox::Ok);
+   msgBox.exec();
 }
 
 void ProcessingForm::handleProcessingComplete()

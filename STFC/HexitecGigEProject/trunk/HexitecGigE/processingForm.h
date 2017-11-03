@@ -1,6 +1,7 @@
 #ifndef PROCESSINGFORM_H
 #define PROCESSINGFORM_H
 
+#include <QString>
 #include <QMainWindow>
 #include <QWidget>
 #include <QFileDialog>
@@ -100,6 +101,8 @@ private slots:
    void setDataFileParameters();
    void handleProcessingComplete();
    void handleImageStarted();
+   void setAllParameters();
+   void handleInvalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
 };
 
 #endif // PROCESSINGFORM_H
