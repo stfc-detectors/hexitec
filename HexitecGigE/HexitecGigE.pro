@@ -280,31 +280,38 @@ DSoFt64 {
 } else:ckd_devel {
 
 #    !exists(torso.cpp) {
-#        error("No such file found - Windows environment variable is working then..")
+#        message("No such file found - Windows environment variable is working then..")
 #    }
 
-    # te2aspect14 PC 64 bit configuration
+    # te2Scandinavia/te2fuscot PC 64 bit configuration
     DEFINES += NONI
     DEFINES += OS_WIN
-    LIBS += $$quote(-LC:/Program Files/MATLAB/R2014a/extern/lib/win64/microsoft) -llibeng -llibmx delayimp.lib /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
-    LIBS += ../DetectorLib/GigE.lib /DELAYLOAD:GigE.dll
+    LIBS += delayimp.lib
+    QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll /DELAYLOAD:Galil2.dll /DELAYLOAD:XpsLib.dll
+    LIBS += ../DetectorLib/GigE.lib
+    LIBS += $$quote(-L//TE0APPS01/Matlab/R2015a/extern/lib/win64/microsoft) -llibeng -llibmx    # .lib files here
 
-    CONFIG(release, debug|release): LIBS += $$quote(-LC:/QT/Libs/LibGalil-2.0.1.447-vs2010-x64/release) -lGalil2 /DELAYLOAD:Galil2.dll
+    CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/LibGalil-2.0.4.514-vs2012-x64/release) -lGalil2
     CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
-    CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib -L../SerialPortLib/qextserialport/release -lQt5ExtSerialPort1 /DELAYLOAD:XpsLib.dll
-    CONFIG(debug, debug|release): LIBS += $$quote(-LC:/QT/Libs/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2 /DELAYLOAD:Galil2.dll
-    CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
-    CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib -L../SerialPortLib/qextserialport/debug -lQt5ExtSerialPortd1 /DELAYLOAD:XpsLib.dll
+    CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
 
-    INCLUDEPATH += "C:/Program Files/MATLAB/R2014a/extern/include"
-    INCLUDEPATH += "C:/QT/libs/LibGalil-2.0.1.447-vs2010-x64"
-    INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.4/Eigen/"
+    CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/LibGalil-2.0.4.514-vs2012-x64/debug/) -lGalil2
+    CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
+    CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib
+
+    # Galil Tools: http://www.galil.com/downloads/software/galiltools
+
+    #INCLUDEPATH += "C:/Program Files/MATLAB/R2014a/extern/include"
+    INCLUDEPATH += "//TE0APPS01/Matlab/R2011b/win64/extern/include/"     # Eg: engine.h
+    INCLUDEPATH += "C:/Program Files/LibGalil-2.0.4.514-vs2012-x64"
+    INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.14/Eigen/"
     INCLUDEPATH += ../DetectorLib
     INCLUDEPATH  += ../HxtProcessingLib/include
+    INCLUDEPATH  += ../HxtProcessingLib/
+    # B/c HxtGigeE/processingwindow.h requires HxtLogger, HxtRawDataProcessor classes:
+    INCLUDEPATH  += ../HxtProcessingLib_CA/include
     INCLUDEPATH += ../XpsLib
     INCLUDEPATH += ../SerialPortLib
-    INCLUDEPATH += ../SerialPortLib/qextserialport/src
-    DEFINES += QEXTSERIALPORT_USING_SHARED
 }
 
 

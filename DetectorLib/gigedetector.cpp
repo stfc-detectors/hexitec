@@ -242,7 +242,7 @@ int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
 int GigEDetector::initialise(Triggering triggering)
 {
    LONG status = -1;
-   CONST LPSTR deviceDescriptor = "";
+   CONST LPSTR deviceDescriptor = (const LPSTR )"";
    ULONG pleoraErrorCodeStrLen = STR_LENGTH;
    ULONG pleoraErrorDescriptionLen = STR_LENGTH;
    ULONG pleoraErrorCode = -1;
@@ -441,7 +441,14 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
 {
    LONG status = -1;
 
-   status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution, yResolution, 0, 0, "One", "Off");
+   // Fix to satisfy ANSI string handling
+   const LPSTR pArg2 = LPSTR("Mono14");
+   const LPSTR pArg7 = LPSTR("One");
+   const LPSTR pArg8 = LPSTR("Off");
+
+   // Unmodified:
+   //status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution, yResolution, 0, 0, "One", "Off");
+   status = SetFrameFormatControl(detectorHandle, pArg2, xResolution, yResolution, 0, 0, pArg7, pArg8);
    showError( "SetFrameFormatControl", status);
    frameSize = xResolution * xResolution * 2;
 
@@ -1053,7 +1060,7 @@ void GigEDetector::configCharacters2Bytes(std::string configCharacters, unsigned
 }
 
 
-void GigEDetector::showError(const LPSTR context, long asError)
+void GigEDetector::showError(const LPCSTR context, long asError)
 {
    LONG result = 1;
    LONG sysError = 0;

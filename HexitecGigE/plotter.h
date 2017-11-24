@@ -116,7 +116,7 @@ public slots:
    void addCurveData(QVector <double> &, bool);
    // void addCurveData(QVector <double> &, QVector <double> &);
    void addCurveData(QVector <double> &, QVector <double> &, bool);
-   void addCurveData(QVector <double> &xData, QVector <double> &yData,
+   void addCurveData(const QVector <double> &xData, const QVector <double> &yData,
                      QString imageName, QPoint p, QColor color, bool parentHold);
    void paintCurve(Curve *curve, QPainterPath *path);
    void paintSummedCurve(QPainterPath *path);
@@ -144,7 +144,7 @@ private:
    bool pixelAddition;
 
    void copyCurve(Curve *newCurve);
-   void constructCurveData(Curve * newCurve, QVector <double> &yData, bool parentHold);
+   void constructCurveData(Curve * newCurve, const QVector <double> &yData, bool parentHold);
    QRect rubberBandRect;
    QRectF axesBox;
    int currentCurve;

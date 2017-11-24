@@ -1,5 +1,5 @@
 #include "processingbuffergenerator.h"
-#include "parameters.h"
+//#include "parameters.h"
 
 #include <QSettings>
 #include <QMutexLocker>

@@ -382,7 +382,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
     unsigned int lastFrameIdx    = 1 - currentFrameIdx;
 
     LOG(gLogConfig, logDEBUG2) << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
-    qDebug() << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
+//    qDebug() << "Parser start: mFramesDetected = " << mFramesDetected << " currentFrameIdx = " << currentFrameIdx << " lastFrameIdx = " << lastFrameIdx;
 
     // Track pixel number (across frames)
     u64 index=0;
@@ -413,7 +413,7 @@ bool HxtRawDataProcessor::parseFile(string aFileName) {
                 framesDetected++;
 
             if (mDebug) LOG(gLogConfig, logDEBUG3) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
-            qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
+//            qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
             //if (mDebug) LOG(gLogConfig, logNOTICE) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
 
             //if (mRowIdx >0) break; /// DEBUGGING
@@ -567,7 +567,7 @@ bool HxtRawDataProcessor::parseBuffer(unsigned short *aBufferName, unsigned long
             framesDetected++;
 
         if (mDebug) LOG(gLogConfig, logDEBUG3) << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
-        qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
+//        qDebug() << "Row " << setw(2) << mRowIdx << " col " << setw(2) << colIdx << " pixel value " << setw(6) << (double)(*mRawData);
 
         //if (mRowIdx >0) break; /// DEBUGGING
 
@@ -738,7 +738,7 @@ bool HxtRawDataProcessor::debugWriteFrame(unsigned int aFrameIdx, string fileDes
 
     // Create file name from frame number and current timestamp
     DateStamp* now = new DateStamp();
-    string debugFile(mDebugFrameDir + now->GetDateStamp() + fileDescription + "_Frame_" + to_string((_ULonglong)mFrameNumber) + ".bin");
+    string debugFile(mDebugFrameDir + now->GetDateStamp() + fileDescription + "_Frame_" + to_string(mFrameNumber) + ".bin");
     delete(now);
 
 

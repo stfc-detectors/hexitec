@@ -43,7 +43,7 @@ public:
 private:
    int TCP_ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut);
    void TCP_CloseSocket(int SocketIndex);
-   char *TCP_GetError(int SocketIndex);
+   const char *TCP_GetError(int SocketIndex);
    void TCP_SetTimeout(int SocketIndex, double Timeout);
    int FirmwareVersionGet (int SocketIndex, char *Version);
    int GroupInitialize (int SocketIndex, char *GroupName);
@@ -59,7 +59,7 @@ private:
    void SetTCPTimeout (int SocketID, double Timeout);
    void SendAndReceive(int socketID, char sSendString[], char sReturnString[], int iReturnStringSize);
    void CloseSocket (int SocketID);
-   char *GetError (int SocketID);
+   const char *GetError (int SocketID);
    void strncpyWithEOS(char *szStringOut, const char *szStringIn, int nNumberOfCharToCopy, int nStringOutSize);
    int ErrorStringGet(int SocketIndex, int ErrorCode, char *ErrorString);
 

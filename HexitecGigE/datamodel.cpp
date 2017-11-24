@@ -235,7 +235,7 @@ Slice *DataModel::getSlice(QString name)
    return slice;
 }
 
-Slice *DataModel::getSlice(QModelIndex &index)
+Slice *DataModel::getSlice(const QModelIndex &index)
 {
    Slice *slice = NULL;
    TreeItem *item = DataModel::instance()->getItem(index);
@@ -266,7 +266,7 @@ void DataModel::removeAllMatlabVariables()
 
 }
 
-void DataModel::removeSlice(QModelIndex &index)
+void DataModel::removeSlice(const QModelIndex &index)
 {
    // This detaches the slice from its Volume (if it's got one)
    dmInstance->getSlice(index)->detach();

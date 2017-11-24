@@ -21,7 +21,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    pbgThread->start();
    moveToThread(pbgThread);
 
-   qDebug() << "PBG Start ThreadId: " <<QThread::currentThreadId();
+   qDebug() << "(HxtGigE)PBG Start ThreadId: " <<QThread::currentThreadId();
 
    connect(this, SIGNAL(imageStarted(char*)),
            this, SLOT(handleImageStarted(char *)));

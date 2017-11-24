@@ -306,9 +306,9 @@ QMainWindow *MainWindow::createVisualisation()
 
 void MainWindow::readFiles()
 {
-   char *df = "Data Files (*.hxt *.hif *.ezd *.dat *.xy *.txt *.*sb *.*xmy)";
-   char *sf = "Script Files (*.js)";
-   char *mf = "Matlab Files (*.m)";
+   const char *df = "Data Files (*.hxt *.hif *.ezd *.dat *.xy *.txt *.*sb *.*xmy)";
+   const char *sf = "Script Files (*.js)";
+   const char *mf = "Matlab Files (*.m)";
 
    QString filter = tr(df) + ";;" + tr(sf) + ";;" + tr(mf);
    QStringList files = QFileDialog::getOpenFileNames(this,
@@ -415,8 +415,8 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 
 void MainWindow::saveFiles()
 {
-   char *sf = "Script Files (*.js)";
-   char *mf = "Matlab Files (*.m)";
+   const char *sf = "Script Files (*.js)";
+   const char *mf = "Matlab Files (*.m)";
    QString filter = tr(EZD_FILES) + ";;" + tr(HXT_FILES) + ";;" + tr(HIF_FILES) + ";;" + tr(XY_FILES) + ";;" + tr(XMY_FILES) + ";;" + tr(SB_FILES);
    filter = filter + ";;" + sf + ";;" + mf;
    QString selectedFilter;

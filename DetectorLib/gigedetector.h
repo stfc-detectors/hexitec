@@ -210,7 +210,7 @@ private:
    void imageDestToPixmap();
    unsigned char *getImage(int imageNumber);
    void run();
-   void showError(const LPSTR context, long asError);
+   void showError(const LPCSTR context, long asError);
    LONG collectOffsetValues();
    void setGetImageParams();
    int configure(bool triggeringSuspended);

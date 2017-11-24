@@ -180,7 +180,7 @@ void NewportXpsMotorController::TCP_CloseSocket(int SocketIndex)
    CloseSocket(SocketIndex);
 }
 
-char * NewportXpsMotorController::TCP_GetError(int SocketIndex)
+const char * NewportXpsMotorController::TCP_GetError(int SocketIndex)
 {
    return (GetError(SocketIndex));
 }
@@ -797,7 +797,7 @@ void NewportXpsMotorController::CloseSocket(int socketID)
    }
 }
 
-char *NewportXpsMotorController::GetError(int socketID)
+const char *NewportXpsMotorController::GetError(int socketID)
 {
    if ((socketID >= 0) && (socketID < MAX_NB_SOCKETS))
    {

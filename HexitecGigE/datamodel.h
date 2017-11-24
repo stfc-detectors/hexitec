@@ -56,10 +56,10 @@ public:
    TreeItem *getItem(QString name);
    Volume *getVolume(QString name);
    Slice *getSlice(QString name);
-   Slice *getSlice(QModelIndex &index);
+   Slice *getSlice(const QModelIndex &index);
    MatlabVariable *getMatlabArray(QModelIndex &index);
    void removeAllMatlabVariables();
-   void removeSlice(QModelIndex &index);
+   void removeSlice(const QModelIndex &index);
    void add(QModelIndex index);
    void end();
 

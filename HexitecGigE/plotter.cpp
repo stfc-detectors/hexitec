@@ -798,7 +798,7 @@ void Plotter::copyCurve(Curve *newCurve)
    lastCurve.maxYData = newCurve->maxYData;
 }
 
-void Plotter::constructCurveData(Curve *newCurve, QVector <double> &yData, bool parentHold)
+void Plotter::constructCurveData(Curve *newCurve, const QVector <double> &yData, bool parentHold)
 {
    if (pixelAddition && parentHold)
    {
@@ -894,7 +894,7 @@ void Plotter::addCurveData(QVector <double> &xData, QVector <double> &yData, boo
    this->update();
 }
 
-void Plotter::addCurveData(QVector <double> &xData, QVector <double> &yData,
+void Plotter::addCurveData(const QVector <double> &xData, const QVector <double> &yData,
                            QString imageName, QPoint p, QColor color, bool parentHold)
 {
    if (xData.size() != yData.size())
