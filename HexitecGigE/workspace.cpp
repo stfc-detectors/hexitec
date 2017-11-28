@@ -120,10 +120,10 @@ void Workspace::createOpsMenu()
 //   connect(importAction, SIGNAL(triggered()), this, SLOT(importArray()));
 //   opsMenu->addAction(importAction);
 
-   maskAction = new QAction("&Mask", opsMenu);
-   maskAction->setEnabled(false);
-   connect(maskAction, SIGNAL(triggered()), this, SLOT(maskSlice()));
-   opsMenu->addAction(maskAction);
+//   maskAction = new QAction("&Mask", opsMenu);
+//   maskAction->setEnabled(false);
+//   connect(maskAction, SIGNAL(triggered()), this, SLOT(maskSlice()));
+//   opsMenu->addAction(maskAction);
 
    multiplyAction = new QAction("&Multiply", opsMenu);
    multiplyAction->setEnabled(false);

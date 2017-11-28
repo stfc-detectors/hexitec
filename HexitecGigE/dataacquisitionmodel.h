@@ -9,7 +9,7 @@
 #include "detectorcontrolform.h"
 #include "dataacquisitionform.h"
 #include "processingbuffergenerator.h"
-#include "progressform.h"
+//#include "progressform.h"
 #include "gigedetector.h"
 #include "detectormonitor.h"
 #include "hv.h"
@@ -31,13 +31,13 @@ class DataAcquisitionModel : public QObject, public Reservable
 private:
    explicit DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionForm,
                                  DetectorControlForm *detectorControlForm,
-                                 ProgressForm *progressForm,
+//                                 ProgressForm *progressForm,
                                  ProcessingBufferGenerator *processingBufferGenerator,
                                  QObject *parent = 0);
    static DataAcquisitionModel *damInstance;
    DataAcquisitionForm *dataAcquisitionForm;
    DetectorControlForm *detectorControlForm;
-   ProgressForm *progressForm;
+//   ProgressForm *progressForm;
    ProcessingBufferGenerator *processingBufferGenerator;
    HV *hv;
    GigEDetector *gigEDetector;
@@ -64,7 +64,7 @@ private:
 
 public:
    static DataAcquisitionModel *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                         ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
+                                         /*ProgressForm *progressForm,*/ ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
    static DataAcquisitionModel *getInstance();
    ~DataAcquisitionModel();
    DataAcquisitionDefinition *getDataAcquisitionDefinition();

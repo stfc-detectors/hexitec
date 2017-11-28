@@ -174,7 +174,7 @@ MainWindow::MainWindow()
    if (activeDAQ)
    {
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
-                                                                progressForm, processingBufferGenerator, this);
+                                                                /*progressForm, */processingBufferGenerator, this);
 //      motionControlform = new MotionControlForm();
    }
 
@@ -255,7 +255,7 @@ MainWindow::MainWindow()
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
       connect(this, SIGNAL(executeShowImage()),
               gigEDetector, SLOT(handleShowImage()));
-      connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
+//      connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
    }
 
 //REPLACE THIS?   emit initialiseProcessingWindow();
@@ -275,7 +275,7 @@ QMainWindow *MainWindow::createVisualisation()
 
    // MainViewer and ThumbViewer are children of visualisation
    createMainViewer();
-   createProgressViewer();
+//   createProgressViewer();
    createThumbViewer();
 
    // Temporarily plotter and workspace are placed inside another tabs widget which is attached to visualisation.
@@ -750,20 +750,20 @@ void MainWindow::createThumbViewer()
    thumbWindow->setParent(dock) ;
 }
 
-void MainWindow::createProgressViewer()
-{
-   progressForm = new ProgressForm(visualisation);
+//void MainWindow::createProgressViewer()
+//{
+////   progressForm = new ProgressForm(visualisation);
 
-   QDockWidget *dock = new QDockWidget(tr("ProgressViewer"), visualisation);
-   dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
-   dock->setMinimumHeight(175);
-//   dock->setMaximumWidth(120);
-   visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
-//   viewMenu->addAction(dock->toggleViewAction());
-   QMainWindow *progressWindow = progressForm->getMainWindow();
-   dock->setWidget(progressWindow) ;
-   progressWindow->setParent(dock) ;
-}
+//   QDockWidget *dock = new QDockWidget(tr("ProgressViewer"), visualisation);
+//   dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
+//   dock->setMinimumHeight(175);
+////   dock->setMaximumWidth(120);
+//   visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
+////   viewMenu->addAction(dock->toggleViewAction());
+//   QMainWindow *progressWindow = progressForm->getMainWindow();
+//   dock->setWidget(progressWindow) ;
+//   progressWindow->setParent(dock) ;
+//}
 
 void MainWindow::createWorkSpace()
 {

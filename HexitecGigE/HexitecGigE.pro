@@ -76,7 +76,7 @@ SOURCES += main.cpp \
     parameters.cpp \
     hv.cpp \
     badinifiledialog.cpp \  
-    progressform.cpp \
+#    progressform.cpp \
     pixelmanipulationform.cpp \
     processingbuffergenerator.cpp \
     processingForm.cpp \
@@ -144,7 +144,7 @@ HEADERS += mainwindow.h \
     parameters.h \
     hv.h \
     badinifiledialog.h \
-    progressform.h \
+#    progressform.h \
     pixelmanipulationform.h \
     processingbuffergenerator.h \
     processingForm.h \
@@ -166,7 +166,7 @@ FORMS += \
     setaxesdialog.ui \
     displaylegendsdialog.ui \
     badinifiledialog.ui \
-    progressform.ui \
+#    progressform.ui \
     pixelmanipulationform.ui \
     processingForm.ui
 

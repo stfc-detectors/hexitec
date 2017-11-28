@@ -3,13 +3,13 @@
 #include "detectorfactory.h"
 #include "dataacquisition.h"
 //#include "processingwindow.h"
-#include "progressform.h"
+//#include "progressform.h"
 
 DataAcquisitionModel *DataAcquisitionModel::damInstance = 0;
 
 DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionForm,
                                            DetectorControlForm *detectorControlForm,
-                                           ProgressForm *progressForm,
+//                                           ProgressForm *progressForm,
                                            ProcessingBufferGenerator *processingBufferGenerator,
                                            QObject *parent) :
    QObject(parent)
@@ -19,7 +19,7 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
 
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
-   this->progressForm = progressForm;
+//   this->progressForm = progressForm;
    this->processingBufferGenerator = processingBufferGenerator;
 
    hv = VoltageSourceFactory::instance()->getHV();
@@ -47,12 +47,12 @@ DataAcquisitionModel::~DataAcquisitionModel()
 }
 
 DataAcquisitionModel *DataAcquisitionModel::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                                     ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
+                                                     /*ProgressForm *progressForm, */ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
 {
    if (damInstance == 0)
    {
       damInstance = new DataAcquisitionModel(dataAcquisitionForm, detectorControlForm,
-                                             progressForm, processingBufferGenerator, parent);
+                                             /*progressForm, */processingBufferGenerator, parent);
    }
 
    return damInstance;
@@ -141,8 +141,8 @@ void DataAcquisitionModel::connectDataAcquisition()
            processingBufferGenerator, SLOT(handleImageComplete(long long)));
    connect(dataAcquisition, SIGNAL(transferBufferReady(unsigned char*,ulong)),
               processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
-   connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
-           progressForm, SLOT(handleImageStarting(double, int, int)));
+//   connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
+//           progressForm, SLOT(handleImageStarting(double, int, int)));
 
 //   connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
 //           processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));

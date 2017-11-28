@@ -28,7 +28,7 @@
 #include "workspace.h"
 #include "dataacquisitionfactory.h"
 //#include "processingwindow.h"
-#include "progressform.h"
+//#include "progressform.h"
 #include "pixelmanipulationform.h"
 
 class HexitecSoftTrigger;
@@ -51,7 +51,7 @@ private:
    void createMainViewer();
    void createPixelManipulation();
    void createPlotter();
-   void createProgressViewer();
+//   void createProgressViewer();
    void createThumbViewer();
    void createWorkSpace();
    void createApplicationOutput();
@@ -72,7 +72,7 @@ private:
 //   KeithleyMainWindow *keithleyMainWindow();
    ////
    ThumbViewer *thumbViewer;
-   ProgressForm *progressForm;
+//   ProgressForm *progressForm;
    Plotter *plotter;
    PixelManipulationForm *pixelManipulationForm;
 //   ScriptingWidget *scripting ;
@@ -121,7 +121,7 @@ signals:
    void startHV();
    void stopHV();
    void returnHxtBuffer(unsigned short* hxtBuffer);  /// HexitecGigE Addition
-   void updateProgress(double elapsed);
+//   void updateProgress(double elapsed);
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
    void readFiles();
