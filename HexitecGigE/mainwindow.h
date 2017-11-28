@@ -21,7 +21,7 @@
 #include "renderarea.h"
 #include "plotter.h"
 #include "thumbviewer.h"
-#include "scriptingwidget.h"
+//#include "scriptingwidget.h"
 //#include "motioncontrolform.h"
 #include "chargesharing.h"
 #include "mainviewer.h"
@@ -75,7 +75,7 @@ private:
    ProgressForm *progressForm;
    Plotter *plotter;
    PixelManipulationForm *pixelManipulationForm;
-   ScriptingWidget *scripting ;
+//   ScriptingWidget *scripting ;
    Workspace *workspace;
    ChargeSharing *chargeSharingInstance;
    bool activeHexitec;

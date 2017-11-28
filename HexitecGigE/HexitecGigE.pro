@@ -18,7 +18,7 @@ SOURCES += main.cpp \
     voxel.cpp \
     thumbviewer.cpp \
     slice.cpp \
-    scriptingwidget.cpp \
+#    scriptingwidget.cpp \
     sarray.cpp \
     renderarea.cpp \
     plotter.cpp \
@@ -47,7 +47,7 @@ SOURCES += main.cpp \
     applicationoutput.cpp \
     hexitecsofttrigger.cpp \
     reservable.cpp \
-    scriptrunner.cpp \
+#    scriptrunner.cpp \
     objectreserver.cpp \
     reservation.cpp \
 #    motorstatus.cpp \
@@ -85,7 +85,7 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     voxel.h \
     slice.h \
-    scriptingwidget.h \
+#    scriptingwidget.h \
     sarray.h \
     renderarea.h \
     plotter.h \
@@ -115,7 +115,7 @@ HEADERS += mainwindow.h \
 #    hardtrigger.h \
     hexitecsofttrigger.h \
     reservable.h \
-    scriptrunner.h \
+#    scriptrunner.h \
     objectreserver.h \
     reservation.h \
 #    motorstatus.h \
@@ -153,7 +153,7 @@ HEADERS += mainwindow.h \
 FORMS += \
     gridsizequery.ui \
     chargesharing.ui \
-    scriptingWidget.ui \
+#    scriptingWidget.ui \
     colormapeditor.ui \
     getvaluedialog.ui \
     offsetsdialog.ui \

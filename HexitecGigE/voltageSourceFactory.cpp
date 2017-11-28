@@ -6,8 +6,8 @@ VoltageSourceFactory *VoltageSourceFactory::vsfInstance = 0;
 VoltageSourceFactory::VoltageSourceFactory(QWidget *parent) :
    QWidget(parent)
 {
-   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
-           SLOT(addObject(QObject*, bool, bool)));
+//   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
+//           SLOT(addObject(QObject*, bool, bool)));
 }
 
 VoltageSourceFactory *VoltageSourceFactory::instance()

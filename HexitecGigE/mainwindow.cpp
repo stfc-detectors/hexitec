@@ -7,7 +7,7 @@
 #include "chargesharing.h"
 #include "plotter.h"
 
-#include "scriptingwidget.h"
+//#include "scriptingwidget.h"
 #include "motioncontrolform.h"
 #include "detectorcontrolform.h"
 #include "dataacquisitionform.h"
@@ -86,12 +86,12 @@ MainWindow::MainWindow()
    QTabWidget *tabs = new QTabWidget(this);
    setCentralWidget(tabs);
 
-   ScriptingWidget *scriptingWidget = ScriptingWidget::instance();
+//   ScriptingWidget *scriptingWidget = ScriptingWidget::instance();
    createApplicationOutput();
 
    tabs->addTab(createVisualisation(), QString("Visualisation"));
 
-   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(), SLOT(addObject(QObject*, bool, bool)));
+//   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(), SLOT(addObject(QObject*, bool, bool)));
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
@@ -165,7 +165,7 @@ MainWindow::MainWindow()
               this, SLOT(disableHVActions()));
    }
 //   We don't have one of these so this won't happen.
-   scriptingWidget->runInitScript();
+//   scriptingWidget->runInitScript();
 
    // The processing window needs to have been created before the data acquisition factory!
    processingDefinition = new ProcessingDefinition(6400);
@@ -232,7 +232,7 @@ MainWindow::MainWindow()
 //      tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
    }
 
-   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
+//   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
 //REPLACE THIS   connect(processingWindow, SIGNAL(removeSlice()), this, SLOT(deleteFirstSlice( ) ));
 
    // Need to signal to processingWindow to initialise itself with settings from 2Easy.ini file
@@ -343,10 +343,10 @@ void MainWindow::readFiles()
 
       if (allScripts)
       {
-         for (int j = 0; j < fileNameList.size(); j++)
-         {
-            ScriptingWidget::instance()->loadScript(fileNameList[j]);
-         }
+//         for (int j = 0; j < fileNameList.size(); j++)
+//         {
+            /*ScriptingWidget::instance()->loadScript(fileNameList[j])*/;
+//         }
       }
       else
       {
@@ -439,13 +439,13 @@ void MainWindow::saveFiles()
 
    if (suffix.compare("js") == 0)
    {
-      emit writeMessage("writing .js file");
-      ScriptingWidget::instance()->saveScript(fileName);
+      /*emit writeMessage("writing .js file")*/;
+//      ScriptingWidget::instance()->saveScript(fileName);
    }
    else if (suffix.compare("m") == 0)
    {
-      emit writeMessage("writing .m file");
-      ScriptingWidget::instance()->saveScript(fileName);
+      /*emit writeMessage("writing .m file")*/;
+//      ScriptingWidget::instance()->saveScript(fileName);
    }
    else if (suffix.compare("ezd") == 0)
    {

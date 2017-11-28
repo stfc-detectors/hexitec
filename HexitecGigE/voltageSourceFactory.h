@@ -5,8 +5,9 @@
  * See for instance http://qt-project.org/forums/viewthread/22133 */
 #define NOMINMAX
 
+#include <QWidget>
 #include "hv.h"
-#include "scriptingwidget.h"
+//#include "scriptingwidget.h"
 
 class VoltageSourceFactory : public QWidget
 {

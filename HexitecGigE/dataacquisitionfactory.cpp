@@ -1,7 +1,7 @@
 #include <QVariant>
 #include "dataacquisitionfactory.h"
 //#include "motor.h"
-#include "scriptingwidget.h"
+//#include "scriptingwidget.h"
 #include "dataacquisitiondefinition.h"
 #include "parameters.h"
 
@@ -90,8 +90,8 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
    dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm, progressForm, processingBufferGenerator);
    dataAcquisitionModel->setProperty("objectName", "daqModel");
 
-   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
-           SLOT(addObject(QObject*, bool, bool)));
+//   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
+//           SLOT(addObject(QObject*, bool, bool)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
 
