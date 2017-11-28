@@ -3,7 +3,7 @@
 
 #include <QThread>
 #include <string>
-#include "newportxpsmotorcontroller.h"
+//#include "newportxpsmotorcontroller.h"
 #include "motor.h"
 
 using namespace std;
@@ -27,7 +27,7 @@ private:
    void updateStatus();
    bool isMoving();
    int interpretStatus(int newportXpsStatus);
-   NewportXpsMotorController *motorController;
+//   NewportXpsMotorController *motorController;
    int id;
    char *axis;
 };

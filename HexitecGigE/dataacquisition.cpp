@@ -3,17 +3,17 @@
 #include "detectorfilename.h"
 #include "detectorfactory.h"
 #include "voltageSourceFactory.h"
-#include "processingwindow.h"
+//#include "processingwindow.h"
 #include "math.h"
-#include "motor.h"
+//#include "motor.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QDateTime>
 
 DataAcquisition *DataAcquisition::daqInstance = 0;
-double DataAcquisition::motorPosition = 0;
-QHash<QString, int> DataAcquisition::motorPositions;
+//double DataAcquisition::motorPosition = 0;
+//QHash<QString, int> DataAcquisition::motorPositions;
 
 DataAcquisition::DataAcquisition(QObject *parent) :
    QThread(parent)
@@ -41,12 +41,12 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    rdaql.append(this);
 }
 
-void DataAcquisition::positionChanged(Motor *motor, const QVariant & value)
-{
-   int position = value.toInt();
-   QString name = motor->property("objectName").toString();
-   motorPositions[name] = position;
-}
+//void DataAcquisition::positionChanged(Motor *motor, const QVariant & value)
+//{
+//   int position = value.toInt();
+//   QString name = motor->property("objectName").toString();
+//   motorPositions[name] = position;
+//}
 
 void DataAcquisition::configureTriggering(int triggeringMode)
 {

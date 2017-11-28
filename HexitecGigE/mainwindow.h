@@ -22,12 +22,12 @@
 #include "plotter.h"
 #include "thumbviewer.h"
 #include "scriptingwidget.h"
-#include "motioncontrolform.h"
+//#include "motioncontrolform.h"
 #include "chargesharing.h"
 #include "mainviewer.h"
 #include "workspace.h"
 #include "dataacquisitionfactory.h"
-#include "processingwindow.h"
+//#include "processingwindow.h"
 #include "progressform.h"
 #include "pixelmanipulationform.h"
 
@@ -65,7 +65,7 @@ private:
    QAction *startHVAct;
    QAction *stopHVAct;
 
-   ProcessingWindow *processingWindow;
+//   ProcessingWindow *processingWindow;
    QMainWindow *visualisation;
    QMainWindow *dataAcquisitionWindow;
    ////
@@ -86,7 +86,7 @@ private:
 //   Keithley *keithley;
 //   bool keithleyPresent;
    // Variables needed by hexitech.exe integration
-   bool bHexitechProcessingBusy;
+//   bool bHexitechProcessingBusy;
    bool bUpdateVisualisationTab;
    DataAcquisitionFactory *dataAcquisitionFactory;
    QString readDir;
@@ -102,16 +102,16 @@ signals:
    void writeMessage(QString message);
    void writeWarning(QString message);
    void writeError(QString message);
-   // Signal to processingWindow to initialise itself using process.any.ini
-   void initialiseProcessingWindow();
-   // Signal to processingWindow manual processing started
-   void manualProcessingStarted();
-   // Signal to processingWindow manual processing abandoned - re-enable GUI
-   void manualProcessingAbandoned();
-   // Signal to processingWindow->getHxtProcessor to remove unprocessed raw files
-   void removeUnprocessedFiles(bool bRemoveFiles);
+//   // Signal to processingWindow to initialise itself using process.any.ini
+//   void initialiseProcessingWindow();
+//   // Signal to processingWindow manual processing started
+//   void manualProcessingStarted();
+//   // Signal to processingWindow manual processing abandoned - re-enable GUI
+//   void manualProcessingAbandoned();
+//   // Signal to processingWindow->getHxtProcessor to remove unprocessed raw files
+//   void removeUnprocessedFiles(bool bRemoveFiles);
    /// HexitechGigE Addition:
-   void hxtProcessingPrepSettings();
+//   void hxtProcessingPrepSettings();
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
    void executeBufferReady(unsigned char * transferBuffer, unsigned long validFrames, int mode);
    void executeReturnBufferReady(unsigned char * transferBuffer);
@@ -151,7 +151,7 @@ public slots:
    void sendActiveSliceToMatlab();
    void getActiveSliceFromMatlab();
    // HxtProcessing (from processingWindow) signals background processing thread status
-   void updateHexitechProcessingStatus(bool isBusy);
+//   void updateHexitechProcessingStatus(bool isBusy);
    // ProcessingWindow signals whether Visualisation tab should be updated
    void updateVisualisationTab(bool bUpdate);
    void handleBufferReady();

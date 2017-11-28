@@ -45,19 +45,19 @@ typedef struct {
 //	colData
 //} hxtParserState;
 
-// Motor positions struct - Passing as one unit within GUI/HxtProcessing
-typedef struct {
-    // New motor names:
-    int mSSX;
-    int mSSY;
-    int mSSZ;
-    int mSSROT;
-    int mTimer;
-    int mGALX;
-    int mGALY;
-    int mGALZ;
-    int mGALROT;
-} motorPositions;
+//// Motor positions struct - Passing as one unit within GUI/HxtProcessing
+//typedef struct {
+//    // New motor names:
+//    int mSSX;
+//    int mSSY;
+//    int mSSZ;
+//    int mSSROT;
+//    int mTimer;
+//    int mGALX;
+//    int mGALY;
+//    int mGALZ;
+//    int mGALROT;
+//} motorPositions;
 
 // Used to track whether one/several members of the above struct has changed
 typedef enum {
@@ -68,12 +68,12 @@ typedef enum {
     conditionEveryNewFile=16
 } processingCondition;
 
-// Used to interrogate motorPositions struct special cases
-//  i.e. is a given motor value unavailable/uninitialised or real?
-typedef enum {
-    positionUnavailable   = 1111111,           // Used to be -77777
-    positionUninitialised = 2222222            // Used to be -65536
-} motorSpecialValues;
+//// Used to interrogate motorPositions struct special cases
+////  i.e. is a given motor value unavailable/uninitialised or real?
+//typedef enum {
+//    positionUnavailable   = 1111111,           // Used to be -77777
+//    positionUninitialised = 2222222            // Used to be -65536
+//} motorSpecialValues;
 
 //const u8 kHxtFramePreambleLabel = 255;
 //const u8 kHxtRowMarkerLabel     = 192;
@@ -83,7 +83,7 @@ typedef enum {
 typedef struct {
     char hxtLabel[8];
     u64 hxtVersion;
-    int motorPositions[9];
+//    int motorPositions[9];
     int filePrefixLength;
     char filePrefix[100];
     char dataTimeStamp[16]; // Don't mess with word boundary (only 13 chars needed tho')

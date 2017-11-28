@@ -52,14 +52,14 @@ HxtProcessing::HxtProcessing(string aAppName, unsigned int aDebugLevel) :
     mutexTimeout   = 50;  // Milliseconds duration to attempt acquiring a mutex lock
 
     bPrefixEnabled      = false;
-    bMotorEnabled       = false;
+//    bMotorEnabled       = false;
     bTimeStampEnabled   = false;
     bUseRawFileEnabled  = false;
 
     bThreadRunning      = true;
 
     // Initialise mPositions members to positionUninitialised (2222222)
-    clearMotorPositions();
+//    clearMotorPositions();
 
     // Condition to be met for file(s) be processed
     targetCondition = conditionNoneMet;
@@ -265,17 +265,17 @@ void HxtProcessing::prepSettings()
     //// Disable this for now..
     //dataProcessor->setEnableDebugFrame(true);   /// ENABLED, for now - Testing time
 
-    // If Motor Positions not selected, pass dummy values as Motor Positions
-    if (!bMotorEnabled)
-    {
-        int dummyPos = positionUninitialised;
-        dataProcessor->updateMotorPositions(dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos);
-    }
-    else
-    {
-        dataProcessor->updateMotorPositions(mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ, mPositions.mSSROT, mPositions.mTimer,
-                                            mPositions.mGALX, mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT);
-    }
+//    // If Motor Positions not selected, pass dummy values as Motor Positions
+//    if (!bMotorEnabled)
+//    {
+//        int dummyPos = positionUninitialised;
+//        dataProcessor->updateMotorPositions(dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos, dummyPos);
+//    }
+//    else
+//    {
+//        dataProcessor->updateMotorPositions(mPositions.mSSX, mPositions.mSSY, mPositions.mSSZ, mPositions.mSSROT, mPositions.mTimer,
+//                                            mPositions.mGALX, mPositions.mGALY, mPositions.mGALZ, mPositions.mGALROT);
+//    }
     dataProcessor->updateTimeStamp(mDataTimeStamp);
 
     // Set up vector implementation
@@ -472,57 +472,57 @@ void hexitech::HxtProcessing::pushTransferBuffer(unsigned char *transferBuffer, 
        qDebug() << "pushTr'rBuffer() failed to add 1/several of buffer & frames  onto respective Queues";
 }
 
-void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)
-{
-    /// convert QHash into motorPositions struct object and place that object on motorQueue queue
-    motorPositions *newPositions = copyQHashToMotorPositions(qHashPositions);
-    if (motorMutex.tryLock(mutexTimeout))
-    {
-        motorQueue.enqueue(*newPositions);
-        motorMutex.unlock();
-    }
-    else
-        emit hexitechSignalError("HxtProcessing::pushMotorPositions() - Unable to acquire mutex lock!");
+//void HxtProcessing::pushMotorPositions(QHash<QString, int> *qHashPositions)
+//{
+//    /// convert QHash into motorPositions struct object and place that object on motorQueue queue
+//    motorPositions *newPositions = copyQHashToMotorPositions(qHashPositions);
+//    if (motorMutex.tryLock(mutexTimeout))
+//    {
+//        motorQueue.enqueue(*newPositions);
+//        motorMutex.unlock();
+//    }
+//    else
+//        emit hexitechSignalError("HxtProcessing::pushMotorPositions() - Unable to acquire mutex lock!");
 
-    delete newPositions;
-    newPositions = 0;
-}
+//    delete newPositions;
+//    newPositions = 0;
+//}
 
-motorPositions* HxtProcessing::copyQHashToMotorPositions(QHash<QString, int> *qHashPositions)
-{
-    /// Convert QHash into motorPositions object
-    motorPositions *newPositions = new motorPositions;
-    newPositions->mSSX     = -1;
-    newPositions->mSSY     = -1;
-    newPositions->mSSZ     = -1;
-    newPositions->mSSROT   = -1;
-    newPositions->mGALX    = -1;
-    newPositions->mGALY    = -1;
-    newPositions->mGALZ    = -1;
-    newPositions->mGALROT  = -1;
-    newPositions->mTimer   = -1;
+//motorPositions* HxtProcessing::copyQHashToMotorPositions(QHash<QString, int> *qHashPositions)
+//{
+//    /// Convert QHash into motorPositions object
+//    motorPositions *newPositions = new motorPositions;
+//    newPositions->mSSX     = -1;
+//    newPositions->mSSY     = -1;
+//    newPositions->mSSZ     = -1;
+//    newPositions->mSSROT   = -1;
+//    newPositions->mGALX    = -1;
+//    newPositions->mGALY    = -1;
+//    newPositions->mGALZ    = -1;
+//    newPositions->mGALROT  = -1;
+//    newPositions->mTimer   = -1;
 
-    QHashIterator<QString, int> mpi(*qHashPositions);
-    while (mpi.hasNext())
-    {
-        mpi.next();
-        //qDebug() << mpi.key() << ":" << mpi.value();
+//    QHashIterator<QString, int> mpi(*qHashPositions);
+//    while (mpi.hasNext())
+//    {
+//        mpi.next();
+//        //qDebug() << mpi.key() << ":" << mpi.value();
 
-        if (mpi.key() == "ssx")             newPositions->mSSX      = mpi.value();
-        else if (mpi.key() == "ssy")        newPositions->mSSY      = mpi.value();
-        else if (mpi.key() == "ssz")        newPositions->mSSZ      = mpi.value();
-        else if (mpi.key() == "ssrot")      newPositions->mSSROT    = mpi.value();
-        else if (mpi.key() == "galx")       newPositions->mGALX     = mpi.value();
-        else if (mpi.key() == "galy")       newPositions->mGALY     = mpi.value();
-        else if (mpi.key() == "galz")       newPositions->mGALZ     = mpi.value();
-        else if (mpi.key() == "galrot")     newPositions->mGALROT   = mpi.value();
-        else if (mpi.key() == "timer")      newPositions->mTimer    = mpi.value();
-        else
-            emit hexitechSignalError(QString("Received unrecognised motor! Named: %1, Value: %2").arg(mpi.key()).arg(mpi.value()) );
-    }
+//        if (mpi.key() == "ssx")             newPositions->mSSX      = mpi.value();
+//        else if (mpi.key() == "ssy")        newPositions->mSSY      = mpi.value();
+//        else if (mpi.key() == "ssz")        newPositions->mSSZ      = mpi.value();
+//        else if (mpi.key() == "ssrot")      newPositions->mSSROT    = mpi.value();
+//        else if (mpi.key() == "galx")       newPositions->mGALX     = mpi.value();
+//        else if (mpi.key() == "galy")       newPositions->mGALY     = mpi.value();
+//        else if (mpi.key() == "galz")       newPositions->mGALZ     = mpi.value();
+//        else if (mpi.key() == "galrot")     newPositions->mGALROT   = mpi.value();
+//        else if (mpi.key() == "timer")      newPositions->mTimer    = mpi.value();
+//        else
+//            emit hexitechSignalError(QString("Received unrecognised motor! Named: %1, Value: %2").arg(mpi.key()).arg(mpi.value()) );
+//    }
 
-    return newPositions;
-}
+//    return newPositions;
+//}
 
 void HxtProcessing::run()
 {
@@ -530,7 +530,7 @@ void HxtProcessing::run()
     emit hexitechSignalError("HxtProcessing Thread up and running.");
 
     // Local variable to track status of fileQueue, motorQueue, bProcessQueueContents
-    bool bFileQueueEmpty = true, bMotorQueueEmpty = true, bProcessTheQueue = false;
+    bool bFileQueueEmpty = true, /*bMotorQueueEmpty = true,*/ bProcessTheQueue = false;
     bool bBufferQueueEmpty  = false;
     int currentCondition = -1;
 
@@ -578,13 +578,13 @@ void HxtProcessing::run()
             else
                 emit hexitechSignalError("HxtProcessing Unable to acquire File mutex lock!");
 
-            if (motorMutex.tryLock(mutexTimeout))       // Check if motorQueue's empty?
-            {
-                bMotorQueueEmpty = motorQueue.isEmpty();
-                motorMutex.unlock();
-            }
-            else
-                emit hexitechSignalError("HxtProcessing Unable to acquire Motor mutex lock!");
+//            if (motorMutex.tryLock(mutexTimeout))       // Check if motorQueue's empty?
+//            {
+//                bMotorQueueEmpty = motorQueue.isEmpty();
+//                motorMutex.unlock();
+//            }
+//            else
+//                emit hexitechSignalError("HxtProcessing Unable to acquire Motor mutex lock!");
 
             if (bufferMutex.tryLock(mutexTimeout))      /// Check if bufferQueue's empty?
             {
@@ -594,7 +594,7 @@ void HxtProcessing::run()
             else
                 emit hexitechSignalError("HxtProcessing Unable to acquire Buffer mutex lock!");
 
-            if ( !bMotorQueueEmpty && (!bFileQueueEmpty || !bBufferQueueEmpty) )   // Break out and process the Queue (if Boolean set)
+            if ( /*!bMotorQueueEmpty && */(!bFileQueueEmpty || !bBufferQueueEmpty) )   // Break out and process the Queue (if Boolean set)
             {
                 break;
             }

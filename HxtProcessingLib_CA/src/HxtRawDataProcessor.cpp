@@ -37,15 +37,15 @@ HxtRawDataProcessor::HxtRawDataProcessor(unsigned int aRows, unsigned int aCols,
     ///Populate mHxtBuffer struct
     strncpy(mHxtBuffer.hxtLabel, "HEXITECH", 8);
     mHxtBuffer.hxtVersion = formatVersion;
-    mHxtBuffer.motorPositions[0] = ssx;
-    mHxtBuffer.motorPositions[1] = ssy;
-    mHxtBuffer.motorPositions[2] = ssz;
-    mHxtBuffer.motorPositions[3] = ssrot;
-    mHxtBuffer.motorPositions[4] = timer;
-    mHxtBuffer.motorPositions[5] = galx;
-    mHxtBuffer.motorPositions[6] = galy;
-    mHxtBuffer.motorPositions[7] = galz;
-    mHxtBuffer.motorPositions[8] = galrot;
+//    mHxtBuffer.motorPositions[0] = ssx;
+//    mHxtBuffer.motorPositions[1] = ssy;
+//    mHxtBuffer.motorPositions[2] = ssz;
+//    mHxtBuffer.motorPositions[3] = ssrot;
+//    mHxtBuffer.motorPositions[4] = timer;
+//    mHxtBuffer.motorPositions[5] = galx;
+//    mHxtBuffer.motorPositions[6] = galy;
+//    mHxtBuffer.motorPositions[7] = galz;
+//    mHxtBuffer.motorPositions[8] = galrot;
     strncpy(mHxtBuffer.filePrefix, filePrefix.c_str(), filePrefix.size());
     mHxtBuffer.filePrefixLength = filePrefix.size();
     strncpy(mHxtBuffer.dataTimeStamp, dataTimeStamp.c_str(), dataTimeStamp.size());
@@ -977,16 +977,16 @@ bool HxtRawDataProcessor::writePixelOutput(string aOutputPixelFileName) {
     // Include File Prefix/Motor Positions/Data Time Stamp - if format version > 1
     if (mHxtBuffer.hxtVersion > 1)
     {
-        /// motor order: mSSX, mSSY, mSSZ, mSSROT, mTimer, mGALX, mGALY, mGALZ, mGALROT
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[0], sizeof(mHxtBuffer.motorPositions[0]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[1], sizeof(mHxtBuffer.motorPositions[1]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[2], sizeof(mHxtBuffer.motorPositions[2]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[3], sizeof(mHxtBuffer.motorPositions[3]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[4], sizeof(mHxtBuffer.motorPositions[4]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[5], sizeof(mHxtBuffer.motorPositions[5]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[6], sizeof(mHxtBuffer.motorPositions[6]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[7], sizeof(mHxtBuffer.motorPositions[7]));
-        pixelFile.write((const char*)&mHxtBuffer.motorPositions[8], sizeof(mHxtBuffer.motorPositions[8]));
+//        /// motor order: mSSX, mSSY, mSSZ, mSSROT, mTimer, mGALX, mGALY, mGALZ, mGALROT
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[0], sizeof(mHxtBuffer.motorPositions[0]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[1], sizeof(mHxtBuffer.motorPositions[1]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[2], sizeof(mHxtBuffer.motorPositions[2]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[3], sizeof(mHxtBuffer.motorPositions[3]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[4], sizeof(mHxtBuffer.motorPositions[4]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[5], sizeof(mHxtBuffer.motorPositions[5]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[6], sizeof(mHxtBuffer.motorPositions[6]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[7], sizeof(mHxtBuffer.motorPositions[7]));
+//        pixelFile.write((const char*)&mHxtBuffer.motorPositions[8], sizeof(mHxtBuffer.motorPositions[8]));
 
         // Determine length of File Prefix
         int filePrefixSize = mHxtBuffer.filePrefixLength;
@@ -1097,18 +1097,18 @@ void HxtRawDataProcessor::updateFilePrefix(string filePrefix)
     strncpy(mHxtBuffer.filePrefix, filePrefix.c_str(), filePrefix.size());
 }
 
-void HxtRawDataProcessor::updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot)
-{
-    mHxtBuffer.motorPositions[0] = ssx;
-    mHxtBuffer.motorPositions[1] = ssy;
-    mHxtBuffer.motorPositions[2] = ssz;
-    mHxtBuffer.motorPositions[3] = ssrot;
-    mHxtBuffer.motorPositions[4] = timer;
-    mHxtBuffer.motorPositions[5] = galx;
-    mHxtBuffer.motorPositions[6] = galy;
-    mHxtBuffer.motorPositions[7] = galz;
-    mHxtBuffer.motorPositions[8] = galrot;
-}
+//void HxtRawDataProcessor::updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot)
+//{
+//    mHxtBuffer.motorPositions[0] = ssx;
+//    mHxtBuffer.motorPositions[1] = ssy;
+//    mHxtBuffer.motorPositions[2] = ssz;
+//    mHxtBuffer.motorPositions[3] = ssrot;
+//    mHxtBuffer.motorPositions[4] = timer;
+//    mHxtBuffer.motorPositions[5] = galx;
+//    mHxtBuffer.motorPositions[6] = galy;
+//    mHxtBuffer.motorPositions[7] = galz;
+//    mHxtBuffer.motorPositions[8] = galrot;
+//}
 
 void HxtRawDataProcessor::updateTimeStamp(string timeStamp)
 {

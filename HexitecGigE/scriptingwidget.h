@@ -10,7 +10,7 @@
 #include <QList>
 #include <QListIterator>
 #include <QMainWindow>
-#include "dummymotor.h"
+//#include "dummymotor.h"
 #include "matlab.h"
 #include "scriptrunner.h"
 #include "reservable.h"

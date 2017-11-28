@@ -15,7 +15,7 @@ public:
    struct HxtV3Buffer {
        char hxtLabel[8];
        uint64_t hxtVersion;
-       int motorPositions[9];
+//       int motorPositions[9];
        int filePrefixLength;
        char filePrefix[100];
        char dataTimeStamp[16];

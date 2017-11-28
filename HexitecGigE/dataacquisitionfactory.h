@@ -2,12 +2,12 @@
 #define DATAACQUISITIONFACTORY_H
 
 #include <QObject>
-#include "motorfactory.h"
+//#include "motorfactory.h"
 #include "detectorfactory.h"
 #include "dataacquisition.h"
 #include "voltageSourceFactory.h"
 #include "dataacquisitionmodel.h"
-#include "ui_motioncontrolform.h"
+//#include "ui_motioncontrolform.h"
 #include "ui_dataacquisitionform.h"
 #include "ui_detectorcontrolform.h"
 #include "progressform.h"
@@ -26,14 +26,14 @@ protected:
    DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
                           ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
 private:
-   MotorModel *motorModel;
-   MotorFactory *motorFactory;
+//   MotorModel *motorModel;
+//   MotorFactory *motorFactory;
    DetectorFactory *detectorFactory;
    VoltageSourceFactory *voltageSourceFactory;
    DataAcquisition *dataAcquisition;
    DataAcquisitionModel *dataAcquisitionModel;
    static DataAcquisitionFactory *dafInstance;
-   void connectMotorsToDAQ();
+//   void connectMotorsToDAQ();
 
 signals:
    void addObject(QObject *object, bool scripting = TRUE, bool gui = TRUE);

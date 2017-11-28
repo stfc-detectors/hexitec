@@ -8,7 +8,7 @@
 #include <QObject>
 #include <QThread>
 #include <QHash>
-#include "motor.h"
+//#include "motor.h"
 #include "gigedetector.h"
 #include "hv.h"
 #include "dataacquisitionmodel.h"
@@ -30,9 +30,9 @@ protected:
    explicit DataAcquisition(QObject *parent = 0);
 private:
    static DataAcquisition *daqInstance;
-   static double motorPosition;
+//   static double motorPosition;
    static void initHexitechProcessor();
-   static QHash<QString, int> motorPositions;
+//   static QHash<QString, int> motorPositions;
    void run();
    int waitForConfiguringDone();
    int waitForCollectingDone();
@@ -131,7 +131,7 @@ public slots:
    void handleBiasState(bool biasOn);
    void handleSetFingerTemperature(double temperature);
    void handleMonitorData(MonitorData *md);
-   void positionChanged(Motor *motor, const QVariant & value);
+//   void positionChanged(Motor *motor, const QVariant & value);
    void handleBufferReady(unsigned char * transferBuffer, unsigned long validFrames);
 //   void handleImageStarted(char *path, int frameSize);
    void handleImageComplete(unsigned long long framesAcquired);

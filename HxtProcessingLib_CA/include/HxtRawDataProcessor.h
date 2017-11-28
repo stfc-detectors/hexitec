@@ -94,7 +94,7 @@ public:
     /// Set and control header entries introduced by Format Version 2
     // Configure prefix, motorPositions, etc according to selections made by functions (that control bools) below
     void updateFilePrefix(string filePrefix);
-    void updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot);
+//    void updateMotorPositions(int ssx, int ssy, int ssz, int ssrot, int timer, int galx, int galy, int galz, int galrot);
     void updateTimeStamp(string timeStamp);
     void updateFormatVersion(u64 formatVersion) { mHxtBuffer.hxtVersion = formatVersion; }
     ///

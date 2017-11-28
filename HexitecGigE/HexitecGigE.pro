@@ -23,26 +23,26 @@ SOURCES += main.cpp \
     renderarea.cpp \
     plotter.cpp \
     plotsettings.cpp \
-    motorlimits.cpp \
-    motor.cpp \
+#    motorlimits.cpp \
+#    motor.cpp \
     mainwindow.cpp \
     hxtframe.cpp \
     hxtfilereader.cpp \
     gridsizequery.cpp \
-    dummymotor.cpp \
-    motioncontrolform.cpp \
+#    dummymotor.cpp \
+#    motioncontrolform.cpp \
     curve.cpp \
     colormap.cpp \
     chargesharing.cpp \
     axissettings.cpp \
     treeitem.cpp \
     colormapeditor.cpp \
-    motormodel.cpp \
-    motordelegate.cpp \
+#    motormodel.cpp \
+#    motordelegate.cpp \
     dataacquisitionfactory.cpp \
-    motorfactory.cpp \
-    galilmotorcontroller.cpp \
-    galilmotor.cpp \
+#    motorfactory.cpp \
+#    galilmotorcontroller.cpp \
+#    galilmotor.cpp \
     matlab.cpp \
     applicationoutput.cpp \
     hexitecsofttrigger.cpp \
@@ -50,7 +50,7 @@ SOURCES += main.cpp \
     scriptrunner.cpp \
     objectreserver.cpp \
     reservation.cpp \
-    motorstatus.cpp \
+#    motorstatus.cpp \
     volume.cpp \
     datamodel.cpp \
     mainviewer.cpp \
@@ -70,7 +70,7 @@ SOURCES += main.cpp \
     detectorfilename.cpp \
     dataacquisitiondefinition.cpp \
     dataacquisitionstatus.cpp \
-    newportxpsmotor.cpp \
+#    newportxpsmotor.cpp \
     setaxesdialog.cpp \
     displaylegendsdialog.cpp \
     parameters.cpp \
@@ -90,13 +90,13 @@ HEADERS += mainwindow.h \
     renderarea.h \
     plotter.h \
     plotsettings.h \
-    motorlimits.h \
-    motor.h \
+#    motorlimits.h \
+#    motor.h \
     hxtframe.h \
     hxtfilereader.h \
     gridsizequery.h \
-    dummymotor.h \
-    motioncontrolform.h \
+#    dummymotor.h \
+#    motioncontrolform.h \
     curve.h \
     colormap.h \
     chargesharing.h \
@@ -104,12 +104,12 @@ HEADERS += mainwindow.h \
     thumbviewer.h \
     treeitem.h \
     colormapeditor.h \
-    motormodel.h \
-    motordelegate.h \
+#    motormodel.h \
+#    motordelegate.h \
     dataacquisitionfactory.h \
-    motorfactory.h \
-    galilmotorcontroller.h \
-    galilmotor.h \
+#    motorfactory.h \
+#    galilmotorcontroller.h \
+#    galilmotor.h \
     matlab.h \
     applicationoutput.h \
 #    hardtrigger.h \
@@ -118,7 +118,7 @@ HEADERS += mainwindow.h \
     scriptrunner.h \
     objectreserver.h \
     reservation.h \
-    motorstatus.h \
+#    motorstatus.h \
     volume.h \
     datamodel.h \
     mainviewer.h \
@@ -138,7 +138,7 @@ HEADERS += mainwindow.h \
     detectorfilename.h \
     dataacquisitiondefinition.h \
     dataacquisitionstatus.h \
-    newportxpsmotor.h \
+#    newportxpsmotor.h \
     setaxesdialog.h \
     displaylegendsdialog.h \
     parameters.h \
@@ -160,7 +160,7 @@ FORMS += \
     datacollectiondialog.ui \
     dpwarningdialog.ui \
     vboutofrangedialog.ui \
-    motioncontrolform.ui \
+#    motioncontrolform.ui \
     detectorcontrolform.ui \
     dataacquisitionform.ui \
     setaxesdialog.ui \
@@ -186,7 +186,7 @@ DSoFt64 {
   LIBS += $$quote(-LC:/Program Files/MATLAB/R2012b/extern/lib/win64/microsoft/) -llibeng -llibmx
   CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/release/) -lGalil2
   CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
-  CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
+  CONFIG(release, debug|release): LIBS += ../hexitegigeLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
   CONFIG(release, debug|release): LIBS += C:/karen/STFC/Technical/ProcessingRe-write/HxtProcessingLib/release/HxtProcessingLib.lib
   CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/Galil/GalilTools/LibGalil-2.0.1.447-vs2010-x64/debug/) -lGalil2
   CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
@@ -287,30 +287,18 @@ DSoFt64 {
     DEFINES += NONI
     DEFINES += OS_WIN
     LIBS += delayimp.lib
-    QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll /DELAYLOAD:Galil2.dll /DELAYLOAD:XpsLib.dll
+    QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
     LIBS += ../DetectorLib/GigE.lib
     LIBS += $$quote(-L//TE0APPS01/Matlab/R2015a/extern/lib/win64/microsoft) -llibeng -llibmx    # .lib files here
-
-    CONFIG(release, debug|release): LIBS += $$quote(-LC:/Program Files/LibGalil-2.0.4.514-vs2012-x64/release) -lGalil2
     CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
-    CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib ../XpsLib/release/XpsLib.lib
-
-    CONFIG(debug, debug|release): LIBS += $$quote(-LC:/Program Files/LibGalil-2.0.4.514-vs2012-x64/debug/) -lGalil2
+    CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib
     CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
-    CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib ../XpsLib/debug/XpsLib.lib
-
-    # Galil Tools: http://www.galil.com/downloads/software/galiltools
-
-    #INCLUDEPATH += "C:/Program Files/MATLAB/R2014a/extern/include"
+    CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib
     INCLUDEPATH += "//TE0APPS01/Matlab/R2011b/win64/extern/include/"     # Eg: engine.h
-    INCLUDEPATH += "C:/Program Files/LibGalil-2.0.4.514-vs2012-x64"
     INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.14/Eigen/"
     INCLUDEPATH += ../DetectorLib
     INCLUDEPATH  += ../HxtProcessingLib/include
     INCLUDEPATH  += ../HxtProcessingLib/
-    # B/c HxtGigeE/processingwindow.h requires HxtLogger, HxtRawDataProcessor classes:
-    INCLUDEPATH  += ../HxtProcessingLib_CA/include
-    INCLUDEPATH += ../XpsLib
     INCLUDEPATH += ../SerialPortLib
 }
 

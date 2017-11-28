@@ -280,7 +280,7 @@ uint16_t *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>
    for (int i = 0; i < frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
-      if (frame[index] < thresholdValue)
+      if (frame[i] < thresholdValue)
       {
          re_orderedFrame[index] =0;
       }

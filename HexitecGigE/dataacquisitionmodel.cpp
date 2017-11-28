@@ -2,7 +2,7 @@
 #include "voltageSourceFactory.h"
 #include "detectorfactory.h"
 #include "dataacquisition.h"
-#include "processingwindow.h"
+//#include "processingwindow.h"
 #include "progressform.h"
 
 DataAcquisitionModel *DataAcquisitionModel::damInstance = 0;

@@ -402,7 +402,7 @@ int HxtProcessing::executeProcessing(bool bProcessFiles, bool bWriteFiles)
 void HxtProcessing::commitConfigChanges() {
 
     dataProcessor->updateFormatVersion(mFormatVersion);
-    dataProcessor->updateMotorPositions(mX, mY, mZ, mRot, mTimer, mGalx, mGaly, mGalz, mGalRot);
+//    dataProcessor->updateMotorPositions(mX, mY, mZ, mRot, mTimer, mGalx, mGaly, mGalz, mGalRot);
     dataProcessor->updateFilePrefix(mFilePrefix);
     dataProcessor->updateTimeStamp(mDataTimeStamp);
 }

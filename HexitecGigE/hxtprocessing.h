@@ -21,7 +21,7 @@
 // QFileInfo needed by configHeaderEntries()
 #include <QFileInfo>
 // QHash needed by pushMotorPositions()
-#include <QHash>
+//#include <QHash>
 
 #include "inifile.h"
 #include "dataacquisitionstatus.h"
@@ -60,12 +60,12 @@ public:
     bool performManualProcessing();
     bool prepareSingleProcessing(bool &bProcessTheQueue);
     void clearAllQueues();
-    bool prepareMotorPositionProcessing(/**/ int *numberOfBuffersToProcess);
+//    bool prepareMotorPositionProcessing(/**/ int *numberOfBuffersToProcess);
     bool prepareWholeQueueProcessing(bool bProcessTheQueue);
     /// Pure debugging purposes only, will soon be removed:
     bool bDebug;
     int dummyFrameCounter;
-    void checkQueueLengths(int &motorSize, int &bufferSize, int &fileSize, int &framesSize);
+    void checkQueueLengths(/*int &motorSize, */int &bufferSize, int &fileSize, int &framesSize);
 
     /// Accessor functions - get functions redundant?
     unsigned int getDebugLevel() { return mDebugLevel; }
@@ -105,14 +105,14 @@ public:
 
     // Function supporting file format version 2
     void setFormatVersion(u64 formatVersion) { mFormatVersion = formatVersion; }
-    void pushMotorPositions(QHash<QString, int> *qHashPositions);
-    motorPositions* copyQHashToMotorPositions(QHash<QString, int> *qHashPositions);
+//    void pushMotorPositions(QHash<QString, int> *qHashPositions);
+//    motorPositions* copyQHashToMotorPositions(QHash<QString, int> *qHashPositions);
     void setDataTimeStamp(string dataTimeStamp) { mDataTimeStamp = dataTimeStamp; }
     void setFilePrefix(string filePrefix) { mFilePrefix = filePrefix; }
     void dumpSettings();
     // Configure prefix, motorPositions, etc ..
     void configHeaderEntries(string fileName);
-    void clearMotorPositions();
+//    void clearMotorPositions();
     // .. according to selections performed by functions listed underneath private slots
 
     // Provide access to set bManualProcessingEnabled:
@@ -145,7 +145,7 @@ signals:
 private slots:
     void handleReturnHxtBuffer(unsigned short* buffer);
     void savePrefix(bool bPrefixChecked);
-    void saveMotor(bool bMotorChecked);
+//    void saveMotor(bool bMotorChecked);
     void saveTimeStamp(bool bTimeStampChecked);
     void saveSameAsRawFile(bool bSameAsRawFileChecked);
     void changeProcessingCondition(processingCondition newCondition);
@@ -165,7 +165,7 @@ private slots:
 
 protected:
     // Go through fileQueue looking for any motor position changes
-    bool checkQueueForMotorChanges(int currentCondition, int *numberOfFilesToProcess);
+//    bool checkQueueForMotorChanges(int currentCondition, int *numberOfFilesToProcess);
     // Check that fileQueue only contain files to be manually processed
     bool confirmOnlyManualFilesInQueue();
 
@@ -235,7 +235,7 @@ protected:
     bool mEnableVector;
 
     bool bPrefixEnabled;
-    bool bMotorEnabled;
+//    bool bMotorEnabled;
     bool bTimeStampEnabled;
     bool bUseRawFileEnabled;
 
@@ -248,7 +248,7 @@ protected:
 
     // Variables supporting file format version 2
     u64 mFormatVersion;
-    motorPositions mPositions;
+//    motorPositions mPositions;
     string mFilePrefix;
     string mDataTimeStamp;
 
@@ -259,7 +259,7 @@ protected:
     // Provide lock access mechanism to fileQueue, motorQueue, targetCondition, bProcessQueueContents
     QMutex fileMutex;
     QMutex bufferMutex;
-    QMutex motorMutex;
+//    QMutex motorMutex;
     QMutex processingMutex;
     QMutex qContentsMutex;
     QMutex framesMutex;
@@ -271,7 +271,7 @@ protected:
 
     // Queues for raw filename and motor positions
     QQueue<string> fileQueue;
-    QQueue<motorPositions> motorQueue;
+//    QQueue<motorPositions> motorQueue;
     // bufferQueue added
     QQueue<unsigned short*> bufferQueue;
     QQueue<unsigned long> framesQueue;

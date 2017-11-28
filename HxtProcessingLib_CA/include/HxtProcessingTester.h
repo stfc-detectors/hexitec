@@ -78,12 +78,12 @@ public:
     ///                       the above set functions are not enough
     void commitConfigChanges();
 
-    void setMotorPosition(int xPos, int yPos, int zPos, int rotPos, int aTimer, int xGal, int yGal, int zGal, int rotGal)
-    {
-        mX = xPos; mY = yPos; mZ = zPos;
-        mRot = rotPos; mTimer = aTimer; mGalx = xGal;
-        mGaly = yGal; mGalz = zGal; mGalRot = rotGal;
-    }
+//    void setMotorPosition(int xPos, int yPos, int zPos, int rotPos, int aTimer, int xGal, int yGal, int zGal, int rotGal)
+//    {
+//        mX = xPos; mY = yPos; mZ = zPos;
+//        mRot = rotPos; mTimer = aTimer; mGalx = xGal;
+//        mGaly = yGal; mGalz = zGal; mGalRot = rotGal;
+//    }
     void setDataTimeStamp(string dataTimeStamp) { mDataTimeStamp = dataTimeStamp; }
     void setFilePrefix(string filePrefix) { mFilePrefix = filePrefix; }
 

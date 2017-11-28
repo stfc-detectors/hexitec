@@ -99,7 +99,7 @@ private:
    struct HxtBuffer {
        char hxtLabel[8];
        quint64 hxtVersion;
-       int motorPositions[9];
+//       int motorPositions[9];
        int filePrefixLength;
        char filePrefix[100];
        char dataTimeStamp[16];

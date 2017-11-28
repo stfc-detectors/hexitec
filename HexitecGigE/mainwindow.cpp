@@ -35,7 +35,7 @@ MainWindow::MainWindow()
 {
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
-   MotionControlForm *motionControlform;
+//   MotionControlForm *motionControlform;
    ProcessingForm *processingForm;
    ProcessingBufferGenerator *processingBufferGenerator;
    ProcessingDefinition *processingDefinition;
@@ -78,7 +78,7 @@ MainWindow::MainWindow()
    readDir = "";
    readFilter = "";
 
-   bHexitechProcessingBusy = false;
+//   bHexitechProcessingBusy = false;
    bUpdateVisualisationTab = false;
    saveCsv = false;
    saveH5 = false;
@@ -175,7 +175,7 @@ MainWindow::MainWindow()
    {
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
                                                                 progressForm, processingBufferGenerator, this);
-      motionControlform = new MotionControlForm();
+//      motionControlform = new MotionControlForm();
    }
 
    if (activeDAQ)
@@ -229,7 +229,7 @@ MainWindow::MainWindow()
       connect(this, SIGNAL(stopDAQ()), dataAcquisitionForm, SLOT(handleAbortDAQPressed()));
       connect(this, SIGNAL(startHV()), detectorControlForm, SLOT(handleHVOn()));
       connect(this, SIGNAL(stopHV()), detectorControlForm, SLOT(handleHVOff()));
-      tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
+//      tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
    }
 
    tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
@@ -915,10 +915,10 @@ void MainWindow::getActiveSliceFromMatlab()
    }
 }
 
-void MainWindow::updateHexitechProcessingStatus(bool isBusy)
-{
-    bHexitechProcessingBusy = isBusy;
-}
+//void MainWindow::updateHexitechProcessingStatus(bool isBusy)
+//{
+//    bHexitechProcessingBusy = isBusy;
+//}
 
 void MainWindow::updateVisualisationTab(bool bUpdate)
 {
@@ -966,25 +966,25 @@ void MainWindow::checkKeithleyConfiguration()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if ( bHexitechProcessingBusy )
-    {
-        QMessageBox::StandardButton ret;
-        ret = QMessageBox::warning(this, tr("Application"),
-                     tr("The hexitech thread is still processing in the background.\n"
-                        "Quitting now will abort that processing.\n"
-                        "Do you want to abort?"),
-                     QMessageBox::Abort | QMessageBox::Cancel);
-        if (ret == QMessageBox::Abort)
-        {
-            // Quit
-            event->accept();
-        }
-        else if (ret == QMessageBox::Cancel)
-        {
-            // Don't quit
-            event->ignore();
-        }
-    }
+//    if ( bHexitechProcessingBusy )
+//    {
+//        QMessageBox::StandardButton ret;
+//        ret = QMessageBox::warning(this, tr("Application"),
+//                     tr("The hexitech thread is still processing in the background.\n"
+//                        "Quitting now will abort that processing.\n"
+//                        "Do you want to abort?"),
+//                     QMessageBox::Abort | QMessageBox::Cancel);
+//        if (ret == QMessageBox::Abort)
+//        {
+//            // Quit
+//            event->accept();
+//        }
+//        else if (ret == QMessageBox::Cancel)
+//        {
+//            // Don't quit
+//            event->ignore();
+//        }
+//    }
 }
 
 bool MainWindow::checkDAQChoice()
