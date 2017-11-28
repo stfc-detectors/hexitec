@@ -18,6 +18,7 @@ S D M Jacques 24 Feb 2011
 #include "voxel.h"
 #include "datamodel.h"
 #include "reservable.h"
+#include "applicationoutput.h"
 
 #include "Dense"
 using namespace Eigen;
@@ -37,7 +38,7 @@ public:
    Slice(QString name, QString fileName);
    Slice(QString name, QStringList fileNameList);
    Slice(QString name, unsigned short* buffer, QString fileName);
-   Slice(QString name, QString varName, int dummy);
+//   Slice(QString name, QString varName, int dummy);
    Slice(QString name, int rows, int cols, int depth, double value);
 
    ~Slice();
@@ -72,8 +73,8 @@ public:
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
    static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
-   Q_INVOKABLE void sendToMatlab();
-   Q_INVOKABLE void sendToMatlab(QString varName);
+//   Q_INVOKABLE void sendToMatlab();
+//   Q_INVOKABLE void sendToMatlab(QString varName);
    void setVoxelDataLen(int voxelDataLen);
    SArray<double> sumImage();
    SArray<double> sumImage(int start, int end);

@@ -16,7 +16,7 @@
 #include <QTreeView>
 #include <QSettings>
 
-#include "matlab.h"
+//#include "matlab.h"
 #include "applicationoutput.h"
 #include "renderarea.h"
 #include "plotter.h"
@@ -148,8 +148,8 @@ public slots:
    void readFiles(QStringList files);
    void readBuffer(unsigned short* buffer, QString fileName);   /// HexitecGigE Addition
    void readData(QString fileName);
-   void sendActiveSliceToMatlab();
-   void getActiveSliceFromMatlab();
+//   void sendActiveSliceToMatlab();
+//   void getActiveSliceFromMatlab();
    // HxtProcessing (from processingWindow) signals background processing thread status
 //   void updateHexitechProcessingStatus(bool isBusy);
    // ProcessingWindow signals whether Visualisation tab should be updated

@@ -11,7 +11,7 @@
 #include <QListIterator>
 #include <QMainWindow>
 //#include "dummymotor.h"
-#include "matlab.h"
+//#include "matlab.h"
 #include "scriptrunner.h"
 #include "reservable.h"
 #include "reservation.h"
@@ -53,7 +53,7 @@ private slots:
    void loadScript();
 
    void saveScript();
-   void setMatlab();
+//   void setMatlab();
    void setScripting();
    void toggle();
    void clearEditor();
@@ -70,7 +70,7 @@ private:
    int destination;
    Ui::ScriptingWidget *ui;
    void scriptError();
-   matlab *matlab;
+//   matlab *matlab;
    QList<QString> commands;
    QList<QString>::iterator commandIterator;
    void executeScript(QString script);
@@ -84,7 +84,7 @@ private:
    void processNextSection();
    bool isInitScript;
    Reservation reservation;
-   QAction *matlabAction;
+//   QAction *matlabAction;
    QAction *scriptingAction;
    QAction *clearAction;
    void createActions();

@@ -17,6 +17,7 @@
 #include "detectorfilename.h"
 #include "objectreserver.h"
 #include "reservable.h"
+#include "applicationoutput.h"
 
 // Putting the .h files for these classes here can introduce circularity problems so
 // we just declare the classes and put the .h files in the .cpp file.

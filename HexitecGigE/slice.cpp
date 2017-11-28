@@ -12,7 +12,7 @@ S D M Jacques 24 Feb 2011
 #include <math.h>
 #include <QProgressDialog>
 #include <gridsizequery.h>
-#include <matlab.h>
+//#include <matlab.h>
 #include <cfloat>
 #include <QDebug>
 
@@ -30,37 +30,38 @@ Slice::Slice(QString name, QObject *parent) : QObject(parent)
 
 /* Constructs a Slice from a matlabVariable.
   */
-Slice::Slice(QString name, QString varName, int dummy)
-{
-   preDataInit(name);
-   matlab *matlab = matlab::instance();
-   if (matlab->getSliceFromMatlab(this, varName) == matlab->SUCCESS)
-   {
-      QVector <double> xScale;
-      if (matlab->getVectorFromMatlab(xScale, varName + "XScale") == matlab->SUCCESS)
-      {
-         if (xScale.size() == voxelDataLen)
-         {
-            for (int i = 0 ; i < voxelDataLen; ++i)
-               commonX.push_back(xScale[i]);
-            xType = COMMON;
-         }
-         else
-         {
-            emit writeWarning("activeSliceXScale size is not consistent with activeSlice - ignoring activeSliceXscale");
-         }
-         postDataInit();
-      }
-      else
-      {
-         emit writeWarning("activeSliceXScale could not be read");
-      }
-   }
-   else
-   {
-      throw QString("Failed to construct Slice from matlab variable: \"" + varName + "\"");
-   }
-}
+/// Redundant now that Matlab's taken out altogether?
+//Slice::Slice(QString name, QString varName, int dummy)
+//{
+//   preDataInit(name);
+//   matlab *matlab = matlab::instance();
+//   if (matlab->getSliceFromMatlab(this, varName) == matlab->SUCCESS)
+//   {
+//      QVector <double> xScale;
+//      if (matlab->getVectorFromMatlab(xScale, varName + "XScale") == matlab->SUCCESS)
+//      {
+//         if (xScale.size() == voxelDataLen)
+//         {
+//            for (int i = 0 ; i < voxelDataLen; ++i)
+//               commonX.push_back(xScale[i]);
+//            xType = COMMON;
+//         }
+//         else
+//         {
+//            emit writeWarning("activeSliceXScale size is not consistent with activeSlice - ignoring activeSliceXscale");
+//         }
+//         postDataInit();
+//      }
+//      else
+//      {
+//         emit writeWarning("activeSliceXScale could not be read");
+//      }
+//   }
+//   else
+//   {
+//      throw QString("Failed to construct Slice from matlab variable: \"" + varName + "\"");
+//   }
+//}
 
 
 
@@ -1717,29 +1718,29 @@ void Slice::setData(double *data)
    }
 }
 
-void Slice::sendToMatlab()
-{
-   sendToMatlab(objectName());
-}
+//void Slice::sendToMatlab()
+//{
+//   sendToMatlab(objectName());
+//}
 
-void Slice::sendToMatlab(QString varName)
-{
-   matlab *matlab = matlab::instance();
-   int dimensions[3] = {voxelDataLen, gridSizeY, gridSizeX};
+//void Slice::sendToMatlab(QString varName)
+//{
+//   matlab *matlab = matlab::instance();
+//   int dimensions[3] = {voxelDataLen, gridSizeY, gridSizeX};
 
-   double *data = getData();
-   matlab->sendArrayToMatlab(dimensions, data, varName);
-   free(data);
+//   double *data = getData();
+//   matlab->sendArrayToMatlab(dimensions, data, varName);
+//   free(data);
 
-   if (this->xType == UNIQUE)
-   {
-      emit writeWarning("X scale has not been sent to Matlab (Not available in this version)");
-   }
-   else if (this->xType == COMMON)
-   {
-      matlab->sendVectorToMatlab(this->commonX, varName + "XScale");
-   }
-}
+//   if (this->xType == UNIQUE)
+//   {
+//      emit writeWarning("X scale has not been sent to Matlab (Not available in this version)");
+//   }
+//   else if (this->xType == COMMON)
+//   {
+//      matlab->sendVectorToMatlab(this->commonX, varName + "XScale");
+//   }
+//}
 
 /* Converts a double value to a channel number for this slice.
   */

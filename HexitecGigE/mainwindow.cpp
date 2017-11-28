@@ -120,11 +120,11 @@ MainWindow::MainWindow()
    connect(workspace, SIGNAL(initializeSlice(Slice *)), this, SLOT(initializeSlice(Slice *)));
    connect(workspace, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(workspace, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), workspace, SLOT(matlabStatus(bool)));
+//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), workspace, SLOT(matlabStatus(bool)));
 
-   connect(matlab::instance(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-   connect(matlab::instance(), SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
-   connect(matlab::instance(), SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
+//   connect(matlab::instance(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
+//   connect(matlab::instance(), SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
+//   connect(matlab::instance(), SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
 
    if (activeDAQ)
    {
@@ -308,9 +308,9 @@ void MainWindow::readFiles()
 {
    const char *df = "Data Files (*.hxt *.hif *.ezd *.dat *.xy *.txt *.*sb *.*xmy)";
    const char *sf = "Script Files (*.js)";
-   const char *mf = "Matlab Files (*.m)";
+//   const char *mf = "Matlab Files (*.m)";
 
-   QString filter = tr(df) + ";;" + tr(sf) + ";;" + tr(mf);
+   QString filter = tr(df) + ";;" + tr(sf) + ";;" /*+ tr(mf)*/;
    QStringList files = QFileDialog::getOpenFileNames(this,
                                                      tr("Select Files for Reading"),
                                                      readDir,
@@ -416,9 +416,9 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 void MainWindow::saveFiles()
 {
    const char *sf = "Script Files (*.js)";
-   const char *mf = "Matlab Files (*.m)";
+//   const char *mf = "Matlab Files (*.m)";
    QString filter = tr(EZD_FILES) + ";;" + tr(HXT_FILES) + ";;" + tr(HIF_FILES) + ";;" + tr(XY_FILES) + ";;" + tr(XMY_FILES) + ";;" + tr(SB_FILES);
-   filter = filter + ";;" + sf + ";;" + mf;
+   filter = filter + ";;" + sf + ";;" /*+ mf*/;
    QString selectedFilter;
    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                    "", filter, &selectedFilter);
@@ -694,19 +694,19 @@ void MainWindow::createMenus()
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
 
-   QAction *exportActiveSliceToMatlab = new QAction(QIcon(":/images/exportToMatlab.png"), tr(""),this);
-   exportActiveSliceToMatlab->setText(tr("Export active slice to Matlab"));
-   exportActiveSliceToMatlab->setEnabled(false);
-   fileToolBar->addAction(exportActiveSliceToMatlab);
-   connect(exportActiveSliceToMatlab, SIGNAL(triggered()), this, SLOT(sendActiveSliceToMatlab()));
-   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), exportActiveSliceToMatlab, SLOT(setEnabled(bool)));
+//   QAction *exportActiveSliceToMatlab = new QAction(QIcon(":/images/exportToMatlab.png"), tr(""),this);
+//   exportActiveSliceToMatlab->setText(tr("Export active slice to Matlab"));
+//   exportActiveSliceToMatlab->setEnabled(false);
+//   fileToolBar->addAction(exportActiveSliceToMatlab);
+//   connect(exportActiveSliceToMatlab, SIGNAL(triggered()), this, SLOT(sendActiveSliceToMatlab()));
+//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), exportActiveSliceToMatlab, SLOT(setEnabled(bool)));
 
-   QAction *importActiveSliceFromMatlab = new QAction(QIcon(":/images/importFromMatlab.png"), tr(""),this);
-   importActiveSliceFromMatlab->setEnabled(false);
-   importActiveSliceFromMatlab->setText(tr("Import active slice from Matlab"));
-   fileToolBar->addAction(importActiveSliceFromMatlab);
-   connect(importActiveSliceFromMatlab, SIGNAL(triggered()), this, SLOT(getActiveSliceFromMatlab()));
-   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), importActiveSliceFromMatlab, SLOT(setEnabled(bool)));
+//   QAction *importActiveSliceFromMatlab = new QAction(QIcon(":/images/importFromMatlab.png"), tr(""),this);
+//   importActiveSliceFromMatlab->setEnabled(false);
+//   importActiveSliceFromMatlab->setText(tr("Import active slice from Matlab"));
+//   fileToolBar->addAction(importActiveSliceFromMatlab);
+//   connect(importActiveSliceFromMatlab, SIGNAL(triggered()), this, SLOT(getActiveSliceFromMatlab()));
+//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), importActiveSliceFromMatlab, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::createStatusBar()
@@ -896,24 +896,24 @@ void MainWindow::writeH5(QString fileName)
    translateProcess->execute(program, arguments);
 }
 
-void MainWindow::sendActiveSliceToMatlab()
-{
-   DataModel::instance()->getActiveSlice()->sendToMatlab("activeSlice");
-}
+//void MainWindow::sendActiveSliceToMatlab()
+//{
+//   DataModel::instance()->getActiveSlice()->sendToMatlab("activeSlice");
+//}
 
-void MainWindow::getActiveSliceFromMatlab()
-{
-   Slice *slice;
-   try
-   {
-      slice = new Slice("from Matlab", "activeSlice", 1);
-      initializeSlice(slice);
-   }
-   catch (QString message)
-   {
-      emit writeError(message);
-   }
-}
+//void MainWindow::getActiveSliceFromMatlab()
+//{
+//   Slice *slice;
+//   try
+//   {
+//      slice = new Slice("from Matlab", "activeSlice", 1);
+//      initializeSlice(slice);
+//   }
+//   catch (QString message)
+//   {
+//      emit writeError(message);
+//   }
+//}
 
 //void MainWindow::updateHexitechProcessingStatus(bool isBusy)
 //{

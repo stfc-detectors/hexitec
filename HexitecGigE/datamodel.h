@@ -10,7 +10,7 @@
 // we just declare the classes and put the .h files in the .cpp file.
 class Volume;
 class Slice;
-class MatlabVariable;
+//class MatlabVariable;
 class TreeItem;
 
 class DataModel : public QAbstractItemModel
@@ -57,8 +57,8 @@ public:
    Volume *getVolume(QString name);
    Slice *getSlice(QString name);
    Slice *getSlice(const QModelIndex &index);
-   MatlabVariable *getMatlabArray(QModelIndex &index);
-   void removeAllMatlabVariables();
+//   MatlabVariable *getMatlabArray(QModelIndex &index);
+//   void removeAllMatlabVariables();
    void removeSlice(const QModelIndex &index);
    void add(QModelIndex index);
    void end();

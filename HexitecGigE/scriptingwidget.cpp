@@ -43,16 +43,16 @@ ScriptingWidget::ScriptingWidget(QWidget *parent) :
    createActions();
    createContextMenus();
 
-   matlab = matlab::instance();
-   connect(matlab, SIGNAL(updateOutput(QString)), this, SLOT(updateOutput(QString)));
-   connect(matlab, SIGNAL(scriptDone(bool)), this, SLOT(scriptDone(bool)));
+//   matlab = matlab::instance();
+//   connect(matlab, SIGNAL(updateOutput(QString)), this, SLOT(updateOutput(QString)));
+//   connect(matlab, SIGNAL(scriptDone(bool)), this, SLOT(scriptDone(bool)));
 
    // Since the matlabAction and the scriptingAction have shortcuts set none of this section should be necessary
    ui->scriptEditor->installEventFilter(this);
    ui->scriptLine->installEventFilter(this);
    ui->scriptOutput->installEventFilter(this);
-   QShortcut *qscOne = new QShortcut(QKeySequence(tr("Alt+M", "matlab")), this);
-   connect(qscOne, SIGNAL(activated()), this, SLOT(setMatlab()));
+//   QShortcut *qscOne = new QShortcut(QKeySequence(tr("Alt+M", "matlab")), this);
+//   connect(qscOne, SIGNAL(activated()), this, SLOT(setMatlab()));
    QShortcut *qscTwo = new QShortcut(QKeySequence(tr("Alt+J", "javascript")), this);
    connect(qscTwo, SIGNAL(activated()), this, SLOT(setScripting()));
    QShortcut *qscThree = new QShortcut(QKeySequence(tr("Alt+T", "toggle")), this);
@@ -119,11 +119,11 @@ void ScriptingWidget::createActions()
    clearAction->setStatusTip(tr("Clear output screen"));
    connect(clearAction, SIGNAL(triggered()), this, SLOT(clearEditor()));
 
-   matlabAction = new QAction(tr("Matlab"), this);
-   matlabAction->setShortcut(QKeySequence(tr("Alt+M")));
-   matlabAction->setStatusTip(tr("Set destination to matlab"));
-   matlabAction->setCheckable(true);
-   connect(matlabAction, SIGNAL(triggered()), this, SLOT(setMatlab()));
+//   matlabAction = new QAction(tr("Matlab"), this);
+//   matlabAction->setShortcut(QKeySequence(tr("Alt+M")));
+//   matlabAction->setStatusTip(tr("Set destination to matlab"));
+//   matlabAction->setCheckable(true);
+//   connect(matlabAction, SIGNAL(triggered()), this, SLOT(setMatlab()));
 
    scriptingAction = new QAction(tr("JavaScript"), this);
    scriptingAction->setShortcut(QKeySequence(tr("Alt+J")));
@@ -135,18 +135,18 @@ void ScriptingWidget::createActions()
 void ScriptingWidget::createContextMenus()
 {
    mainContextMenu = new QMenu();
-   mainContextMenu->addAction(matlabAction);
+//   mainContextMenu->addAction(matlabAction);
    mainContextMenu->addAction(scriptingAction);
    connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(mainContextMenuEvent(QPoint)));
 
    scriptEditorContextMenu = ui->scriptEditor->createStandardContextMenu();
    scriptEditorContextMenu->addAction(clearAction);
-   scriptEditorContextMenu->addAction(matlabAction);
+//   scriptEditorContextMenu->addAction(matlabAction);
    scriptEditorContextMenu->addAction(scriptingAction);
    connect(ui->scriptEditor, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorContextMenuEvent(QPoint)));
 
    scriptLineContextMenu = ui->scriptLine->createStandardContextMenu();
-   scriptLineContextMenu->addAction(matlabAction);
+//   scriptLineContextMenu->addAction(matlabAction);
    scriptLineContextMenu->addAction(scriptingAction);
    connect(ui->scriptLine, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(lineContextMenuEvent(QPoint)));
 
@@ -207,20 +207,20 @@ bool ScriptingWidget::eventFilter(QObject *object, QEvent *event)
    return eventHandled;
 }
 
-void ScriptingWidget::setMatlab()
-{
-   destination = MATLAB;
-   matlabAction->setChecked(true);
-   scriptingAction->setChecked(false);
-   ui->lineEditLabel->setText("   MATLAB>>");
-   ui->lineEditLabel->setStyleSheet("color:orangered;");
-   scriptingDockWidget->setWindowTitle("MATLAB");
-}
+//void ScriptingWidget::setMatlab()
+//{
+//   destination = MATLAB;
+//   matlabAction->setChecked(true);
+//   scriptingAction->setChecked(false);
+//   ui->lineEditLabel->setText("   MATLAB>>");
+//   ui->lineEditLabel->setStyleSheet("color:orangered;");
+//   scriptingDockWidget->setWindowTitle("MATLAB");
+//}
 
 void ScriptingWidget::setScripting()
 {
    destination = SCRIPTING;
-   matlabAction->setChecked(false);
+//   matlabAction->setChecked(false);
    scriptingAction->setChecked(true);
    ui->lineEditLabel->setText("JAVASCRIPT>>");
    ui->lineEditLabel->setStyleSheet("color:blue;");
@@ -233,10 +233,10 @@ void ScriptingWidget::toggle()
    {
       setScripting();
    }
-   else
-   {
-      setMatlab();
-   }
+//   else
+//   {
+//      setMatlab();
+//   }
 }
 
 void ScriptingWidget::clearEditor()
@@ -462,9 +462,9 @@ void ScriptingWidget::sendCommands(QString commands)
    case MATLAB:
 //      qDebug() << "sendCommands to MATLAB";
       setScriptIsRunning(true);
-      matlab->setScript(commands);
+//      matlab->setScript(commands);
       updateOutput("Starting MATLAB script");
-      matlab->startScript();
+//      matlab->startScript();
       break;
    }
 }
@@ -473,7 +473,7 @@ void ScriptingWidget::setModeFromFile(QString fileName)
 {
    if (fileName.endsWith('m'))
    {
-      setMatlab();
+      /*setMatlab()*/;
    }
    else if (fileName.endsWith("js"))
    {

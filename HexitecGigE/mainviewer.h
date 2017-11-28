@@ -8,7 +8,7 @@
 #include <QtGui>
 
 #include "renderarea.h"
-#include "matlabvariable.h"
+//#include "matlabvariable.h"
 #include "sarray.h"
 
 // MainViewer is a wrapper for the main renderArea.
@@ -23,7 +23,7 @@ public:
    QToolBar *createToolbar();
    void showNewActiveSlice();
    bool isHeld();
-   void showMatlabArray(MatlabVariable *ma);
+//   void showMatlabArray(MatlabVariable *ma);
 
 protected:
    void dragEnterEvent(QDragEnterEvent *event);

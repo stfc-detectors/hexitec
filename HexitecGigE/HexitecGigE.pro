@@ -43,7 +43,7 @@ SOURCES += main.cpp \
 #    motorfactory.cpp \
 #    galilmotorcontroller.cpp \
 #    galilmotor.cpp \
-    matlab.cpp \
+#    matlab.cpp \
     applicationoutput.cpp \
     hexitecsofttrigger.cpp \
     reservable.cpp \
@@ -56,7 +56,7 @@ SOURCES += main.cpp \
     mainviewer.cpp \
     workspace.cpp \
     getvaluedialog.cpp \
-    matlabvariable.cpp \
+#    matlabvariable.cpp \
     eigencomponent.cpp \
     offsetsdialog.cpp \
     datacollectiondialog.cpp \
@@ -110,7 +110,7 @@ HEADERS += mainwindow.h \
 #    motorfactory.h \
 #    galilmotorcontroller.h \
 #    galilmotor.h \
-    matlab.h \
+#    matlab.h \
     applicationoutput.h \
 #    hardtrigger.h \
     hexitecsofttrigger.h \
@@ -124,7 +124,7 @@ HEADERS += mainwindow.h \
     mainviewer.h \
     workspace.h \
     getvaluedialog.h \
-    matlabvariable.h \
+#    matlabvariable.h \
     eigencomponent.h \
     offsetsdialog.h \
     datacollectiondialog.h \
@@ -287,14 +287,14 @@ DSoFt64 {
     DEFINES += NONI
     DEFINES += OS_WIN
     LIBS += delayimp.lib
-    QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll /DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
+    QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll #/DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
     LIBS += ../DetectorLib/GigE.lib
-    LIBS += $$quote(-L//TE0APPS01/Matlab/R2015a/extern/lib/win64/microsoft) -llibeng -llibmx    # .lib files here
+#    LIBS += $$quote(-L//TE0APPS01/Matlab/R2015a/extern/lib/win64/microsoft) -llibeng -llibmx    # .lib files here
     CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
     CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib
     CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
     CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib
-    INCLUDEPATH += "//TE0APPS01/Matlab/R2011b/win64/extern/include/"     # Eg: engine.h
+#    INCLUDEPATH += "//TE0APPS01/Matlab/R2011b/win64/extern/include/"     # Eg: engine.h
     INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.14/Eigen/"
     INCLUDEPATH += ../DetectorLib
     INCLUDEPATH  += ../HxtProcessingLib/include

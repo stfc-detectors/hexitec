@@ -59,26 +59,26 @@ void MainViewer::showNewActiveSlice()
    renderArea->update();
 }
 
-void MainViewer::showMatlabArray(MatlabVariable *ma)
-{
-   renderArea->Hexitec_logoOff();
-   int xSize = ma->getXSize();
-   int ySize = ma->getYSize();
-   double *data = ma->getData();
-   SArray <double> imageData = SArray<double>();
-   imageData.resize(xSize, ySize);
-   for (int i = 0; i < xSize; i++)
-   {
-      for(int j = 0; j < ySize; j++)
-      {
-         imageData[i][j] = data[i * ySize + j];
-      }
-   }
-   renderArea->setImageData(imageData);
-   renderArea->title(ma->getName());
-   renderArea->update();
-   renderArea->setDynamicStateOff();
-}
+//void MainViewer::showMatlabArray(MatlabVariable *ma)
+//{
+//   renderArea->Hexitec_logoOff();
+//   int xSize = ma->getXSize();
+//   int ySize = ma->getYSize();
+//   double *data = ma->getData();
+//   SArray <double> imageData = SArray<double>();
+//   imageData.resize(xSize, ySize);
+//   for (int i = 0; i < xSize; i++)
+//   {
+//      for(int j = 0; j < ySize; j++)
+//      {
+//         imageData[i][j] = data[i * ySize + j];
+//      }
+//   }
+//   renderArea->setImageData(imageData);
+//   renderArea->title(ma->getName());
+//   renderArea->update();
+//   renderArea->setDynamicStateOff();
+//}
 
 MainViewer::MainViewer()
 {
