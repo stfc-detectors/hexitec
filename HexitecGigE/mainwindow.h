@@ -159,6 +159,7 @@ public slots:
    void handleShowImage();
    void enableMainWindowActions();
    void disableMainWindowActions();
+   void disableStopDAQAction();
    void enableHVActions();
    void disableHVActions();
    void handleProcessingComplete(QString fileName);

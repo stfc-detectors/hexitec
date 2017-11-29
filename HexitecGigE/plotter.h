@@ -177,7 +177,7 @@ private:
    int numberRightPoints;
 
    QSpinBox *channelExplorerSpinBox;
-   QSpinBox *backgroundRemoveSpinBox;
+//   QSpinBox *backgroundRemoveSpinBox;
 
    int wheelValue;
    QMainWindow *plotWindow;

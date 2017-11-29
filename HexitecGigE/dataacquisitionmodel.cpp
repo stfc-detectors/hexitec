@@ -17,17 +17,10 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
    DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
 
-   qDebug() << "Setting up dataAcquisitionForm, progressForm..";
-//   qDebug() << dataAcquisitionForm::staticMetaObject.className();
-//   qDebug() << progressForm::staticMetaObject.className();
-
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
    this->progressForm = progressForm;
    this->processingBufferGenerator = processingBufferGenerator;
-
-   qDebug() << "this->daAcqForm: " << this->dataAcquisitionForm->metaObject()->className();
-   qDebug() << "this->progrForm: " << this->progressForm->metaObject()->className();
 
    hv = VoltageSourceFactory::instance()->getHV();
    gigEDetector = DetectorFactory::instance()->getGigEDetector();
@@ -102,10 +95,6 @@ void DataAcquisitionModel::connectDetectorMonitor()
 
 void DataAcquisitionModel::connectDataAcquisition()
 {
-    qDebug() << Q_FUNC_INFO; // just to confirm we entered the function
-    qDebug() << "class name: " << DataAcquisitionModel::staticMetaObject.className();
-
-    qDebug() << "DataAcquisitionModel::connectDataAcquisition() 1";
    connect(dataAcquisition, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(dataAcquisition, SIGNAL(executeOffsets()),
@@ -135,8 +124,6 @@ void DataAcquisitionModel::connectDataAcquisition()
 
    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
            detectorControlForm, SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
-//REPLACE THIS    connect(dataAcquisition, SIGNAL(dataAcquisitionStatusChanged(DataAcquisitionStatus)),
-//REPLACE THIS            ProcessingWindow::getHxtProcessor(), SLOT(handleDataAcquisitionStatusChanged(DataAcquisitionStatus)));
    connect(dataAcquisition, SIGNAL(setTargetTemperature(double)),
            gigEDetector, SLOT(handleSetTargetTemperature(double)));
    connect(dataAcquisition, SIGNAL(appendTimestamp(bool)),
@@ -152,13 +139,7 @@ void DataAcquisitionModel::connectDataAcquisition()
            processingBufferGenerator, SLOT(handleImageComplete(long long)));
    connect(dataAcquisition, SIGNAL(transferBufferReady(unsigned char*,ulong)),
               processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
-//   connect(dataAcquisition, SIGNAL(imageStarting(double, int, int)),
-//           progressForm, SLOT(handleImageStarting(double, int, int)));
 
-
-//   this->dataAcquisitionForm->setDaqName(QString("test"));
-//   this->progressForm->setDaqCollectionTime(23.2);
-   qDebug() << "DataAcquisitionModel::connectDataAcquisition() 2";
 
    connect(this->dataAcquisitionForm, SIGNAL(newDataAcquisitionState(QString)),
            this->progressForm, SLOT(handleNewDataAcquisitionState(QString)));
@@ -171,7 +152,6 @@ void DataAcquisitionModel::connectDataAcquisition()
 
    connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
            processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));
-
 }
 
 void DataAcquisitionModel::connectGigEDetector()
@@ -200,7 +180,6 @@ void DataAcquisitionModel::connectGigEDetector()
 //           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(gigEDetector, SIGNAL(cancelDataCollection()),
            dataAcquisition, SLOT(handleCancelReducedDataCollection()));
-
 }
 
 void DataAcquisitionModel::connectDetectorControlForm()

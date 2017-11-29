@@ -51,6 +51,7 @@ private:
    void guiReady();
    void guiInitialising();
    void guiWaitingDarks();
+   void guiWaitingTriggers();
    void guiOffsets();
    void guiOffsetsPrep();
    void guiCollectingPrep();
@@ -111,6 +112,7 @@ signals:
    void createLogFile(DetectorFilename *logFilename);
    void enableMainWindowActions();
    void disableMainWindowActions();
+   void disableStopDAQAction();
    void saveRawChanged(bool saveRaw);
 
    void newDataAcquisitionState(QString state);

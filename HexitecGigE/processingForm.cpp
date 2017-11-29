@@ -69,8 +69,8 @@ void ProcessingForm::initialiseProcessingForm()
    QString interceptFilename;
    QString outputPrefix;
    QString boolString = "true";
-   int nRows = 80;
-   int nCols = 80;
+//   int nRows = 80;
+//   int nCols = 80;
    int rows = 80;
    int columns = 80;
    long long binStart = 0;

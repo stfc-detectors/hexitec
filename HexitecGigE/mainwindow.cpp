@@ -33,7 +33,6 @@
 
 MainWindow::MainWindow()
 {
-    qDebug() << "Hi";
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
 //   MotionControlForm *motionControlform;
@@ -164,6 +163,8 @@ MainWindow::MainWindow()
               this, SLOT(enableHVActions()));
       connect(detectorControlForm, SIGNAL(disableHVActions()),
               this, SLOT(disableHVActions()));
+      connect(dataAcquisitionForm, SIGNAL(disableStopDAQAction()),
+              this, SLOT(disableStopDAQAction()));
    }
 //   We don't have one of these so this won't happen.
 //   scriptingWidget->runInitScript();
@@ -171,12 +172,10 @@ MainWindow::MainWindow()
    // The processing window needs to have been created before the data acquisition factory!
    processingDefinition = new ProcessingDefinition(6400);
    processingForm = new ProcessingForm();
-   qDebug() << "Before ProcessingBufferGenerator";
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
-   qDebug() << "After";
+
    if (activeDAQ)
    {
-       qDebug() << "1";
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
                                                                 progressForm, processingBufferGenerator, this);
 //      motionControlform = new MotionControlForm();
@@ -184,7 +183,6 @@ MainWindow::MainWindow()
 
    if (activeDAQ)
    {
-       qDebug() << "2";
       HV *hv = VoltageSourceFactory::instance()->getHV();
       detectorControlForm->setHvName(hv->property("objectName").toString());
       QString daqName = dataAcquisitionFactory->getDataAcquisition()->property("objectName").toString();
@@ -1060,6 +1058,7 @@ void MainWindow::handleSaveCsvChanged(bool saveCsv)
 void MainWindow::enableMainWindowActions()
 {
    startDAQAct->setEnabled(true);
+   qDebug() << "MainWindow::enableMainWindowActions()   disabling stopDAQAct..";
    stopDAQAct->setDisabled(true);
 }
 
@@ -1080,9 +1079,15 @@ void MainWindow::enableHVActions()
 void MainWindow::disableMainWindowActions()
 {
    startDAQAct->setDisabled(true);
+   qDebug() << "MainWindow::disableMainWindowActions()  enabling stopDAQAct";
    stopDAQAct->setEnabled(true);
 }
 
+void MainWindow::disableStopDAQAction()
+{
+   qDebug() << "MainWindow::disableStopDAQAction()  disabling stopDAQAct";
+   stopDAQAct->setEnabled(false);
+}
 
 void MainWindow::disableHVActions()
 {

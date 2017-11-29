@@ -116,8 +116,8 @@ Plotter::Plotter(QWidget *parent) :
 
    channelExplorerSpinBox = new QSpinBox(this);
    channelExplorerSpinBox->hide();
-   backgroundRemoveSpinBox = new QSpinBox(this);
-   backgroundRemoveSpinBox->hide();
+//   backgroundRemoveSpinBox = new QSpinBox(this);
+//   backgroundRemoveSpinBox->hide();
    connect(channelExplorerSpinBox, SIGNAL(valueChanged(int)), this, SLOT(CESpinBoxCallBack()));
 
    plotWindow = new QMainWindow();
@@ -139,7 +139,7 @@ QToolBar *Plotter::createToolBar()
 
    QAction *zoomInAct = new QAction(QIcon(":/images/zoomIn.png"), tr(""),this);
    QAction *zoomOutAct = new QAction(QIcon(":/images/zoomOut.png"), tr(""),this);
-   QAction *yLockToggleAct = new QAction(QIcon(":/images/unlockY.png"), tr(""),this);
+//   QAction *yLockToggleAct = new QAction(QIcon(":/images/unlockY.png"), tr(""),this);
    QAction *gridToggle = new QAction(QIcon(":/images/grid.png"), tr(""),this);
    QAction *holdPlot = new QAction(QIcon(":/images/hold.png"), tr(""),this);
    QAction *clearPlot = new QAction(QIcon(":/images/clean.png"), tr(""),this);
@@ -148,7 +148,7 @@ QToolBar *Plotter::createToolBar()
 
    zoomInAct->setText("Zoom In");
    zoomOutAct->setText(tr("Zoom Out"));
-   yLockToggleAct->setText(tr("toggle Y Axis lock"));
+//   yLockToggleAct->setText(tr("toggle Y Axis lock"));
    gridToggle->setText(tr("Toggle Grid"));
    holdPlot->setText(tr("Toggle Hold"));
    clearPlot->setText(tr("Clear Plot"));
@@ -157,7 +157,7 @@ QToolBar *Plotter::createToolBar()
 
    plotToolBar->addAction(zoomInAct);
    plotToolBar->addAction(zoomOutAct);
-   plotToolBar->addAction(yLockToggleAct);
+//   plotToolBar->addAction(yLockToggleAct);
    plotToolBar->addAction(gridToggle);
    plotToolBar->addAction(holdPlot);
    plotToolBar->addAction(clearPlot);
@@ -166,7 +166,7 @@ QToolBar *Plotter::createToolBar()
 
    connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
    connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
-   connect(yLockToggleAct, SIGNAL(triggered()), this, SLOT(yLockToggle()));
+//   connect(yLockToggleAct, SIGNAL(triggered()), this, SLOT(yLockToggle()));
    connect(gridToggle, SIGNAL(triggered()), this, SLOT(gridToggle()));
    connect(holdPlot, SIGNAL(triggered()), this, SLOT(holdPlot()));
    connect(clearPlot, SIGNAL(triggered()), this, SLOT(clearPlot()));
@@ -363,15 +363,15 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
       QRect spinBoxPos(axesBox.right() + 50, axesBox.top() + 81, 35, 20);
       channelExplorerSpinBox->setGeometry(spinBoxPos);
       channelExplorerSpinBox->show();
-      QRect spinBoxPos2(axesBox.right() + 50, axesBox.top() + 108, 35, 20);
-      backgroundRemoveSpinBox->setGeometry(spinBoxPos2);
-      backgroundRemoveSpinBox->show();
+//      QRect spinBoxPos2(axesBox.right() + 50, axesBox.top() + 108, 35, 20);
+//      backgroundRemoveSpinBox->setGeometry(spinBoxPos2);
+//      backgroundRemoveSpinBox->show();
    }
 
    if (!xExploreState)
    {
       channelExplorerSpinBox->hide();
-      backgroundRemoveSpinBox->hide();
+//      backgroundRemoveSpinBox->hide();
    }
 
    if (showRubberBand)

@@ -8,9 +8,6 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DataAcquisitionForm)
 {
-    qDebug() << Q_FUNC_INFO; // just to confirm we entered the function
-    qDebug() << "class name: " << DataAcquisitionForm::staticMetaObject.className();
-
    ui->setupUi(this);
 
    mainWindow = new QMainWindow();
@@ -414,7 +411,7 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          }
          break;
       case DataAcquisitionStatus::WAITING_TRIGGER:
-            guiDetectorBusy();
+            guiWaitingTriggers();
             break;
       case DataAcquisitionStatus::COLLECTING:
          guiCollecting();
@@ -472,6 +469,28 @@ void DataAcquisitionForm::guiReady()
 void DataAcquisitionForm::guiWaitingDarks()
 {
    guiDetectorBusy();
+}
+
+void DataAcquisitionForm::guiWaitingTriggers()
+{
+   emit disableMainWindowActions();
+   emit disableStopDAQAction();
+   ui->collectImages->setEnabled(false);
+   ui->abortDAQ->setEnabled(false);
+
+   ui->collectImages->setEnabled(false);
+   ui->offsetsButton->setEnabled(false);
+   ui->saveRaw->setEnabled(false);
+   ui->dataFileDirectory->setEnabled(false);
+   ui->dataFilePrefix->setEnabled(false);
+   ui->dataFileDirectoryButton->setEnabled(false);
+   ui->dataFileTimestamp->setEnabled(false);
+   ui->loggingEnabled->setEnabled(false);
+   ui->logFileDirectoryButton->setEnabled(false);
+   ui->logFileTimestamp->setEnabled(false);
+   ui->abortDAQ->setEnabled(false);
+   ui->duration->setEnabled(false);
+   disableRepeats();
 }
 
 void DataAcquisitionForm::guiOffsets()
