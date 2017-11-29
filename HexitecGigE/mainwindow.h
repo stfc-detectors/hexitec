@@ -51,7 +51,7 @@ private:
    void createMainViewer();
    void createPixelManipulation();
    void createPlotter();
-//   void createProgressViewer();
+   void createProgressViewer();
    void createThumbViewer();
    void createWorkSpace();
    void createApplicationOutput();
@@ -72,7 +72,7 @@ private:
 //   KeithleyMainWindow *keithleyMainWindow();
    ////
    ThumbViewer *thumbViewer;
-//   ProgressForm *progressForm;
+   ProgressForm *progressForm;
    Plotter *plotter;
    PixelManipulationForm *pixelManipulationForm;
 //   ScriptingWidget *scripting ;

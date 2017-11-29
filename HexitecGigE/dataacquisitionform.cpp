@@ -8,6 +8,9 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DataAcquisitionForm)
 {
+    qDebug() << Q_FUNC_INFO; // just to confirm we entered the function
+    qDebug() << "class name: " << DataAcquisitionForm::staticMetaObject.className();
+
    ui->setupUi(this);
 
    mainWindow = new QMainWindow();
@@ -316,6 +319,7 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
    int daqImgs = status.getDaqImages();
 
    ui->state->setText(status.getMessage());
+   emit newDataAcquisitionState(status.getMessage());
 
    switch (status.getMajorStatus())
    {
@@ -379,6 +383,10 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
       }
       ui->progressBar->setValue(progress);
       ui->imageProgressBar->setValue(status.getPercentage());
+
+      emit newDataAcquisitionProgressBarValue(progress);
+      emit newDataAcquisitionImageProgressValue(status.getPercentage());
+
       switch (status.getMinorStatus())
       {
       case DataAcquisitionStatus::OFFSETS_PREP:

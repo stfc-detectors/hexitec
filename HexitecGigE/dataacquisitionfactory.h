@@ -10,7 +10,7 @@
 //#include "ui_motioncontrolform.h"
 #include "ui_dataacquisitionform.h"
 #include "ui_detectorcontrolform.h"
-//#include "progressform.h"
+#include "progressform.h"
 
 class DataAcquisitionFactory : public QObject
 {
@@ -18,13 +18,13 @@ class DataAcquisitionFactory : public QObject
 public:
    ~DataAcquisitionFactory();
    static DataAcquisitionFactory *instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                           /*ProgressForm *progressForm,*/ ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
+                                           ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
    static DataAcquisitionFactory *getInstance();
    DataAcquisition *getDataAcquisition();
    DataAcquisitionModel *getDataAcquisitionModel();
 protected:
    DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                          /*ProgressForm *progressForm,*/ ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
+                          ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent = 0);
 private:
 //   MotorModel *motorModel;
 //   MotorFactory *motorFactory;

@@ -19,20 +19,25 @@ public:
    ~ProgressForm();
    QMainWindow *getMainWindow();
 
+   void setDaqCollectionTime(double value) {daqCollectionTime = value; }
 private:
    Ui::ProgressForm *ui;
    QMainWindow *mainWindow;
-   QString formattedText;
+//   QString formattedText;
    double daqCollectionTime;
-   double collectionTime;
-   double remainingTime;
-   QString formattedTime(double daqDuration);
-   QString prepend0(QString input, int number);
-   void updateTimes();
+//   double collectionTime;
+//   double remainingTime;
+//   QString formattedTime(double daqDuration);
+//   QString prepend0(QString input, int number);
+//   void updateTimes();
 
 public slots:
-   void handleImageStarting(double daqCollectionTime, int repeatCount, int nRepeat);
-   void handleUpdateProgress(double progressTime);
+//   void handleImageStarting(double daqCollectionTime, int repeatCount, int nRepeat);
+//   void handleUpdateProgress(double progressTime);
+
+   void handleNewDataAcquisitionState(QString state);
+   void handleNewDataAcquisitionProgressBarValue(int progressBarValue);
+   void handleNewDataAcquisitionImageProgressValue(int imageProgressValue);
 };
 
 #endif // PROGRESSFORM_H

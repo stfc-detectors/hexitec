@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>136</width>
-    <height>126</height>
+    <width>223</width>
+    <height>153</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,45 +20,45 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <widget class="QLabel" name="daqTimeFormattedLabel">
+   <item row="1" column="0">
+    <widget class="QLabel" name="progressBarLabel">
      <property name="text">
-      <string>Time (formatted)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Remaining exposure:</string>
+      <string>Image Progress</string>
      </property>
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="progressBarLabel_2">
      <property name="text">
-      <string>Current exposure time:</string>
+      <string>DAQ Progress</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QLabel" name="remainingTimeFormattedLabel">
+   <item row="0" column="0">
+    <widget class="QLabel" name="dataAcquisitionModel_2">
      <property name="text">
-      <string>Time (formatted)</string>
+      <string>Status</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>Total exposure time:</string>
+   <item row="1" column="1">
+    <widget class="QProgressBar" name="imageProgressBar">
+     <property name="value">
+      <number>0</number>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="currentTimeFormattedLabel">
+   <item row="2" column="1">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="2">
+    <widget class="QLabel" name="state">
      <property name="text">
-      <string>Time (formatted)</string>
+      <string>Idle</string>
      </property>
     </widget>
    </item>

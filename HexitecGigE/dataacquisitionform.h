@@ -112,6 +112,10 @@ signals:
    void enableMainWindowActions();
    void disableMainWindowActions();
    void saveRawChanged(bool saveRaw);
+
+   void newDataAcquisitionState(QString state);
+   void newDataAcquisitionProgressBarValue(int progressBarValue);
+   void newDataAcquisitionImageProgressValue(int imageProgressValue);
 };
 
 #endif // DATAACQUISITIONFORM_H

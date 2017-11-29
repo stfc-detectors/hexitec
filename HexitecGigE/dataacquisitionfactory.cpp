@@ -8,7 +8,7 @@
 DataAcquisitionFactory *DataAcquisitionFactory::dafInstance = 0;
 
 DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                               /*ProgressForm *progressForm,*/ ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
+                                               ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
 {
    QString aspectFilename = Parameters::aspectIniFilename;
    QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
@@ -87,7 +87,7 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
 
    dataAcquisition = DataAcquisition::instance();
    dataAcquisition->setProperty("objectName", "daq");
-   dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm, /*progressForm, */processingBufferGenerator);
+   dataAcquisitionModel = DataAcquisitionModel::instance(dataAcquisitionForm, detectorControlForm, progressForm, processingBufferGenerator);
    dataAcquisitionModel->setProperty("objectName", "daqModel");
 
 //   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(),
@@ -138,11 +138,11 @@ DataAcquisitionFactory::~DataAcquisitionFactory()
 }
 
 DataAcquisitionFactory *DataAcquisitionFactory::instance(DataAcquisitionForm *dataAcquisitionForm, DetectorControlForm *detectorControlForm,
-                                                         /*ProgressForm *progressForm,*/ ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
+                                                         ProgressForm *progressForm, ProcessingBufferGenerator *processingBufferGenerator, QObject *parent)
 {
    if (dafInstance == 0)
    {
-      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm, /*progressForm,*/ processingBufferGenerator, parent);
+      dafInstance = new DataAcquisitionFactory(dataAcquisitionForm, detectorControlForm, progressForm, processingBufferGenerator, parent);
    }
 
    return dafInstance;
