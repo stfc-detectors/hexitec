@@ -1058,7 +1058,6 @@ void MainWindow::handleSaveCsvChanged(bool saveCsv)
 void MainWindow::enableMainWindowActions()
 {
    startDAQAct->setEnabled(true);
-   qDebug() << "MainWindow::enableMainWindowActions()   disabling stopDAQAct..";
    stopDAQAct->setDisabled(true);
 }
 
@@ -1079,13 +1078,11 @@ void MainWindow::enableHVActions()
 void MainWindow::disableMainWindowActions()
 {
    startDAQAct->setDisabled(true);
-   qDebug() << "MainWindow::disableMainWindowActions()  enabling stopDAQAct";
    stopDAQAct->setEnabled(true);
 }
 
 void MainWindow::disableStopDAQAction()
 {
-   qDebug() << "MainWindow::disableStopDAQAction()  disabling stopDAQAct";
    stopDAQAct->setEnabled(false);
 }
 
