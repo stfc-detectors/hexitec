@@ -1098,7 +1098,7 @@ bool Slice::readHXT(unsigned short *buffer)
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
-//    contentVoxel.resize(gridSizeX);   // Slice::resize() 9 lines above sorted voxels
+//    contentVoxel.resize(gridSizeX);   // Slice::resize() 9 lines above sorted out contentVoxels
 //    voxels = new Voxel[gridSizeX * gridSizeY];
     summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
