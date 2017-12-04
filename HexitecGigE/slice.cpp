@@ -26,6 +26,8 @@ const QString Slice::multipleSuffixes = QString(".sb.xmy.xy.txt");
 Slice::Slice(QString name, QObject *parent) : QObject(parent)
 {
    preDataInit(name);
+   /// Let Slice::resize() handle mem (de)allocation
+   resize(gridSizeX, gridSizeY);
 }
 
 /* Constructs a Slice from a matlabVariable.
@@ -209,15 +211,16 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 {
    preDataInit(name);
 
-   resize(rows, cols);
+   /// Let Slice::resize() handle mem (de)allocation
+   resize(rows, cols, depth, value);
 
-   for (int i = 0; i < rows; i++)
-   {
-      for (int j = 0; j < cols; j++)
-      {
-         contentVoxel[i][j] = new Voxel(depth, value);
-      }
-   }
+//   for (int i = 0; i < rows; i++)
+//   {
+//      for (int j = 0; j < cols; j++)
+//      {
+//         contentVoxel[i][j] = new Voxel(depth, value);
+//      }
+//   }
    postDataInit();
 }
 
@@ -642,10 +645,22 @@ void Slice::zeroStats()
   */
 void Slice::resize(int rows, int cols)
 {
-   for (int i = 0; i < rows; ++i)
+    qDebug() << "Slice::resize(int, int) start";
+    /// Slice::resize() in charge of (de)allocating memory
+    for (int i = 0; i < gridSizeX; ++i)
+    {
+       for (int j = 0 ; j < gridSizeY ; ++j)
+       {
+          delete contentVoxel[i][j];
+       }
+    }
+
+   // Current memory allocation now free; Grab what's needed
+   //   for resized dimensions of Slice object
+   for (i = 0; i < rows; ++i)
    {
       contentVoxel.push_back( QVector <Voxel *> () );
-      for (int j = 0 ; j < cols ; ++j)
+      for (j = 0 ; j < cols ; ++j)
       {
          Voxel *v = new Voxel;
          contentVoxel[i].push_back(v);
@@ -656,6 +671,33 @@ void Slice::resize(int rows, int cols)
    return;
 }
 
+void Slice::resize(int rows, int cols, int depth, double value)
+{
+    qDebug() << "Slice::resize(int, int, int, double) start";
+    /// Slice::resize() in charge of (de)allocating memory
+    for (int i = 0; i < gridSizeX; ++i)
+    {
+       for (int j = 0 ; j < gridSizeY ; ++j)
+       {
+          delete contentVoxel[i][j];
+       }
+    }
+
+   // Current memory allocation now free; Grab what's needed
+   //   for resized dimensions of Slice object
+   for (i = 0; i < rows; ++i)
+   {
+      contentVoxel.push_back( QVector <Voxel *> () );
+      for (j = 0 ; j < cols ; ++j)
+      {
+         Voxel *v = new Voxel(depth, value);
+         contentVoxel[i].push_back(v);
+      }
+   }
+   gridSizeX = rows;
+   gridSizeY = cols;
+   return;
+}
 
 /* Calculates the statistics for this Slice.
   */
@@ -1024,6 +1066,7 @@ bool Slice::readXMY(QStringList fileNames)
 
 bool Slice::readHXT(unsigned short *buffer)
 {
+    qDebug() << "Slice::readHXT(unsigned short *buffer) start";
     struct HxtBuffer hxtBuffer;
     hxtBuffer.allData = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
     double *allDataPointer;
@@ -1042,15 +1085,21 @@ bool Slice::readHXT(unsigned short *buffer)
 
     memcpy((void *) allDataPointer, (void *) (dataAddress), bufferSize);
 
-    gridSizeX = hxtBuffer.nRows;
-    gridSizeY = hxtBuffer.nCols;
+    quint32 bufNumRows = hxtBuffer.nRows;
+    quint32 bufNumCols = hxtBuffer.nCols;
+
+    /// Let Slice::resize() handle mem (de)allocation
+    resize(bufNumRows, bufNumCols);
+
+    gridSizeX = bufNumRows;
+    gridSizeY = bufNumCols;
     numberOfBins = hxtBuffer.nBins;
 
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
-    contentVoxel.resize(gridSizeX);
-    voxels = new Voxel[gridSizeX * gridSizeY];
+//    contentVoxel.resize(gridSizeX);   // Slice::resize() 9 lines above sorted voxels
+//    voxels = new Voxel[gridSizeX * gridSizeY];
     summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
     allDataPointer += numberOfBins;
@@ -1060,7 +1109,7 @@ bool Slice::readHXT(unsigned short *buffer)
     int iBin;
     for (iRow = 0; iRow < gridSizeX; iRow++)
     {
-       contentVoxel[iRow].resize(gridSizeY);
+//       contentVoxel[iRow].resize(gridSizeY);
        for (iCol = 0; iCol < gridSizeY; iCol++)
        {
            voxelPointer = &voxels[currentVoxel];
@@ -1087,6 +1136,7 @@ bool Slice::readHXT(unsigned short *buffer)
 
 bool Slice::readHXT(QString fileName)
 {
+    qDebug() << "Slice::readHXT(QStr fNm) start";
    QFile file(fileName);
    if (!file.open(QIODevice::ReadOnly))
    {
@@ -1212,10 +1262,6 @@ bool Slice::readHXT(QString fileName)
    {
       for (iCol = 0; iCol < nCols; ++iCol)
       {
-         //voxelDataLen = iBin;
-         // Create new voxel by reading nBins doubles from the file
-         Voxel *v = new Voxel;
-         contentVoxel[iRow].push_back(v);
          for (iBin = 0 ; iBin < nBins ; ++iBin)
          {
             file.read((char *) &d, sizeof(d));
@@ -1319,9 +1365,6 @@ bool Slice::readHIF(QString fileName)
        for (iRow = 0; iRow < nRows; ++iRow)
        {
           iPix = iCol*nRows+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
           for (iBin = 0 ; iBin < nBins ; ++iBin)
           {
               contentVoxel[iRow][iCol]->contentYData.push_back(MAT(iBin,iPix));
@@ -1553,11 +1596,14 @@ bool Slice::readDAT(QString fileName)
       return(false);
    }
 
+   // resize contentVoxel to default 80x80 regardless
+   resize(80, 80);
+
    int iBin, iRow, iCol;
    if (voxelDataLen == 0) // probably a new slice
    {
       // use default values
-      resize(80,80);
+//      resize(80,80);
       voxelDataLen = 400;
       zeroStats();
 

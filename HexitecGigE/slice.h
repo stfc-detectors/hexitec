@@ -73,6 +73,7 @@ public:
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
    static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
+   void resize(int, int, int, double);
 //   Q_INVOKABLE void sendToMatlab();
 //   Q_INVOKABLE void sendToMatlab(QString varName);
    void setVoxelDataLen(int voxelDataLen);
