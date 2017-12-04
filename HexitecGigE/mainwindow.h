@@ -133,7 +133,7 @@ private slots:
    void deleteExcessSlices();   // Added 11.04.2014
    void about();
    void testDevelopment();
-   void getPrinComps();
+//   void getPrinComps();
    void externalChargeShare();
    void initializeSlice(Slice *slice, int sliceNumber = -1);
    void save();

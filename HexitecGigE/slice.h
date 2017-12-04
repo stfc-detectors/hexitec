@@ -47,8 +47,8 @@ public:
    Slice *add(Slice *anOtherSlice);
    Slice *add(double value);
    Slice *backProject();
-   Slice *eigenImageSlice();
-   Slice *prinComp();
+//   Slice *eigenImageSlice();
+//   Slice *prinComp();
 
    void calculatePrinComps();
    static bool fileNameListValid(QStringList fileNameList);

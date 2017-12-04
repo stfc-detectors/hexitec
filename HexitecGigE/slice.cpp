@@ -160,6 +160,8 @@ void Slice::preDataInit(QString name)
    commonX.resize(0);
    zeroStats();
    xType = NONE;
+   summedImageY = NULL;
+   voxels = NULL;
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
@@ -226,9 +228,10 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 
 Slice::~Slice()
 {
-   delete[](voxels);
+//   delete[](voxels);
    commonX.clear();
-   free(summedImageY);
+   if (summedImageY != NULL)
+       free(summedImageY);
 }
 
 /*
@@ -262,45 +265,45 @@ void Slice::addParameters()
 
 #include "SVD"
 
-Slice *Slice::prinComp()
-{
+//Slice *Slice::prinComp()
+//{
 
-    Slice *newSlice = new Slice(name + "_Eigen_Images");
-    newSlice->resize(gridSizeX, gridSizeY);
+//    Slice *newSlice = new Slice(name + "_Eigen_Images");
+//    newSlice->resize(gridSizeX, gridSizeY);
 
-    int nComps = eigenWeights.rows();
-    if (nComps == 0)
-    {
-        calculatePrinComps();
-    }
+//    int nComps = eigenWeights.rows();
+//    if (nComps == 0)
+//    {
+//        calculatePrinComps();
+//    }
 
-    // Construct a slice based on existing stored weights and spectra within (this) instance
-    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-    {
-        newSlice->commonX.push_back(iComp);
-    }
-    newSlice->voxelDataLen = nComps;
-    int iPix;
-    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-    {
-       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-       {
-          iPix = iCol*gridSizeX+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
-          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-          {
-              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-          }
-       }
-    }
+//    // Construct a slice based on existing stored weights and spectra within (this) instance
+//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
+//    {
+//        newSlice->commonX.push_back(iComp);
+//    }
+//    newSlice->voxelDataLen = nComps;
+//    int iPix;
+//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
+//    {
+//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
+//       {
+//          iPix = iCol*gridSizeX+iRow;
+//          // Create new voxel
+//          Voxel *v = new Voxel;
+//          contentVoxel[iRow].push_back(v);
+//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
+//          {
+//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
+//          }
+//       }
+//    }
 
-    newSlice->zeroStats();
-    newSlice->xType = COMMON;
-    newSlice->postDataInit();
-    return newSlice;
-}
+//    newSlice->zeroStats();
+//    newSlice->xType = COMMON;
+//    newSlice->postDataInit();
+//    return newSlice;
+//}
 
 void Slice::calculatePrinComps()
 {
@@ -334,40 +337,40 @@ void Slice::calculatePrinComps()
 
 }
 
-Slice *Slice::eigenImageSlice()
-{
-    // Now superceded by Slice::prinComp()- method needs removing
-    // Constructs a new slice from the eigen weights stored in an existing (this) slice
-    int nComps = eigenWeights.rows();
+//Slice *Slice::eigenImageSlice()
+//{
+//    // Now superceded by Slice::prinComp()- method needs removing
+//    // Constructs a new slice from the eigen weights stored in an existing (this) slice
+//    int nComps = eigenWeights.rows();
 
-    Slice *newSlice = new Slice(name + "_Eigen_Images");
-    newSlice->resize(gridSizeX, gridSizeY);
+//    Slice *newSlice = new Slice(name + "_Eigen_Images");
+//    newSlice->resize(gridSizeX, gridSizeY);
 
-    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-    {
-        newSlice->commonX.push_back(iComp);
-    }
-    newSlice->voxelDataLen = nComps;
-    int iPix;
-    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-    {
-       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-       {
-          iPix = iCol*gridSizeX+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
-          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-          {
-              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-          }
-       }
-    }
-    newSlice->zeroStats();
-    newSlice->xType = COMMON;
-    newSlice->postDataInit();
-    return newSlice;
-}
+//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
+//    {
+//        newSlice->commonX.push_back(iComp);
+//    }
+//    newSlice->voxelDataLen = nComps;
+//    int iPix;
+//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
+//    {
+//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
+//       {
+//          iPix = iCol*gridSizeX+iRow;
+//          // Create new voxel
+//          Voxel *v = new Voxel;
+//          contentVoxel[iRow].push_back(v);
+//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
+//          {
+//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
+//          }
+//       }
+//    }
+//    newSlice->zeroStats();
+//    newSlice->xType = COMMON;
+//    newSlice->postDataInit();
+//    return newSlice;
+//}
 
 /* Moved here from main window, modified where marked. There definitely was a bug which is now fixed so that
    it will produce a new Slice. However the contents of the new Slice may be wrong.
@@ -654,18 +657,21 @@ void Slice::resize(int rows, int cols)
           delete contentVoxel[i][j];
        }
     }
+    if (voxels != NULL)
+        delete[] voxels;
 
    // Current memory allocation now free; Grab what's needed
    //   for resized dimensions of Slice object
-   for (i = 0; i < rows; ++i)
+   for (int i = 0; i < rows; ++i)
    {
       contentVoxel.push_back( QVector <Voxel *> () );
-      for (j = 0 ; j < cols ; ++j)
+      for (int j = 0 ; j < cols ; ++j)
       {
          Voxel *v = new Voxel;
          contentVoxel[i].push_back(v);
       }
    }
+   voxels = new Voxel[gridSizeX * gridSizeY];
    gridSizeX = rows;
    gridSizeY = cols;
    return;
@@ -685,10 +691,10 @@ void Slice::resize(int rows, int cols, int depth, double value)
 
    // Current memory allocation now free; Grab what's needed
    //   for resized dimensions of Slice object
-   for (i = 0; i < rows; ++i)
+   for (int i = 0; i < rows; ++i)
    {
       contentVoxel.push_back( QVector <Voxel *> () );
-      for (j = 0 ; j < cols ; ++j)
+      for (int j = 0 ; j < cols ; ++j)
       {
          Voxel *v = new Voxel(depth, value);
          contentVoxel[i].push_back(v);
@@ -1100,7 +1106,8 @@ bool Slice::readHXT(unsigned short *buffer)
 
 //    contentVoxel.resize(gridSizeX);   // Slice::resize() 9 lines above sorted out contentVoxels
 //    voxels = new Voxel[gridSizeX * gridSizeY];
-    summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+    if (summedImageY != NULL)
+        summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
     allDataPointer += numberOfBins;
     int currentVoxel = 0;
@@ -1257,7 +1264,8 @@ bool Slice::readHXT(QString fileName)
  ///////////////////////////////  QString fileStem;
 
    numberOfBins = nBins;
-   summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+   if (summedImageY == NULL)
+       summedImageY = (double*) calloc (numberOfBins, sizeof(double));
    for (iRow = 0; iRow < nRows; ++iRow)
    {
       for (iCol = 0; iCol < nCols; ++iCol)

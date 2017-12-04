@@ -2,12 +2,10 @@
 #include <QSplashScreen>
 #include "mainwindow.h"
 
-/// HexitecGigE Addition; Static linking?
-//#include <QtPlugin>
-//Q_IMPORT_PLUGIN(qt5gui)
-//Q_IMPORT_PLUGIN(Qt5Widgets)
-//Q_IMPORT_PLUGIN(Qt5ExtSerialPort1)
-///
+// Necessary includes and defines for memory leak detection:
+#ifdef _MSC_VER
+#include <vld.h>
+#endif // _MSC_VER
 
 int main(int argc, char *argv[])
 {

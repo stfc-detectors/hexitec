@@ -928,15 +928,15 @@ void MainWindow::updateVisualisationTab(bool bUpdate)
     bUpdateVisualisationTab = bUpdate;
 }
 
-void MainWindow::getPrinComps()
-{
+//void MainWindow::getPrinComps()
+//{
 
-    if (DataModel::instance()->numberOfSlices() == 0)
-            return;
-    // If calculating the principal components this may need to be a threaded process
-    // as it is potentially a long process
-    initializeSlice(DataModel::instance()->getActiveSlice()->prinComp());
-}
+//    if (DataModel::instance()->numberOfSlices() == 0)
+//            return;
+//    // If calculating the principal components this may need to be a threaded process
+//    // as it is potentially a long process
+//    initializeSlice(DataModel::instance()->getActiveSlice()->prinComp());
+//}
 
 
 /* This is the slot connected to the test item on the main menu.
