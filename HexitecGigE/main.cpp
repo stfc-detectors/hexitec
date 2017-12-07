@@ -11,7 +11,6 @@
 
 int main(int argc, char *argv[])
 {
-    qDebug() << "int main()";
     QApplication app(argc, argv);
     //Q_INIT_RESOURCE(2Easy);
     Q_INIT_RESOURCE(HexitecGigE);

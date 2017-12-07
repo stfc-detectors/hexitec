@@ -8,9 +8,6 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DataAcquisitionForm)
 {
-    qDebug() << Q_FUNC_INFO; // just to confirm we entered the function
-    qDebug() << "class name: " << DataAcquisitionForm::staticMetaObject.className();
-
    ui->setupUi(this);
 
    mainWindow = new QMainWindow();

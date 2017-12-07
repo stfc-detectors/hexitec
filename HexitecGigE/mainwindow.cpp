@@ -33,7 +33,6 @@
 
 MainWindow::MainWindow()
 {
-    qDebug() << "Hi";
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
 //   MotionControlForm *motionControlform;
@@ -171,7 +170,7 @@ MainWindow::MainWindow()
    // The processing window needs to have been created before the data acquisition factory!
    processingDefinition = new ProcessingDefinition(6400);
    processingForm = new ProcessingForm();
-   qDebug() << "Before ProcessingBufferGenerator";
+
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
    if (activeDAQ)
@@ -183,7 +182,6 @@ MainWindow::MainWindow()
 
    if (activeDAQ)
    {
-       qDebug() << "2";
       HV *hv = VoltageSourceFactory::instance()->getHV();
       detectorControlForm->setHvName(hv->property("objectName").toString());
       QString daqName = dataAcquisitionFactory->getDataAcquisition()->property("objectName").toString();

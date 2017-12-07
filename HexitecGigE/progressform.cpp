@@ -6,9 +6,6 @@ ProgressForm::ProgressForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::ProgressForm)
 {
-    qDebug() << Q_FUNC_INFO; // just to confirm we entered the function
-    qDebug() << "class name: " << ProgressForm::staticMetaObject.className();
-
    ui->setupUi(this);
    mainWindow = new QMainWindow();
    mainWindow->setCentralWidget(this);
