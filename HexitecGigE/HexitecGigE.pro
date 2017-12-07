@@ -289,12 +289,10 @@ DSoFt64 {
     LIBS += delayimp.lib
     QMAKE_LFLAGS_RELEASE += /DELAYLOAD:GigE.dll #/DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll
     LIBS += ../DetectorLib/GigE.lib
-#    LIBS += $$quote(-L//TE0APPS01/Matlab/R2015a/extern/lib/win64/microsoft) -llibeng -llibmx    # .lib files here
     CONFIG(release, debug|release): LIBS += ../DetectorLib/release/DetectorLib.lib ../SerialPortLib/release/SerialPortLib.lib
     CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib
     CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
     CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib
-#    INCLUDEPATH += "//TE0APPS01/Matlab/R2011b/win64/extern/include/"     # Eg: engine.h
     INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.14/Eigen/"
     INCLUDEPATH += ../DetectorLib
     INCLUDEPATH  += ../HxtProcessingLib/include
