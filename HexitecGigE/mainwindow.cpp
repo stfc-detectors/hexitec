@@ -173,10 +173,9 @@ MainWindow::MainWindow()
    processingForm = new ProcessingForm();
    qDebug() << "Before ProcessingBufferGenerator";
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
-   qDebug() << "After";
+
    if (activeDAQ)
    {
-       qDebug() << "1";
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
                                                                 progressForm, processingBufferGenerator, this);
 //      motionControlform = new MotionControlForm();

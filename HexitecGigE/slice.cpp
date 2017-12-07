@@ -158,6 +158,8 @@ void Slice::preDataInit(QString name)
    commonX.resize(0);
    zeroStats();
    xType = NONE;
+   // Make voxels a NULL ptr
+   voxels = NULL;
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
@@ -223,7 +225,8 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 
 Slice::~Slice()
 {
-   delete[](voxels);
+   if (voxels != NULL)
+      delete[](voxels);
    commonX.clear();
    free(summedImageY);
 }
