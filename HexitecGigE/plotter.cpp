@@ -116,8 +116,8 @@ Plotter::Plotter(QWidget *parent) :
 
    channelExplorerSpinBox = new QSpinBox(this);
    channelExplorerSpinBox->hide();
-   backgroundRemoveSpinBox = new QSpinBox(this);
-   backgroundRemoveSpinBox->hide();
+//   backgroundRemoveSpinBox = new QSpinBox(this);
+//   backgroundRemoveSpinBox->hide();
    connect(channelExplorerSpinBox, SIGNAL(valueChanged(int)), this, SLOT(CESpinBoxCallBack()));
 
    plotWindow = new QMainWindow();
@@ -363,15 +363,15 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
       QRect spinBoxPos(axesBox.right() + 50, axesBox.top() + 81, 35, 20);
       channelExplorerSpinBox->setGeometry(spinBoxPos);
       channelExplorerSpinBox->show();
-      QRect spinBoxPos2(axesBox.right() + 50, axesBox.top() + 108, 35, 20);
-      backgroundRemoveSpinBox->setGeometry(spinBoxPos2);
-      backgroundRemoveSpinBox->show();
+//      QRect spinBoxPos2(axesBox.right() + 50, axesBox.top() + 108, 35, 20);
+//      backgroundRemoveSpinBox->setGeometry(spinBoxPos2);
+//      backgroundRemoveSpinBox->show();
    }
 
    if (!xExploreState)
    {
       channelExplorerSpinBox->hide();
-      backgroundRemoveSpinBox->hide();
+//      backgroundRemoveSpinBox->hide();
    }
 
    if (showRubberBand)
