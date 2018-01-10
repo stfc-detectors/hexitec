@@ -133,7 +133,7 @@ DataAcquisitionFactory::~DataAcquisitionFactory()
 {
    dafInstance = 0;
    delete dataAcquisition;
-//   delete detectorFactory;
+   delete detectorFactory;
 //   delete motorFactory;
 }
 

@@ -3,9 +3,9 @@
 #include "mainwindow.h"
 
 // Necessary includes and defines for memory leak detection:
-#ifdef _MSC_VER
-#include <vld.h>
-#endif // _MSC_VER
+//#ifdef _MSC_VER
+//#include <vld.h>
+//#endif // _MSC_VER
 
 int main(int argc, char *argv[])
 {

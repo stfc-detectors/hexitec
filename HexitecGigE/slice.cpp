@@ -163,7 +163,6 @@ void Slice::preDataInit(QString name)
    commonX.resize(0);
    zeroStats();
    xType = NONE;
-   summedImageY = NULL;
    // Make voxels a NULL ptr
    voxels = NULL;
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
@@ -218,7 +217,15 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
     qDebug() << "::Slice(QStr, int rows, int cols, .., ..)";
    preDataInit(name);
 
+   resize(rows, cols);
 
+   for (int i = 0; i < rows; i++)
+   {
+      for (int j = 0; j < cols; j++)
+      {
+         contentVoxel[i][j] = new Voxel(depth, value);
+      }
+   }
    postDataInit();
 }
 
@@ -227,8 +234,7 @@ Slice::~Slice()
    if (voxels != NULL)
       delete[](voxels);
    commonX.clear();
-   if (summedImageY != NULL)
-       free(summedImageY);
+   free(summedImageY);
 }
 
 /*
@@ -645,20 +651,6 @@ void Slice::zeroStats()
   */
 void Slice::resize(int rows, int cols)
 {
-    qDebug() << "Slice::resize(int, int) start";
-    /// Slice::resize() in charge of (de)allocating memory
-    for (int i = 0; i < gridSizeX; ++i)
-    {
-       for (int j = 0 ; j < gridSizeY ; ++j)
-       {
-          delete contentVoxel[i][j];
-       }
-    }
-    if (voxels != NULL)
-        delete[] voxels;
-
-   // Current memory allocation now free; Grab what's needed
-   //   for resized dimensions of Slice object
    for (int i = 0; i < rows; ++i)
    {
       contentVoxel.push_back( QVector <Voxel *> () );
@@ -668,39 +660,11 @@ void Slice::resize(int rows, int cols)
          contentVoxel[i].push_back(v);
       }
    }
-   voxels = new Voxel[gridSizeX * gridSizeY];
    gridSizeX = rows;
    gridSizeY = cols;
    return;
 }
 
-void Slice::resize(int rows, int cols, int depth, double value)
-{
-    qDebug() << "Slice::resize(int, int, int, double) start";
-    /// Slice::resize() in charge of (de)allocating memory
-    for (int i = 0; i < gridSizeX; ++i)
-    {
-       for (int j = 0 ; j < gridSizeY ; ++j)
-       {
-          delete contentVoxel[i][j];
-       }
-    }
-
-   // Current memory allocation now free; Grab what's needed
-   //   for resized dimensions of Slice object
-   for (int i = 0; i < rows; ++i)
-   {
-      contentVoxel.push_back( QVector <Voxel *> () );
-      for (int j = 0 ; j < cols ; ++j)
-      {
-         Voxel *v = new Voxel(depth, value);
-         contentVoxel[i].push_back(v);
-      }
-   }
-   gridSizeX = rows;
-   gridSizeY = cols;
-   return;
-}
 
 /* Calculates the statistics for this Slice.
   */
@@ -1088,23 +1052,16 @@ bool Slice::readHXT(unsigned short *buffer)
 
     memcpy((void *) allDataPointer, (void *) (dataAddress), bufferSize);
 
-    quint32 bufNumRows = hxtBuffer.nRows;
-    quint32 bufNumCols = hxtBuffer.nCols;
-
-    /// Let Slice::resize() handle mem (de)allocation
-    resize(bufNumRows, bufNumCols);
-
-    gridSizeX = bufNumRows;
-    gridSizeY = bufNumCols;
+    gridSizeX = hxtBuffer.nRows;
+    gridSizeY = hxtBuffer.nCols;
     numberOfBins = hxtBuffer.nBins;
 
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
-//    contentVoxel.resize(gridSizeX);   // Slice::resize() 9 lines above sorted out contentVoxels
-//    voxels = new Voxel[gridSizeX * gridSizeY];
-    if (summedImageY != NULL)
-        summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+    contentVoxel.resize(gridSizeX);
+    voxels = new Voxel[gridSizeX * gridSizeY];
+    summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
     allDataPointer += numberOfBins;
     int currentVoxel = 0;
@@ -1113,7 +1070,7 @@ bool Slice::readHXT(unsigned short *buffer)
     int iBin;
     for (iRow = 0; iRow < gridSizeX; iRow++)
     {
-//       contentVoxel[iRow].resize(gridSizeY);
+       contentVoxel[iRow].resize(gridSizeY);
        for (iCol = 0; iCol < gridSizeY; iCol++)
        {
            voxelPointer = &voxels[currentVoxel];
@@ -1261,12 +1218,15 @@ bool Slice::readHXT(QString fileName)
  ///////////////////////////////  QString fileStem;
 
    numberOfBins = nBins;
-   if (summedImageY == NULL)
-       summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+   summedImageY = (double*) calloc (numberOfBins, sizeof(double));
    for (iRow = 0; iRow < nRows; ++iRow)
    {
       for (iCol = 0; iCol < nCols; ++iCol)
       {
+         //voxelDataLen = iBin;
+         // Create new voxel by reading nBins doubles from the file
+         Voxel *v = new Voxel;
+         contentVoxel[iRow].push_back(v);
          for (iBin = 0 ; iBin < nBins ; ++iBin)
          {
             file.read((char *) &d, sizeof(d));
@@ -1370,6 +1330,9 @@ bool Slice::readHIF(QString fileName)
        for (iRow = 0; iRow < nRows; ++iRow)
        {
           iPix = iCol*nRows+iRow;
+          // Create new voxel
+          Voxel *v = new Voxel;
+          contentVoxel[iRow].push_back(v);
           for (iBin = 0 ; iBin < nBins ; ++iBin)
           {
               contentVoxel[iRow][iCol]->contentYData.push_back(MAT(iBin,iPix));
@@ -1605,6 +1568,7 @@ bool Slice::readDAT(QString fileName)
    if (voxelDataLen == 0) // probably a new slice
    {
       // use default values
+      resize(80,80);
       voxelDataLen = 400;
       zeroStats();
 
@@ -1719,10 +1683,10 @@ bool Slice::squeezeX()
 //   commonX.resize(voxelDataLen);
 //   for (int k = 0; k < voxelDataLen ; ++k)
 //      commonX[k] = (double)(k) * step;
+
 //   xType = COMMON;
 //   return(true);
 //}
-
 
 ///* Creates a C-style array out of the data.
 //  */
@@ -1743,11 +1707,13 @@ bool Slice::squeezeX()
 //   }
 //   return data;
 //}
+
 //void Slice::setData(double *data)
 //{
 //   //this->voxelDataLen = voxelDataLen;
 //  // this->gridSizeY = gridSizeY;
 //  // this->gridSizeX = gridSizeX;
+
 //   double *ptr = data;
 //   for (int i = 0; i < gridSizeX; i++)
 //   {
@@ -1881,7 +1847,6 @@ SArray<double> Slice::sumImage(int start, int end)
 //   y2.resize(N);
 //   double arg;
 //   double cosarg, sinarg;
-
 
 //   for (int i = 0; i < N; i++)
 //   {
