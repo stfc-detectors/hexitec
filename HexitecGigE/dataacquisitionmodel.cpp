@@ -140,7 +140,6 @@ void DataAcquisitionModel::connectDataAcquisition()
    connect(dataAcquisition, SIGNAL(transferBufferReady(unsigned char*,ulong)),
               processingBufferGenerator, SLOT(handleTransferBufferReady(unsigned char*,ulong)));
 
-
    connect(this->dataAcquisitionForm, SIGNAL(newDataAcquisitionState(QString)),
            this->progressForm, SLOT(handleNewDataAcquisitionState(QString)));
 

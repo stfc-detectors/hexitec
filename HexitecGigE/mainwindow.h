@@ -132,7 +132,7 @@ private slots:
    void deleteFirstSlice(); // Necessary because cannot do SIGNAL(deleteSlice( DataModel::instance()->sliceAt(0)))...
    void deleteExcessSlices();   // Added 11.04.2014
    void about();
-   void testDevelopment();
+//   void testDevelopment();
 //   void getPrinComps();
    void externalChargeShare();
    void initializeSlice(Slice *slice, int sliceNumber = -1);

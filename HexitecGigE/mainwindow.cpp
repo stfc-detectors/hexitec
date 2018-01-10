@@ -650,8 +650,8 @@ void MainWindow::createMenus()
       connect(startDAQAct, SIGNAL(triggered()), this, SLOT(handleStartDAQ()));
       connect(stopDAQAct, SIGNAL(triggered()), this, SLOT(handleStopDAQ()));
 
-      startHVAct = new QAction(QIcon(":/images/startDAQ.png"), tr(""),this);
-      stopHVAct = new QAction(QIcon(":/images/stopDAQ.png"), tr(""),this);
+      startHVAct = new QAction(QIcon(":/images/VbiasOn.png"), tr(""),this);
+      stopHVAct = new QAction(QIcon(":/images/VbiasOff.png"), tr(""),this);
       startHVAct->setText("Turn HV On (start bias refreshing)");
       stopHVAct->setText("Turn HV Off (stop bias refreshing)");
       startHVAct->setDisabled(true);
@@ -941,13 +941,13 @@ void MainWindow::updateVisualisationTab(bool bUpdate)
 
 /* This is the slot connected to the test item on the main menu.
    */
-void MainWindow::testDevelopment()
-{
-    if (DataModel::instance()->numberOfSlices() == 0)
-            return;
+//void MainWindow::testDevelopment()
+//{
+//    if (DataModel::instance()->numberOfSlices() == 0)
+//            return;
 
-   initializeSlice(DataModel::instance()->getActiveSlice()->backProject());
-}
+//   initializeSlice(DataModel::instance()->getActiveSlice()->backProject());
+//}
 /*
 void MainWindow::checkKeithleyConfiguration()
 {

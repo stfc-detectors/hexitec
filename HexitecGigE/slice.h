@@ -46,11 +46,11 @@ public:
    // Methods (in alphabetical order)
    Slice *add(Slice *anOtherSlice);
    Slice *add(double value);
-   Slice *backProject();
+//   Slice *backProject();
 //   Slice *eigenImageSlice();
 //   Slice *prinComp();
 
-   void calculatePrinComps();
+//   void calculatePrinComps();
    static bool fileNameListValid(QStringList fileNameList);
    SArray<double> channelImage(double value);
    void detach();
@@ -73,7 +73,6 @@ public:
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
    static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
-   void resize(int, int, int, double);
 //   Q_INVOKABLE void sendToMatlab();
 //   Q_INVOKABLE void sendToMatlab(QString varName);
    void setVoxelDataLen(int voxelDataLen);
@@ -89,7 +88,7 @@ public:
    void writeHXT(QString);
    void writeHIF(QString);
    Q_INVOKABLE QObject *zeros(int rows, int cols, int depth);
-   void setData(double *data);
+//   void setData(double *data);
 signals:
    void writeError(QString);
    void writeMessage(QString);
@@ -101,7 +100,7 @@ private:
    struct HxtBuffer {
        char hxtLabel[8];
        quint64 hxtVersion;
-//       int motorPositions[9];
+       int motorPositions[9];
        int filePrefixLength;
        char filePrefix[100];
        char dataTimeStamp[16];
@@ -152,9 +151,9 @@ private:
    Slice *clone(QString name);
    static QString nextSliceName();
    static QString roleBackSliceName();
-   bool makeCommonX(double);
-   void myFFT(int, int, QVector <double> &, QVector <double> &);
-   double *getData();
+//   bool makeCommonX(double);
+//   void myFFT(int, int, QVector <double> &, QVector <double> &);
+//   double *getData();
    void postDataInit();
    void postDataInit(QString fileName);
    void preDataInit(QString name);
