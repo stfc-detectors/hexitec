@@ -46,11 +46,11 @@ public:
    // Methods (in alphabetical order)
    Slice *add(Slice *anOtherSlice);
    Slice *add(double value);
-   Slice *backProject();
-   Slice *eigenImageSlice();
-   Slice *prinComp();
+//   Slice *backProject();
+//   Slice *eigenImageSlice();
+//   Slice *prinComp();
 
-   void calculatePrinComps();
+//   void calculatePrinComps();
    static bool fileNameListValid(QStringList fileNameList);
    SArray<double> channelImage(double value);
    void detach();
@@ -88,7 +88,7 @@ public:
    void writeHXT(QString);
    void writeHIF(QString);
    Q_INVOKABLE QObject *zeros(int rows, int cols, int depth);
-   void setData(double *data);
+//   void setData(double *data);
 signals:
    void writeError(QString);
    void writeMessage(QString);
@@ -151,9 +151,9 @@ private:
    Slice *clone(QString name);
    static QString nextSliceName();
    static QString roleBackSliceName();
-   bool makeCommonX(double);
-   void myFFT(int, int, QVector <double> &, QVector <double> &);
-   double *getData();
+//   bool makeCommonX(double);
+//   void myFFT(int, int, QVector <double> &, QVector <double> &);
+//   double *getData();
    void postDataInit();
    void postDataInit(QString fileName);
    void preDataInit(QString name);

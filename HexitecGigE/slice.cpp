@@ -25,6 +25,7 @@ const QString Slice::multipleSuffixes = QString(".sb.xmy.xy.txt");
   */
 Slice::Slice(QString name, QObject *parent) : QObject(parent)
 {
+   qDebug() << "::Slice(QStr, QObj)";
    preDataInit(name);
 }
 
@@ -82,6 +83,8 @@ QString Slice::getFileName()
   */
 Slice::Slice(QString name, QString fileName)
 {
+    qDebug() << "::Slice(QStr, QStr)  ";
+
    preDataInit(name);
    bool status = false;
    QString fileRoot = QFileInfo(fileName).fileName();
@@ -119,6 +122,7 @@ Slice::Slice(QString name, QString fileName)
   */
 Slice::Slice(QString name, QStringList fileNameList)
 {
+    qDebug() << "::Slice(QStr, QStrList)";
    preDataInit(name);
 
    QString fileSuffix = QFileInfo(fileNameList[0]).suffix();
@@ -135,6 +139,7 @@ Slice::Slice(QString name, QStringList fileNameList)
 
 Slice::Slice(QString name, unsigned short* buffer, QString fileName)
 {
+    qDebug() << "::Slice(QStr, us buff, QStr)";
    preDataInit(name);
 
    readHXT(buffer);
@@ -209,6 +214,7 @@ void Slice::postDataInit(QString fileName)
 
 Slice::Slice(QString name, int rows, int cols, int depth, double value)
 {
+    qDebug() << "::Slice(QStr, int rows, int cols, .., ..)";
    preDataInit(name);
 
    resize(rows, cols);
@@ -262,338 +268,338 @@ void Slice::addParameters()
 
 #include "SVD"
 
-Slice *Slice::prinComp()
-{
+//Slice *Slice::prinComp()
+//{
 
-    Slice *newSlice = new Slice(name + "_Eigen_Images");
-    newSlice->resize(gridSizeX, gridSizeY);
+//    Slice *newSlice = new Slice(name + "_Eigen_Images");
+//    newSlice->resize(gridSizeX, gridSizeY);
 
-    int nComps = eigenWeights.rows();
-    if (nComps == 0)
-    {
-        calculatePrinComps();
-    }
+//    int nComps = eigenWeights.rows();
+//    if (nComps == 0)
+//    {
+//        calculatePrinComps();
+//    }
 
-    // Construct a slice based on existing stored weights and spectra within (this) instance
-    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-    {
-        newSlice->commonX.push_back(iComp);
-    }
-    newSlice->voxelDataLen = nComps;
-    int iPix;
-    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-    {
-       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-       {
-          iPix = iCol*gridSizeX+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
-          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-          {
-              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-          }
-       }
-    }
+//    // Construct a slice based on existing stored weights and spectra within (this) instance
+//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
+//    {
+//        newSlice->commonX.push_back(iComp);
+//    }
+//    newSlice->voxelDataLen = nComps;
+//    int iPix;
+//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
+//    {
+//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
+//       {
+//          iPix = iCol*gridSizeX+iRow;
+//          // Create new voxel
+//          Voxel *v = new Voxel;
+//          contentVoxel[iRow].push_back(v);
+//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
+//          {
+//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
+//          }
+//       }
+//    }
 
-    newSlice->zeroStats();
-    newSlice->xType = COMMON;
-    newSlice->postDataInit();
-    return newSlice;
-}
+//    newSlice->zeroStats();
+//    newSlice->xType = COMMON;
+//    newSlice->postDataInit();
+//    return newSlice;
+//}
 
-void Slice::calculatePrinComps()
-{
-    // Calculate the components
-    int nRC = gridSizeX*gridSizeY;
-    MatrixXd MAT;
-    MAT.resize(nRC,voxelDataLen);
-    // Repack the data
-    int iPix;
-    for (int i = 0; i < gridSizeY ; ++i)
-    {
-        for (int j = 0; j < gridSizeX; ++j)
-        {
-            iPix = i*gridSizeX+j;
-            for (int k = 0 ; k < voxelDataLen; ++k)
-            {
-                MAT(iPix,k) = contentVoxel[j][i]->contentYData[k];
-            }
-        }
-    }
-    writeMessage("Calculating principle components");
-    JacobiSVD<MatrixXd> svd(MAT, ComputeThinU | ComputeThinV);
-    writeMessage("Done");
-    writeMessage("MAT size : " + QString::number(MAT.rows())+ ","+QString::number(MAT.cols()));
-    writeMessage("SVD U size : " + QString::number(svd.matrixU().rows())+ ","+QString::number(svd.matrixU().cols()));
-    writeMessage("SVD V size : " + QString::number(svd.matrixV().rows())+ ","+QString::number(svd.matrixV().cols()));
-    eigenWeights = svd.singularValues().asDiagonal()*svd.matrixU().transpose();
-    eigenSpectra = svd.matrixV();
-    //eigenWeights.transposeInPlace();
-   // eigenSpectra.transposeInPlace();
+//void Slice::calculatePrinComps()
+//{
+//    // Calculate the components
+//    int nRC = gridSizeX*gridSizeY;
+//    MatrixXd MAT;
+//    MAT.resize(nRC,voxelDataLen);
+//    // Repack the data
+//    int iPix;
+//    for (int i = 0; i < gridSizeY ; ++i)
+//    {
+//        for (int j = 0; j < gridSizeX; ++j)
+//        {
+//            iPix = i*gridSizeX+j;
+//            for (int k = 0 ; k < voxelDataLen; ++k)
+//            {
+//                MAT(iPix,k) = contentVoxel[j][i]->contentYData[k];
+//            }
+//        }
+//    }
+//    writeMessage("Calculating principle components");
+//    JacobiSVD<MatrixXd> svd(MAT, ComputeThinU | ComputeThinV);
+//    writeMessage("Done");
+//    writeMessage("MAT size : " + QString::number(MAT.rows())+ ","+QString::number(MAT.cols()));
+//    writeMessage("SVD U size : " + QString::number(svd.matrixU().rows())+ ","+QString::number(svd.matrixU().cols()));
+//    writeMessage("SVD V size : " + QString::number(svd.matrixV().rows())+ ","+QString::number(svd.matrixV().cols()));
+//    eigenWeights = svd.singularValues().asDiagonal()*svd.matrixU().transpose();
+//    eigenSpectra = svd.matrixV();
+//    //eigenWeights.transposeInPlace();
+//   // eigenSpectra.transposeInPlace();
 
-}
+//}
 
-Slice *Slice::eigenImageSlice()
-{
-    // Now superceded by Slice::prinComp()- method needs removing
-    // Constructs a new slice from the eigen weights stored in an existing (this) slice
-    int nComps = eigenWeights.rows();
+//Slice *Slice::eigenImageSlice()
+//{
+//    // Now superceded by Slice::prinComp()- method needs removing
+//    // Constructs a new slice from the eigen weights stored in an existing (this) slice
+//    int nComps = eigenWeights.rows();
 
-    Slice *newSlice = new Slice(name + "_Eigen_Images");
-    newSlice->resize(gridSizeX, gridSizeY);
+//    Slice *newSlice = new Slice(name + "_Eigen_Images");
+//    newSlice->resize(gridSizeX, gridSizeY);
 
-    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-    {
-        newSlice->commonX.push_back(iComp);
-    }
-    newSlice->voxelDataLen = nComps;
-    int iPix;
-    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-    {
-       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-       {
-          iPix = iCol*gridSizeX+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
-          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-          {
-              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-          }
-       }
-    }
-    newSlice->zeroStats();
-    newSlice->xType = COMMON;
-    newSlice->postDataInit();
-    return newSlice;
-}
+//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
+//    {
+//        newSlice->commonX.push_back(iComp);
+//    }
+//    newSlice->voxelDataLen = nComps;
+//    int iPix;
+//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
+//    {
+//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
+//       {
+//          iPix = iCol*gridSizeX+iRow;
+//          // Create new voxel
+//          Voxel *v = new Voxel;
+//          contentVoxel[iRow].push_back(v);
+//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
+//          {
+//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
+//          }
+//       }
+//    }
+//    newSlice->zeroStats();
+//    newSlice->xType = COMMON;
+//    newSlice->postDataInit();
+//    return newSlice;
+//}
 
-/* Moved here from main window, modified where marked. There definitely was a bug which is now fixed so that
-   it will produce a new Slice. However the contents of the new Slice may be wrong.
-   Used to 'return' on error from several places, these now 'return NULL'.
-*/
-Slice *Slice::backProject()
-{
-   // temporary driver part
-   bool bPRotTraFlag = true;
-   int bPFilterTypeNum = 1;
-   double bPStartAngle = 0;
-   double bPStopAngle = 180;
-   double PI = 3.14159265;
-   //
-   int rotSide, traSide;
-   if(bPRotTraFlag)
-   {
-      rotSide = this->gridSizeY;
-      traSide = this->gridSizeX;
-      emit writeMessage("gridSizeY is rotation: " + QString::number(this->gridSizeY));
-   }
-   else
-   {
-      traSide = this->gridSizeY;
-      rotSide = this->gridSizeX;
-      emit writeMessage("gridSizeX is rotation: " + QString::number(this->gridSizeX));
-   }
-   if(rotSide > traSide)
-   {
-      emit writeError("The algorithm currently work only when rotation side <= translation side.");
-      return NULL;
-   }
+///* Moved here from main window, modified where marked. There definitely was a bug which is now fixed so that
+//   it will produce a new Slice. However the contents of the new Slice may be wrong.
+//   Used to 'return' on error from several places, these now 'return NULL'.
+//*/
+//Slice *Slice::backProject()
+//{
+//   // temporary driver part
+//   bool bPRotTraFlag = true;
+//   int bPFilterTypeNum = 1;
+//   double bPStartAngle = 0;
+//   double bPStopAngle = 180;
+//   double PI = 3.14159265;
+//   //
+//   int rotSide, traSide;
+//   if(bPRotTraFlag)
+//   {
+//      rotSide = this->gridSizeY;
+//      traSide = this->gridSizeX;
+//      emit writeMessage("gridSizeY is rotation: " + QString::number(this->gridSizeY));
+//   }
+//   else
+//   {
+//      traSide = this->gridSizeY;
+//      rotSide = this->gridSizeX;
+//      emit writeMessage("gridSizeX is rotation: " + QString::number(this->gridSizeX));
+//   }
+//   if(rotSide > traSide)
+//   {
+//      emit writeError("The algorithm currently work only when rotation side <= translation side.");
+//      return NULL;
+//   }
 
-   double bPStepAngle = (bPStopAngle-bPStartAngle)/(rotSide-1);
-   QVector <double> anglesVec;
+//   double bPStepAngle = (bPStopAngle-bPStartAngle)/(rotSide-1);
+//   QVector <double> anglesVec;
 
-   for(int a=0; a<rotSide; ++a)
-      anglesVec.push_back((bPStartAngle+a*bPStepAngle)*PI/180.0);
+//   for(int a=0; a<rotSide; ++a)
+//      anglesVec.push_back((bPStartAngle+a*bPStepAngle)*PI/180.0);
 
-   if(anglesVec.size() != rotSide)
-   {
-      emit writeError("Number of angles not equal to side size.");
-      return NULL;
-   }
+//   if(anglesVec.size() != rotSide)
+//   {
+//      emit writeError("Number of angles not equal to side size.");
+//      return NULL;
+//   }
 
-   int nn2 = 2 * pow(2, ceil(log(1.0*traSide)/log(2.0)));
-   QVector <double> dataVec;
-   dataVec.resize(nn2);
-   QVector <double> Filt;
+//   int nn2 = 2 * pow(2, ceil(log(1.0*traSide)/log(2.0)));
+//   QVector <double> dataVec;
+//   dataVec.resize(nn2);
+//   QVector <double> Filt;
 
-   if(bPFilterTypeNum == 0)
-   {
-      emit writeError( "Filter should be chosen to proceed.");
-      return NULL;
-   }
-   else if(bPFilterTypeNum == 1)
-   {
-      for(int uu=0; uu<traSide; ++uu)
-         Filt.push_back(fabs(sin(-PI+uu*(2*PI/traSide))));
-   }
-   else if(bPFilterTypeNum == 2)
-   {
-      for(int uu=0; uu<traSide; ++uu)
-         Filt.push_back(fabs((-PI+uu*(2*PI/traSide))));
-   }
+//   if(bPFilterTypeNum == 0)
+//   {
+//      emit writeError( "Filter should be chosen to proceed.");
+//      return NULL;
+//   }
+//   else if(bPFilterTypeNum == 1)
+//   {
+//      for(int uu=0; uu<traSide; ++uu)
+//         Filt.push_back(fabs(sin(-PI+uu*(2*PI/traSide))));
+//   }
+//   else if(bPFilterTypeNum == 2)
+//   {
+//      for(int uu=0; uu<traSide; ++uu)
+//         Filt.push_back(fabs((-PI+uu*(2*PI/traSide))));
+//   }
 
-   emit writeMessage("Back projection will be carried out for all channels");
+//   emit writeMessage("Back projection will be carried out for all channels");
 
-   QVector < QVector < QVector <double> > > allVec;
-   double midIndex = (1.0*traSide+1.0)/2.0;
-   QVector < QVector <double> > xpr, ypr, filtIndex, BPIa;
-   xpr.resize(traSide);
-   ypr.resize(traSide);
-   filtIndex.resize(traSide);
-   BPIa.resize(traSide);
-   for(int b=0; b<traSide; ++b)
-      for(int c=0; c<traSide; ++c)
-      {
-         xpr[b].push_back(1.0*c-midIndex+1.0);
-         ypr[b].push_back(1.0*b-midIndex+1.0);
-         filtIndex[b].push_back(0.0);
-         BPIa[b].push_back(0.0);
-      }
-   QVector < int > tempI;
-   QVector < QPair <int, int> > pairI;
-   QVector < QVector < QPair <int, int> > > spota;
-   QVector < QVector < int > > nfi;
-   for (int mm = 0 ; mm < anglesVec.size() ; mm++)
-   {
-      QVector < QVector <int> > F;
-      spota.push_back (pairI);
-      nfi.push_back (tempI);
-      for (int i = 0 ; i < traSide ; i++)
-      {
-         F.push_back(tempI);
-         for (int j = 0 ; j < traSide ; j ++)
-         {
-            double filtidx = floor(0.5+(midIndex+xpr[i][j]*sin(anglesVec[mm])-ypr[i][j]*cos(anglesVec[mm])));
-            F[i].push_back(filtidx);
-         }
-      }
+//   QVector < QVector < QVector <double> > > allVec;
+//   double midIndex = (1.0*traSide+1.0)/2.0;
+//   QVector < QVector <double> > xpr, ypr, filtIndex, BPIa;
+//   xpr.resize(traSide);
+//   ypr.resize(traSide);
+//   filtIndex.resize(traSide);
+//   BPIa.resize(traSide);
+//   for(int b=0; b<traSide; ++b)
+//      for(int c=0; c<traSide; ++c)
+//      {
+//         xpr[b].push_back(1.0*c-midIndex+1.0);
+//         ypr[b].push_back(1.0*b-midIndex+1.0);
+//         filtIndex[b].push_back(0.0);
+//         BPIa[b].push_back(0.0);
+//      }
+//   QVector < int > tempI;
+//   QVector < QPair <int, int> > pairI;
+//   QVector < QVector < QPair <int, int> > > spota;
+//   QVector < QVector < int > > nfi;
+//   for (int mm = 0 ; mm < anglesVec.size() ; mm++)
+//   {
+//      QVector < QVector <int> > F;
+//      spota.push_back (pairI);
+//      nfi.push_back (tempI);
+//      for (int i = 0 ; i < traSide ; i++)
+//      {
+//         F.push_back(tempI);
+//         for (int j = 0 ; j < traSide ; j ++)
+//         {
+//            double filtidx = floor(0.5+(midIndex+xpr[i][j]*sin(anglesVec[mm])-ypr[i][j]*cos(anglesVec[mm])));
+//            F[i].push_back(filtidx);
+//         }
+//      }
 
-      for (int k = 0  ; k < traSide; k ++)
-      {
-         for (int l = 0 ; l < traSide ; l ++)
-         {
-            if (F[l][k] > 0 && F[l][k] <= traSide)
-            {
-               QPair <int,int> tem;
-               tem.first = l;
-               tem.second = k;
-               spota[mm].push_back(tem);
-               nfi[mm].push_back(F[l][k]-1);
-            }
-         }
-      }
-   }
-   int numberOfChannels = this->commonX.size();
-   QProgressDialog progress("Back projection will be carried out for all channels...", "Stop read", 0, numberOfChannels-1);
-   progress.setWindowModality(Qt::WindowModal);
-   progress.show();
-   unsigned long int count = 0;
-   for(int oo=0; oo < numberOfChannels; ++oo) // commonX specific
-   {
-      QVector < QVector <double> > BPI;
-      BPI.resize(traSide);
-      for(int dd=0; dd<traSide; ++dd)
-         for(int zz=0; zz<traSide; ++zz)
-            BPI[dd].push_back(0.0);
+//      for (int k = 0  ; k < traSide; k ++)
+//      {
+//         for (int l = 0 ; l < traSide ; l ++)
+//         {
+//            if (F[l][k] > 0 && F[l][k] <= traSide)
+//            {
+//               QPair <int,int> tem;
+//               tem.first = l;
+//               tem.second = k;
+//               spota[mm].push_back(tem);
+//               nfi[mm].push_back(F[l][k]-1);
+//            }
+//         }
+//      }
+//   }
+//   int numberOfChannels = this->commonX.size();
+//   QProgressDialog progress("Back projection will be carried out for all channels...", "Stop read", 0, numberOfChannels-1);
+//   progress.setWindowModality(Qt::WindowModal);
+//   progress.show();
+//   unsigned long int count = 0;
+//   for(int oo=0; oo < numberOfChannels; ++oo) // commonX specific
+//   {
+//      QVector < QVector <double> > BPI;
+//      BPI.resize(traSide);
+//      for(int dd=0; dd<traSide; ++dd)
+//         for(int zz=0; zz<traSide; ++zz)
+//            BPI[dd].push_back(0.0);
 
-      QVector < QVector <double> > filtPR;
-      filtPR.resize(rotSide);
-      if(bPRotTraFlag)
-      {
-         for(int aa=0; aa<rotSide; ++aa)
-            for(int bb=0; bb<traSide; ++bb)
-               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
-      }
-      else
-      {
-         for(int aa=0; aa<traSide; ++aa)
-            for(int bb=0; bb<rotSide; ++bb)
-               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
-      }
+//      QVector < QVector <double> > filtPR;
+//      filtPR.resize(rotSide);
+//      if(bPRotTraFlag)
+//      {
+//         for(int aa=0; aa<rotSide; ++aa)
+//            for(int bb=0; bb<traSide; ++bb)
+//               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
+//      }
+//      else
+//      {
+//         for(int aa=0; aa<traSide; ++aa)
+//            for(int bb=0; bb<rotSide; ++bb)
+//               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
+//      }
 
-      for(int hh=0; hh<filtPR.size(); ++hh)
-      {
-         QVector <double>  x1, y1;
-         x1.resize(filtPR[hh].size());
-         y1.resize(filtPR[hh].size());
-         int gg;
-         for(gg=0; gg<filtPR[hh].size(); ++gg)
-         {
-            x1[gg]   = filtPR[hh][gg];
-            y1[gg]   = 0.0;
-         }
+//      for(int hh=0; hh<filtPR.size(); ++hh)
+//      {
+//         QVector <double>  x1, y1;
+//         x1.resize(filtPR[hh].size());
+//         y1.resize(filtPR[hh].size());
+//         int gg;
+//         for(gg=0; gg<filtPR[hh].size(); ++gg)
+//         {
+//            x1[gg]   = filtPR[hh][gg];
+//            y1[gg]   = 0.0;
+//         }
 
-         myFFT(1, filtPR[hh].size(), x1, y1);
+//         myFFT(1, filtPR[hh].size(), x1, y1);
 
-         for(gg=0; gg<filtPR[hh].size(); ++gg)
-         {
-            x1[gg]   = x1[gg] * Filt[gg];
-            y1[gg]   = y1[gg] * Filt[gg];
-         }
+//         for(gg=0; gg<filtPR[hh].size(); ++gg)
+//         {
+//            x1[gg]   = x1[gg] * Filt[gg];
+//            y1[gg]   = y1[gg] * Filt[gg];
+//         }
 
-         myFFT(-1, filtPR[hh].size(), x1, y1);
+//         myFFT(-1, filtPR[hh].size(), x1, y1);
 
-         for(gg=0; gg<filtPR[hh].size(); ++gg)
-         {
-            filtPR[hh][gg] = x1[gg];
-         }
-      }
+//         for(gg=0; gg<filtPR[hh].size(); ++gg)
+//         {
+//            filtPR[hh][gg] = x1[gg];
+//         }
+//      }
 
-      for (int ii = 0  ; ii < rotSide ; ii++)
-      {
-         for (int jj = 0; jj <  spota[ii].size(); ++jj)
-         {
-            int r = spota[ii][jj].first;
-            int c = spota[ii][jj].second;
-            int ll = nfi[ii][jj];
-            BPI[r][c] += filtPR[ii][ll];
-         }
-      }
+//      for (int ii = 0  ; ii < rotSide ; ii++)
+//      {
+//         for (int jj = 0; jj <  spota[ii].size(); ++jj)
+//         {
+//            int r = spota[ii][jj].first;
+//            int c = spota[ii][jj].second;
+//            int ll = nfi[ii][jj];
+//            BPI[r][c] += filtPR[ii][ll];
+//         }
+//      }
 
-      for(int x=0; x<BPI.size(); ++x)
-      {
-         for(int y=0; y<BPI[x].size(); ++y)
-         {
-            BPI[x][y] = BPI[x][y]/(anglesVec.size()*1.0);
-         }
-      }
-      allVec.push_back(BPI);
-      count++;
-      progress.setValue(count);
-      progress.update();
-      if(progress.wasCanceled())
-         return NULL;
-   }
+//      for(int x=0; x<BPI.size(); ++x)
+//      {
+//         for(int y=0; y<BPI[x].size(); ++y)
+//         {
+//            BPI[x][y] = BPI[x][y]/(anglesVec.size()*1.0);
+//         }
+//      }
+//      allVec.push_back(BPI);
+//      count++;
+//      progress.setValue(count);
+//      progress.update();
+//      if(progress.wasCanceled())
+//         return NULL;
+//   }
 
-   progress.update();
-   progress.deleteLater();
+//   progress.update();
+//   progress.deleteLater();
 
-   Slice *newSlice = new Slice("back projected");
+//   Slice *newSlice = new Slice("back projected");
 
-   newSlice->resize(traSide, traSide);
-   newSlice->voxelDataLen = allVec.size();
-   for(int ee=0; ee<allVec.size(); ++ee)
-   {
-      // This was originally copying the new commonX to the new commonX
-      newSlice->commonX.push_back(this->commonX[ee]);
-   }
-   for(int ww=0; ww<traSide; ++ww)
-      for(int xx=0; xx<traSide; ++xx)
-      {
-         for(int dd=0; dd<allVec.size(); ++dd)
-         {
-            newSlice->contentVoxel[ww][xx]->contentYData.push_back(allVec[dd][ww][xx]);
-         }
-      }
+//   newSlice->resize(traSide, traSide);
+//   newSlice->voxelDataLen = allVec.size();
+//   for(int ee=0; ee<allVec.size(); ++ee)
+//   {
+//      // This was originally copying the new commonX to the new commonX
+//      newSlice->commonX.push_back(this->commonX[ee]);
+//   }
+//   for(int ww=0; ww<traSide; ++ww)
+//      for(int xx=0; xx<traSide; ++xx)
+//      {
+//         for(int dd=0; dd<allVec.size(); ++dd)
+//         {
+//            newSlice->contentVoxel[ww][xx]->contentYData.push_back(allVec[dd][ww][xx]);
+//         }
+//      }
 
-   newSlice->zeroStats();
-   newSlice->xType = COMMON;
-   newSlice->postDataInit();
-//   emit initializeSlice(newSlice);
-   return newSlice;
-}
+//   newSlice->zeroStats();
+//   newSlice->xType = COMMON;
+//   newSlice->postDataInit();
+////   emit initializeSlice(newSlice);
+//   return newSlice;
+//}
 
 int Slice::getGridSizeX()
 {
@@ -1090,6 +1096,7 @@ bool Slice::readHXT(unsigned short *buffer)
 
 bool Slice::readHXT(QString fileName)
 {
+    qDebug() << "Slice::readHXT(Qstr)  !";
    QFile file(fileName);
    if (!file.open(QIODevice::ReadOnly))
    {
@@ -1658,68 +1665,68 @@ bool Slice::squeezeX()
    return(true);
 }
 
-bool Slice::makeCommonX(double step)
-{
-   // should overload this so that it takes a vector argument as well for non-discrete X
-   // also should do something abou the uniqueX case i.e. delel
-   if (xType == UNIQUE)
-   {
-      for (int i = 0; i < gridSizeX; ++i)
-      {
-         for (int j = 0; j < gridSizeY; ++j)
-         {
-            contentVoxel[i][j]->contentXData.resize(0);;
-         }
-      }
-   }
-   commonX.resize(voxelDataLen);
-   for (int k = 0; k < voxelDataLen ; ++k)
-      commonX[k] = (double)(k) * step;
+//bool Slice::makeCommonX(double step)
+//{
+//   // should overload this so that it takes a vector argument as well for non-discrete X
+//   // also should do something abou the uniqueX case i.e. delel
+//   if (xType == UNIQUE)
+//   {
+//      for (int i = 0; i < gridSizeX; ++i)
+//      {
+//         for (int j = 0; j < gridSizeY; ++j)
+//         {
+//            contentVoxel[i][j]->contentXData.resize(0);;
+//         }
+//      }
+//   }
+//   commonX.resize(voxelDataLen);
+//   for (int k = 0; k < voxelDataLen ; ++k)
+//      commonX[k] = (double)(k) * step;
 
-   xType = COMMON;
-   return(true);
-}
+//   xType = COMMON;
+//   return(true);
+//}
 
-/* Creates a C-style array out of the data.
-  */
-double *Slice::getData()
-{
-   double *data = (double *)malloc(voxelDataLen * gridSizeY * gridSizeX * sizeof(double));
-   double *ptr = data;
-   for (int i = 0; i < gridSizeX; i++)
-   {
-      for (int j = 0; j < gridSizeY; j++)
-      {
-         for (int k = 0; k < voxelDataLen; k++)
-         {
-            *ptr = contentVoxel[i][j]->contentYData[k];
-            ptr++;
-         }
-      }
-   }
-   return data;
-}
+///* Creates a C-style array out of the data.
+//  */
+//double *Slice::getData()
+//{
+//   double *data = (double *)malloc(voxelDataLen * gridSizeY * gridSizeX * sizeof(double));
+//   double *ptr = data;
+//   for (int i = 0; i < gridSizeX; i++)
+//   {
+//      for (int j = 0; j < gridSizeY; j++)
+//      {
+//         for (int k = 0; k < voxelDataLen; k++)
+//         {
+//            *ptr = contentVoxel[i][j]->contentYData[k];
+//            ptr++;
+//         }
+//      }
+//   }
+//   return data;
+//}
 
-void Slice::setData(double *data)
-{
-   //this->voxelDataLen = voxelDataLen;
-  // this->gridSizeY = gridSizeY;
-  // this->gridSizeX = gridSizeX;
+//void Slice::setData(double *data)
+//{
+//   //this->voxelDataLen = voxelDataLen;
+//  // this->gridSizeY = gridSizeY;
+//  // this->gridSizeX = gridSizeX;
 
-   double *ptr = data;
-   for (int i = 0; i < gridSizeX; i++)
-   {
-      for (int j = 0; j < gridSizeY; j++)
-      {
-         contentVoxel[i][j]->contentYData.resize(voxelDataLen);
-         for (int k = 0; k < voxelDataLen; k++)
-         {
-            contentVoxel[i][j]->contentYData[k] = *ptr;
-            ptr++;
-         }
-      }
-   }
-}
+//   double *ptr = data;
+//   for (int i = 0; i < gridSizeX; i++)
+//   {
+//      for (int j = 0; j < gridSizeY; j++)
+//      {
+//         contentVoxel[i][j]->contentYData.resize(voxelDataLen);
+//         for (int k = 0; k < voxelDataLen; k++)
+//         {
+//            contentVoxel[i][j]->contentYData[k] = *ptr;
+//            ptr++;
+//         }
+//      }
+//   }
+//}
 
 //void Slice::sendToMatlab()
 //{
@@ -1827,49 +1834,49 @@ SArray<double> Slice::sumImage(int start, int end)
    return imageData;
 }
 
-/* Moved here from MainWindow because it's only used by Slice::backProject. Since it is a general
-       purpose mathematical thing it should probably be in some kind of Math or Util class.
-       */
-void Slice::myFFT(int flag, int N, QVector <double> &x1 , QVector  <double> &y1)
-{
-   N = x1.size();
-   // WARNING LOOP VARIABLES ARE NOT LONG
-   QVector <double> x2, y2;
-   x2.resize(N);
-   y2.resize(N);
-   double arg;
-   double cosarg, sinarg;
+///* Moved here from MainWindow because it's only used by Slice::backProject. Since it is a general
+//       purpose mathematical thing it should probably be in some kind of Math or Util class.
+//       */
+//void Slice::myFFT(int flag, int N, QVector <double> &x1 , QVector  <double> &y1)
+//{
+//   N = x1.size();
+//   // WARNING LOOP VARIABLES ARE NOT LONG
+//   QVector <double> x2, y2;
+//   x2.resize(N);
+//   y2.resize(N);
+//   double arg;
+//   double cosarg, sinarg;
 
-   for (int i = 0; i < N; i++)
-   {
-      x2[i] = 0.0;
-      y2[i] = 0.0;
-      arg = - flag * 2.0 * 3.141592654 * (double)i / (double)N;
-      for (int k = 0; k < N; k++)
-      {
-         cosarg = cos(k * arg);
-         sinarg = sin(k * arg);
-         x2[i] += (x1[k] * cosarg - y1[k] * sinarg);
-         y2[i] += (x1[k] * sinarg + y1[k] * cosarg);
-      }
-   }
-   if (flag == -1)
-   {
-      for (int i = 0 ; i < N ; i++)
-      {
-         x1[i] = x2[i] / (double)N;
-         y1[i] = y2[i] / (double)N;
-      }
-   }
-   else
-   {
-      for (int i = 0 ; i < N ; i++)
-      {
-         x1[i] = x2[i];
-         y1[i] = y2[i];
-      }
-   }
-}
+//   for (int i = 0; i < N; i++)
+//   {
+//      x2[i] = 0.0;
+//      y2[i] = 0.0;
+//      arg = - flag * 2.0 * 3.141592654 * (double)i / (double)N;
+//      for (int k = 0; k < N; k++)
+//      {
+//         cosarg = cos(k * arg);
+//         sinarg = sin(k * arg);
+//         x2[i] += (x1[k] * cosarg - y1[k] * sinarg);
+//         y2[i] += (x1[k] * sinarg + y1[k] * cosarg);
+//      }
+//   }
+//   if (flag == -1)
+//   {
+//      for (int i = 0 ; i < N ; i++)
+//      {
+//         x1[i] = x2[i] / (double)N;
+//         y1[i] = y2[i] / (double)N;
+//      }
+//   }
+//   else
+//   {
+//      for (int i = 0 ; i < N ; i++)
+//      {
+//         x1[i] = x2[i];
+//         y1[i] = y2[i];
+//      }
+//   }
+//}
 
 /* Attaches the Slice to its parent Volume's data.
   */
