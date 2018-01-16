@@ -67,7 +67,7 @@ public:
    bool isCompatible(Slice *anOtherSlice);
    Q_INVOKABLE QObject *mask(double *theMask);
    Slice *multiply(double value);
-   Q_INVOKABLE QObject *ones(int rows, int cols, int depth);
+//   Q_INVOKABLE QObject *ones(int rows, int cols, int depth);
    Q_INVOKABLE QObject *plus(QObject *anotherSlice);
    Q_INVOKABLE QObject *plus(double value);
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
@@ -82,12 +82,8 @@ public:
    Q_INVOKABLE QObject *times(double value);
    int valueToChannel(double value);
    Slice *veil(double *theMask);
-   bool writeXY(QString);
-   bool writeXMY(QString, QString);
-   void writeEZD(QString);
    void writeHXT(QString);
-   void writeHIF(QString);
-   Q_INVOKABLE QObject *zeros(int rows, int cols, int depth);
+//   Q_INVOKABLE QObject *zeros(int rows, int cols, int depth);
 //   void setData(double *data);
 signals:
    void writeError(QString);
@@ -124,13 +120,9 @@ private:
    };
 
    // Variables
-   Voxel *voxels;
-   QVector <double> binVoltage;
    QVector <double> commonX;
    QVector < QVector <Voxel *> > contentVoxel;
    double *summedImageY;
-   MatrixXd eigenWeights;
-   MatrixXd eigenSpectra;
    QString fileName;
    int sliceToReplace;
    int gridSizeX;
@@ -157,13 +149,8 @@ private:
    void postDataInit();
    void postDataInit(QString fileName);
    void preDataInit(QString name);
-   bool readDAT(QString);
-   bool readEZD(QString);
    bool readHXT(QString);
    bool readHXT(unsigned short *buffer);
-   bool readHIF(QString);
-   bool readXMY(QStringList);
-   bool readXY(QStringList);
    bool squeezeX();
    void stats();
    void zeroStats();

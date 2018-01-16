@@ -125,7 +125,7 @@ signals:
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
    void readFiles();
-   void saveFiles();
+//   void saveFiles();
    void deleteSlice(Slice *slice);
    void deleteActiveSlice();
    void deleteAllSlices();

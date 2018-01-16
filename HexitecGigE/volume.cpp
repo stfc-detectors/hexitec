@@ -1,6 +1,7 @@
 #include "volume.h"
 #include "volume.h"
 #include "datamodel.h"
+#include <QDebug>
 
 Volume::Volume(QString name)
 {
@@ -18,6 +19,14 @@ Volume::Volume(QString name)
    // emit addObject(this);
 }
 
+Volume::~Volume()
+{
+    qDebug() << "Volume::~Volume() DTOR IS CALLED!";
+//   for (int i = 0; i < slices->size(); i++)
+//      delete slices;
+    /// Or just do:
+//   delete slices;
+}
 
 void Volume::addSlice(Slice *slice)
 {

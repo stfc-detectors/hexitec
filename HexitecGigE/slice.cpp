@@ -29,43 +29,6 @@ Slice::Slice(QString name, QObject *parent) : QObject(parent)
    preDataInit(name);
 }
 
-/* Constructs a Slice from a matlabVariable.
-  */
-/// Redundant now that Matlab's taken out altogether?
-//Slice::Slice(QString name, QString varName, int dummy)
-//{
-//   preDataInit(name);
-//   matlab *matlab = matlab::instance();
-//   if (matlab->getSliceFromMatlab(this, varName) == matlab->SUCCESS)
-//   {
-//      QVector <double> xScale;
-//      if (matlab->getVectorFromMatlab(xScale, varName + "XScale") == matlab->SUCCESS)
-//      {
-//         if (xScale.size() == voxelDataLen)
-//         {
-//            for (int i = 0 ; i < voxelDataLen; ++i)
-//               commonX.push_back(xScale[i]);
-//            xType = COMMON;
-//         }
-//         else
-//         {
-//            emit writeWarning("activeSliceXScale size is not consistent with activeSlice - ignoring activeSliceXscale");
-//         }
-//         postDataInit();
-//      }
-//      else
-//      {
-//         emit writeWarning("activeSliceXScale could not be read");
-//      }
-//   }
-//   else
-//   {
-//      throw QString("Failed to construct Slice from matlab variable: \"" + varName + "\"");
-//   }
-//}
-
-
-
 /* Returns a title suitable for using on e.g. images of the slice.
   */
 
@@ -93,18 +56,6 @@ Slice::Slice(QString name, QString fileName)
    {
       status = readHXT(fileName);
    }
-   else if (fileRoot.contains("hif"))
-   {
-       status = readHIF(fileName);
-   }
-   else if (fileRoot.contains("ezd"))
-   {
-      status = readEZD(fileName);
-   }
-   else if (fileRoot.contains("dat"))
-   {
-      status = readDAT(fileName);
-   }
 
    if (status)
    {
@@ -124,13 +75,6 @@ Slice::Slice(QString name, QStringList fileNameList)
 {
     qDebug() << "::Slice(QStr, QStrList)";
    preDataInit(name);
-
-   QString fileSuffix = QFileInfo(fileNameList[0]).suffix();
-   // This check is done twice
-   if (fileSuffix.contains("sb") || fileSuffix.contains("xmy"))
-      readXMY(fileNameList);
-   if (fileSuffix.contains("xy") || fileSuffix.contains("txt"))
-      readXY(fileNameList);
 
    this->fileName = fileNameList[0];
    postDataInit();
@@ -163,8 +107,6 @@ void Slice::preDataInit(QString name)
    commonX.resize(0);
    zeroStats();
    xType = NONE;
-   // Make voxels a NULL ptr
-   voxels = NULL;
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
@@ -231,8 +173,16 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 
 Slice::~Slice()
 {
-   if (voxels != NULL)
-      delete[](voxels);
+   qDebug() << "Slice::~Slice() DTOR called";
+   int iRow, iCol;
+   for (iRow = 0; iRow < gridSizeX; iRow++)
+   {
+      for (iCol = 0; iCol < gridSizeY; iCol++)
+      {
+           delete contentVoxel[iRow][iCol];
+      }
+   }
+
    commonX.clear();
    free(summedImageY);
 }
@@ -242,19 +192,19 @@ Slice::~Slice()
   static methods can't easily be called from QML so you need some other instance of Slice to use
   them: newslice = any_old_slice.zeros(20,20,20)
   */
-QObject *Slice::zeros(int rows, int cols, int depth)
-{
-   Slice *newSlice = new Slice("zeros", rows, cols, depth, 0.0);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
+//QObject *Slice::zeros(int rows, int cols, int depth)
+//{
+//   Slice *newSlice = new Slice("zeros", rows, cols, depth, 0.0);
+//   emit initializeSlice(newSlice);
+//   return newSlice;
+//}
 
-QObject *Slice::ones(int rows, int cols, int depth)
-{
-   Slice *newSlice = new Slice("ones", rows, cols, depth, 1.0);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
+//QObject *Slice::ones(int rows, int cols, int depth)
+//{
+//   Slice *newSlice = new Slice("ones", rows, cols, depth, 1.0);
+//   emit initializeSlice(newSlice);
+//   return newSlice;
+//}
 
 /* These are the parameters which are displayed in the Workspace tree.
   */
@@ -265,341 +215,6 @@ void Slice::addParameters()
    addParameter("Height", gridSizeY);
    addParameter("Length", voxelDataLen);
 }
-
-#include "SVD"
-
-//Slice *Slice::prinComp()
-//{
-
-//    Slice *newSlice = new Slice(name + "_Eigen_Images");
-//    newSlice->resize(gridSizeX, gridSizeY);
-
-//    int nComps = eigenWeights.rows();
-//    if (nComps == 0)
-//    {
-//        calculatePrinComps();
-//    }
-
-//    // Construct a slice based on existing stored weights and spectra within (this) instance
-//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-//    {
-//        newSlice->commonX.push_back(iComp);
-//    }
-//    newSlice->voxelDataLen = nComps;
-//    int iPix;
-//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-//    {
-//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-//       {
-//          iPix = iCol*gridSizeX+iRow;
-//          // Create new voxel
-//          Voxel *v = new Voxel;
-//          contentVoxel[iRow].push_back(v);
-//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-//          {
-//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-//          }
-//       }
-//    }
-
-//    newSlice->zeroStats();
-//    newSlice->xType = COMMON;
-//    newSlice->postDataInit();
-//    return newSlice;
-//}
-
-//void Slice::calculatePrinComps()
-//{
-//    // Calculate the components
-//    int nRC = gridSizeX*gridSizeY;
-//    MatrixXd MAT;
-//    MAT.resize(nRC,voxelDataLen);
-//    // Repack the data
-//    int iPix;
-//    for (int i = 0; i < gridSizeY ; ++i)
-//    {
-//        for (int j = 0; j < gridSizeX; ++j)
-//        {
-//            iPix = i*gridSizeX+j;
-//            for (int k = 0 ; k < voxelDataLen; ++k)
-//            {
-//                MAT(iPix,k) = contentVoxel[j][i]->contentYData[k];
-//            }
-//        }
-//    }
-//    writeMessage("Calculating principle components");
-//    JacobiSVD<MatrixXd> svd(MAT, ComputeThinU | ComputeThinV);
-//    writeMessage("Done");
-//    writeMessage("MAT size : " + QString::number(MAT.rows())+ ","+QString::number(MAT.cols()));
-//    writeMessage("SVD U size : " + QString::number(svd.matrixU().rows())+ ","+QString::number(svd.matrixU().cols()));
-//    writeMessage("SVD V size : " + QString::number(svd.matrixV().rows())+ ","+QString::number(svd.matrixV().cols()));
-//    eigenWeights = svd.singularValues().asDiagonal()*svd.matrixU().transpose();
-//    eigenSpectra = svd.matrixV();
-//    //eigenWeights.transposeInPlace();
-//   // eigenSpectra.transposeInPlace();
-
-//}
-
-//Slice *Slice::eigenImageSlice()
-//{
-//    // Now superceded by Slice::prinComp()- method needs removing
-//    // Constructs a new slice from the eigen weights stored in an existing (this) slice
-//    int nComps = eigenWeights.rows();
-
-//    Slice *newSlice = new Slice(name + "_Eigen_Images");
-//    newSlice->resize(gridSizeX, gridSizeY);
-
-//    for (int iComp = 0 ; iComp < nComps ; ++iComp)
-//    {
-//        newSlice->commonX.push_back(iComp);
-//    }
-//    newSlice->voxelDataLen = nComps;
-//    int iPix;
-//    for (int iCol = 0; iCol < gridSizeY; ++iCol)
-//    {
-//       for (int iRow = 0; iRow < gridSizeX; ++iRow)
-//       {
-//          iPix = iCol*gridSizeX+iRow;
-//          // Create new voxel
-//          Voxel *v = new Voxel;
-//          contentVoxel[iRow].push_back(v);
-//          for (int iComp= 0 ; iComp < nComps ; ++iComp)
-//          {
-//              newSlice->contentVoxel[iRow][iCol]->contentYData.push_back(eigenWeights(iComp,iPix));
-//          }
-//       }
-//    }
-//    newSlice->zeroStats();
-//    newSlice->xType = COMMON;
-//    newSlice->postDataInit();
-//    return newSlice;
-//}
-
-///* Moved here from main window, modified where marked. There definitely was a bug which is now fixed so that
-//   it will produce a new Slice. However the contents of the new Slice may be wrong.
-//   Used to 'return' on error from several places, these now 'return NULL'.
-//*/
-//Slice *Slice::backProject()
-//{
-//   // temporary driver part
-//   bool bPRotTraFlag = true;
-//   int bPFilterTypeNum = 1;
-//   double bPStartAngle = 0;
-//   double bPStopAngle = 180;
-//   double PI = 3.14159265;
-//   //
-//   int rotSide, traSide;
-//   if(bPRotTraFlag)
-//   {
-//      rotSide = this->gridSizeY;
-//      traSide = this->gridSizeX;
-//      emit writeMessage("gridSizeY is rotation: " + QString::number(this->gridSizeY));
-//   }
-//   else
-//   {
-//      traSide = this->gridSizeY;
-//      rotSide = this->gridSizeX;
-//      emit writeMessage("gridSizeX is rotation: " + QString::number(this->gridSizeX));
-//   }
-//   if(rotSide > traSide)
-//   {
-//      emit writeError("The algorithm currently work only when rotation side <= translation side.");
-//      return NULL;
-//   }
-
-//   double bPStepAngle = (bPStopAngle-bPStartAngle)/(rotSide-1);
-//   QVector <double> anglesVec;
-
-//   for(int a=0; a<rotSide; ++a)
-//      anglesVec.push_back((bPStartAngle+a*bPStepAngle)*PI/180.0);
-
-//   if(anglesVec.size() != rotSide)
-//   {
-//      emit writeError("Number of angles not equal to side size.");
-//      return NULL;
-//   }
-
-//   int nn2 = 2 * pow(2, ceil(log(1.0*traSide)/log(2.0)));
-//   QVector <double> dataVec;
-//   dataVec.resize(nn2);
-//   QVector <double> Filt;
-
-//   if(bPFilterTypeNum == 0)
-//   {
-//      emit writeError( "Filter should be chosen to proceed.");
-//      return NULL;
-//   }
-//   else if(bPFilterTypeNum == 1)
-//   {
-//      for(int uu=0; uu<traSide; ++uu)
-//         Filt.push_back(fabs(sin(-PI+uu*(2*PI/traSide))));
-//   }
-//   else if(bPFilterTypeNum == 2)
-//   {
-//      for(int uu=0; uu<traSide; ++uu)
-//         Filt.push_back(fabs((-PI+uu*(2*PI/traSide))));
-//   }
-
-//   emit writeMessage("Back projection will be carried out for all channels");
-
-//   QVector < QVector < QVector <double> > > allVec;
-//   double midIndex = (1.0*traSide+1.0)/2.0;
-//   QVector < QVector <double> > xpr, ypr, filtIndex, BPIa;
-//   xpr.resize(traSide);
-//   ypr.resize(traSide);
-//   filtIndex.resize(traSide);
-//   BPIa.resize(traSide);
-//   for(int b=0; b<traSide; ++b)
-//      for(int c=0; c<traSide; ++c)
-//      {
-//         xpr[b].push_back(1.0*c-midIndex+1.0);
-//         ypr[b].push_back(1.0*b-midIndex+1.0);
-//         filtIndex[b].push_back(0.0);
-//         BPIa[b].push_back(0.0);
-//      }
-//   QVector < int > tempI;
-//   QVector < QPair <int, int> > pairI;
-//   QVector < QVector < QPair <int, int> > > spota;
-//   QVector < QVector < int > > nfi;
-//   for (int mm = 0 ; mm < anglesVec.size() ; mm++)
-//   {
-//      QVector < QVector <int> > F;
-//      spota.push_back (pairI);
-//      nfi.push_back (tempI);
-//      for (int i = 0 ; i < traSide ; i++)
-//      {
-//         F.push_back(tempI);
-//         for (int j = 0 ; j < traSide ; j ++)
-//         {
-//            double filtidx = floor(0.5+(midIndex+xpr[i][j]*sin(anglesVec[mm])-ypr[i][j]*cos(anglesVec[mm])));
-//            F[i].push_back(filtidx);
-//         }
-//      }
-
-//      for (int k = 0  ; k < traSide; k ++)
-//      {
-//         for (int l = 0 ; l < traSide ; l ++)
-//         {
-//            if (F[l][k] > 0 && F[l][k] <= traSide)
-//            {
-//               QPair <int,int> tem;
-//               tem.first = l;
-//               tem.second = k;
-//               spota[mm].push_back(tem);
-//               nfi[mm].push_back(F[l][k]-1);
-//            }
-//         }
-//      }
-//   }
-//   int numberOfChannels = this->commonX.size();
-//   QProgressDialog progress("Back projection will be carried out for all channels...", "Stop read", 0, numberOfChannels-1);
-//   progress.setWindowModality(Qt::WindowModal);
-//   progress.show();
-//   unsigned long int count = 0;
-//   for(int oo=0; oo < numberOfChannels; ++oo) // commonX specific
-//   {
-//      QVector < QVector <double> > BPI;
-//      BPI.resize(traSide);
-//      for(int dd=0; dd<traSide; ++dd)
-//         for(int zz=0; zz<traSide; ++zz)
-//            BPI[dd].push_back(0.0);
-
-//      QVector < QVector <double> > filtPR;
-//      filtPR.resize(rotSide);
-//      if(bPRotTraFlag)
-//      {
-//         for(int aa=0; aa<rotSide; ++aa)
-//            for(int bb=0; bb<traSide; ++bb)
-//               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
-//      }
-//      else
-//      {
-//         for(int aa=0; aa<traSide; ++aa)
-//            for(int bb=0; bb<rotSide; ++bb)
-//               filtPR[aa].push_back(this->contentVoxel[aa][bb]->contentYData[oo]);
-//      }
-
-//      for(int hh=0; hh<filtPR.size(); ++hh)
-//      {
-//         QVector <double>  x1, y1;
-//         x1.resize(filtPR[hh].size());
-//         y1.resize(filtPR[hh].size());
-//         int gg;
-//         for(gg=0; gg<filtPR[hh].size(); ++gg)
-//         {
-//            x1[gg]   = filtPR[hh][gg];
-//            y1[gg]   = 0.0;
-//         }
-
-//         myFFT(1, filtPR[hh].size(), x1, y1);
-
-//         for(gg=0; gg<filtPR[hh].size(); ++gg)
-//         {
-//            x1[gg]   = x1[gg] * Filt[gg];
-//            y1[gg]   = y1[gg] * Filt[gg];
-//         }
-
-//         myFFT(-1, filtPR[hh].size(), x1, y1);
-
-//         for(gg=0; gg<filtPR[hh].size(); ++gg)
-//         {
-//            filtPR[hh][gg] = x1[gg];
-//         }
-//      }
-
-//      for (int ii = 0  ; ii < rotSide ; ii++)
-//      {
-//         for (int jj = 0; jj <  spota[ii].size(); ++jj)
-//         {
-//            int r = spota[ii][jj].first;
-//            int c = spota[ii][jj].second;
-//            int ll = nfi[ii][jj];
-//            BPI[r][c] += filtPR[ii][ll];
-//         }
-//      }
-
-//      for(int x=0; x<BPI.size(); ++x)
-//      {
-//         for(int y=0; y<BPI[x].size(); ++y)
-//         {
-//            BPI[x][y] = BPI[x][y]/(anglesVec.size()*1.0);
-//         }
-//      }
-//      allVec.push_back(BPI);
-//      count++;
-//      progress.setValue(count);
-//      progress.update();
-//      if(progress.wasCanceled())
-//         return NULL;
-//   }
-
-//   progress.update();
-//   progress.deleteLater();
-
-//   Slice *newSlice = new Slice("back projected");
-
-//   newSlice->resize(traSide, traSide);
-//   newSlice->voxelDataLen = allVec.size();
-//   for(int ee=0; ee<allVec.size(); ++ee)
-//   {
-//      // This was originally copying the new commonX to the new commonX
-//      newSlice->commonX.push_back(this->commonX[ee]);
-//   }
-//   for(int ww=0; ww<traSide; ++ww)
-//      for(int xx=0; xx<traSide; ++xx)
-//      {
-//         for(int dd=0; dd<allVec.size(); ++dd)
-//         {
-//            newSlice->contentVoxel[ww][xx]->contentYData.push_back(allVec[dd][ww][xx]);
-//         }
-//      }
-
-//   newSlice->zeroStats();
-//   newSlice->xType = COMMON;
-//   newSlice->postDataInit();
-////   emit initializeSlice(newSlice);
-//   return newSlice;
-//}
 
 int Slice::getGridSizeX()
 {
@@ -731,81 +346,6 @@ void Slice::stats()
     */
 }
 
-
-void Slice::writeEZD(QString fileName)
-{
-   if (xType == UNIQUE)  // this is a big fix
-   {
-      emit writeMessage("This is a message from the Slice class");
-      squeezeX();
-   }
-
-   QFile ofile(fileName);
-   if (!ofile.open(QIODevice::WriteOnly))
-      emit writeMessage("Can not write file : " + fileName);
-
-   QTextStream out(&ofile);
-   QDataStream bout(&ofile);
-
-   out << "#FILE EZD (2Easy data file)" << endl;
-   out << "#VERSION 1" << endl;
-   out << "#HIST " << gridSizeX << " x " << gridSizeY << endl;
-   if (xType == NONE)
-   {
-      out << "#TYPE MY" << endl;
-      out << "#YDATA "  << gridSizeX*gridSizeY << " x " << voxelDataLen << " DOUBLE" << endl;
-   }
-   if (xType == COMMON)
-   {
-      out << "#TYPE SXMY" << endl;
-      out << "#XDATA "  << "1" << " x " << voxelDataLen << " DOUBLE" << endl;
-      out << "#YDATA "  << gridSizeX*gridSizeY << " x " << voxelDataLen << " DOUBLE" << endl;
-   }
-   if (xType == UNIQUE)
-   {
-      out << "#TYPE MXY" << endl;
-      out << "#XYDATA "  << gridSizeX*gridSizeY << " x " << voxelDataLen << " DOUBLE" << endl;
-   }
-
-   out << "#EOH "  << endl;
-
-   if (xType == COMMON)
-   {
-      // write X data
-      for (int i = 0; i < voxelDataLen; ++i)
-         bout << (double) commonX[i];
-   }
-   if ((xType == NONE) | (xType == COMMON))
-   {
-      // write Y data
-      for (int i = 0; i < gridSizeX; ++i)
-      {
-         for (int j = 0; j < gridSizeY; ++j)
-         {
-            for (int k = 0 ; k < voxelDataLen;  ++k)
-               bout << (double) contentVoxel[i][j]->contentYData[k];
-         }
-      }
-   }
-   if (xType == UNIQUE)
-   {
-      // write XY data
-      for (int i = 0; i < gridSizeX; ++i)
-      {
-         for (int j = 0; j < gridSizeY; ++j)
-         {
-            for (int k = 0 ; k < voxelDataLen;  ++k)
-            {
-               bout << (double) contentVoxel[i][j]->contentXData[k];
-               bout << (double) contentVoxel[i][j]->contentYData[k];
-            }
-         }
-      }
-   }
-   emit writeMessage("data successfully writen");  // should comment this out
-   ofile.close();
-}
-
 void Slice::writeHXT(QString fileName)
 {
    if (!xType == COMMON)
@@ -869,168 +409,6 @@ void Slice::writeHXT(QString fileName)
    ofile.close();
 }
 
-
-
-bool Slice::readXY(QStringList fileNames)
-{
-   gridSizeQuery gridQuery;
-   gridQuery.exec();
-   if (fileNames.size() != gridQuery.numberOfRows*gridQuery.numberOfColumns)
-   {
-      emit writeMessage("Number of files does not match gridSize");
-      return(false);
-   }
-   // really need to check that all files are xy
-   resize(gridQuery.numberOfRows, gridQuery.numberOfColumns);
-
-   QProgressDialog progress("Reading files...", "Stop read", 0,fileNames.size());
-   progress.setWindowModality(Qt::WindowModal);
-   progress.show();
-   QString fileName;
-   int i = 0;
-   for (int j = 0 ; j < gridQuery.numberOfRows ; ++j)
-   {
-      for (int k = 0 ; k < gridQuery.numberOfColumns ; ++k)
-      {
-         fileName = fileNames[i];
-         contentVoxel[j][k]->readXY(fileName);
-         progress.setValue(i);
-         if (progress.wasCanceled())
-            break;
-         ++i;
-      }
-   }
-   progress.setValue(fileNames.size());
-   progress.update();
-   voxelDataLen = contentVoxel[0][0]->contentYData.size();
-   //    emit writeMessage("Number of bins : " + QString::number(voxelDataLen));
-   zeroStats();
-   xType = UNIQUE;
-   return(true);
-}
-
-bool Slice::writeXY(QString fileStem)
-{
-   if (xType == COMMON)
-   {
-      for (int i = 0 ; i < gridSizeX ; ++i)
-      {
-         for (int j = 0 ; j < gridSizeY ; ++j)
-         {
-            QString fileName;
-            fileName.sprintf("_%3.3d_%3.3d.xy",i,j);
-            fileName = fileStem + fileName;
-            QFile file(fileName);
-            if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-               return(false);
-            QTextStream out(&file);
-            for (int k = 0 ; k < contentVoxel[i][j]->contentYData.size(); ++k)
-               out << commonX[k] << " " << contentVoxel[i][j]->contentYData[k] << endl;
-            file.close();
-         }
-      }
-   }
-   return(true);
-}
-
-bool Slice::writeXMY(QString  fileStem, QString suffix)
-{
-   if (!xType == COMMON)
-      return(false);
-
-   QProgressDialog progress("Writing files...", "Stop write", 0,gridSizeX);
-   progress.setWindowModality(Qt::WindowModal);
-   progress.show();
-
-   for (int i = 0 ; i < gridSizeX ; ++i)
-   {
-      QString fileName;
-      fileName.sprintf("_%3.3d",i);
-      fileName = fileStem + fileName + "." + suffix;
-      QFile file(fileName);
-      if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-         return(false);
-      QTextStream out(&file);
-      for (int k = 0 ; k < commonX.size(); ++k)
-      {
-         out << commonX[k] ;
-         for (int j = 0 ; j < gridSizeY ; ++j)
-            out << "\t" << contentVoxel[i][j]->contentYData[k];
-         out << endl;
-      }
-      file.close();
-      progress.setValue(i);
-      if (progress.wasCanceled())
-         return(false);
-
-   }
-   progress.setValue(gridSizeX);
-   progress.update();
-
-   return(true);
-}
-
-bool Slice::readXMY(QStringList fileNames)
-{
-
-   gridSizeQuery gridQuery;
-   // Guess the sizes - rows = number of files
-   //                 - cols = (should be) number of lines in first file
-   gridQuery.setSize(fileNames.size(), 1);
-   gridQuery.exec();
-   if (fileNames.size() != gridQuery.numberOfRows)
-   {
-      emit writeMessage("Number of files does not match suggested gridSize");
-      return(false);
-   }
-   resize(gridQuery.numberOfRows, gridQuery.numberOfColumns);
-
-   // could do something here to check the first file
-
-   QProgressDialog progress("Reading files...", "Stop read", 0,fileNames.size());
-   progress.setWindowModality(Qt::WindowModal);
-   progress.show();
-   QString fileName;
-   int i = 0;
-   double x, y;
-   for (int j = 0 ; j < gridQuery.numberOfRows ; ++j)
-   {
-      fileName = fileNames[j];
-      QFile file(fileName);
-      if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-      {
-         // emit writeMessage("Cannot open file " + fileName + "/nSkipping this file");
-         return(false);
-      }
-      QTextStream in(&file);
-      while (1)
-      {
-         in >> x;
-         if (in.atEnd())
-            break;
-         if (j == 0)
-            commonX.push_back(x);
-         for (int k = 0 ; k < gridQuery.numberOfColumns ; ++k)
-         {
-            in >> y;
-            contentVoxel[j][k]->contentYData.push_back(y);
-         }
-      }
-      progress.setValue(i);
-      if (progress.wasCanceled())
-         break;
-      ++i;
-   }
-   progress.setValue(fileNames.size());
-   progress.update();
-   voxelDataLen = contentVoxel[0][0]->contentYData.size();
-   zeroStats();
-   xType = COMMON;
-   // temporary message
-   emit writeMessage("size of commonX: " + QString::number(commonX.size()));
-   return(true);
-}
-
 bool Slice::readHXT(unsigned short *buffer)
 {
     qDebug() << "Slice::readHXT(unsigned short *buffer) start";
@@ -1038,7 +416,7 @@ bool Slice::readHXT(unsigned short *buffer)
     hxtBuffer.allData = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
     double *allDataPointer;
     allDataPointer = hxtBuffer.allData;
-    Voxel *voxelPointer;
+//    Voxel *voxelPointer;
     unsigned short *tmpBuffer;
 
     unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
@@ -1059,8 +437,7 @@ bool Slice::readHXT(unsigned short *buffer)
     commonX.resize(hxtBuffer.nBins);
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
-    contentVoxel.resize(gridSizeX);
-    voxels = new Voxel[gridSizeX * gridSizeY];
+    resize(gridSizeX, gridSizeY);
     summedImageY = (double*) calloc (numberOfBins, sizeof(double));
 
     allDataPointer += numberOfBins;
@@ -1073,14 +450,12 @@ bool Slice::readHXT(unsigned short *buffer)
        contentVoxel[iRow].resize(gridSizeY);
        for (iCol = 0; iCol < gridSizeY; iCol++)
        {
-           voxelPointer = &voxels[currentVoxel];
-           voxelPointer->contentXData.resize(numberOfBins);
-           voxelPointer->contentYData.resize(numberOfBins);
-           contentVoxel[iRow][iCol] = voxelPointer;
-           memcpy((void *) &(voxelPointer->contentYData[0]), (void *) (allDataPointer), numberOfBins * sizeof(double));
+           contentVoxel[iRow][iCol]->contentXData.resize(numberOfBins);
+           contentVoxel[iRow][iCol]->contentYData.resize(numberOfBins);
+           memcpy((void *) &(contentVoxel[iRow][iCol]->contentYData[0]), (void *) (allDataPointer), numberOfBins * sizeof(double));
            for (iBin = 0; iBin < numberOfBins; iBin++)
            {
-              summedImageY[iBin] += voxelPointer->contentYData[iBin];
+              summedImageY[iBin] += contentVoxel[iRow][iCol]->contentYData[iBin];
            }
            currentVoxel++;
            allDataPointer += numberOfBins;
@@ -1223,10 +598,6 @@ bool Slice::readHXT(QString fileName)
    {
       for (iCol = 0; iCol < nCols; ++iCol)
       {
-         //voxelDataLen = iBin;
-         // Create new voxel by reading nBins doubles from the file
-         Voxel *v = new Voxel;
-         contentVoxel[iRow].push_back(v);
          for (iBin = 0 ; iBin < nBins ; ++iBin)
          {
             file.read((char *) &d, sizeof(d));
@@ -1240,407 +611,6 @@ bool Slice::readHXT(QString fileName)
    voxelDataLen = nBins;
    zeroStats();
    xType = COMMON;
-   return(true);
-}
-
-bool Slice::readHIF(QString fileName)
-{
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-       emit writeMessage("Cannot open file " + fileName + ": Skipping this file");
-       return(false);
-    }
-    char myChar;
-    quint64 hifVersion;
-    quint32 nRows, nCols, nBins, nComps;
-
-    bool jj;
-    QString hxtLabel;
-    for (int i = 0; i < 26; ++i)
-    {
-       jj   = file.getChar(&myChar);
-       hxtLabel += myChar;
-    }
-
-    if (hxtLabel.contains("HYPERSPECTRAL IMAGE FORMAT"))
-    {
-       emit writeMessage("Type: HYPERSPECTRAL IMAGE FORMAT");
-    }
-    else
-    {
-       emit writeMessage("<B>Format not recognised !</B>");
-       file.close();
-       return(false);
-    }
-    file.read((char *) &hifVersion, sizeof(hifVersion));
-    file.read((char *) &nRows, sizeof(nRows));
-    file.read((char *) &nCols, sizeof(nCols));
-    file.read((char *) &nBins, sizeof(nBins));
-    file.read((char *) &nComps, sizeof(nComps));
-
-    emit writeMessage("Version: " + QString::number(hifVersion));
-    emit writeMessage("Number of rows: " + QString::number(nRows));
-    emit writeMessage("Number of columns: " + QString::number(nCols));
-    emit writeMessage("Number of bins: " + QString::number(nBins));
-    emit writeMessage("Number of components: " + QString::number(nComps));
-
-    resize(nRows,nCols);
-
-    quint32 iRow, iCol, iBin, iComp, nRC, iPix;
-    double d;
-
-    // Read Channels
-    QVector <double> channels(nBins);
-    for (iBin = 0 ; iBin < nBins ; ++iBin)
-    {
-       file.read((char *) &d, sizeof(d));
-       commonX.push_back(d);
-    }
-
-    // Read Data
-    nRC = nRows*nCols;
-    eigenWeights.resize(nComps, nRC);
-    eigenSpectra.resize(nBins, nComps);
-    for (iComp = 0 ; iComp < nComps; ++iComp)
-    {
-        // Read Eigen image
-        for (iPix = 0; iPix < nRC ; ++iPix)
-        {
-            file.read((char *) &d, sizeof(d));
-            eigenWeights(iComp,iPix) = d;
-        }
-        // Read Eigen spectra
-        for (iBin = 0 ; iBin < nBins; ++iBin)
-        {
-            file.read((char *) &d, sizeof(d));
-            eigenSpectra(iBin,iComp) = d;
-        }
-    }
-
-    file.close();
-
-    // Multiply out
-    MatrixXd MAT;
-    MAT.resize(nBins,nRC);
-    MAT = eigenSpectra * eigenWeights;
-    // Unpack the result
-    for (iCol = 0; iCol < nCols; ++iCol)
-    {
-       for (iRow = 0; iRow < nRows; ++iRow)
-       {
-          iPix = iCol*nRows+iRow;
-          // Create new voxel
-          Voxel *v = new Voxel;
-          contentVoxel[iRow].push_back(v);
-          for (iBin = 0 ; iBin < nBins ; ++iBin)
-          {
-              contentVoxel[iRow][iCol]->contentYData.push_back(MAT(iBin,iPix));
-          }
-       }
-    }
-    // Finish up
-    voxelDataLen = nBins;
-    zeroStats();
-    xType = COMMON;
-    return(true);
- }
-
-void Slice::writeHIF(QString fileName)
-{
-   if (!xType == COMMON)
-   {
-      emit writeMessage("Currently only implemented for slice data with common X scale");
-      return;
-   }
-   if (voxelDataLen != commonX.size())
-   {
-      emit writeMessage("VoxelDataLen != commonX.size()");
-      return;
-   }
-
-   quint32 nComps = eigenWeights.rows();
-   if (nComps == 0)
-   {
-       // will need to calculate the stuff
-   }
-
-   QFile ofile(fileName);
-   if (!ofile.open(QIODevice::WriteOnly))
-   {
-      emit writeMessage("Can not write file : " + fileName);
-      return;
-   }
-
-   QDataStream bout(&ofile);
-   char myChar;
-   quint64 hifVersion;
-   quint32 nRows, nCols, nBins, nRC;
-   hifVersion = 1;
-   nRows = (quint32) gridSizeX;
-   nCols = (quint32) gridSizeY;
-   nBins = (quint32) voxelDataLen;
-   QString hifLabel = "HYPERSPECTRAL IMAGE FORMAT";
-   for (int i = 0; i < 26; ++i)
-   {
-      myChar = hifLabel.at(i).toLatin1();
-      bout.writeRawData((char *) &myChar, sizeof(myChar));
-      hifLabel += myChar;
-   }
-   bout.writeRawData((char *) &hifVersion, sizeof(hifVersion));
-   bout.writeRawData((char *) &nRows, sizeof(nRows));
-   bout.writeRawData((char *) &nCols, sizeof(nRows));
-   bout.writeRawData((char *) &nBins, sizeof(nRows));
-   bout.writeRawData((char *) &nComps, sizeof(nComps));
-
-   quint32 iBin, iComp, iPix;
-   // Read Channels
-   QVector <double> channels(nBins);
-   for (iBin = 0 ; iBin < nBins ; ++iBin)
-   {
-      bout.writeRawData((char *) &commonX[iBin], sizeof(commonX[iBin]));
-   }
-   // Read data
-   nRC = nRows*nCols;
-   eigenWeights.resize(nComps, nRC);
-   eigenSpectra.resize(nBins, nComps);
-   for (iComp = 0 ; iComp < nComps; ++iComp)
-   {
-       // Read Eigen image
-       for (iPix = 0; iPix < nRC ; ++iPix)
-       {
-           bout.writeRawData((char *) &eigenWeights(iComp,iPix), sizeof(double));
-       }
-       // Read Eigen spectra
-       for (iBin = 0 ; iBin < nBins; ++iBin)
-       {
-           bout.writeRawData((char *) &eigenSpectra(iBin,iComp), sizeof(double));
-       }
-   }
-
-   ofile.close();
-   emit writeMessage("data successfully writen");  // should comment this out
-}
-
-bool Slice::readEZD(QString fileName)
-{
-   QFile file(fileName);
-   if (!file.open(QIODevice::ReadOnly))
-   {
-      emit writeMessage("Cannot open file " + fileName + " Skipping this file");
-      return(false);
-   }
-
-   int nBins = 0;  // this info should be read from the header
-   int nRows = 0;  // ditto
-   int nCols = 0;  // ditto
-   int numberOfXdata = 0; // not really used
-   int numberOfYdata = 0; // not really used
-   int numberOfXYdata = 0; // not really used
-
-   QString headerLine;
-   QStringList words;
-   bool foundEOH = false;
-   bool isHIST = false;
-   bool validTYPE = false;
-   while (!foundEOH & !file.atEnd())
-   {
-      headerLine = file.readLine();
-      writeMessage(headerLine);
-      if (headerLine.contains("#EOH"))
-      {
-         foundEOH = true;
-         continue;
-      }
-      if (headerLine.contains("#HIST"))
-      {
-         words = headerLine.split(" ");
-         nRows = words[1].toInt();
-         nCols = words[3].toInt();
-         emit writeMessage(QString::number(nRows) + " " + QString::number(nCols));
-         isHIST = true;
-      }
-      if (headerLine.contains("#TYPE"))
-      {
-         validTYPE = true;
-         if (headerLine.contains("MY"))
-            xType = NONE;
-         if (headerLine.contains("SXMY"))
-            xType = COMMON;
-         if (headerLine.contains("MXY"))
-            xType = UNIQUE;
-      }
-      if (headerLine.contains("#XDATA"))
-      {
-         words = headerLine.split(" ");
-         numberOfXdata = words[1].toInt();
-         nBins = words[3].toInt();
-         isHIST = true;
-      }
-      if (headerLine.contains("#YDATA"))
-      {
-         words = headerLine.split(" ");
-         numberOfYdata = words[1].toInt();
-         nBins = words[3].toInt();
-         //format = words[4];
-         isHIST = true;
-      }
-      if (headerLine.contains("#XYDATA"))
-      {
-         words = headerLine.split(" ");
-         numberOfXYdata = words[1].toInt();
-         nBins = words[3].toInt();
-         //format = words[4];
-         isHIST = true;
-      }
-   }
-
-   if (!foundEOH | !validTYPE )
-   {
-      file.close();
-      emit writeMessage("header not good");
-      return(false);
-   }
-   emit writeMessage(QString::number(nBins));
-
-   // need to cheek if size of Y or XY data is equal to nRows * nCols
-   // next lot of code shouild be in:  if (isHIST) { // histogram stuff}
-   resize(nRows,nCols);
-   QDataStream bin(&file);
-   if (xType == COMMON)
-   {
-      double x;
-      for (int iBin = 0 ; iBin < nBins ; ++iBin)
-      {
-         bin >> x;
-         commonX.push_back(x);
-      }
-   }
-
-   if ((xType == NONE) | (xType == COMMON))
-   {
-      double y;
-      for (int iRow = 0; iRow < nRows; ++iRow)
-      {
-         for (int iCol = 0; iCol < nCols; ++iCol)
-         {
-            for (int iBin = 0 ; iBin < nBins ; ++iBin)
-            {
-               bin >> y;
-               contentVoxel[iRow][iCol]->contentYData.push_back(y);
-            }
-         }
-      }
-   }
-
-   if (xType == UNIQUE)
-   {
-      double x, y;
-      for (int iRow = 0; iRow < nRows; ++iRow)
-      {
-         for (int iCol = 0; iCol < nCols; ++iCol)
-         {
-            for (int iBin = 0 ; iBin < nBins ; ++iBin)
-            {
-               bin >> x >> y;
-               contentVoxel[iRow][iCol]->contentXData.push_back(x);
-               contentVoxel[iRow][iCol]->contentYData.push_back(y);
-            }
-         }
-      }
-   }
-   file.close();
-   voxelDataLen = nBins;
-   zeroStats();
-   return(true);
-}
-
-bool Slice::readDAT(QString fileName)
-{
-   QFile file(fileName);
-   if (!file.open(QIODevice::ReadOnly))
-   {
-      emit writeMessage("Cannot open file " + fileName + ": Skipping this file");
-      return(false);
-   }
-
-   int iBin, iRow, iCol;
-   if (voxelDataLen == 0) // probably a new slice
-   {
-      // use default values
-      resize(80,80);
-      voxelDataLen = 400;
-      zeroStats();
-
-      double d = 0.0;
-      for (iRow = 0; iRow < gridSizeX; ++iRow)
-      {
-         for (iCol = 0; iCol < gridSizeY; ++iCol)
-         {
-            for (iBin = 0 ; iBin < voxelDataLen ; ++iBin)
-               contentVoxel[iRow][iCol]->contentYData.push_back(d);
-         }
-      }
-
-      double voltageStep;
-      voltageStep = (double) pow(2.0,16) / (double) voxelDataLen / 10.0;
-
-      for (iBin = 1 ; iBin < voxelDataLen + 1 ; ++iBin)
-      {
-         binVoltage.push_back(voltageStep * iBin);
-      }
-   }
-
-   quint8 n1,n2,n3,rowNumber,colNumber;
-   quint32 frameNumber;
-   quint16 frameNumber2;
-   double value;
-   quint64 amountRead = 0;
-   quint64 block = sizeof(n1);
-   QFileInfo fi(file);
-   emit writeMessage(QString::number(fi.size()));
-   QString progressLabel("Reading ..." + fileName.right(50));
-   QProgressDialog progress(progressLabel, "Stop read", 0,fi.size());
-   progress.setWindowModality(Qt::WindowModal);
-   progress.show();
-   while (!file.atEnd())
-   {
-      file.read((char *) &n1, sizeof(n1));
-      file.read((char *) &n2, sizeof(n2));
-      file.read((char *) &n3, sizeof(n3));
-      amountRead += 3 * block;
-
-      if (n1 == 255 && n2 == 255 && n3 == 255)
-      {
-         // read frame number
-         file.read((char *) &frameNumber, sizeof(frameNumber));
-         // emit writeMessage("<B>Frame Number: " + QString::number(frameNumber) + "</B>");
-         file.read((char *) &frameNumber2, sizeof(frameNumber2));
-         progress.setValue(amountRead);
-         progress.update();
-         if (progress.wasCanceled())
-            break;
-         continue;
-      }
-      if (n1 == 0 && n2 == 192)
-         rowNumber = n3;
-      else  // event data
-      {
-         value = (double) (n2 * 256 + n1);
-         colNumber = n3;
-         for (int kk = 0 ; kk < voxelDataLen ; ++kk)
-         {
-            if (value < binVoltage[kk])
-            {
-               contentVoxel[rowNumber][colNumber]->contentYData[kk] += 1.0;
-               break;
-            }
-         }
-      }
-   }
-   file.close();
-   progress.update();
-   progress.deleteLater();
    return(true);
 }
 

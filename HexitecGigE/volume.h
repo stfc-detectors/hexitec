@@ -10,6 +10,7 @@ class Slice;
 
 class Volume : public TreeItem
 {
+    ~Volume();
 private:
    QVector<Slice *> *slices;
 public:

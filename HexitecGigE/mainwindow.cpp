@@ -309,11 +309,11 @@ QMainWindow *MainWindow::createVisualisation()
 
 void MainWindow::readFiles()
 {
-   const char *df = "Data Files (*.hxt *.hif *.ezd *.dat *.xy *.txt *.*sb *.*xmy)";
-   const char *sf = "Script Files (*.js)";
+   const char *df = "Data Files (*.hxt)";
+//   const char *sf = "Script Files (*.js)";
 //   const char *mf = "Matlab Files (*.m)";
 
-   QString filter = tr(df) + ";;" + tr(sf) + ";;" /*+ tr(mf)*/;
+   QString filter = tr(df) + ";;" /*+ tr(sf) + ";;" *//*+ tr(mf)*/;
    QStringList files = QFileDialog::getOpenFileNames(this,
                                                      tr("Select Files for Reading"),
                                                      readDir,
@@ -409,146 +409,148 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
    update();
 }
 
-#define EZD_FILES "EZD FILES (*.ezd)"
-#define HXT_FILES "HXT FILES (*.hxt)"
-#define HIF_FILES "HIF FILES (*.hif)"
-#define XY_FILES "XY FILES (*.xy)"
-#define XMY_FILES "XMY FILES (*.xmy)"
-#define SB_FILES "XMY FILES (*.sb)"
+////#define EZD_FILES "EZD FILES (*.ezd)"
+//#define HXT_FILES "HXT FILES (*.hxt)"
+////#define HIF_FILES "HIF FILES (*.hif)"
+////#define XY_FILES "XY FILES (*.xy)"
+////#define XMY_FILES "XMY FILES (*.xmy)"
+////#define SB_FILES "XMY FILES (*.sb)"
 
-void MainWindow::saveFiles()
-{
-   const char *sf = "Script Files (*.js)";
-//   const char *mf = "Matlab Files (*.m)";
-   QString filter = tr(EZD_FILES) + ";;" + tr(HXT_FILES) + ";;" + tr(HIF_FILES) + ";;" + tr(XY_FILES) + ";;" + tr(XMY_FILES) + ";;" + tr(SB_FILES);
-   filter = filter + ";;" + sf + ";;" /*+ mf*/;
-   QString selectedFilter;
-   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                   "", filter, &selectedFilter);
+//void MainWindow::saveFiles()
+//{
+////   const char *sf = "Script Files (*.js)";
+////   const char *mf = "Matlab Files (*.m)";
+//   QString filter = /*tr(EZD_FILES) + ";;" +*/ tr(HXT_FILES) /*+ ";;" + tr(HIF_FILES) + ";;" + tr(XY_FILES) + ";;" + tr(XMY_FILES) + ";;" + tr(SB_FILES)*/;
+//   filter = filter + ";;" /*+ sf + ";;"*/ /*+ mf*/;
+//   QString selectedFilter;
+//   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+//                                                   "", filter, &selectedFilter);
 
-   emit writeMessage("FILENAME " + fileName);
+//   emit writeMessage("FILENAME " + fileName);
 
-   if (fileName.isNull())
-      return;
+//   if (fileName.isNull())
+//      return;
 
-   QFileInfo fi(fileName);
-   QString base = fi.baseName();
-   QString suffix = fi.suffix();
-   base = fi.path() + "/" + base;
-   QStringList fileNames;
+//   QFileInfo fi(fileName);
+//   QString base = fi.baseName();
+//   QString suffix = fi.suffix();
+//   base = fi.path() + "/" + base;
+//   QStringList fileNames;
 
-   // The fileName always has a suffix, if the user types "ethelred" then the QFileDialog seems to add the suffix from
-   // the current filter to the name. If the user types "ethelred.js" the QFileDialog leaves it alone.
+//   // The fileName always has a suffix, if the user types "ethelred" then the QFileDialog seems to add the suffix from
+//   // the current filter to the name. If the user types "ethelred.js" the QFileDialog leaves it alone.
 
-   if (suffix.compare("js") == 0)
-   {
-      /*emit writeMessage("writing .js file")*/;
-//      ScriptingWidget::instance()->saveScript(fileName);
-   }
-   else if (suffix.compare("m") == 0)
-   {
-      /*emit writeMessage("writing .m file")*/;
-//      ScriptingWidget::instance()->saveScript(fileName);
-   }
-   else if (suffix.compare("ezd") == 0)
-   {
-      emit writeMessage("writing .ezd file");
-      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-      {
-         QString fileNumber;
-         fileNumber.sprintf("%3.3d",i);
-         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-         emit writeMessage(fileNames.last());
-      }
-      if (fileNames.size() == 1)
-         fileNames[0] = (base + "." + suffix);
+//   if (suffix.compare("js") == 0)
+//   {
+//      /*emit writeMessage("writing .js file")*/;
+////      ScriptingWidget::instance()->saveScript(fileName);
+//   }
+//   else if (suffix.compare("m") == 0)
+//   {
+//      /*emit writeMessage("writing .m file")*/;
+////      ScriptingWidget::instance()->saveScript(fileName);
+//   }
+//   else if (suffix.compare("ezd") == 0)
+//   {
+//       ;    /// CA: Not needed
+////      emit writeMessage("writing .ezd file");
+////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
+////      {
+////         QString fileNumber;
+////         fileNumber.sprintf("%3.3d",i);
+////         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
+////         emit writeMessage(fileNames.last());
+////      }
+////      if (fileNames.size() == 1)
+////         fileNames[0] = (base + "." + suffix);
 
-      for (int i = 0; i < fileNames.size(); ++i)
-      {
-         DataModel::instance()->sliceAt(i)->writeEZD(fileNames[i]);
-      }
-   }
-   else if (suffix.compare("hxt") == 0)
-   {
-      emit writeMessage("writing .hxt file");
-      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-      {
-         QString fileNumber;
-         fileNumber.sprintf("%3.3d",i);
-         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-         emit writeMessage(fileNames.last());
-      }
-      if (fileNames.size() == 1)
-         fileNames[0] = (base + "." + suffix);
+////      for (int i = 0; i < fileNames.size(); ++i)
+////      {
+////         DataModel::instance()->sliceAt(i)->writeEZD(fileNames[i]);
+////      }
+//   }
+//   else if (suffix.compare("hxt") == 0)
+//   {
+//      emit writeMessage("writing .hxt file");
+//      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
+//      {
+//         QString fileNumber;
+//         fileNumber.sprintf("%3.3d",i);
+//         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
+//         emit writeMessage(fileNames.last());
+//      }
+//      if (fileNames.size() == 1)
+//         fileNames[0] = (base + "." + suffix);
 
-      for (int i = 0; i < fileNames.size(); ++i)
-      {
-         DataModel::instance()->sliceAt(i)->writeHXT(fileNames[i]);
-      }
-   }
-   else if (suffix.compare("hif") == 0)
-   {
-      emit writeMessage("writing .hif file");
-      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-      {
-         QString fileNumber;
-         fileNumber.sprintf("%3.3d",i);
-         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-         emit writeMessage(fileNames.last());
-      }
-      if (fileNames.size() == 1)
-         fileNames[0] = (base + "." + suffix);
+//      for (int i = 0; i < fileNames.size(); ++i)
+//      {
+//         DataModel::instance()->sliceAt(i)->writeHXT(fileNames[i]);
+//      }
+//   }
+//   else if (suffix.compare("hif") == 0)
+//   {
+//       ; /// CA: Surplus to requirement
+////      emit writeMessage("writing .hif file");
+////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
+////      {
+////         QString fileNumber;
+////         fileNumber.sprintf("%3.3d",i);
+////         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
+////         emit writeMessage(fileNames.last());
+////      }
+////      if (fileNames.size() == 1)
+////         fileNames[0] = (base + "." + suffix);
 
-      for (int i = 0; i < fileNames.size(); ++i)
-      {
-         DataModel::instance()->sliceAt(i)->writeHIF(fileNames[i]);
-      }
-   }
-   else if (suffix.compare("xy") == 0)
-   {
-      emit writeMessage("writing .xy file");
-      emit writeMessage(" NOT IMPLEMENTED");
-      /*
-        for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-        {
-            QString fileNumber;
-            fileNumber.sprintf("%3.3d",i);
-            fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-            emit writeMessage(fileNames.last());
-        }
-        if (fileNames.size() == 1)
-            fileNames[0] = (base + "." + suffix);
+////      for (int i = 0; i < fileNames.size(); ++i)
+////      {
+////         DataModel::instance()->sliceAt(i)->writeHIF(fileNames[i]);
+////      }
+//   }
+//   else if (suffix.compare("xy") == 0)
+//   {
+//      emit writeMessage("writing .xy file");
+//      emit writeMessage(" NOT IMPLEMENTED");
+//      /*
+//        for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
+//        {
+//            QString fileNumber;
+//            fileNumber.sprintf("%3.3d",i);
+//            fileNames.push_back(base + "_" + fileNumber + "." + suffix);
+//            emit writeMessage(fileNames.last());
+//        }
+//        if (fileNames.size() == 1)
+//            fileNames[0] = (base + "." + suffix);
 
-        for (int i = 0; i < fileNames.size(); ++i)
-        {
-            DataModel::sliceAt(i)->writeEZD(fileNames[i]);
-        }
-*/
-   }
-   else if ((suffix.compare("xmy") == 0) || (suffix.compare("sb") == 0))
-   {
-      emit writeMessage("writing .xmy file");
-      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-      {
-         QString fileNumber;
-         fileNumber.sprintf("%3.3d",i);
-         fileNames.push_back(base + "_" + fileNumber);
-      }
-      if (fileNames.size() == 1)
-         fileNames[0] = (base);
+//        for (int i = 0; i < fileNames.size(); ++i)
+//        {
+//            DataModel::sliceAt(i)->writeEZD(fileNames[i]);
+//        }
+//*/
+//   }
+//   else if ((suffix.compare("xmy") == 0) || (suffix.compare("sb") == 0))
+//   {
+//       ;
+////      emit writeMessage("writing .xmy file");
+////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
+////      {
+////         QString fileNumber;
+////         fileNumber.sprintf("%3.3d",i);
+////         fileNames.push_back(base + "_" + fileNumber);
+////      }
+////      if (fileNames.size() == 1)
+////         fileNames[0] = (base);
 
-      for (int i = 0; i < fileNames.size(); ++i)
-      {
-         DataModel::instance()->sliceAt(i)->writeXMY(fileNames[i], suffix);
-      }
+////      for (int i = 0; i < fileNames.size(); ++i)
+////      {
+////         DataModel::instance()->sliceAt(i)->writeXMY(fileNames[i], suffix);
+////      }
+//   }
+//   else
+//   {
+//      writeError("Format " + suffix + " not currently supported");
+//   }
 
-   }
-   else
-   {
-      writeError("Format " + suffix + " not currently supported");
-   }
-
-}
+//}
 
 void MainWindow::handleStartDAQ()
 {
