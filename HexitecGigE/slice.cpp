@@ -83,7 +83,7 @@ Slice::Slice(QString name, QStringList fileNameList)
 
 Slice::Slice(QString name, unsigned short* buffer, QString fileName)
 {
-    qDebug() << "::Slice(QStr, us buff, QStr)";
+//    qDebug() << "::Slice(QStr, us buff, QStr)";
    preDataInit(name);
 
    readHXT(buffer);
@@ -173,7 +173,7 @@ Slice::Slice(QString name, int rows, int cols, int depth, double value)
 
 Slice::~Slice()
 {
-   qDebug() << "Slice::~Slice() DTOR called";
+//   qDebug() << "Slice::~Slice() DTOR called";
    int iRow, iCol;
    for (iRow = 0; iRow < gridSizeX; iRow++)
    {
@@ -186,25 +186,6 @@ Slice::~Slice()
    commonX.clear();
    free(summedImageY);
 }
-
-/*
-  This method and ones() are really meant for use in scripts and they should be static. However
-  static methods can't easily be called from QML so you need some other instance of Slice to use
-  them: newslice = any_old_slice.zeros(20,20,20)
-  */
-//QObject *Slice::zeros(int rows, int cols, int depth)
-//{
-//   Slice *newSlice = new Slice("zeros", rows, cols, depth, 0.0);
-//   emit initializeSlice(newSlice);
-//   return newSlice;
-//}
-
-//QObject *Slice::ones(int rows, int cols, int depth)
-//{
-//   Slice *newSlice = new Slice("ones", rows, cols, depth, 1.0);
-//   emit initializeSlice(newSlice);
-//   return newSlice;
-//}
 
 /* These are the parameters which are displayed in the Workspace tree.
   */
@@ -245,20 +226,6 @@ void Slice::setVoxelDataLen(int voxelDataLen)
   */
 void Slice::zeroStats()
 {
-   /*
-   minChannelValue.resize(0);
-   maxChannelValue.resize(0);
-   meanChannelValue.resize(0);
-   variance.resize(0);
-   standardDeviation.resize(0);
-   for (int i = 0; i < voxelDataLen; ++i)
-   {
-      minChannelValue.push_back(0.0);
-      maxChannelValue.push_back(0.0);
-      meanChannelValue.push_back(0.0);
-      variance.push_back(0.0);
-      standardDeviation.push_back(0.0);
-   }*/
    return;
 }
 
@@ -301,49 +268,6 @@ void Slice::stats()
       }
    }
    meanData = sumData/(1.0 * gridSizeX * gridSizeY);
-   /*
-   QVector <double> minChannelValue;
-   QVector <double> maxChannelValue;
-   QVector <double> meanChannelValue;
-   QVector <double> variance;
-   QVector <double> standardDeviation;
-
-    for (int iBin = 0 ; iBin < voxelDataLen ; ++iBin)
-    {
-        minChannelValue[iBin] = contentVoxel[0][0]->contentYData[iBin];
-        meanChannelValue[iBin] = 0.0;
-        maxChannelValue[iBin] = 0.0;
-        for (int row = 0; row < gridSizeX ; ++row )
-        {
-            for (int col = 0; col < gridSizeY ; ++col )
-            {
-                if (contentVoxel[row][col]->contentYData[iBin] > maxChannelValue[iBin])
-                    maxChannelValue[iBin] = contentVoxel[row][col]->contentYData[iBin];
-                if (contentVoxel[row][col]->contentYData[iBin] < minChannelValue[iBin])
-                    minChannelValue[iBin] = contentVoxel[row][col]->contentYData[iBin];
-                meanChannelValue[iBin] += contentVoxel[row][col]->contentYData[iBin];
-            }
-        }
-        meanChannelValue[iBin] = meanChannelValue[iBin] / (gridSizeX * gridSizeY);
-    }
-
-    // Now work out the variance
-    double diff;
-    for (int iBin = 0 ; iBin < voxelDataLen ; ++iBin)
-    {
-        variance[iBin] = 0;
-         for (int row = 0; row < gridSizeX ; ++row )
-        {
-            for (int col = 0; col < gridSizeY ; ++col )
-            {
-                diff = (meanChannelValue[iBin] - contentVoxel[row][col]->contentYData[iBin]);
-                variance[iBin] += diff*diff;
-            }
-        }
-        variance[iBin] = variance[iBin] / (gridSizeX * gridSizeY);
-        standardDeviation[iBin] = sqrt(variance[iBin]);
-    }
-    */
 }
 
 void Slice::writeHXT(QString fileName)
@@ -411,12 +335,11 @@ void Slice::writeHXT(QString fileName)
 
 bool Slice::readHXT(unsigned short *buffer)
 {
-    qDebug() << "Slice::readHXT(unsigned short *buffer) start";
+//    qDebug() << "Slice::readHXT(unsigned short *buffer) start";
     struct HxtBuffer hxtBuffer;
     hxtBuffer.allData = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
     double *allDataPointer;
     allDataPointer = hxtBuffer.allData;
-//    Voxel *voxelPointer;
     unsigned short *tmpBuffer;
 
     unsigned int bufferSize = sizeof(hxtBuffer) - sizeof(double *);
@@ -472,7 +395,7 @@ bool Slice::readHXT(unsigned short *buffer)
 
 bool Slice::readHXT(QString fileName)
 {
-    qDebug() << "Slice::readHXT(Qstr)  !";
+//    qDebug() << "Slice::readHXT(Qstr)  !";
    QFile file(fileName);
    if (!file.open(QIODevice::ReadOnly))
    {
@@ -636,93 +559,6 @@ bool Slice::squeezeX()
    return(true);
 }
 
-//bool Slice::makeCommonX(double step)
-//{
-//   // should overload this so that it takes a vector argument as well for non-discrete X
-//   // also should do something abou the uniqueX case i.e. delel
-//   if (xType == UNIQUE)
-//   {
-//      for (int i = 0; i < gridSizeX; ++i)
-//      {
-//         for (int j = 0; j < gridSizeY; ++j)
-//         {
-//            contentVoxel[i][j]->contentXData.resize(0);;
-//         }
-//      }
-//   }
-//   commonX.resize(voxelDataLen);
-//   for (int k = 0; k < voxelDataLen ; ++k)
-//      commonX[k] = (double)(k) * step;
-
-//   xType = COMMON;
-//   return(true);
-//}
-
-///* Creates a C-style array out of the data.
-//  */
-//double *Slice::getData()
-//{
-//   double *data = (double *)malloc(voxelDataLen * gridSizeY * gridSizeX * sizeof(double));
-//   double *ptr = data;
-//   for (int i = 0; i < gridSizeX; i++)
-//   {
-//      for (int j = 0; j < gridSizeY; j++)
-//      {
-//         for (int k = 0; k < voxelDataLen; k++)
-//         {
-//            *ptr = contentVoxel[i][j]->contentYData[k];
-//            ptr++;
-//         }
-//      }
-//   }
-//   return data;
-//}
-
-//void Slice::setData(double *data)
-//{
-//   //this->voxelDataLen = voxelDataLen;
-//  // this->gridSizeY = gridSizeY;
-//  // this->gridSizeX = gridSizeX;
-
-//   double *ptr = data;
-//   for (int i = 0; i < gridSizeX; i++)
-//   {
-//      for (int j = 0; j < gridSizeY; j++)
-//      {
-//         contentVoxel[i][j]->contentYData.resize(voxelDataLen);
-//         for (int k = 0; k < voxelDataLen; k++)
-//         {
-//            contentVoxel[i][j]->contentYData[k] = *ptr;
-//            ptr++;
-//         }
-//      }
-//   }
-//}
-
-//void Slice::sendToMatlab()
-//{
-//   sendToMatlab(objectName());
-//}
-
-//void Slice::sendToMatlab(QString varName)
-//{
-//   matlab *matlab = matlab::instance();
-//   int dimensions[3] = {voxelDataLen, gridSizeY, gridSizeX};
-
-//   double *data = getData();
-//   matlab->sendArrayToMatlab(dimensions, data, varName);
-//   free(data);
-
-//   if (this->xType == UNIQUE)
-//   {
-//      emit writeWarning("X scale has not been sent to Matlab (Not available in this version)");
-//   }
-//   else if (this->xType == COMMON)
-//   {
-//      matlab->sendVectorToMatlab(this->commonX, varName + "XScale");
-//   }
-//}
-
 /* Converts a double value to a channel number for this slice.
   */
 int Slice::valueToChannel(double value)
@@ -804,50 +640,6 @@ SArray<double> Slice::sumImage(int start, int end)
    }
    return imageData;
 }
-
-///* Moved here from MainWindow because it's only used by Slice::backProject. Since it is a general
-//       purpose mathematical thing it should probably be in some kind of Math or Util class.
-//       */
-//void Slice::myFFT(int flag, int N, QVector <double> &x1 , QVector  <double> &y1)
-//{
-//   N = x1.size();
-//   // WARNING LOOP VARIABLES ARE NOT LONG
-//   QVector <double> x2, y2;
-//   x2.resize(N);
-//   y2.resize(N);
-//   double arg;
-//   double cosarg, sinarg;
-
-//   for (int i = 0; i < N; i++)
-//   {
-//      x2[i] = 0.0;
-//      y2[i] = 0.0;
-//      arg = - flag * 2.0 * 3.141592654 * (double)i / (double)N;
-//      for (int k = 0; k < N; k++)
-//      {
-//         cosarg = cos(k * arg);
-//         sinarg = sin(k * arg);
-//         x2[i] += (x1[k] * cosarg - y1[k] * sinarg);
-//         y2[i] += (x1[k] * sinarg + y1[k] * cosarg);
-//      }
-//   }
-//   if (flag == -1)
-//   {
-//      for (int i = 0 ; i < N ; i++)
-//      {
-//         x1[i] = x2[i] / (double)N;
-//         y1[i] = y2[i] / (double)N;
-//      }
-//   }
-//   else
-//   {
-//      for (int i = 0 ; i < N ; i++)
-//      {
-//         x1[i] = x2[i];
-//         y1[i] = y2[i];
-//      }
-//   }
-//}
 
 /* Attaches the Slice to its parent Volume's data.
   */

@@ -38,7 +38,6 @@ public:
    Slice(QString name, QString fileName);
    Slice(QString name, QStringList fileNameList);
    Slice(QString name, unsigned short* buffer, QString fileName);
-//   Slice(QString name, QString varName, int dummy);
    Slice(QString name, int rows, int cols, int depth, double value);
 
    ~Slice();
@@ -46,11 +45,7 @@ public:
    // Methods (in alphabetical order)
    Slice *add(Slice *anOtherSlice);
    Slice *add(double value);
-//   Slice *backProject();
-//   Slice *eigenImageSlice();
-//   Slice *prinComp();
 
-//   void calculatePrinComps();
    static bool fileNameListValid(QStringList fileNameList);
    SArray<double> channelImage(double value);
    void detach();
@@ -67,14 +62,11 @@ public:
    bool isCompatible(Slice *anOtherSlice);
    Q_INVOKABLE QObject *mask(double *theMask);
    Slice *multiply(double value);
-//   Q_INVOKABLE QObject *ones(int rows, int cols, int depth);
    Q_INVOKABLE QObject *plus(QObject *anotherSlice);
    Q_INVOKABLE QObject *plus(double value);
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
    static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
-//   Q_INVOKABLE void sendToMatlab();
-//   Q_INVOKABLE void sendToMatlab(QString varName);
    void setVoxelDataLen(int voxelDataLen);
    SArray<double> sumImage();
    SArray<double> sumImage(int start, int end);
@@ -83,8 +75,6 @@ public:
    int valueToChannel(double value);
    Slice *veil(double *theMask);
    void writeHXT(QString);
-//   Q_INVOKABLE QObject *zeros(int rows, int cols, int depth);
-//   void setData(double *data);
 signals:
    void writeError(QString);
    void writeMessage(QString);
@@ -143,9 +133,6 @@ private:
    Slice *clone(QString name);
    static QString nextSliceName();
    static QString roleBackSliceName();
-//   bool makeCommonX(double);
-//   void myFFT(int, int, QVector <double> &, QVector <double> &);
-//   double *getData();
    void postDataInit();
    void postDataInit(QString fileName);
    void preDataInit(QString name);

@@ -7,8 +7,6 @@
 #include "chargesharing.h"
 #include "plotter.h"
 
-//#include "scriptingwidget.h"
-#include "motioncontrolform.h"
 #include "detectorcontrolform.h"
 #include "dataacquisitionform.h"
 
@@ -35,7 +33,6 @@ MainWindow::MainWindow()
 {
    DetectorControlForm *detectorControlForm;
    DataAcquisitionForm *dataAcquisitionForm;
-//   MotionControlForm *motionControlform;
    ProcessingForm *processingForm;
    ProcessingBufferGenerator *processingBufferGenerator;
    ProcessingDefinition *processingDefinition;
@@ -178,7 +175,6 @@ MainWindow::MainWindow()
    {
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
                                                                 progressForm, processingBufferGenerator, this);
-//      motionControlform = new MotionControlForm();
    }
 
    if (activeDAQ)
@@ -232,7 +228,6 @@ MainWindow::MainWindow()
       connect(this, SIGNAL(stopDAQ()), dataAcquisitionForm, SLOT(handleAbortDAQPressed()));
       connect(this, SIGNAL(startHV()), detectorControlForm, SLOT(handleHVOn()));
       connect(this, SIGNAL(stopHV()), detectorControlForm, SLOT(handleHVOff()));
-//      tabs->addTab(motionControlform->getMainWindow(), QString("Motion Control"));
    }
 
 //   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));

@@ -18,45 +18,31 @@ SOURCES += main.cpp \
     voxel.cpp \
     thumbviewer.cpp \
     slice.cpp \
-#    scriptingwidget.cpp \
     sarray.cpp \
     renderarea.cpp \
     plotter.cpp \
     plotsettings.cpp \
-#    motorlimits.cpp \
-#    motor.cpp \
     mainwindow.cpp \
     hxtframe.cpp \
     hxtfilereader.cpp \
     gridsizequery.cpp \
-#    dummymotor.cpp \
-#    motioncontrolform.cpp \
     curve.cpp \
     colormap.cpp \
     chargesharing.cpp \
     axissettings.cpp \
     treeitem.cpp \
     colormapeditor.cpp \
-#    motormodel.cpp \
-#    motordelegate.cpp \
     dataacquisitionfactory.cpp \
-#    motorfactory.cpp \
-#    galilmotorcontroller.cpp \
-#    galilmotor.cpp \
-#    matlab.cpp \
     applicationoutput.cpp \
     hexitecsofttrigger.cpp \
     reservable.cpp \
-#    scriptrunner.cpp \
     objectreserver.cpp \
     reservation.cpp \
-#    motorstatus.cpp \
     volume.cpp \
     datamodel.cpp \
     mainviewer.cpp \
     workspace.cpp \
     getvaluedialog.cpp \
-#    matlabvariable.cpp \
     eigencomponent.cpp \
     offsetsdialog.cpp \
     datacollectiondialog.cpp \
@@ -70,7 +56,6 @@ SOURCES += main.cpp \
     detectorfilename.cpp \
     dataacquisitiondefinition.cpp \
     dataacquisitionstatus.cpp \
-#    newportxpsmotor.cpp \
     setaxesdialog.cpp \
     displaylegendsdialog.cpp \
     parameters.cpp \
@@ -85,18 +70,13 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     voxel.h \
     slice.h \
-#    scriptingwidget.h \
     sarray.h \
     renderarea.h \
     plotter.h \
     plotsettings.h \
-#    motorlimits.h \
-#    motor.h \
     hxtframe.h \
     hxtfilereader.h \
     gridsizequery.h \
-#    dummymotor.h \
-#    motioncontrolform.h \
     curve.h \
     colormap.h \
     chargesharing.h \
@@ -104,27 +84,17 @@ HEADERS += mainwindow.h \
     thumbviewer.h \
     treeitem.h \
     colormapeditor.h \
-#    motormodel.h \
-#    motordelegate.h \
     dataacquisitionfactory.h \
-#    motorfactory.h \
-#    galilmotorcontroller.h \
-#    galilmotor.h \
-#    matlab.h \
     applicationoutput.h \
-#    hardtrigger.h \
     hexitecsofttrigger.h \
     reservable.h \
-#    scriptrunner.h \
     objectreserver.h \
     reservation.h \
-#    motorstatus.h \
     volume.h \
     datamodel.h \
     mainviewer.h \
     workspace.h \
     getvaluedialog.h \
-#    matlabvariable.h \
     eigencomponent.h \
     offsetsdialog.h \
     datacollectiondialog.h \
@@ -138,7 +108,6 @@ HEADERS += mainwindow.h \
     detectorfilename.h \
     dataacquisitiondefinition.h \
     dataacquisitionstatus.h \
-#    newportxpsmotor.h \
     setaxesdialog.h \
     displaylegendsdialog.h \
     parameters.h \
@@ -153,14 +122,12 @@ HEADERS += mainwindow.h \
 FORMS += \
     gridsizequery.ui \
     chargesharing.ui \
-#    scriptingWidget.ui \
     colormapeditor.ui \
     getvaluedialog.ui \
     offsetsdialog.ui \
     datacollectiondialog.ui \
     dpwarningdialog.ui \
     vboutofrangedialog.ui \
-#    motioncontrolform.ui \
     detectorcontrolform.ui \
     dataacquisitionform.ui \
     setaxesdialog.ui \

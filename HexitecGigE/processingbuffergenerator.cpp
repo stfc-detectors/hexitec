@@ -178,6 +178,7 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
 void ProcessingBufferGenerator::handleProcessingComplete()
 {
    qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
+   delete currentImageProcessorHandler;
    emit processingComplete();
 }
 
