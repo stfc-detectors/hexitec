@@ -25,7 +25,7 @@ const QString Slice::multipleSuffixes = QString(".sb.xmy.xy.txt");
   */
 Slice::Slice(QString name, QObject *parent) : QObject(parent)
 {
-   qDebug() << "::Slice(QStr, QObj)";
+//   qDebug() << "::Slice(QStr, QObj)";
    preDataInit(name);
 }
 
@@ -46,7 +46,7 @@ QString Slice::getFileName()
   */
 Slice::Slice(QString name, QString fileName)
 {
-    qDebug() << "::Slice(QStr, QStr)  ";
+//    qDebug() << "::Slice(QStr, QStr)  ";
 
    preDataInit(name);
    bool status = false;
@@ -73,7 +73,7 @@ Slice::Slice(QString name, QString fileName)
   */
 Slice::Slice(QString name, QStringList fileNameList)
 {
-    qDebug() << "::Slice(QStr, QStrList)";
+//    qDebug() << "::Slice(QStr, QStrList)";
    preDataInit(name);
 
    this->fileName = fileNameList[0];
@@ -156,7 +156,7 @@ void Slice::postDataInit(QString fileName)
 
 Slice::Slice(QString name, int rows, int cols, int depth, double value)
 {
-    qDebug() << "::Slice(QStr, int rows, int cols, .., ..)";
+//    qDebug() << "::Slice(QStr, int rows, int cols, .., ..)";
    preDataInit(name);
 
    resize(rows, cols);
@@ -361,7 +361,7 @@ bool Slice::readHXT(unsigned short *buffer)
     memcpy((void *) &commonX[0], (void *) (allDataPointer), hxtBuffer.nBins * sizeof(double));
 
     resize(gridSizeX, gridSizeY);
-    summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+    summedImageY = (double*) calloc (numberOfBins, sizeof(double)); // freed()'d in DTOR
 
     allDataPointer += numberOfBins;
     int currentVoxel = 0;
@@ -516,7 +516,7 @@ bool Slice::readHXT(QString fileName)
  ///////////////////////////////  QString fileStem;
 
    numberOfBins = nBins;
-   summedImageY = (double*) calloc (numberOfBins, sizeof(double));
+   summedImageY = (double*) calloc (numberOfBins, sizeof(double)); // freed()'d in DTOR
    for (iRow = 0; iRow < nRows; ++iRow)
    {
       for (iCol = 0; iCol < nCols; ++iCol)

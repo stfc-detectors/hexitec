@@ -59,7 +59,7 @@ private:
    void closeEvent(QCloseEvent *event);
    bool checkDAQChoice();
    void writeCsv(QString filename, QVector<double> col0, double *col1, int numberOfBins);
-   void writeH5(QString fileName);
+//   void writeH5(QString fileName);
    QAction *startDAQAct;
    QAction *stopDAQAct;
    QAction *startHVAct;
@@ -94,7 +94,7 @@ private:
    bool activeDAQ;
    bool hVOn;
    std::ofstream outFile;
-   bool saveH5;
+//   bool saveH5;
    bool saveCsv;
 
 signals:
@@ -162,8 +162,8 @@ public slots:
    void disableStopDAQAction();
    void enableHVActions();
    void disableHVActions();
-   void handleProcessingComplete(QString fileName);
-   void handleSaveH5Changed(bool saveH5);
+//   void handleProcessingComplete(QString fileName);
+//   void handleSaveH5Changed(bool saveH5);
    void handleSaveCsvChanged(bool saveCsv);
 };
 

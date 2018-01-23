@@ -47,7 +47,7 @@ private:
    void performTriggeredDataCollection();
    void performFixedDataCollection();
    int doSplitDataCollections(int nDaqOverall, int repeatCount,
-                              bool triggering = false, int ttlInput = GigEDetector::INVALID_TTLINPUT);
+                              bool triggering = false/*, int ttlInput = GigEDetector::INVALID_TTLINPUT*/);
    int doLowPriorityBiasDataCollections(int nDaqOverall);
    void setDataAcquisitionTime(int nDaq);
    void performSingleBiasRefresh();

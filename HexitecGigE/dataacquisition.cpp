@@ -144,7 +144,7 @@ char *DataAcquisition::getStatus()
 {
    int major = daqStatus.getMajorStatus();
    int minor = daqStatus.getMinorStatus();
-   char *status;
+   char *status = NULL;
    sprintf(status,"%d.%d", major, minor);
    return status;//daqStatus.getMajorStatus() + "." + daqStatus.getMinorStatus();
 }
@@ -227,7 +227,7 @@ void DataAcquisition::performTriggeringConfigure()
 
 void DataAcquisition::performContinuousDataCollection(bool triggering)
 {
-   int nDaq;
+//   int nDaq;
    int repeatCount;
    int nDaqOverall = 0;
 
@@ -279,7 +279,7 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
    emit enableMonitoring();
 }
 
-int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bool triggering, int ttlInput)
+int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bool triggering/*, int ttlInput*/)
 {
    bool suspendTriggering = false;
    bool configureRequired = false;
@@ -443,7 +443,7 @@ void DataAcquisition::setDataAcquisitionTime(int nDaq)
 {
    double biasRefreshDataCollectionTime = hv->getBiasRefreshInterval();
    double finalDataCollectionTime = dataAcquisitionDefinition->getDuration() - (biasRefreshDataCollectionTime * ((double) (splitDataCollections - 1)));
-   double durationSeconds;
+//   double durationSeconds;
 
    dataCollectionTime = biasRefreshDataCollectionTime;
 

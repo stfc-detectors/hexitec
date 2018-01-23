@@ -14,8 +14,8 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
                                            QObject *parent) :
    QObject(parent)
 {
-   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
-   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
+//   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
+//   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
 
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
@@ -37,8 +37,8 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    connectHV();
    connectObjectReserver();
 
-   initialiseDetectorFilename(dataFilename);
-   initialiseDetectorFilename(logFilename);
+//   initialiseDetectorFilename(dataFilename);
+//   initialiseDetectorFilename(logFilename);
    rdaqml.append((QObject *)this);
 }
 
@@ -149,8 +149,8 @@ void DataAcquisitionModel::connectDataAcquisition()
    connect(this->dataAcquisitionForm, SIGNAL(newDataAcquisitionImageProgressValue(int)),
            this->progressForm, SLOT(handleNewDataAcquisitionImageProgressValue(int)));
 
-   connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
-           processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));
+//   connect(dataAcquisition, SIGNAL(imageStarting(char *, int, int)),
+//           processingBufferGenerator, SLOT(handleImageStarting(char *, int, int)));
 }
 
 void DataAcquisitionModel::connectGigEDetector()
@@ -161,8 +161,8 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
    connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
-   connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
-           dataAcquisition, SLOT(handleImageStarted(char *, int)));
+//   connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
+//           dataAcquisition, SLOT(handleImageStarted(char *, int)));
    connect(gigEDetector, SIGNAL(imageStarted(char *)),
            processingBufferGenerator, SLOT(handleImageStarted(char *)));
    connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
@@ -278,7 +278,7 @@ void DataAcquisitionModel::connectObjectReserver()
    connect(objectReserver, SIGNAL(controlledByGui()), dataAcquisitionForm, SLOT(handleControlledByGui()));
 }
 
-void DataAcquisitionModel::initialiseDetectorFilename(DetectorFilename *detectorFilename)
+void DataAcquisitionModel::initialiseDetectorFilename(/*DetectorFilename *detectorFilename*/)
 {
    emit dataChanged(dataAcquisitionDefinition);
 }

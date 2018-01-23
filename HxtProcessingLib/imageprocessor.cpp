@@ -275,6 +275,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
+                  free(result);
                }
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
@@ -326,10 +327,9 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
 void ImageProcessor::handleProcess()
 {
    GeneralFrameProcessor *fp;
-   int thresholdValue;
-   uint16_t *thresholdPerPixel;
-   uint16_t *result;
-   bool energyCalibration;
+   int thresholdValue = 0;
+   uint16_t *thresholdPerPixel = NULL;
+   uint16_t *result = NULL;
    filenameBin = new char[1024];
    filenameHxt = new char[1024];
    filenameCsv = new char[1024];

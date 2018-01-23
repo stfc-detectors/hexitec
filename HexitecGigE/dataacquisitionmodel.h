@@ -59,7 +59,7 @@ private:
    void connectObjectReserver();
    void setDetectorFilename(DetectorFilename sourceFilename, DetectorFilename *destFilename);
    void initialise();
-   void initialiseDetectorFilename(DetectorFilename *detectorFilename);
+   void initialiseDetectorFilename(/*DetectorFilename *detectorFilename*/);
    void changeDaqDuration();
 
 public:

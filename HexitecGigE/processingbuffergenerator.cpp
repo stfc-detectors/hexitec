@@ -72,7 +72,7 @@ void ProcessingBufferGenerator::handleTransferBufferReady(unsigned char *transfe
 
 void ProcessingBufferGenerator::bufferReady(unsigned char *buffer, unsigned long validFrames)
 {
-   bufferToProcess = (char *) malloc(frameSize * validFrames);
+   bufferToProcess = (char *) malloc(frameSize * validFrames);      // Free()'d by calling ImageProcessor::processThreshold...()
    memcpy(bufferToProcess, buffer, frameSize * validFrames);
    currentImageProcessor->enqueueBuffer(bufferToProcess, validFrames);
 }
@@ -150,9 +150,9 @@ void ProcessingBufferGenerator::handleConfigureProcessing(QStringList inputFiles
 
 }
 
-void ProcessingBufferGenerator::handleHxtFileWritten(char * buffer, const char *filename)
-{
-}
+//void ProcessingBufferGenerator::handleHxtFileWritten(char * buffer, const char *filename)
+//{
+//}
 
 void ProcessingBufferGenerator::handleHxtFileWritten()
 {
@@ -182,10 +182,10 @@ void ProcessingBufferGenerator::handleProcessingComplete()
    emit processingComplete();
 }
 
-void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
-{
-   emit processingComplete();
-}
+//void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
+//{
+//   emit processingComplete();
+//}
 
 void ProcessingBufferGenerator::handleProcessImages()
 {
@@ -238,7 +238,7 @@ void ProcessingBufferGenerator::handleProcessImages()
 
       while (inFile)
       {
-         transferBuffer = (unsigned char *) calloc(nRows * nCols  * 500 * sizeof(uint16_t), sizeof(char));
+         transferBuffer = (unsigned char *) calloc(nRows * nCols  * 500 * sizeof(uint16_t), sizeof(char));  // freed()'d in handleFileBufferReady
 
          inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
          if (!inFile)
@@ -314,7 +314,7 @@ void ProcessingBufferGenerator::handlePostProcessImages()
 
       while (inFile)
       {
-         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
+         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));   // freed()'d in handleFileBufferReady
 
          inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
          if (!inFile)

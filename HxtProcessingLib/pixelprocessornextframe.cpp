@@ -20,7 +20,7 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresh
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue || lastRe_orderedFrame[i] != 0)
       {
@@ -39,7 +39,7 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thres
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdPerPixel[i] || lastRe_orderedFrame[i] != 0)
       {
@@ -63,7 +63,7 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresh
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue || lastRe_orderedFrame[i] != 0)
       {
@@ -92,7 +92,7 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thres
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdPerPixel[i] || lastRe_orderedFrame[i] != 0)
       {
@@ -117,7 +117,7 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] - thresholdValue < 0 || lastRe_orderedFrame[index] != 0)
@@ -141,7 +141,7 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] - thresholdPerPixel[i] < 0 || lastRe_orderedFrame[index] != 0)
@@ -169,7 +169,7 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] < thresholdValue || lastRe_orderedFrame[index] > 0)
@@ -200,7 +200,7 @@ uint16_t *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
-   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] < thresholdPerPixel[index] || lastRe_orderedFrame[index] > 0)

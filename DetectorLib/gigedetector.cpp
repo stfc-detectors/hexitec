@@ -253,7 +253,7 @@ int GigEDetector::initialise(Triggering triggering)
    UCHAR projectId = 0x12;
    UCHAR version = 0x02;
    UCHAR forceEqualVersion = 0x0;
-   ULONG timeOut = 1000;
+//   ULONG timeOut = 1000;
 
    updateState(INITIALISING);
 
@@ -917,8 +917,8 @@ unsigned char *GigEDetector::getImage(int imageNumber)
 
 
    buffer = getBufferReady();
-   imageDest = (short *) malloc(imageSize * sizeof(short));
-   image = (unsigned char *) malloc(imageSize * sizeof(unsigned char));
+   imageDest = (short *) malloc(imageSize * sizeof(short)); // free()'d in ::imageDEstToPixmap
+   image = (unsigned char *) malloc(imageSize * sizeof(unsigned char)); // free() where? -> detCtrlForm, SLOT(setPixMap())
    memcpy(imageDest, buffer, segmentSize);
    returnBuffer = buffer;
    emit executeReturnBufferReady(returnBuffer);

@@ -59,7 +59,7 @@ public slots:
    void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
-   void handleHxtFileWritten(char *buffer, const char * filename);
+//   void handleHxtFileWritten(char *buffer, const char * filename);
    void handleHxtFileWritten();
 
    void handleConfigureSensor(int nRows, int nCols);
@@ -81,7 +81,7 @@ public slots:
    void handleConfigureProcessing(QStringList inputFilesList,
                                   QString outputDirectory,
                                   QString outputPrefix);
-   void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
+//   void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
    void handleProcessingComplete();
 };
 

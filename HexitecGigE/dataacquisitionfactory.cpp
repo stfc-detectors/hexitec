@@ -16,7 +16,7 @@ DataAcquisitionFactory::DataAcquisitionFactory(DataAcquisitionForm *dataAcquisit
 //   motorModel = new MotorModel();
 //   motorFactory = MotorFactory::instance();
 //   QString motor;
-   int id = 0;
+//   int id = 0;
 //   QList<QString> motors;
 //   motors << "ssx" << "ssy" << "ssz" << "ssrot" << "galx" << "galy" << "galz" << "galrot";
 

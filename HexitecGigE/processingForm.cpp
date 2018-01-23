@@ -469,9 +469,9 @@ void ProcessingForm::guiIdle()
 
 
 
-void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
-{
-}
+//void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
+//{
+//}
 
 void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
 {
@@ -507,13 +507,13 @@ void ProcessingForm::setChargedSharingParameters()
 
 void ProcessingForm::setInputFilesList()
 {
-   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", "Raw Data (*.bin)");
+   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://temp//QD_HxtGigE//hexitec//IniFiles//", "Raw Data (*.bin)");
    ui->inputFilesList->setText(source.join(", "));
 }
 
 void ProcessingForm::setOutputDirectory()
 {
-   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", QFileDialog::ShowDirsOnly);
+   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://temp//QD_HxtGigE//hexitec//IniFiles//", QFileDialog::ShowDirsOnly);
    ui->outputDirectory->setText(source);
 }
 

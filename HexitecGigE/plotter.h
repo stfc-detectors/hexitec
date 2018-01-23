@@ -123,7 +123,7 @@ public slots:
    void setAxesAccepted();
    void setAxesRejected();
    void setAxesApplied();
-   void displayLegendsFinished(int code);
+//   void displayLegendsFinished(int code);
    void handlePixelAdditionChanged(bool);
 
 private:

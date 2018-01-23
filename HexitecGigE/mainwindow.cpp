@@ -78,7 +78,7 @@ MainWindow::MainWindow()
 //   bHexitechProcessingBusy = false;
    bUpdateVisualisationTab = false;
    saveCsv = false;
-   saveH5 = false;
+//   saveH5 = false;
 
    QTabWidget *tabs = new QTabWidget(this);
    setCentralWidget(tabs);
@@ -843,10 +843,6 @@ void MainWindow::readFiles(QStringList files)
           }
        }
     }
-//    else
-//    {
-//        qDebug() << "MainWindow::readFiles() - Not updating the Visualisation Tab as requested by \"UpdateDisplay\"";
-//    }
 }
 
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
@@ -872,7 +868,7 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, 
 {
    stringstream outputText(stringstream::out);
 
-   for (unsigned int i = 0; i < numberOfBins; i++)
+   for (/*unsigned */int i = 0; i < numberOfBins; i++)
    {
       outputText << col0[i] << "," << col1[i] << std::endl;
    }
@@ -886,83 +882,20 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, 
 
 }
 
-void MainWindow::writeH5(QString fileName)
-{
-   QString program = "Translator.exe";
-   QStringList arguments;
-   arguments << fileName << "h5";
-
-   QProcess *translateProcess = new QProcess();
-   translateProcess->execute(program, arguments);
-}
-
-//void MainWindow::sendActiveSliceToMatlab()
+//void MainWindow::writeH5(QString fileName)
 //{
-//   DataModel::instance()->getActiveSlice()->sendToMatlab("activeSlice");
-//}
+//   QString program = "Translator.exe";
+//   QStringList arguments;
+//   arguments << fileName << "h5";
 
-//void MainWindow::getActiveSliceFromMatlab()
-//{
-//   Slice *slice;
-//   try
-//   {
-//      slice = new Slice("from Matlab", "activeSlice", 1);
-//      initializeSlice(slice);
-//   }
-//   catch (QString message)
-//   {
-//      emit writeError(message);
-//   }
-//}
-
-//void MainWindow::updateHexitechProcessingStatus(bool isBusy)
-//{
-//    bHexitechProcessingBusy = isBusy;
+//   QProcess *translateProcess = new QProcess();
+//   translateProcess->execute(program, arguments);
 //}
 
 void MainWindow::updateVisualisationTab(bool bUpdate)
 {
     bUpdateVisualisationTab = bUpdate;
 }
-
-//void MainWindow::getPrinComps()
-//{
-
-//    if (DataModel::instance()->numberOfSlices() == 0)
-//            return;
-//    // If calculating the principal components this may need to be a threaded process
-//    // as it is potentially a long process
-//    initializeSlice(DataModel::instance()->getActiveSlice()->prinComp());
-//}
-
-
-/* This is the slot connected to the test item on the main menu.
-   */
-//void MainWindow::testDevelopment()
-//{
-//    if (DataModel::instance()->numberOfSlices() == 0)
-//            return;
-
-//   initializeSlice(DataModel::instance()->getActiveSlice()->backProject());
-//}
-/*
-void MainWindow::checkKeithleyConfiguration()
-{
-   QSettings *settings = new QSettings(QSettings::UserScope, "TEDDI", "HexitecGigE");
-   keithleyPresent = false;
-   if (settings->contains("KEITHLEY"))
-   {
-      if (settings->value("KEITHLEY").toString() == "On")
-      {
-         keithleyPresent = true;
-      }
-      else
-      {
-         emit writeWarning("Keithley is disabled in this session");
-      }
-   }
-}
-*/
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -1033,19 +966,19 @@ void MainWindow::handleShowImage()
    emit executeShowImage();
 }
 
-void MainWindow::handleProcessingComplete(QString fileName)
-{
-   if (saveH5)
-   {
-      writeH5(fileName);
-   }
+//void MainWindow::handleProcessingComplete(QString fileName)
+//{
+//   if (saveH5)
+//   {
+//      writeH5(fileName);
+//   }
 
-}
+//}
 
-void MainWindow::handleSaveH5Changed(bool saveH5)
-{
-   this->saveH5 = saveH5;
-}
+//void MainWindow::handleSaveH5Changed(bool saveH5)
+//{
+//   this->saveH5 = saveH5;
+//}
 
 void MainWindow::handleSaveCsvChanged(bool saveCsv)
 {

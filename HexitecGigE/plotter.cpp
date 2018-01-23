@@ -80,7 +80,7 @@ Plotter::Plotter(QWidget *parent) :
    connect(setAxesDialog, SIGNAL(accepted()), this, SLOT(setAxesAccepted()));
    connect(setAxesDialog, SIGNAL(rejected()), this, SLOT(setAxesRejected()));
    connect(setAxesDialog, SIGNAL(apply()), this, SLOT(setAxesApplied()));
-   connect(displayLegendsDialog, SIGNAL(finished(int)), this, SLOT(displayLegendsFinished(int)));
+//   connect(displayLegendsDialog, SIGNAL(finished(int)), this, SLOT(displayLegendsFinished(int)));
 
    setDynamicStateOff();
    setBackgroundRole(QPalette::Base);
@@ -243,7 +243,7 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
       }
 
       painter.setPen(QColor(0,0,0));
-      double spanSummedY = (summedCurve->maxYData - summedCurve->minYData);
+//      double spanSummedY = (summedCurve->maxYData - summedCurve->minYData);
 
       for (int j = 0; j <= zoomStack[currentZoom].numYTicks; ++j)
       {
@@ -336,7 +336,7 @@ void Plotter::paintEvent(QPaintEvent * /* event */)
       painter.strokePath(path, curve[j]->curvePen);
    }
 
-   double x,y;
+   double x;
 
    if (xExploreState)
    {
@@ -949,10 +949,10 @@ void Plotter::setAxesApplied()
    setAxes();
 }
 
-void Plotter::displayLegendsFinished(int code)
-{
-   displayLegendsAction->setChecked(false);
-}
+//void Plotter::displayLegendsFinished(int code)
+//{
+//   displayLegendsAction->setChecked(false);
+//}
 
 void Plotter::handlePixelAdditionChanged(bool pixelAddition)
 {

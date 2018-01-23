@@ -1,6 +1,7 @@
 #include "hxtitem.h"
 #include <iostream>
 #include <math.h>
+#include <qdebug.h>
 
 using namespace std;
 
@@ -21,7 +22,8 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
 
 HxtItem::~HxtItem()
 {
-//   free(summedHistogram);
+    free(summedHistogram);
+//    free(hxtBin);         // Causes crash later (ProcessingBufferGenerator::handleProcessingComplete())
 }
 
 void HxtItem::freeAllocedMemory()
@@ -55,7 +57,7 @@ void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
 
 void HxtItem::initialiseTotalSpectrum()
 {
-   summedHistogram = (long long *) calloc(nBins, sizeof(long long));
+   summedHistogram = (long long *) calloc(nBins, sizeof(long long));    // free()'d in DTOR
 }
 
 void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
