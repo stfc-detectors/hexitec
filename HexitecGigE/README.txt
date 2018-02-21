@@ -30,10 +30,15 @@ DetectorLib
 HxtProcessingLib
 SerialPortLib
 
-With these project built, the HexitecGigE project will have its' dependent libraries available and can be successfully built. Note that its' profile file (HexitecGigE.pro) may need modifying. It relies upon a Windows environment variable to pick up the correct paths etc.
- The most recent build environment is reflected for the variable value of: 
+With these project built, the HexitecGigE project will have its' dependent libraries available and can be successfully built. 
 
-ckd_devel
+PLEASE NOTE: The profile file (HexitecGigE.pro) WILL REQUIRE modifying if the project hasn't been successfully built previous on the same machine. It relies upon a Windows System Environment variable to pick up the correct paths etc.
+ If HEXITECGIGE_SYSTEM doesn't exist, create a system variable and give it a suitable value. As of February 2018, the most recent build environment is reflected as:
+
+HEXITECGIGE_SYSTEM=ckd_devel
+
+Look in the profile file near the end for the paragraph those beginning contains "ckd_devel".
+
 
 Note that the project HxtProcessingLibTest isn't a dependency upon HexitecGigE. However, running its executable allows processing of data without using the GUI. This has proven useful for debugging purposes in the past. ConfigHexitecGigE is the tool used to define where the two configuration .ini files are located, along with toggling the Data Acquisition tabs on/off within the GUI. Example ini files, along with calibration files, can be found in IniFiles/.
 
