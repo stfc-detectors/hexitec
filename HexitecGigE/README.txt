@@ -17,7 +17,7 @@ At the moment, there isn't enough space to fit them here - please liaise with Ma
 Instructions for building the HexitecGigE source code
 -----------------------------------------------------
 
-The executable resulting from building the source code was built on Win 7, using Qt 5.6.2 (64 bit), Microsoft Visual Studio 2015 Professional and Windows SDK version 10.0.10586.0. It has also been confirmed building on Win 10, Qt 5.9.2, Microsoft Visual Studio 2017 Community Edition, Windows SDK 10.0.16299.0. 
+The executable resulting from building the source code was built on Win 7, using Qt 5.6.2 (64 bit), Microsoft Visual Studio 2015 Professional and Windows SDK version 10.0.10586.0. It has also been confirmed building on Win 10, Qt 5.9.2, Microsoft Visual Studio 2017 Community Edition, Windows SDK 10.0.16299.0; Win 7, Microsoft Visual Studio 2017 Professional with the same Windows SDK has also been confirmed working. 
 
 
 Building the various projects:
@@ -34,6 +34,9 @@ With these project built, the HexitecGigE project will have its' dependent libra
  The most recent build environment is reflected for the variable value of: 
 
 ckd_devel
+
+HexitecGigE also relies upon a deprecated Qt module called QtScript. To download it, run the QT maintenance tool which is typically can be found at: C:\Qt\MaintenanceTool.exe. Select "Add or remove components", click "Next" then for the installed Qt Version (e.g. 5.9.2), expend that section and ensure "Qt Script (Deprecated)" is ticked before clicking "Next" followed by "Update".
+
 
 Note that the project HxtProcessingLibTest isn't a dependency upon HexitecGigE. However, running its executable allows processing of data without using the GUI. This has proven useful for debugging purposes in the past. ConfigHexitecGigE is the tool used to define where the two configuration .ini files are located, along with toggling the Data Acquisition tabs on/off within the GUI. Example ini files, along with calibration files, can be found in IniFiles/.
 
@@ -53,7 +56,7 @@ In addition, The Windows Deploy Tool of QT must also be run to generate some add
 
 (note that this is for QT 5.6, amend the path according to your version of QT)
 
-c:\Qt56\5.6\msvc2015_64\bin\windeployqt.exe HexitecGigE.exe
+c:\Qt\5.6\msvc2015_64\bin\windeployqt.exe HexitecGigE.exe
 
 
-Instructions prepared by Christian Angelsen, 08/12/2017.
+Instructions prepared by Christian Angelsen, 23/02/2018.
