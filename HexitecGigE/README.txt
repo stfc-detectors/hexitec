@@ -30,10 +30,15 @@ DetectorLib
 HxtProcessingLib
 SerialPortLib
 
-With these project built, the HexitecGigE project will have its' dependent libraries available and can be successfully built. Note that its' profile file (HexitecGigE.pro) may need modifying. It relies upon a Windows environment variable to pick up the correct paths etc.
- The most recent build environment is reflected for the variable value of: 
+With these project built, the HexitecGigE project will have its' dependent libraries available and can be successfully built. 
 
-ckd_devel
+PLEASE NOTE: The profile file (HexitecGigE.pro) WILL REQUIRE modifying if the project hasn't been successfully built previous on the same machine. It relies upon a Windows System Environment variable to pick up the correct paths etc.
+ If HEXITECGIGE_SYSTEM doesn't exist, create a system variable and give it a suitable value. As of February 2018, the most recent build environment is reflected as:
+
+HEXITECGIGE_SYSTEM=ckd_devel
+
+Look in the profile file near the end for the paragraph those beginning contains "ckd_devel".
+
 
 HexitecGigE also relies upon a deprecated Qt module called QtScript. To download it, run the QT maintenance tool which is typically can be found at: C:\Qt\MaintenanceTool.exe. Select "Add or remove components", click "Next" then for the installed Qt Version (e.g. 5.9.2), expend that section and ensure "Qt Script (Deprecated)" is ticked before clicking "Next" followed by "Update".
 
