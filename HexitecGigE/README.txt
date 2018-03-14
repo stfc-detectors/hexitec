@@ -17,7 +17,12 @@ At the moment, there isn't enough space to fit them here - please liaise with Ma
 Instructions for building the HexitecGigE source code
 -----------------------------------------------------
 
-The executable resulting from building the source code was built on Win 7, using Qt 5.6.2 (64 bit), Microsoft Visual Studio 2015 Professional and Windows SDK version 10.0.10586.0. It has also been confirmed building on Win 10, Qt 5.9.2, Microsoft Visual Studio 2017 Community Edition, Windows SDK 10.0.16299.0; Win 7, Microsoft Visual Studio 2017 Professional with the same Windows SDK has also been confirmed working. 
+The executable resulting from building the source code was built on Win 7, using Qt 5.6.2 (64 bit), Microsoft Visual Studio 2015 Professional and Windows SDK version 10.0.10586.0. Here's a table of confirmed working tool chains:
+
+Windows:       Qt:              MSVC:                                           Win SDK:
+Win 7,         5.6.2 (64 bit)   Microsoft Visual Studio 2015 Professional,      SDK version 10.0.10586.0 
+Win 10,        5.9.2,           Microsoft Visual Studio 2017 Community Edition, SDK version 10.0.16299.0
+Win 7,         5.9.2,           Microsoft Visual Studio 2017 Professional,      SDK version 10.0.16299.0
 
 
 Building the various projects:
