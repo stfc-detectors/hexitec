@@ -9,6 +9,8 @@
 #include <iostream>
 #include <fstream>
 #include <Windows.h>
+//
+#include <QTime>
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
@@ -276,6 +278,9 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
    processingDefinition->setRows(nRows);
    processingDefinition->setCols(nCols);
    processingFilenameList.clear();
+   ///
+//   QTime qtTime;
+//   int readTime = 0, readyTime = 0;
 
    inputFilename = new char[1024];
 
@@ -310,24 +315,29 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       }
 
       int bufferCount = 0;
-
-      while (inFile)
+       qDebug() << "PBG current time: " << QTime::currentTime();
+//      while (inFile)
       {
+         int numFramesReqd = 1;
          transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
 
-         inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
+//         qtTime.restart();
+         inFile.read((char *)transferBuffer, nRows * nCols  * numFramesReqd/*500*/ * 2);
+//         readTime = qtTime.elapsed();
          if (!inFile)
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-//            qDebug() << "MODIFY TRANSFER BUFFER!!!";
 //            fill(transferBuffer, transferBuffer + (160000 * validFrames), 150);
+//            qtTime.restart();
             emit fileBufferReady(transferBuffer, validFrames);
+//            readyTime = qtTime.elapsed();
          }
          else
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-            emit fileBufferReady(transferBuffer, 500);
+            emit fileBufferReady(transferBuffer, validFrames/*500*/);
          }
+
          totalFramesAcquired += validFrames;
          bufferCount++;
          Sleep(50);
@@ -335,6 +345,8 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       inFile.close();
       emit imageComplete(totalFramesAcquired);
    }
+//   qDebug() << "PBG  binRead: " << (readTime) << " ms.";
+//   qDebug() << "PBG bufReady: " << (readyTime) << " ms.";
    delete processingFilename;
    delete inputFilename;
 }

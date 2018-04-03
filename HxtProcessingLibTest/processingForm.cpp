@@ -60,7 +60,7 @@ QMainWindow *ProcessingForm::getMainWindow()
 void ProcessingForm::initialiseProcessingForm()
 {
    QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
-   QString twoEasyFilename = "C:\\Detector\\hexitecGigE.ini";
+   QString twoEasyFilename = "C:\\Detector\\hexitecGigE_400.ini";
    QString inputFilesList;
    IniFile *twoEasyIniFile;
 
@@ -271,10 +271,10 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId();
+   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId() << QTime::currentTime();
    emit processImages(nRows, nCols);
    guiBusy();
-   qDebug() << "PROCESSING CONTINUING!!!";
+//   qDebug() << "PROCESSING CONTINUING!!!";
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)

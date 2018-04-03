@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+//
+#include <QDebug>
+#include <QTime>
 
 HANDLE ImageProcessor::getProcessingCompleteEvent()
 {
@@ -165,6 +168,9 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
 
    thresholdValue = processingDefinition->getThresholdValue();
 
+   ///
+//   QTime qtTime;
+//   int accessTime = 0, processTime = 0, energiesTime = 0, binaryTime = 0, hxtTime = 0, spectrumTime = 0;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
       while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
@@ -176,17 +182,23 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       {
          while (imageItem->getBufferQueueSize() > 0)
          {
+//            qtTime.restart();
             bufferStart = imageItem->getNextBuffer(&validFrames);
+//            accessTime = qtTime.elapsed();
             frameIterator = bufferStart;
             if (frameIterator != NULL)
             {
+
                for (unsigned long i = 0; i < validFrames; i++)
                {
+//                  qtTime.restart();
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+//                  processTime = qtTime.elapsed();
                   if (hxtMap->size() > 0)
                   {
-
+//                     qtTime.restart();
                      hxtGenerator->processEnergies(hxtMap);
+//                     energiesTime = qtTime.elapsed();
                   }
 
                   // MUST USE RESULT IN FURTHER CALCULATIONS
@@ -194,12 +206,16 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   processedFrameCount++;
                   free(result);
                }
+//               qtTime.restart();
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
+//               binaryTime = qtTime.elapsed();
                if (hxtGeneration)
                {
+//                  qtTime.restart();
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
                                (char *) hxtGenerator->getHxtV3AllData(), processingDefinition->getHxtBufferAllDataSize(),
                                filenameHxt);
+//                 hxtTime = qtTime.elapsed();
 
                }
                free(bufferStart);
@@ -236,9 +252,18 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
       }
       if (processingDefinition->getTotalSpectrum())
       {
+//         qtTime.restart();
          writeCsvFile(hxtGenerator->getEnergyBin(), hxtGenerator->getSummedHistogram(), filenameCsv);
+//         spectrumTime = qtTime.elapsed();
       }
    }
+//   qDebug() << "IP    access: " << (accessTime) << " ms.";
+//   qDebug() << "IP   process: " << (processTime) << " ms.";
+//   qDebug() << "IP  energies: " << (energiesTime) << " ms.";
+//   qDebug() << "IP  binWrite: " << (binaryTime) << " ms.";
+//   qDebug() << "IP  hxtWrite: " << (hxtTime) << " ms.";
+//   qDebug() << "IP  spectrum: " << (spectrumTime) << " ms.";
+   qDebug() << "IP current time: " << QTime::currentTime();
 }
 
 
@@ -424,8 +449,6 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)
 {
    std::ofstream outFile;
-   unsigned long long theAddress;
-   memcpy((void *) &theAddress, (void *) (header+184), 8);
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::out);
    outFile.write((const char *)header, headerLength * sizeof(char));

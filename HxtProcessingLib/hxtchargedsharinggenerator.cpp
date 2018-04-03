@@ -1,5 +1,8 @@
 #include "hxtchargedsharinggenerator.h"
 #include <Windows.h>
+//
+#include <QDebug>
+#include <QTime>
 
 HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    HxtGenerator(nRows, nCols, processingDefinition)
@@ -40,7 +43,9 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
    length = pixelEnergyMap->size();
    fill(pixelRow, pixelRow + sizeof(pixelRow), 0);
    fill(pixelCol, pixelCol + sizeof(pixelCol), 0);
-
+//   QTime qtTime;
+//   int sortTime = 0, callTime = 0;
+//   qtTime.restart();
    while (it != itend)
    {
       pixel = it->first;
@@ -50,18 +55,22 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
       it++;
       index++;
    }
-
+//   sortTime = qtTime.elapsed();
    switch (chargedSharingMode)
    {
       case ADDITION:
          processAdditionChargedSharing(pixelEnergyMap, length);
          break;
       case DISCRIMINATION:
+//         qtTime.restart();
          processDiscriminationChargedSharing(pixelEnergyMap, length);
+//         callTime = qtTime.elapsed();
          break;
       default:
          break;
    }
+//   qDebug() << "CSD sortTime: " << (sortTime) << " ms.";
+//   qDebug() << "CSD callTime: " << (callTime) << " ms.";
 }
 
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
@@ -153,7 +162,6 @@ void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_m
       row = pixelRow[i];
       column = pixelCol[i];
       maxValue = pixelValue[i];
-
       rowIndexBegin = row - directionalDistance;
       rowIndexEnd = row + directionalDistance;
       colIndexBegin = column - directionalDistance;

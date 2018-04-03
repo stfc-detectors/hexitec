@@ -6,6 +6,9 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
+//
+#include <QTime>
+#include <qDebug>
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
@@ -195,8 +198,12 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
 
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
-
+//   QTime qtTime;
+//   int copyTime = 0, applyTime = 0, storeTime = 0;
+//   qtTime.restart();
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+//   copyTime = qtTime.elapsed();
+//   qtTime.restart();
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue)
@@ -209,6 +216,9 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
          pixelEnergyMap->insert(std::make_pair(i, value));
       }
    }
+//   applyTime = qtTime.elapsed();
+//   qDebug() << "GPP  memcopy: " << copyTime << " ms";
+//   qDebug() << "GPP Calibrat: " << (applyTime) << " ms.";
    *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
