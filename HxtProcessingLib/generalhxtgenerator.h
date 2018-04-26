@@ -24,6 +24,8 @@ public:
    long long *getSummedHistogram();
 
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap) = 0;
+   ///
+   virtual void calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts) = 0;
 
 protected:
    bool getFrameProcessingInProgress();

@@ -167,6 +167,36 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    hxtsProcessed++;
 }
 
+
+void HxtItem::addFrameDataToHistogram(uint16_t *frame)
+{
+
+   double *currentHistogram = &histogramPerPixel[0];
+   long long *summed = &summedHistogram[0];
+   double thisEnergy;
+   int bin;
+   int pixel;
+
+   int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+   for (int i = 0; i < frameSize; i++)
+   {
+      pixel = i;
+      thisEnergy = frame[i];
+      bin = (int)((thisEnergy / binWidth));
+      if (bin <= nBins)
+      {
+         (*(currentHistogram + (pixel * nBins) + bin))++;
+         (*(summed + bin)) ++;
+      }
+      else
+      {
+         qDebug() << "BAD BIN = " << bin;
+      }
+   }
+
+   hxtsProcessed++;
+}
+
 HxtItem::HxtV3Buffer *HxtItem::getHxtV3Buffer()
 {
    return &hxtV3Buffer;

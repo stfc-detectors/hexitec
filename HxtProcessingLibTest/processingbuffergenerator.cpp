@@ -315,10 +315,11 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       }
 
       int bufferCount = 0;
-       qDebug() << "PBG current time: " << QTime::currentTime();
+//       qDebug() << "PBG current time: " << QTime::currentTime() << " sizeof uint16_t, char: " << sizeof(uint16_t) << " " << sizeof(char);
 //      while (inFile)
       {
-         int numFramesReqd = 1;
+         int numFramesReqd = 100;
+         qDebug() << "PBG reading: " << numFramesReqd << " Frames (Rewritten CSD algorithm)";
          transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
 
 //         qtTime.restart();

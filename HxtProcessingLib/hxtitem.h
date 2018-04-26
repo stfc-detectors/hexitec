@@ -53,6 +53,9 @@ public:
    long long getTotalEnergiesToProcess();
    void addToHistogram(unordered_map <int, double>pixelEnergyMap);
    void addToHistogramWithSum(unordered_map <int, double>pixelEnergyMap);
+   ///
+   void addFrameDataToHistogram(uint16_t *frame);
+   ///
    HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();
    double *getEnergyBin();

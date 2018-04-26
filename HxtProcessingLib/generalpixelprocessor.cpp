@@ -197,30 +197,40 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
    double value;
 
    pixelEnergyMap = new unordered_map<int, double>();
+   pixelEnergyMap->reserve(500000);
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
-//   QTime qtTime;
-//   int copyTime = 0, applyTime = 0, storeTime = 0;
+   QTime qtTime;
+   int /*copyTime = 0,*/ applyTime = 0/*, storeTime = 0*/;
 //   qtTime.restart();
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+//   qDebug() << "GPP before, A: " << pixelEnergyMap->size() << "    B: " << sizeof(pixelEnergyMap)
+//            << " Bucket: count,max_load,load: " << pixelEnergyMap->bucket_count() << pixelEnergyMap->max_load_factor() << pixelEnergyMap->load_factor();
 //   copyTime = qtTime.elapsed();
-//   qtTime.restart();
+   qtTime.restart();
+//   int sign = 0;
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue)
+//      sign = (re_orderedFrame[i] - thresholdValue) >> 31;
+//      re_orderedFrame[i] = ~sign & re_orderedFrame[0];
       {
          re_orderedFrame[i] = 0;
       }
       else
+//      if (sign > -1)
       {
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
-         pixelEnergyMap->insert(std::make_pair(i, value));
+         re_orderedFrame[i] = value;
+         ///pixelEnergyMap->insert(std::make_pair(i, value));
       }
    }
-//   applyTime = qtTime.elapsed();
+   applyTime = qtTime.elapsed();
 //   qDebug() << "GPP  memcopy: " << copyTime << " ms";
 //   qDebug() << "GPP Calibrat: " << (applyTime) << " ms.";
    *pixelEnergyMapPtr = pixelEnergyMap;
 
+//    qDebug() << "GPP  after, A: " << pixelEnergyMap->size() << "B: " << sizeof(pixelEnergyMap)
+//             << " Bucket: count,max_load,load: " << pixelEnergyMap->bucket_count() << pixelEnergyMap->max_load_factor() << pixelEnergyMap->load_factor();
    return re_orderedFrame;
 }
 

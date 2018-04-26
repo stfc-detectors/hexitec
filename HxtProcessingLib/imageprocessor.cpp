@@ -192,12 +192,16 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
 //                  qtTime.restart();
-                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+                  /// Omit Calibration
+                  ///result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
 //                  processTime = qtTime.elapsed();
-                  if (hxtMap->size() > 0)
+                  ///if (hxtMap->size() > 0)
                   {
+                     /// Do calibration & CS algorithm in one go
 //                     qtTime.restart();
-                     hxtGenerator->processEnergies(hxtMap);
+                     ///hxtGenerator->processEnergies(hxtMap);
+                     hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
+                                                                     processingDefinition->getGradients(), processingDefinition->getIntercepts());
 //                     energiesTime = qtTime.elapsed();
                   }
 
@@ -263,7 +267,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
 //   qDebug() << "IP  binWrite: " << (binaryTime) << " ms.";
 //   qDebug() << "IP  hxtWrite: " << (hxtTime) << " ms.";
 //   qDebug() << "IP  spectrum: " << (spectrumTime) << " ms.";
-   qDebug() << "IP current time: " << QTime::currentTime();
+//   qDebug() << "IP current time: " << QTime::currentTime();
 }
 
 
