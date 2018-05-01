@@ -34,6 +34,7 @@ QToolBar *MainViewer::createToolbar()
    renderZoomOutAct->setText("Zoom Out");
    colorBarsToggle->setText(tr("Toggle Colour Bars"));
    renderGridToggle->setText(tr("Toggle Grid"));
+   cycleColorMap->setText(tr("Cycle Colour Map"));
 
    renderToolBar->addAction(renderZoomInAct);
    renderToolBar->addAction(renderZoomOutAct);

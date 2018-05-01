@@ -9,7 +9,7 @@ aSpect dll, version 1.0.1.9
 Pleora:
 eBus runtime 64-bit 5.0.0.4100
 
-Rather confusingly, the 32 bit version of the aSpect DLL should be copied to the C:\Windows\syswow64 folder, whereas the 64-bit version should be copied to C:\Windows\system32 folder. Please follow those instructions to the letter. The GigE.dll version should match to version of the message DLL, so also 1.0.1.9. This can be found in the HexitecGigE/ subfolder. The version of the message DLL requires version 5 of the Pleora drivers, as outlined above. Previous version of these DLLs required on older version of the Pleora drivers (4.0.8.3423). So be careful checking DLL versions and Pleora driver versions if a pre-December 2017 version of HexitecGigE is to be run.
+Rather confusingly, the 32 bit version of the aSpect DLL should be copied to the C:\Windows\syswow64 folder, whereas the 64-bit version should be copied to C:\Windows\system32 folder. Please follow these instructions to the letter. The GigE.dll version should match the version of the message DLL, so also 1.0.1.9. This can be found in the HexitecGigE/ subfolder. The version of the message DLL requires version 5 of the Pleora drivers, as outlined above. Previous version of these DLLs required an older version of the Pleora drivers (4.0.8.3423). So be careful checking DLL versions and Pleora driver versions if a pre-December 2017 version of HexitecGigE is to be run.
 
 At the moment, there isn't enough space to fit them here - please liaise with Matt Wilson for a copy of the message DLL and the Pleora drivers.
 

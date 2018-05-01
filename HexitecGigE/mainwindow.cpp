@@ -660,7 +660,7 @@ void MainWindow::createMenus()
    }
 
    QAction *deleteSliceAct = new QAction(QIcon(":/images/removeImage.png"), tr(""),this);
-   QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data or scripts..."), this);
+   QAction *readAction = new QAction(QIcon(":/images/ReadImage.png"), tr("&Load data"), this);
    QAction *quitAct = new QAction(tr("&Quit"), this);
    QAction *aboutAct = new QAction(tr("&About"), this);
 
