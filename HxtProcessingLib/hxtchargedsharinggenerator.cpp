@@ -84,7 +84,7 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
    unsigned int frameSize  = nRows * nCols;
    double *gradientValue = gradients, *interceptValue = intercepts;
    double value = 0.0;
-   int applyTime = 0, copyTime = 0, callTime = 0;   // Debug
+   int applyTime = 0, copyTime = 0, callTime = 0, recpTime = 0;   // Debug
    QTime qtTime;        // Debug
    qtTime.restart();    // Debug
    int nonZeroCount = 0;
@@ -125,8 +125,8 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
 //   qDebug() << "memory copy," << startPosn << endPosn;
    for (int i = startPosn; i < endPosn; )
    {
-      memcpy(&(processedFrame[i]), rowPtr, nRows * sizeof(uint16_t));
-      rowPtr = rowPtr + nRows;
+      memcpy(&(processedFrame[i]), rowPtr, nCols * sizeof(uint16_t));   // Swapped nRows for nCols
+      rowPtr = rowPtr + nCols;                                          // Ditto
       i = i + increment;
    }
    copyTime = qtTime.elapsed();
@@ -200,6 +200,19 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
       }
    }
    callTime = qtTime.elapsed();
+   /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
+   ///              DOUBLE CHECK THAT THIS IS CORRECT AND THEN REMOVE IT AFTER THE CSD FRAME HAS BEEN  processed
+   qtTime.restart();
+//   qDebug() << "memory copy," << startPosn << endPosn;
+   rowPtr = frame;
+   for (int i = startPosn; i < endPosn; )
+   {
+      memcpy(rowPtr, &(processedFrame[i]), nCols * sizeof(uint16_t));
+      rowPtr = rowPtr + nCols;
+      i = i + increment;
+   }
+   recpTime = qtTime.elapsed();
+
 //   qDebug() << "Counted " << countSharedEvents << " cases of CSD.";
 
 ///   switch (chargedSharingMode)
@@ -218,7 +231,9 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
 //   qDebug() << "CSG Calibrat: " << (applyTime) << " ms.";
 //   qDebug() << "CSG copyTime: " << (copyTime) << " ms.";
 //   qDebug() << "CSG CSalTime: " << (callTime) << " ms.";
-   return processedFrame;
+
+//   qDebug() << "CSG recpTime: " << (recpTime) << " ms.";
+   return frame /*processedFrame*/; /// Return frame, not processedFrame (CSD frame)
 }
 
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
