@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QTime>
 #include <QThread>
+#include <iostream>
 HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    HxtGenerator(nRows, nCols, processingDefinition)
 {
@@ -87,8 +88,8 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
    int applyTime = 0, copyTime = 0, callTime = 0, recpTime = 0;   // Debug
    QTime qtTime;        // Debug
    qtTime.restart();    // Debug
-   int nonZeroCount = 0;
-   for (unsigned int i = 0; i < frameSize; i++)
+   int nonZeroCount = 0, iDebug = 500;
+   for (int i = 0; i < frameSize; i++)
    {
       if (frame[i] < thresholdValue)
       {
@@ -96,17 +97,23 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
       }
       else
       {
-         nonZeroCount++;
          value = (frame[i] * gradientValue[i] + interceptValue[i]);
-//         if (nonZeroCount < 75)
-//            qDebug() << "frame[" << i << "] = " << frame[i] << ". Calibrated value: " << value;
          frame[i] = value;
+         ///
+        if ( (value > 109) && (value < (120)) )
+        {
+            std::cout << "\tF[" << i << "]: \t" << frame[i] << " ";
+            if (nonZeroCount%5 == 0)
+                std::cout << endl;
+            nonZeroCount++;
+        }
       }
    }
+   std::cout << "\nCalibrated frame contains " << nonZeroCount << " hits between 110-120." << endl;
+   nonZeroCount=0;
    applyTime = qtTime.elapsed();
-//   qDebug() << "Detected " << nonZeroCount << " pixel(s) in frame";
 
-   /// processFrame contains empty (1-2) pixel(s) on each side to enable charge sharing algorithm execution
+   /// processFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
    int sidePadding           = 2 *  directionalDistance;
    int processedFrameRows    = (nRows + sidePadding);
    int processedFrameColumns = (nCols + sidePadding);
@@ -122,98 +129,41 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
    uint16_t *rowPtr = frame;
 
    qtTime.restart();
-//   qDebug() << "memory copy," << startPosn << endPosn;
    for (int i = startPosn; i < endPosn; )
    {
-      memcpy(&(processedFrame[i]), rowPtr, nCols * sizeof(uint16_t));   // Swapped nRows for nCols
-      rowPtr = rowPtr + nCols;                                          // Ditto
+      memcpy(&(processedFrame[i]), rowPtr, nCols * sizeof(uint16_t));
+      rowPtr = rowPtr + nCols;
       i = i + increment;
    }
    copyTime = qtTime.elapsed();
 
+   /// DEBUGGING:
+   int offset = 2820;
+   this->showFrameSubset(frame, offset);
+   offset = 3237;
+   this->showCsdFrameSubset(processedFrame, offset);
+   std::cout << endl;
+   int bin = 110;
+   showCsdFrameBinContents(processedFrameSize, processedFrame, bin);
+
+   //// CSD example frame, with directionalDistance = 1
+   ///
+   ///      0    1    2    3  ...  399  400  401
+   ///    402  403  404  405  ...  801  802  803
+   ///    804  805  806  807  ... 1203 1204 1205
+   ///   1206
+   ///   1608 1609 1610 1611  ... 2007 2008 2009
+   ///
+   ///   Where frame's first row is 400 pixels from position 402 - 800,
+   ///      second row is 803 - 1201, etc
+
    // Apply CSD algorithm onto processedFrame
    endPosn = processedFrameSize - (processedFrameColumns * directionalDistance) - directionalDistance;
-
-   uint16_t *neighbourPixelPtr = NULL, *pixelPtr = processedFrame;
-   int rowIndexBegin = (-1*directionalDistance);
-   int rowIndexEnd   = (directionalDistance+1);
-   int colIndexBegin = rowIndexBegin;
-   int colIndexEnd   = rowIndexEnd;
-   bool bWipePixel = false;
-   unsigned int countSharedEvents = 0;
    qtTime.restart();
-//   qDebug() << "CS algorithm" << startPosn << endPosn << " processedFrameRows:" << processedFrameRows;
-//   int iDebug = 420;
-   for (int i = startPosn; i < endPosn;  i++)
-   {
-
-      if (processedFrame[i] != 0)
-      {
-//         if (i < iDebug)
-//            qDebug() << "processedFrame[" << i << "] = " << processedFrame[i] << " = " << processedFrame << " rowIdx/colIdx Begin&End: "
-//                        << rowIndexBegin << rowIndexEnd << colIndexBegin << colIndexEnd << "dD: " << directionalDistance;
-
-         pixelPtr = (&(processedFrame[i]));       // Point at current (non-Zero) pixel
-         for (int row = rowIndexBegin; row < rowIndexEnd; row++)
-         {
-            for (int column = colIndexBegin; column < colIndexEnd; column++)
-            {
-               if ((row == 0) && (column == 0)) // Don't compare pixel with itself
-                  continue;
-
-//               qDebug() << "processedFrame[" << i << "] = " << processedFrame[i] << " = " << processedFrame;
-//               qDebug() << "processedFrame: " << (&(processedFrame));
-//               qDebug() << "startPosn: " << startPosn;
-////               qDebug() << "neighbourPixelPtr " << neighbourPixelPtr;
-//               qDebug() << "pixelPtr  " << pixelPtr;
-//               qDebug() << "row, col " << row << column;
-//               qDebug() << "processedFrameRows " << processedFrameRows;
-//               qDebug() << "processedFrameRows*row " << processedFrameRows*row;
-//               qDebug() << "neighbourPixelPtr " << (pixelPtr + (processedFrameRows*row)  + column);
-               neighbourPixelPtr = (pixelPtr + (processedFrameRows*row)  + column);
-               /// Debug
-//               if (i < iDebug)
-//                  qDebug() <<  "pFrm[" << i << "] = " << processedFrame[i] <<  (&(processedFrame[i])) << "nPxlPtr: " << *neighbourPixelPtr << neighbourPixelPtr << "row, column: " << row << column
-//                            << " CmpAddresses: " << ((&(processedFrame[i])) - neighbourPixelPtr);
-               // Wipe this pixel if another neighbour was non-Zero
-               if (bWipePixel)
-               {
-//                  if (i < iDebug)
-//                      qDebug() << "Prev neigh hit, wiping addr: " << neighbourPixelPtr;
-                   *neighbourPixelPtr = 0;
-               }
-               else
-               {
-//                  if (i < 500)
-//                     qDebug() << "First time neighb hit! *nPlPtr:" << *neighbourPixelPtr << neighbourPixelPtr;
-                  // Is this the first neighbouring, non-Zero pixel?
-                  if (*neighbourPixelPtr != 0)
-                  {
-                     *neighbourPixelPtr = 0;
-                     bWipePixel = true;
-                     countSharedEvents++;
-                  }
-               }
-            }
-         }
-         bWipePixel = false;
-      }
-   }
+   processDiscriminationRewritten(processedFrame, processedFrameRows, startPosn, endPosn);
    callTime = qtTime.elapsed();
-   /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
-   ///              DOUBLE CHECK THAT THIS IS CORRECT AND THEN REMOVE IT AFTER THE CSD FRAME HAS BEEN  processed
-   qtTime.restart();
-//   qDebug() << "memory copy," << startPosn << endPosn;
-   rowPtr = frame;
-   for (int i = startPosn; i < endPosn; )
-   {
-      memcpy(rowPtr, &(processedFrame[i]), nCols * sizeof(uint16_t));
-      rowPtr = rowPtr + nCols;
-      i = i + increment;
-   }
-   recpTime = qtTime.elapsed();
 
-//   qDebug() << "Counted " << countSharedEvents << " cases of CSD.";
+   std::cout  << "\tchargedSharingMode: " << chargedSharingMode << " ADDITION: " << ADDITION << " DISCRIMINATION: " << DISCRIMINATION << endl;
 
 ///   switch (chargedSharingMode)
 //   {
@@ -231,10 +181,24 @@ uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame
 //   qDebug() << "CSG Calibrat: " << (applyTime) << " ms.";
 //   qDebug() << "CSG copyTime: " << (copyTime) << " ms.";
 //   qDebug() << "CSG CSalTime: " << (callTime) << " ms.";
-
 //   qDebug() << "CSG recpTime: " << (recpTime) << " ms.";
-   return frame /*processedFrame*/; /// Return frame, not processedFrame (CSD frame)
+
+   /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
+   qtTime.restart();
+   rowPtr = frame;
+   for (int i = startPosn; i < endPosn; )
+   {
+      memcpy(rowPtr, &(processedFrame[i]), nCols * sizeof(uint16_t));
+      rowPtr = rowPtr + nCols;
+      i = i + increment;
+   }
+   recpTime = qtTime.elapsed();
+
+   showFrameBinContents(frameSize, frame, bin);
+
+   return frame;
 }
+
 
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
 {
@@ -331,12 +295,10 @@ void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_m
       colIndexEnd = column + directionalDistance;
 
       if (rowIndexBegin < 0)
-//      if ((rowIndexBegin ^ 1) < 0)
       {
          rowIndexBegin = 0;
       }
       if (colIndexBegin < 0)
-//      if ((colIndexBegin ^ 1) < 0)
       {
          colIndexBegin = 0;
       }
@@ -367,7 +329,138 @@ void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_m
    }
 }
 
+void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *processedFrame, int processedFrameRows, int startPosn, int endPosn)
+{
+    uint16_t *neighbourPixel = NULL, *currentPixel = processedFrame;
+    int rowIndexBegin = (-1*directionalDistance);
+    int rowIndexEnd   = (directionalDistance+1);
+    int colIndexBegin = rowIndexBegin;
+    int colIndexEnd   = rowIndexEnd;
+    bool bWipePixel = false;
+    int nonZeroCount = 0;
+
+    int pxlRow = -1, pxlCol = -1;
+    for (int i = startPosn; i < endPosn;  i++)
+    {
+       if (processedFrame[i] != 0)
+       {
+          currentPixel = (&(processedFrame[i]));       // Point at current (non-Zero) pixel
+
+          for (int row = rowIndexBegin; row < rowIndexEnd; row++)
+          {
+             for (int column = colIndexBegin; column < colIndexEnd; column++)
+             {
+
+                if ((row == 0) && (column == 0)) // Don't compare pixel with itself
+                   continue;
+
+                neighbourPixel = (currentPixel + (processedFrameRows*row)  + column);
+
+                ///
+                if (( (processedFrame[i] > 109) &&  (processedFrame[i] < 120)) && (*neighbourPixel != 0))
+                {
+                    pxlRow = (int) (i / 400);
+                    pxlCol = (int) (i - (pxlRow * 400));
+                    nonZeroCount++;
+                    std::cout << "C[" << i << "] = \t" << processedFrame[i] <<  "\ti.e. row: " << pxlRow << "\tcolumn: " << pxlCol << endl;
+                }
+                ///
+                // Wipe this pixel if another neighbour was non-Zero
+                if (bWipePixel)
+                {
+                    *neighbourPixel = 0;
+                }
+                else
+                {
+                   // Is this the first neighbouring, non-Zero pixel?
+                   if (*neighbourPixel != 0)
+                   {
+                      // Yes; Wipe neighbour and current (non-zero) pixel
+                      *neighbourPixel = 0;
+                      *currentPixel = 0;
+                      bWipePixel = true;
+                   }
+                }
+             }
+          }
+          bWipePixel = false;
+       }
+    }
+}
+
+
 void HxtChargedSharingGenerator::setChargedSharingMode(ChargedSharingMode chargedSharingMode)
 {
    this->chargedSharingMode = chargedSharingMode;
+}
+
+/// DEBUGGING function:
+void HxtChargedSharingGenerator::showFrameSubset(uint16_t *frame, int offset)
+{
+    std::cout << "showFrameSubset() - Displaying pixels surrounding [" << offset << "]" << endl;
+    offset -= 800;
+    for (int i = offset; i < (offset+(8*400)); )
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            std::cout << "\t!Frm[" << i+j << "]: \t" << frame[i+j] << " ";
+        }
+        std::cout << endl;
+        i = i + 400;
+    }
+    std::cout << endl;
+}
+
+void HxtChargedSharingGenerator::showCsdFrameSubset(uint16_t  *processedFrame, int offset)
+{
+    std::cout << "showCsdFrameSubset() - Displaying pixels surrounding [" << offset << "]" << endl;
+    offset -= 804;
+    for (int i = offset; i < (offset+(8*402)); )
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            std::cout << "\t!CSD[" << i+j << "]: \t" << processedFrame[i+j] << " ";
+        }
+        std::cout << endl;
+        i = i + 402;
+    }
+}
+
+void HxtChargedSharingGenerator::showCsdFrameBinContents(int processedFrameSize, uint16_t *processedFrame, int bin)
+{
+   int nonZeroCount = 0, value = 0;
+   int binMin = bin - 1;
+   int binMax = bin + 10;
+   std::cout << "showCsdFrameBinContents() for bin " << bin << " (i.e. " << binMin << "-" << binMax << ")." << endl;
+
+   for (int i = 0; i < processedFrameSize; i++)
+   {
+       value = processedFrame[i];
+       if ( (value > binMin) && (value < (binMax)) )
+       {
+           std::cout << "\tCSD[" << i << "]: \t" << processedFrame[i] << " ";
+           if (nonZeroCount%5 == 0)
+               std::cout << endl;
+           nonZeroCount++;
+        }
+   }
+   std::cout << "\n That's " << nonZeroCount << " hits between 110-120." << endl;
+}
+
+void HxtChargedSharingGenerator::showFrameBinContents(int frameSize, uint16_t *frame, int bin)
+{
+    int nonZeroCount = 0;
+    int binMin = bin - 1;
+    int binMax = bin + 10;
+    std::cout << "showFrameBinContents() for bin " << bin << " (i.e. " << binMin << "-" << binMax << ")." << endl;
+
+    for (unsigned int i = 0; i < frameSize; i++)
+   {
+       if ((frame[i] > binMin) && (frame[i] < binMax))
+       {
+           std::cout << "C[" << i << "] = " << frame[i] << endl;
+           nonZeroCount++;
+       }
+   }
+   std::cout << "\n That's " << nonZeroCount << " hits between 110-120." << endl;
 }

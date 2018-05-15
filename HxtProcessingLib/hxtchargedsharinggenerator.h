@@ -21,9 +21,13 @@ protected:
 private:
   void processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
   void processDiscriminationChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
+  void processDiscriminationRewritten(uint16_t *processedFrame, int processedFrameRows, int startPosn, int endPosn);
   void setChargedSharingMode(ChargedSharingMode chargedSharingMode);
-  ///
-//  void processDCS(uint16_t *frame);
+  /// Debug function(s)
+  void showFrameSubset(uint16_t *frame, int offset);
+  void showCsdFrameSubset(uint16_t  *processedFrame, int offset);
+  void showCsdFrameBinContents(int processedFrameSize, uint16_t *processedFrame, int bin);
+  void showFrameBinContents(int frameSize, uint16_t *frame, int bin);
   ///
   int pixelGridSize;
   int directionalDistance;

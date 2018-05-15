@@ -30,7 +30,7 @@ void HxtChargedSharingSumGenerator::calibrateAndApplyChargedAlgorithm(uint16_t *
 {
 //   qDebug() <<   "HxtChargedSharingSumGenerator::calibrateAndApplyChargedAlgorithm()";
    uint16_t *processedFrame = calibrateAndChargedSharing(frame, thresholdValue, gradients, intercepts);
-   hxtItem->addFrameDataToHistogram(processedFrame);
+   hxtItem->addFrameDataToHistogram(processedFrame, thresholdValue);
    incrementProcessedEnergyCount();
 }
 

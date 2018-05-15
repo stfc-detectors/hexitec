@@ -167,10 +167,9 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    hxtsProcessed++;
 }
 
-
-void HxtItem::addFrameDataToHistogram(uint16_t *frame)
+/// Written to support CS Algorithm rework
+void HxtItem::addFrameDataToHistogram(uint16_t *frame, uint16_t thresholdValue)
 {
-
    double *currentHistogram = &histogramPerPixel[0];
    long long *summed = &summedHistogram[0];
    double thisEnergy;
@@ -182,6 +181,8 @@ void HxtItem::addFrameDataToHistogram(uint16_t *frame)
    {
       pixel = i;
       thisEnergy = frame[i];
+      if (thisEnergy  < thresholdValue)
+          continue;
       bin = (int)((thisEnergy / binWidth));
       if (bin <= nBins)
       {
