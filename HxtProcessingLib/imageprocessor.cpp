@@ -46,7 +46,7 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    {
       chargedSharing = true;
    }
-
+    qDebug() << "ImageProcessor() chargedSharing: " << chargedSharing << " totalSpectrum: " << totalSpectrum;
       if (chargedSharing)
       {
          if(totalSpectrum)
@@ -83,6 +83,9 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *bufferStart;
    char *frameIterator;
    int buffNo = 0;
+    qDebug() << Q_FUNC_INFO;
+   /// thresholdValue is a temporary hack..
+   int thresholdValue = -1;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -100,12 +103,15 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
+//                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
 
-                  if (hxtMap->size() > 0)
-                  {
-                     hxtGenerator->processEnergies(hxtMap);
-                  }
+//                  if (hxtMap->size() > 0)
+//                  {
+                      qDebug() << "processThresholdNone()";
+                      ///hxtGenerator->processEnergies(hxtMap);
+                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
+                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
+//                  }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -169,6 +175,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
    thresholdValue = processingDefinition->getThresholdValue();
 
    ///
+   qDebug() << Q_FUNC_INFO;
 //   QTime qtTime;
 //   int accessTime = 0, processTime = 0, energiesTime = 0, binaryTime = 0, hxtTime = 0, spectrumTime = 0;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -279,6 +286,9 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    char *frameIterator;
 
    thresholdPerPixel = processingDefinition->getThresholdPerPixel();
+   /// thresholdValue is a temporary hack..
+   qDebug() << Q_FUNC_INFO;
+   int thresholdValue = 0;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -299,7 +309,9 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
                   if (hxtMap->size() > 0)
                   {
-                     hxtGenerator->processEnergies(hxtMap);
+                      ///hxtGenerator->processEnergies(hxtMap);
+                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
+                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
                   }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;

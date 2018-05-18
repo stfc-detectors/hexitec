@@ -28,9 +28,9 @@ void HxtChargedSharingSumGenerator::processEnergies(unordered_map <int, double>*
 
 void HxtChargedSharingSumGenerator::calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts)
 {
-//   qDebug() <<   "HxtChargedSharingSumGenerator::calibrateAndApplyChargedAlgorithm()";
+   qDebug() <<   "HxtChargedSharingSumGenerator::calibrateAndApplyChargedAlgorithm() ?? Here thresholdValue: " << thresholdValue;
    uint16_t *processedFrame = calibrateAndChargedSharing(frame, thresholdValue, gradients, intercepts);
-   hxtItem->addFrameDataToHistogram(processedFrame, thresholdValue);
+   hxtItem->addFrameDataToHistogramWithSum(processedFrame, thresholdValue);
    incrementProcessedEnergyCount();
 }
 

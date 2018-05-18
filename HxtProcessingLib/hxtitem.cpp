@@ -170,6 +170,35 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
 /// Written to support CS Algorithm rework
 void HxtItem::addFrameDataToHistogram(uint16_t *frame, uint16_t thresholdValue)
 {
+    double *currentHistogram = &histogramPerPixel[0];
+    double thisEnergy;
+    int bin;
+    int pixel;
+
+    int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+    for (int i = 0; i < frameSize; i++)
+    {
+       pixel = i;
+       thisEnergy = frame[i];
+       if (thisEnergy  < thresholdValue)
+           continue;
+       bin = (int)((thisEnergy / binWidth));
+       if (bin <= nBins)
+       {
+          (*(currentHistogram + (pixel * nBins) + bin))++;
+       }
+       else
+       {
+ /*         qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
+                   << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
+       }
+    }
+
+    hxtsProcessed++;
+}
+
+void HxtItem::addFrameDataToHistogramWithSum(uint16_t *frame, uint16_t thresholdValue)
+{
    double *currentHistogram = &histogramPerPixel[0];
    long long *summed = &summedHistogram[0];
    double thisEnergy;
@@ -191,7 +220,8 @@ void HxtItem::addFrameDataToHistogram(uint16_t *frame, uint16_t thresholdValue)
       }
       else
       {
-         qDebug() << "BAD BIN = " << bin;
+/*         qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
+                  << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
       }
    }
 
