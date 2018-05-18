@@ -24,8 +24,7 @@ public:
    long long *getSummedHistogram();
 
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap) = 0;
-   ///
-   virtual void calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts) = 0;
+   virtual void processEnergies(uint16_t *frame) = 0;
 
 protected:
    bool getFrameProcessingInProgress();
@@ -39,6 +38,9 @@ protected:
    int *pixelRow;
    int *pixelCol;
    double *pixelValue;
+   /// Assist histogramming requiring pixel threshold(s)
+   int thresholdValue;
+   uint16_t *thresholdPerPixel;
 
 };
 

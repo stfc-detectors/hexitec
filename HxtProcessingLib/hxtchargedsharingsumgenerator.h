@@ -7,8 +7,7 @@ class HxtChargedSharingSumGenerator : public HxtChargedSharingGenerator
 public:
    HxtChargedSharingSumGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
-   ///
-   virtual void calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts);
+   virtual void processEnergies(uint16_t *frame);
 };
 
 #endif // HXTCHARGEDSHARINGSUMGENERATOR_H

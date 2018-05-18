@@ -26,6 +26,14 @@ void HxtChargedSharingGenerator::processEnergies(unordered_map <int, double> *pi
    delete pixelEnergyMap;
 }
 
+void HxtChargedSharingGenerator::processEnergies(uint16_t *frame)
+{
+   calculateChargedSharing(frame);
+   std::cout << Q_FUNC_INFO << " feeding inherited member threshold into hxtItem->addFrameDataToHistogram()" << endl;
+   hxtItem->addFrameDataToHistogram(frame, thresholdValue);
+   incrementProcessedEnergyCount();
+}
+
 void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
 {
    this->pixelGridSize = pixelGridSize;
@@ -74,135 +82,96 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
 //   qDebug() << "CSD callTime: " << (callTime) << " ms.";
 }
 
-void HxtChargedSharingGenerator::calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts)
+void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
 {
-   uint16_t *processedFrame = calibrateAndChargedSharing(frame, thresholdValue, gradients, intercepts);
-   hxtItem->addFrameDataToHistogram(processedFrame, thresholdValue);
-   incrementProcessedEnergyCount();
+    qDebug() << Q_FUNC_INFO;
+    /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
+    int sidePadding           = 2 *  directionalDistance;
+    int extendedFrameRows    = (nRows + sidePadding);
+    int extendedFrameColumns = (nCols + sidePadding);
+    int extendedFrameSize    = extendedFrameRows * extendedFrameColumns;
 
-//   // DSoFt original code:
-//   calculateChargedSharing(pixelEnergyMap);
-//   hxtItem->addToHistogram(*pixelEnergyMap);
+    uint16_t  *extendedFrame;
+    extendedFrame = (uint16_t *) calloc(extendedFrameSize, sizeof(uint16_t));
+
+    // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
+    int startPosn = extendedFrameColumns * directionalDistance + directionalDistance;
+    int endPosn   = extendedFrameSize;
+    int increment = extendedFrameColumns;
+    uint16_t *rowPtr = frame;
+
+//    qtTime.restart();
+    for (int i = startPosn; i < endPosn; )
+    {
+       memcpy(&(extendedFrame[i]), rowPtr, nCols * sizeof(uint16_t));
+       rowPtr = rowPtr + nCols;
+       i = i + increment;
+    }
+//    copyTime = qtTime.elapsed();
+
+    /// DEBUGGING:
+ //   int offset = 2820;
+ //   this->showFrameSubset(frame, offset);
+ //   offset = 3237;
+ //   this->showCsdFrameSubset(extendedFrame, offset);
+ //   std::cout << endl;
+ //   int bin = 110;
+ //   showCsdFrameBinContents(extendedFrameSize, extendedFrame, bin);
+
+    //// CSD example frame, with directionalDistance = 1
+    ///
+    ///      0    1    2    3  ...  399  400  401
+    ///    402  403  404  405  ...  801  802  803
+    ///    804  805  806  807  ... 1203 1204 1205
+    ///   1206
+    ///   1608 1609 1610 1611  ... 2007 2008 2009
+    ///
+    ///   Where frame's first row is 400 pixels from position 402 - 800,
+    ///      second row is 803 - 1201, etc
+
+    endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
+
+    switch (chargedSharingMode)
+    {
+       case ADDITION:
+//          qtTime.restart();
+          processAdditionRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
+//          callTime = qtTime.elapsed();
+          break;
+       case DISCRIMINATION:
+//          qtTime.restart();
+          processDiscriminationRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
+//          callTime = qtTime.elapsed();
+          break;
+       default:
+          break;
+    }
+
+    /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
+//    qtTime.restart();
+    rowPtr = frame;
+    for (int i = startPosn; i < endPosn; )
+    {
+       memcpy(rowPtr, &(extendedFrame[i]), nCols * sizeof(uint16_t));
+       rowPtr = rowPtr + nCols;
+       i = i + increment;
+    }
+//    recpTime = qtTime.elapsed();
+
+    free(extendedFrame);
+}
+
+//void HxtChargedSharingGenerator::calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts)
+//{
+//   uint16_t *processedFrame = calibrateAndChargedSharing(frame, thresholdValue, gradients, intercepts);
+//   hxtItem->addFrameDataToHistogram(processedFrame, thresholdValue);
 //   incrementProcessedEnergyCount();
-}
 
-uint16_t *HxtChargedSharingGenerator::calibrateAndChargedSharing(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts)
-{
-   qDebug() << "This is the problem? " << Q_FUNC_INFO << " thresholdValue: " << thresholdValue;
-   /// 1. Calibration
-   int frameSize  = nRows * nCols;
-   double *gradientValue = gradients, *interceptValue = intercepts;
-   double value = 0.0;
-   int applyTime = 0, copyTime = 0, callTime = 0, recpTime = 0;   // Debug
-   QTime qtTime;        // Debug
-   qtTime.restart();    // Debug
-//   int nonZeroCount = 0;
-   for (int i = 0; i < frameSize; i++)
-   {
-      if (frame[i] < thresholdValue)
-      {
-         frame[i] = 0;
-      }
-      else
-      {
-         value = (frame[i] * gradientValue[i] + interceptValue[i]);
-         frame[i] = value;
-         ///
-//        if ( (value > 109) && (value < (120)) )
-//        {
-//            std::cout << "\tF[" << i << "]: \t" << frame[i] << " ";
-//            if (nonZeroCount%5 == 0)
-//                std::cout << endl;
-//            nonZeroCount++;
-//        }
-      }
-   }
-//   std::cout << "\nCalibrated frame contains " << nonZeroCount << " hits between 110-120." << endl;
-//   nonZeroCount=0;
-   applyTime = qtTime.elapsed();
-
-   /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
-   int sidePadding           = 2 *  directionalDistance;
-   int extendedFrameRows    = (nRows + sidePadding);
-   int extendedFrameColumns = (nCols + sidePadding);
-   int extendedFrameSize    = extendedFrameRows * extendedFrameColumns;
-
-   uint16_t  *extendedFrame;
-   extendedFrame = (uint16_t *) calloc(extendedFrameSize, sizeof(uint16_t));
-
-   // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
-   int startPosn = extendedFrameColumns * directionalDistance + directionalDistance;
-   int endPosn   = extendedFrameSize;
-   int increment = extendedFrameColumns;
-   uint16_t *rowPtr = frame;
-
-   qtTime.restart();
-   for (int i = startPosn; i < endPosn; )
-   {
-      memcpy(&(extendedFrame[i]), rowPtr, nCols * sizeof(uint16_t));
-      rowPtr = rowPtr + nCols;
-      i = i + increment;
-   }
-   copyTime = qtTime.elapsed();
-
-   /// DEBUGGING:
-//   int offset = 2820;
-//   this->showFrameSubset(frame, offset);
-//   offset = 3237;
-//   this->showCsdFrameSubset(extendedFrame, offset);
-//   std::cout << endl;
-//   int bin = 110;
-//   showCsdFrameBinContents(extendedFrameSize, extendedFrame, bin);
-
-   //// CSD example frame, with directionalDistance = 1
-   ///
-   ///      0    1    2    3  ...  399  400  401
-   ///    402  403  404  405  ...  801  802  803
-   ///    804  805  806  807  ... 1203 1204 1205
-   ///   1206
-   ///   1608 1609 1610 1611  ... 2007 2008 2009
-   ///
-   ///   Where frame's first row is 400 pixels from position 402 - 800,
-   ///      second row is 803 - 1201, etc
-
-   endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
-
-   switch (chargedSharingMode)
-   {
-      case ADDITION:
-         qtTime.restart();
-         processAdditionRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-         callTime = qtTime.elapsed();
-         break;
-      case DISCRIMINATION:
-         qtTime.restart();
-         processDiscriminationRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-         callTime = qtTime.elapsed();
-         break;
-      default:
-         break;
-   }
-//   qDebug() << "CSG Calibrat: " << (applyTime) << " ms.";
-//   qDebug() << "CSG copyTime: " << (copyTime) << " ms.";
-//   qDebug() << "CSG CSalTime: " << (callTime) << " ms.";
-//   qDebug() << "CSG recpTime: " << (recpTime) << " ms.";
-
-   /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
-   qtTime.restart();
-   rowPtr = frame;
-   for (int i = startPosn; i < endPosn; )
-   {
-      memcpy(rowPtr, &(extendedFrame[i]), nCols * sizeof(uint16_t));
-      rowPtr = rowPtr + nCols;
-      i = i + increment;
-   }
-   recpTime = qtTime.elapsed();
-
-//   showFrameBinContents(frameSize, frame, bin);
-
-   return frame;
-}
-
+////   // DSoFt original code:
+////   calculateChargedSharing(pixelEnergyMap);
+////   hxtItem->addToHistogram(*pixelEnergyMap);
+////   incrementProcessedEnergyCount();
+//}
 
 void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
 {

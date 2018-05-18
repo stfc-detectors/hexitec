@@ -210,7 +210,7 @@ void HxtItem::addFrameDataToHistogramWithSum(uint16_t *frame, uint16_t threshold
    {
       pixel = i;
       thisEnergy = frame[i];
-      if (thisEnergy  < thresholdValue)
+      if ((thisEnergy < thresholdValue )|| (thisEnergy == 0))
           continue;
       bin = (int)((thisEnergy / binWidth));
       if (bin <= nBins)

@@ -87,9 +87,9 @@ uint16_t *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelR
                                               uint16_t *frame)
 {
    uint16_t  *re_orderedFrame;
-   unordered_map<int, double> *pixelRawValMap;
+//   unordered_map<int, double> *pixelRawValMap;
 
-   pixelRawValMap = new unordered_map<int, double>();
+//   pixelRawValMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
@@ -97,10 +97,10 @@ uint16_t *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelR
    {
       if (re_orderedFrame[i] != 0)
       {
-         pixelRawValMap->insert(std::make_pair(i, re_orderedFrame[i]));
+         /*pixelRawValMap->insert(std::make_pair(i, re_orderedFrame[i]))*/;
       }
    }
-   *pixelRawValMapPtr = pixelRawValMap;
+//   *pixelRawValMapPtr = pixelRawValMap;
 
    return re_orderedFrame;
 }
@@ -140,11 +140,11 @@ uint16_t *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelR
 uint16_t *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRawValMapPtr,
                                               uint16_t *frame, uint16_t *thresholdPerPixel)
 {
-   uint16_t  *re_orderedFrame;
-   unordered_map<int, double> *pixelRawValMap;
-//   int index;
+    qDebug() << Q_FUNC_INFO << " processing frame withOUT Calibration (Called from ImageProcessor::processThresholdValue())";
+    uint16_t  *re_orderedFrame;
+//   unordered_map<int, double> *pixelRawValMap;
 
-   pixelRawValMap = new unordered_map<int, double>();
+//   pixelRawValMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
@@ -156,10 +156,10 @@ uint16_t *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixel
       }
       else
       {
-         pixelRawValMap->insert(std::make_pair(i, re_orderedFrame[i]));
+         /*pixelRawValMap->insert(std::make_pair(i, re_orderedFrame[i]))*/;
       }
    }
-   *pixelRawValMapPtr = pixelRawValMap;
+//   *pixelRawValMapPtr = pixelRawValMap;
 
    return re_orderedFrame;
 }
@@ -168,10 +168,10 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t  *re_orderedFrame;
-   unordered_map<int, double> *pixelEnergyMap;
+//   unordered_map<int, double> *pixelEnergyMap;
    double value;
 
-   pixelEnergyMap = new unordered_map<int, double>();
+//   pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
@@ -181,10 +181,11 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame,
       if (re_orderedFrame[i] != 0)
       {
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
-         pixelEnergyMap->insert(std::make_pair(i, value));
+         re_orderedFrame[i] = value;
+//         pixelEnergyMap->insert(std::make_pair(i, value));
       }
    }
-   *pixelEnergyMapPtr = pixelEnergyMap;
+//   *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
 }
@@ -192,32 +193,28 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame,
 uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
+    qDebug() << Q_FUNC_INFO << " processing frame .... Called from where?";
    uint16_t  *re_orderedFrame;
-   unordered_map<int, double> *pixelEnergyMap;
+//   unordered_map<int, double> *pixelEnergyMap;
    double value;
 
-   pixelEnergyMap = new unordered_map<int, double>();
-   pixelEnergyMap->reserve(500000);
+//   pixelEnergyMap = new unordered_map<int, double>();
+
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
+   qDebug() << "1";
    QTime qtTime;
    int /*copyTime = 0,*/ applyTime = 0/*, storeTime = 0*/;
-//   qtTime.restart();
+
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-//   qDebug() << "GPP before, A: " << pixelEnergyMap->size() << "    B: " << sizeof(pixelEnergyMap)
-//            << " Bucket: count,max_load,load: " << pixelEnergyMap->bucket_count() << pixelEnergyMap->max_load_factor() << pixelEnergyMap->load_factor();
-//   copyTime = qtTime.elapsed();
+    qDebug() << "2";
    qtTime.restart();
-//   int sign = 0;
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue)
-//      sign = (re_orderedFrame[i] - thresholdValue) >> 31;
-//      re_orderedFrame[i] = ~sign & re_orderedFrame[0];
       {
          re_orderedFrame[i] = 0;
       }
       else
-//      if (sign > -1)
       {
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
          re_orderedFrame[i] = value;
@@ -227,7 +224,7 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
    applyTime = qtTime.elapsed();
 //   qDebug() << "GPP  memcopy: " << copyTime << " ms";
 //   qDebug() << "GPP Calibrat: " << (applyTime) << " ms.";
-   *pixelEnergyMapPtr = pixelEnergyMap;
+//   *pixelEnergyMapPtr = pixelEnergyMap;
 
 //    qDebug() << "GPP  after, A: " << pixelEnergyMap->size() << "B: " << sizeof(pixelEnergyMap)
 //             << " Bucket: count,max_load,load: " << pixelEnergyMap->bucket_count() << pixelEnergyMap->max_load_factor() << pixelEnergyMap->load_factor();
@@ -237,11 +234,12 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
 uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
+   qDebug() << Q_FUNC_INFO << " processing frame with Calibration (Called from ImageProcessor::processThresholdValue())";
    uint16_t  *re_orderedFrame;
-   unordered_map<int, double> *pixelEnergyMap;
+//   unordered_map<int, double> *pixelEnergyMap;
    double value;
 
-   pixelEnergyMap = new unordered_map<int, double>();
+//   pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
@@ -254,10 +252,11 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresho
       else
       {
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
-         pixelEnergyMap->insert(std::make_pair(i, value));
+         re_orderedFrame[i] = value;
+//         pixelEnergyMap->insert(std::make_pair(i, value));
       }
    }
-   *pixelEnergyMapPtr = pixelEnergyMap;
+//   *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;
 }

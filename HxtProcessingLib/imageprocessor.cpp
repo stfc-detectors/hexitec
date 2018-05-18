@@ -84,8 +84,6 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *frameIterator;
    int buffNo = 0;
     qDebug() << Q_FUNC_INFO;
-   /// thresholdValue is a temporary hack..
-   int thresholdValue = -1;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -103,14 +101,14 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-//                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
+                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
 
 //                  if (hxtMap->size() > 0)
 //                  {
                       qDebug() << "processThresholdNone()";
-                      ///hxtGenerator->processEnergies(hxtMap);
-                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
-                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
+                      hxtGenerator->processEnergies((uint16_t *)result);
+//                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
+//                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
 //                  }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
@@ -199,23 +197,25 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
 //                  qtTime.restart();
-                  /// Omit Calibration
-                  ///result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+                  qDebug() << "IP fp done";
 //                  processTime = qtTime.elapsed();
                   ///if (hxtMap->size() > 0)
                   {
                      /// Do calibration & CS algorithm in one go
 //                     qtTime.restart();
                      ///hxtGenerator->processEnergies(hxtMap);
-                     hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
-                                                                     processingDefinition->getGradients(), processingDefinition->getIntercepts());
+                     qDebug() << "IP before hxtG->procNrg()..";
+                     hxtGenerator->processEnergies((uint16_t *)result);
 //                     energiesTime = qtTime.elapsed();
                   }
-
+                  qDebug() << "IP processEnergies() done";
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
+                  qDebug() << "IP before freeing results";
                   free(result);
+                  qDebug() << "IP freed result";
                }
 //               qtTime.restart();
                writeBinFile(bufferStart, (validFrames * frameSize), filenameBin);
@@ -244,7 +244,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue);
-                  hxtGenerator->processEnergies(hxtMap);
+//                  hxtGenerator->processEnergies(hxtMap);
+                  hxtGenerator->processEnergies((uint16_t *)result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -285,10 +286,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    char *bufferStart;
    char *frameIterator;
 
-   thresholdPerPixel = processingDefinition->getThresholdPerPixel();
-   /// thresholdValue is a temporary hack..
    qDebug() << Q_FUNC_INFO;
-   int thresholdValue = 0;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -307,12 +305,13 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
-                  if (hxtMap->size() > 0)
-                  {
+//                  if (hxtMap->size() > 0)
+//                  {
                       ///hxtGenerator->processEnergies(hxtMap);
-                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
-                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
-                  }
+                      hxtGenerator->processEnergies((uint16_t *)result);
+//                      hxtGenerator->calibrateAndApplyChargedAlgorithm((uint16_t *)frameIterator, thresholdValue,
+//                                                                      processingDefinition->getGradients(), processingDefinition->getIntercepts());
+//                  }
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -455,11 +454,13 @@ void ImageProcessor::imageAcquisitionComplete(long long totalFramesToProcess)
 
 void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char* filename)
 {
+    qDebug() <<  "image processor::writingBinFile()";
    std::ofstream outFile;
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::app);
    outFile.write((const char *)buffer, length * sizeof(char));
    outFile.close();   
+   qDebug() <<  "image processor::writingBinFile() finished";
 }
 
 void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)

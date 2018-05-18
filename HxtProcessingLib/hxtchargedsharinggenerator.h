@@ -10,13 +10,11 @@ public:
    void setPixelGridSize(int pixelGridSize);
 
    virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
-   /// Trial doing Calibration & CS algorithm jointly
-   virtual void calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts);
-   ///
+   virtual void processEnergies(uint16_t *frame);
 
 protected:
   void calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap);
-  uint16_t *calibrateAndChargedSharing(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts);
+  void calculateChargedSharing(uint16_t *frame);
 
 private:
   void processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);

@@ -1,7 +1,10 @@
 #include "generalhxtgenerator.h"
+///
+#include <QDebug>
 
 GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
+    qDebug() << Q_FUNC_INFO << " CTOR";
    this->nRows = nRows;
    this->nCols = nCols;
    frameSize = nRows * nCols;
@@ -12,6 +15,25 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    hxtItem->setTotalEnergiesToProcess(0);
 
    setFrameProcessingInProgress(true);
+
+   thresholdValue = 0;
+   thresholdPerPixel = NULL;
+
+   switch (processingDefinition->getThreshholdMode())
+   {
+      case ThresholdMode::NONE:
+         // Nothing to do here really
+         break;
+      case ThresholdMode::SINGLE_VALUE:
+         thresholdValue = processingDefinition->getThresholdValue();
+         break;
+      case ThresholdMode::THRESHOLD_FILE:
+         thresholdPerPixel = processingDefinition->getThresholdPerPixel();
+         break;
+      default:
+         break;
+   }
+
 }
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
@@ -23,6 +45,8 @@ GeneralHxtGenerator::~GeneralHxtGenerator()
       free(pixelCol);
       free(pixelValue);
    }
+   if (thresholdPerPixel != NULL)
+      free(thresholdPerPixel);
    delete hxtItem;
 
 }
