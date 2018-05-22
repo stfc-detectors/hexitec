@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+//
+#include <QDebug>
 
 HANDLE ImageProcessor::getProcessingCompleteEvent()
 {
@@ -80,7 +82,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    char *bufferStart;
    char *frameIterator;
    int buffNo = 0;
-
+    qDebug() << Q_FUNC_INFO;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
       while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
@@ -131,6 +133,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
+                  qDebug() << "no energy calibration..";
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator);
                   // MUST USE RESULT IN FURTHER CALCULATIONS
                   frameIterator += frameSize;
@@ -182,7 +185,9 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
+//                   qDebug() <<"IP before -Grimson process()";
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+//                  qDebug() << "IP after -it >process()";
                   if (hxtMap->size() > 0)
                   {
 

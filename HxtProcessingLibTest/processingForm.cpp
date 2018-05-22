@@ -60,7 +60,7 @@ QMainWindow *ProcessingForm::getMainWindow()
 void ProcessingForm::initialiseProcessingForm()
 {
    QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
-   QString twoEasyFilename = "C:\\Detector\\hexitecGigE.ini";
+   QString twoEasyFilename = "C:\\Detector\\hexitecGigE_400.ini";
    QString inputFilesList;
    IniFile *twoEasyIniFile;
 

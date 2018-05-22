@@ -6,6 +6,8 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
+//
+#include <qdebug.h>
 
 PixelProcessorNextFrame::PixelProcessorNextFrame() :
    GeneralPixelProcessor()
@@ -55,29 +57,34 @@ uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thres
 uint16_t *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresholdValue,
                                                 unordered_map<int, double>**pixelEnergyMapPtr)
 {
+    qDebug() << "! !33!! " << Q_FUNC_INFO;
    uint16_t  *re_orderedFrame;
    unordered_map<int, double> *pixelEnergyMap;
    double value;
-
+   qDebug() << "1";
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
-
+   qDebug() << "memcpy done";
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+//      std::cout << "[" << i << "]";
       if (re_orderedFrame[i] < thresholdValue || lastRe_orderedFrame[i] != 0)
       {
+//         std::cout << ".";
          re_orderedFrame[i] = 0;
       }
       else
       {
+//         std::cout << "!";
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
          pixelEnergyMap->insert(std::make_pair(i,value));
       }
    }
+   std::cout << "\ncalibration done\n";
    *pixelEnergyMapPtr = pixelEnergyMap;
    memcpy(lastRe_orderedFrame, re_orderedFrame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-
+   qDebug() << "lastRe_orderFrame copied done, returning re-auditFrame";
    return re_orderedFrame;
 }
 

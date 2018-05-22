@@ -1,6 +1,8 @@
 #include "frameprocessor.h"
 #include <iostream>
 #include <fstream>
+//
+#include <qDebug>
 
 FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
    GeneralFrameProcessor(nextFrameCorrection)
@@ -48,7 +50,7 @@ uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
                                   unordered_map<int, double>**pixelEnergyMapPtr)
 {
    uint16_t *result;
-
+//    qDebug() << "FP::process()";
    result = pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyMapPtr);
 
    return result;

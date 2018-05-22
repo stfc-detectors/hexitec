@@ -107,6 +107,7 @@ void HxtItem::setBinWidth(double value)
 
 void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
 {
+   std::cout << "\t\tHxtItem::addToHistogram() !" << endl;
    double *currentHistogram = &histogramPerPixel[0];
    double thisEnergy;
    int bin;
@@ -137,7 +138,6 @@ void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
 
 void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
 {
-
    double *currentHistogram = &histogramPerPixel[0];
    long long *summed = &summedHistogram[0];
    double thisEnergy;

@@ -311,11 +311,12 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
 
       int bufferCount = 0;
 
-      while (inFile)
+//      while (inFile)
       {
+          int numFramesReqd = 2;
          transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
 
-         inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
+         inFile.read((char *)transferBuffer, nRows * nCols  * numFramesReqd/*500*/ * 2);
          if (!inFile)
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
@@ -326,13 +327,14 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
          else
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-            emit fileBufferReady(transferBuffer, 500);
+            emit fileBufferReady(transferBuffer, validFrames/*500*/);
          }
          totalFramesAcquired += validFrames;
          bufferCount++;
          Sleep(50);
       }
       inFile.close();
+//       qDebug() << "MSTR: " << totalFramesAcquired << " Frms.";
       emit imageComplete(totalFramesAcquired);
    }
    delete processingFilename;

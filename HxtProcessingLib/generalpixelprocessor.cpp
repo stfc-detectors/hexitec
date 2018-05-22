@@ -6,6 +6,8 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
+//
+#include <QDebug>
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
@@ -192,7 +194,8 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
    uint16_t  *re_orderedFrame;
    unordered_map<int, double> *pixelEnergyMap;
    double value;
-
+//    qDebug() << "MASTER br's ::processFrame()";
+//    int nonZeroCount = 0, pixelRow = 0, pixelCol = 0;
    pixelEnergyMap = new unordered_map<int, double>();
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
 
@@ -207,8 +210,24 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
       {
          value = (re_orderedFrame[i] * gradientValue[i] + interceptValue[i]);
          pixelEnergyMap->insert(std::make_pair(i, value));
+
+//         if ((frame[i] == 0) || (i > 1410))
+//             continue;
+//         if (((nonZeroCount % 4) == 0) && (nonZeroCount != 0))
+//             std::cout << endl;
+//         std::cout << "F[" << i << "] = " << frame[i] << " \t\t";
+//         nonZeroCount++;
+//         if ((frame[i] > 109) && (frame[i] < 120))
+//         {
+//            pixelRow = (int) (i / 400);
+//            pixelCol = (int) (i - (pixelRow * 400));
+
+//            std::cout << "F[" << i << "] = \t" << frame[i] <<  "\ti.e. row: " << pixelRow << "\tcolumn: " << pixelCol << endl;
+//            nonZeroCount++;
+//         }
       }
    }
+//   std::cout << "Found " << nonZeroCount << " hits between 110-120\n";
    *pixelEnergyMapPtr = pixelEnergyMap;
 
    return re_orderedFrame;

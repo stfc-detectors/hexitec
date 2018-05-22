@@ -25,7 +25,8 @@ private:
   double maxValue;
   int maxIndex;
   ChargedSharingMode chargedSharingMode;
-
+  ///
+  bool isPixelInRange(int pixel, int target);
 };
 
 #endif // HXTCHARGEDSHARINGGENERATOR_H
