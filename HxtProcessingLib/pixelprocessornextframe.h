@@ -14,6 +14,8 @@ class PixelProcessorNextFrame : public GeneralPixelProcessor
 public:
    PixelProcessorNextFrame();
 
+//   void resetLastRe_orderedSize();
+
    uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue);
    uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
 

@@ -318,7 +318,7 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
 //       qDebug() << "PBG current time: " << QTime::currentTime() << " sizeof uint16_t, char: " << sizeof(uint16_t) << " " << sizeof(char);
 //      while (inFile)
       {
-         int numFramesReqd = 1;
+         int numFramesReqd = 2;
          transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
 
 //         qtTime.restart();

@@ -7,7 +7,7 @@
 HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    GeneralHxtGenerator(nRows, nCols, processingDefinition)
 {
-    qDebug() << Q_FUNC_INFO << "CTOR called";
+//    qDebug() << Q_FUNC_INFO << "CTOR called";
    if (processingDefinition->getTotalSpectrum())
    {
       hxtItem->initialiseTotalSpectrum();

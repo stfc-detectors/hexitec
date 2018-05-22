@@ -2,11 +2,13 @@
 
 #include <iostream>
 #include <fstream>
-
+//
+#include <QDebug>
 GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
    if (nextFrameCorrection)
    {
+      qDebug() << Q_FUNC_INFO << " CTOR";
       pixelProcessor = new PixelProcessorNextFrame();
    }
    else
@@ -24,6 +26,7 @@ void GeneralFrameProcessor::setFrameSize(int frameSize)
 {
    pixelProcessor->setFrameSize(frameSize);
 }
+
 
 void GeneralFrameProcessor::setGradients(double *gradientValue)
 {

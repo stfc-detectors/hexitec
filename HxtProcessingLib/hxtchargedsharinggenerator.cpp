@@ -84,7 +84,7 @@ void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, dou
 
 void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
 {
-    qDebug() << Q_FUNC_INFO;
+//    qDebug() << Q_FUNC_INFO;
     /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
     int sidePadding           = 2 *  directionalDistance;
     int extendedFrameRows    = (nRows + sidePadding);
@@ -337,6 +337,11 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *extend
 //                    nonZeroCount++;
 //                    std::cout << "C[" << i << "] = \t" << extendedFrame[i] <<  "\ti.e. row: " << pxlRow << "\tcolumn: " << pxlCol << endl;
 //                }
+                if ( (extendedFrame[i] == 2) && ((*neighbourPixel) == 378) )
+                {
+                    std::cout << "extFrm is 2, neighb is 378, so not touching these two..\n";
+                    continue;
+                }
                 ///
                 // Wipe this pixel if another neighbour was non-Zero
                 if (bWipePixel)
@@ -369,7 +374,7 @@ void HxtChargedSharingGenerator::processAdditionRewritten(uint16_t *extendedFram
     int colIndexBegin = rowIndexBegin;
     int colIndexEnd   = rowIndexEnd;
     int maxValue;
-    int nonZeroCount = 0;
+//    int nonZeroCount = 0;
 
     for (int i = startPosn; i < endPosn;  i++)
     {

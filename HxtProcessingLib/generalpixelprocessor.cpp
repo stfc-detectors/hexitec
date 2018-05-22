@@ -70,6 +70,7 @@ void GeneralPixelProcessor::initialiseEnergyCalibration(double *gradientValue, d
 
 void GeneralPixelProcessor::setFrameSize(int frameSize)
 {
+    qDebug() << Q_FUNC_INFO << " frameSize was: " << GeneralPixelProcessor::frameSize << " now: " << frameSize;
    GeneralPixelProcessor::frameSize = frameSize;
 }
 
@@ -193,7 +194,7 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame,
 uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
-    qDebug() << Q_FUNC_INFO << " processing frame .... Called from where?";
+    qDebug() << Q_FUNC_INFO << " processing frame ...";
    uint16_t  *re_orderedFrame;
 //   unordered_map<int, double> *pixelEnergyMap;
    double value;
@@ -201,14 +202,15 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
 //   pixelEnergyMap = new unordered_map<int, double>();
 
    re_orderedFrame = (uint16_t *) calloc(GeneralPixelProcessor::frameSize, sizeof(uint16_t));
-   qDebug() << "1";
+//   qDebug() << "1";
    QTime qtTime;
    int /*copyTime = 0,*/ applyTime = 0/*, storeTime = 0*/;
 
    memcpy(re_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-    qDebug() << "2";
+//    qDebug() << "2";
    qtTime.restart();
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   unsigned int i = 0;
+   for (/*unsigned int i = 0*/; i < GeneralPixelProcessor::frameSize; i++)
    {
       if (re_orderedFrame[i] < thresholdValue)
       {
@@ -222,6 +224,7 @@ uint16_t *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t threshol
       }
    }
    applyTime = qtTime.elapsed();
+   qDebug() << "finished calibration, i: " << i << " frameSize: " << GeneralPixelProcessor::frameSize;
 //   qDebug() << "GPP  memcopy: " << copyTime << " ms";
 //   qDebug() << "GPP Calibrat: " << (applyTime) << " ms.";
 //   *pixelEnergyMapPtr = pixelEnergyMap;

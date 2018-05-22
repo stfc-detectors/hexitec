@@ -27,12 +27,12 @@ void HxtChargedSharingSumGenerator::processEnergies(unordered_map <int, double>*
 
 void HxtChargedSharingSumGenerator::processEnergies(uint16_t *frame)
 {
-    qDebug() << Q_FUNC_INFO;
+//    qDebug() << Q_FUNC_INFO;
    calculateChargedSharing(frame);
-   qDebug() << "1";
+//   qDebug() << "1";
    hxtItem->addFrameDataToHistogramWithSum(frame, thresholdValue);
-   qDebug() << "2";
+//   qDebug() << "2";
    incrementProcessedEnergyCount();
-   qDebug() << "DONE";
+//   qDebug() << "DONE";
 }
 

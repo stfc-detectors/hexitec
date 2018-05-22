@@ -50,15 +50,11 @@ uint16_t *FrameProcessor::process(uint16_t *frame,
 uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
                                   unordered_map<int, double>**pixelEnergyMapPtr)
 {
-    qDebug() << "   FP 1";
    uint16_t *result;
-//   QTime qtTime;
-//   int resultTime = 0;
-//   qtTime.restart();
+//   QTime qtTime;   int resultTime = 0;   qtTime.restart();
    result = pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyMapPtr);
 //   resultTime = qtTime.elapsed();
 //   qDebug() << "FP    result: " << (resultTime) << " ms.";
-   qDebug() << "    FP 2";
 
    return result;
 }

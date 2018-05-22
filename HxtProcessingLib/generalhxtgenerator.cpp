@@ -4,7 +4,7 @@
 
 GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-    qDebug() << Q_FUNC_INFO << " CTOR";
+//    qDebug() << Q_FUNC_INFO << " CTOR";
    this->nRows = nRows;
    this->nCols = nCols;
    frameSize = nRows * nCols;

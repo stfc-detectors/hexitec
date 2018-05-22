@@ -25,6 +25,10 @@ public:
    void setInterceptValue(double *gradientValue);
    double *getGradientValue();
    double *getInterceptValue();
+   /// Need to change PixelProcessorFrame::lastRe_ordered size, but as member not part of parent,
+   ///  and PixelProcessorFrame object only known at program execution, we need a virtual function here
+//   virtual void resetLastRe_orderedSize();
+   ///
 
    uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
                           uint16_t *frame);
