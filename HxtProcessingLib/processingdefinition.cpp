@@ -132,7 +132,6 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
 
    inFile.open(filename);
 
-
    if (!inFile)
    {
      for (int val = 0; val < frameSize; val ++)
@@ -177,7 +176,6 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
         dataValue[val] = defaultValue;
      }
    }
-
 
    while (inFile >> dataValue[i])
    {

@@ -335,7 +335,6 @@ void Slice::writeHXT(QString fileName)
 
 bool Slice::readHXT(unsigned short *buffer)
 {
-//    qDebug() << "Slice::readHXT(unsigned short *buffer) start";
     struct HxtBuffer hxtBuffer;
     hxtBuffer.allData = (double*) malloc (MAX_SPECTRUM_SIZE * sizeof(double));
     double *allDataPointer;

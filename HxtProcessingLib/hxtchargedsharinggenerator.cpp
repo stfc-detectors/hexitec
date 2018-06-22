@@ -18,18 +18,9 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
    setPixelGridSize(processingDefinition->getPixelGridSize());
 }
 
-void HxtChargedSharingGenerator::processEnergies(unordered_map <int, double> *pixelEnergyMap)
-{
-   calculateChargedSharing(pixelEnergyMap);
-   hxtItem->addToHistogram(*pixelEnergyMap);
-   incrementProcessedEnergyCount();
-   delete pixelEnergyMap;
-}
-
 void HxtChargedSharingGenerator::processEnergies(uint16_t *frame)
 {
    calculateChargedSharing(frame);
-   std::cout << Q_FUNC_INFO << " feeding inherited member threshold into hxtItem->addFrameDataToHistogram()" << endl;
    hxtItem->addFrameDataToHistogram(frame, thresholdValue);
    incrementProcessedEnergyCount();
 }
@@ -40,51 +31,8 @@ void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
    directionalDistance = (int)pixelGridSize/2;
 }
 
-void HxtChargedSharingGenerator::calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap)
-{
-   int pixel;
-   int index = 0;
-   int length;
-
-   unordered_map<int, double>::iterator it = pixelEnergyMap->begin();
-   unordered_map<int, double>::iterator itend = pixelEnergyMap->end();
-
-   length = pixelEnergyMap->size();
-   fill(pixelRow, pixelRow + sizeof(pixelRow), 0);
-   fill(pixelCol, pixelCol + sizeof(pixelCol), 0);
-   QTime qtTime;
-   int /*sortTime = 0,*/ callTime = 0;
-//   qtTime.restart();
-   while (it != itend)
-   {
-      pixel = it->first;
-      pixelRow[index] = (int) (pixel / nRows);
-      pixelCol[index] = (int) (pixel - (pixelRow[index] * nCols));
-      pixelValue[index] = it->second;
-      it++;
-      index++;
-   }
-//   sortTime = qtTime.elapsed();
-   switch (chargedSharingMode)
-   {
-      case ADDITION:
-         processAdditionChargedSharing(pixelEnergyMap, length);
-         break;
-      case DISCRIMINATION:
-         qtTime.restart();
-         processDiscriminationChargedSharing(pixelEnergyMap, length);
-         callTime = qtTime.elapsed();
-         break;
-      default:
-         break;
-   }
-//   qDebug() << "CSD sortTime: " << (sortTime) << " ms.";
-//   qDebug() << "CSD callTime: " << (callTime) << " ms.";
-}
-
 void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
 {
-//    qDebug() << Q_FUNC_INFO;
     /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
     int sidePadding           = 2 *  directionalDistance;
     int extendedFrameRows    = (nRows + sidePadding);
@@ -108,15 +56,6 @@ void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
        i = i + increment;
     }
 //    copyTime = qtTime.elapsed();
-
-    /// DEBUGGING:
- //   int offset = 2820;
- //   this->showFrameSubset(frame, offset);
- //   offset = 3237;
- //   this->showCsdFrameSubset(extendedFrame, offset);
- //   std::cout << endl;
- //   int bin = 110;
- //   showCsdFrameBinContents(extendedFrameSize, extendedFrame, bin);
 
     //// CSD example frame, with directionalDistance = 1
     ///
@@ -159,147 +98,7 @@ void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
 //    recpTime = qtTime.elapsed();
 
     free(extendedFrame);
-}
-
-//void HxtChargedSharingGenerator::calibrateAndApplyChargedAlgorithm(uint16_t *frame, uint16_t thresholdValue, double *gradients, double *intercepts)
-//{
-//   uint16_t *processedFrame = calibrateAndChargedSharing(frame, thresholdValue, gradients, intercepts);
-//   hxtItem->addFrameDataToHistogram(processedFrame, thresholdValue);
-//   incrementProcessedEnergyCount();
-
-////   // DSoFt original code:
-////   calculateChargedSharing(pixelEnergyMap);
-////   hxtItem->addToHistogram(*pixelEnergyMap);
-////   incrementProcessedEnergyCount();
-//}
-
-void HxtChargedSharingGenerator::processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
-{
-   int rowIndexBegin;
-   int rowIndexEnd;
-   int colIndexBegin;
-   int colIndexEnd;
-   int row;
-   int column;
-   int rowShare;
-   int columnShare;
-
-   for (int i = 0; i < length; i++)
-   {
-      row = pixelRow[i];
-      column = pixelCol[i];
-      maxValue = pixelValue[i];
-
-      rowIndexBegin = row - directionalDistance;
-      rowIndexEnd = row + directionalDistance;
-      colIndexBegin = column - directionalDistance;
-      colIndexEnd = column + directionalDistance;
-
-      if (rowIndexBegin < 0)
-      {
-         rowIndexBegin = 0;
-      }
-      if (colIndexBegin < 0)
-      {
-         colIndexBegin = 0;
-      }
-      if (rowIndexEnd >= nRows)
-      {
-         rowIndexEnd = nRows - 1;
-      }
-      if (colIndexEnd >= nCols)
-      {
-         colIndexEnd = nCols - 1;
-      }
-
-      for (int j = 0; j < length; j++)
-      {
-         if (i != j && (pixelValue[i] !=0) && (pixelValue[j] !=0))
-         {
-         if ((pixelRow[j] >= rowIndexBegin) && (pixelRow[j] <= rowIndexEnd))
-         {
-            if ((pixelCol[j] >= colIndexBegin) && (pixelCol[j] <= colIndexEnd))
-            {
-               rowShare = pixelRow[j];
-               columnShare = pixelCol[j];
-
-               if (pixelValue[j] > maxValue)
-               {
-                  pixelValue[j] += pixelValue[i];
-                  maxValue = pixelValue[j];
-                  pixelValue[i] = 0.0;
-                  pixelEnergyMap->erase(row * nCols + column);
-                  (*pixelEnergyMap)[rowShare * nCols + columnShare] = pixelValue[j];
-               }
-               else
-               {
-                  pixelValue[i] += pixelValue[j];
-                  maxValue = pixelValue[i];
-                  pixelValue[j] = 0.0;
-                  pixelEnergyMap->erase(rowShare * nCols + columnShare);
-                  (*pixelEnergyMap)[row * nCols + column] = pixelValue[i];
-               }
-            }
-         }
-         }
-      }
-   }
-}
-
-void HxtChargedSharingGenerator::processDiscriminationChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length)
-{
-   int rowIndexBegin;
-   int rowIndexEnd;
-   int colIndexBegin;
-   int colIndexEnd;
-   int row;
-   int column;
-   int rowShare;
-   int columnShare;
-
-   for (int i = 0; i < length; i++)
-   {
-      row = pixelRow[i];
-      column = pixelCol[i];
-      maxValue = pixelValue[i];
-      rowIndexBegin = row - directionalDistance;
-      rowIndexEnd = row + directionalDistance;
-      colIndexBegin = column - directionalDistance;
-      colIndexEnd = column + directionalDistance;
-
-      if (rowIndexBegin < 0)
-      {
-         rowIndexBegin = 0;
-      }
-      if (colIndexBegin < 0)
-      {
-         colIndexBegin = 0;
-      }
-      if (rowIndexEnd >= nRows)
-      {
-         rowIndexEnd = nRows - 1;
-      }
-      if (colIndexEnd >= nCols)
-      {
-         colIndexEnd = nCols - 1;
-      }
-
-      for (int j = i + 1; j < length; j++)
-      {
-         if ((pixelRow[j] >= rowIndexBegin) && (pixelRow[j] <= rowIndexEnd))
-         {
-            if ((pixelCol[j] >= colIndexBegin) && (pixelCol[j] <= colIndexEnd))
-            {
-               rowShare = pixelRow[j];
-               columnShare = pixelCol[j];
-
-               pixelEnergyMap->erase(row * nCols + column);
-               pixelEnergyMap->erase(rowShare * nCols + columnShare);
-            }
-         }
-      }
-
-   }
+    extendedFrame = NULL;
 }
 
 void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
@@ -310,7 +109,6 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *extend
     int colIndexBegin = rowIndexBegin;
     int colIndexEnd   = rowIndexEnd;
     bool bWipePixel = false;
-//    int nonZeroCount = 0;
 
 //    int pxlRow = -1, pxlCol = -1;
     for (int i = startPosn; i < endPosn;  i++)
@@ -329,20 +127,6 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *extend
 
                 neighbourPixel = (currentPixel + (extendedFrameRows*row)  + column);
 
-                ///
-//                if (( (extendedFrame[i] > 109) &&  (extendedFrame[i] < 120)) && (*neighbourPixel != 0))
-//                {
-//                    pxlRow = (int) (i / 400);
-//                    pxlCol = (int) (i - (pxlRow * 400));
-//                    nonZeroCount++;
-//                    std::cout << "C[" << i << "] = \t" << extendedFrame[i] <<  "\ti.e. row: " << pxlRow << "\tcolumn: " << pxlCol << endl;
-//                }
-                if ( (extendedFrame[i] == 2) && ((*neighbourPixel) == 378) )
-                {
-                    std::cout << "extFrm is 2, neighb is 378, so not touching these two..\n";
-                    continue;
-                }
-                ///
                 // Wipe this pixel if another neighbour was non-Zero
                 if (bWipePixel)
                 {
@@ -374,7 +158,6 @@ void HxtChargedSharingGenerator::processAdditionRewritten(uint16_t *extendedFram
     int colIndexBegin = rowIndexBegin;
     int colIndexEnd   = rowIndexEnd;
     int maxValue;
-//    int nonZeroCount = 0;
 
     for (int i = startPosn; i < endPosn;  i++)
     {

@@ -12,7 +12,6 @@ class GeneralHxtGenerator
 public:
    GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~GeneralHxtGenerator();
-   void freeAllocedMemory();
    void enqueuePixelRawVals(double *pixelRawVals);
    void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
    void setFrameProcessingInProgress(bool inProgress);
@@ -23,7 +22,6 @@ public:
    double *getEnergyBin();
    long long *getSummedHistogram();
 
-   virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap) = 0;
    virtual void processEnergies(uint16_t *frame) = 0;
 
 protected:
@@ -38,9 +36,8 @@ protected:
    int *pixelRow;
    int *pixelCol;
    double *pixelValue;
-   /// Assist histogramming requiring pixel threshold(s)
+   /// Assist histogramming requiring pixel threshold
    int thresholdValue;
-   uint16_t *thresholdPerPixel;
 
 };
 

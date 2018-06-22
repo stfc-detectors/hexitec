@@ -13,6 +13,7 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    setBinEnd(binEnd);
    setBinWidth(binWidth);
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
+   hxtBin = NULL;
    initialiseHxtBuffer(nRows, nCols);
 
    pixelEnergy = NULL;
@@ -23,12 +24,13 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
 HxtItem::~HxtItem()
 {
     free(summedHistogram);
-//    free(hxtBin);         // Causes crash later (ProcessingBufferGenerator::handleProcessingComplete())
-}
+    summedHistogram = NULL;
 
-void HxtItem::freeAllocedMemory()
-{
-   free(hxtBin);
+    if (hxtBin != NULL)
+    {
+       free(hxtBin);
+       hxtBin = NULL;
+    }
 }
 
 void HxtItem::initialiseHxtBuffer(int nRows, int nCols)

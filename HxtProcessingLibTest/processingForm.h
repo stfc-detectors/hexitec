@@ -92,7 +92,6 @@ private slots:
    void setHxtGeneration(bool hxtGeneration);
    void setStartSpinBoxLimit(int upperLimit);
    void setEndSpinBoxLimit(int lowerLimit);
-   void NextFrameCorrectionOption(bool nextFrameCorrection);
    void setChargedSharingOptions(int chargedSharingOption);
    void setChargedSharingParameters();
    void setInputFilesList();

@@ -24,8 +24,6 @@ private:
    IniFile *twoEasyIniFile;
    QThread *pbgThread;
    QMutex mutex;
-//   QList<ImageProcessor *>imageProcessorList;
-   QList<ImageProcessorHandler *>imageProcessorHandlerList;
    QList<char *>processingFilenameList;
    ImageProcessor *currentImageProcessor;
    ImageProcessorHandler *currentImageProcessorHandler;
@@ -39,6 +37,8 @@ private:
    int nCols;
    QWinEventNotifier *hxtNotifier;
 
+   QMutex guiMutex;
+   bool bMainWindowBusy;
 
 signals:
    void imageStarted(char *path);
@@ -49,18 +49,17 @@ signals:
    void processingComplete();
    void hxtFileWritten(unsigned short *buffer, QString filename);
    void invalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
+   /// Let MainWindow tell ImageProcessor object when ok send final buffer
+   void mainWindowBusy(bool bBusy);
 
 public slots:
-   void handleProcessImages();
    void handlePostProcessImages();
-//   void handlePostProcessImages(int nRows, int nCols);
    void handleImageStarted(char *filename);
-//   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames, int mode);
-   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
-//   void handleHxtFileWritten(char *buffer, const char * filename);
    void handleHxtFileWritten();
+
+   void handleMainWindowBusy(bool bBusy);
 
    void handleConfigureSensor(int nRows, int nCols);
    void handleConfigureProcessing(bool re_order,
@@ -81,7 +80,6 @@ public slots:
    void handleConfigureProcessing(QStringList inputFilesList,
                                   QString outputDirectory,
                                   QString outputPrefix);
-//   void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
    void handleProcessingComplete();
 };
 

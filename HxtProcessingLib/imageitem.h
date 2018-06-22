@@ -10,11 +10,11 @@ using namespace std;
 class ImageItem
 {
 public:
-   ImageItem(const char *filename, int nRows, int nCols);
+   ImageItem(const char *filename);
    ~ImageItem();
    void enqueueBuffer(char *address, unsigned long validFrameCount);
    char *getNextBuffer(unsigned long *validFrameCount);
-   int getBufferQueueSize();
+   size_t getBufferQueueSize();
    char *getFilename();
 
 private:

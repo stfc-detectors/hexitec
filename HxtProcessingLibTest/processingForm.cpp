@@ -60,7 +60,7 @@ QMainWindow *ProcessingForm::getMainWindow()
 void ProcessingForm::initialiseProcessingForm()
 {
    QSettings settings(QSettings::UserScope, "TEDDI", "HexitecGigE");
-   QString twoEasyFilename = "C:\\Detector\\hexitecGigE_400.ini";
+   QString twoEasyFilename = "C:\\Detector\\hexitecGigE.ini";
    QString inputFilesList;
    IniFile *twoEasyIniFile;
 
@@ -265,7 +265,6 @@ void ProcessingForm::initialiseProcessingForm()
 
 void ProcessingForm::initialise()
 {
-   qDebug()<< "ProcessingForm::initialise()";
    setThresholdParameters();
 }
 
@@ -455,10 +454,6 @@ int ProcessingForm::getFrameSize()
    return frameSize;
 }
 
-void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
-{
-}
-
 void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
 {
    this->chargedSharingOption = chargedSharingOption;
@@ -492,13 +487,13 @@ void ProcessingForm::setChargedSharingParameters()
 
 void ProcessingForm::setInputFilesList()
 {
-   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", "Raw Data (*.bin)");
+   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "D://Data//", "Raw Data (*.bin)");
    ui->inputFilesList->setText(source.join(", "));
 }
 
 void ProcessingForm::setOutputDirectory()
 {
-   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", QFileDialog::ShowDirsOnly);
+   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "D://Data//BinMe//", QFileDialog::ShowDirsOnly);
    ui->outputDirectory->setText(source);
 }
 

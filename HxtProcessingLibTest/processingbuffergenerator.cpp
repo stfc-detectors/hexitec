@@ -1,5 +1,4 @@
 #include "processingbuffergenerator.h"
-//#include "parameters.h"
 
 #include <QSettings>
 #include <QMutexLocker>
@@ -14,7 +13,6 @@
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
-//   imageProcessorList.clear();
    currentImageProcessor = NULL;
    this->processingDefinition = processingDefinition;
    nRows = this->processingDefinition->getRows();
@@ -65,17 +63,12 @@ void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer,
 {
    bufferReady(fileBuffer, validFrames);
    free(fileBuffer);
-}
-
-void ProcessingBufferGenerator::handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames)
-{
-   bufferReady(transferBuffer, validFrames);
-   emit returnBufferReady(transferBuffer, validFrames);
+   fileBuffer = NULL;
 }
 
 void ProcessingBufferGenerator::bufferReady(unsigned char *buffer, unsigned long validFrames)
 {
-   bufferToProcess = (char *) malloc(frameSize * validFrames);
+   bufferToProcess = (char *) malloc(frameSize * validFrames);          // free()'d in imageprocessor::processThreshol…() functions
    memcpy(bufferToProcess, buffer, frameSize * validFrames);
    currentImageProcessor->enqueueBuffer(bufferToProcess, validFrames);
 }
@@ -151,10 +144,6 @@ void ProcessingBufferGenerator::handleConfigureProcessing(QStringList inputFiles
 
 }
 
-void ProcessingBufferGenerator::handleHxtFileWritten(char * buffer, const char *filename)
-{
-}
-
 void ProcessingBufferGenerator::handleHxtFileWritten()
 {
    hxtFilename = QString(currentImageProcessor->getHxtFilename());
@@ -181,87 +170,7 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
 
 void ProcessingBufferGenerator::handleProcessingComplete()
 {
-   emit processingComplete();
-}
-
-void ProcessingBufferGenerator::handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount)
-{
-   delete completedImageProcessor;
-}
-
-void ProcessingBufferGenerator::handleProcessImages()
-{
-   int fileExtensionPos;
-   QString outputFilename;
-   unsigned char *transferBuffer;
-   unsigned long validFrames = 0;
-   long long totalFramesAcquired = 0;
-   std::ifstream inFile;
-   int nRows = 80;
-   int nCols = 80;
-   char *processingFilename;
-   char *inputFilename;
-
-   processingFilenameList.clear();
-
-   inputFilename = new char[1024];
-
-   foreach (const QString &str, inputFilesList)
-   {
-      QFileInfo fi(str);
-      QString filename = fi.fileName();
-
-      processingFilename = new char[1024];
-
-      fileExtensionPos = filename.lastIndexOf(".");
-      filename.truncate(fileExtensionPos);
-
-      outputFilename = processingDefinition->getOutputDirectory();
-      if (!outputFilename.endsWith("/"))
-      {
-         outputFilename.append("/");
-      }
-      outputFilename.append(processingDefinition->getOutputPrefix());
-      outputFilename.append(filename);
-
-      strcpy(processingFilename, (char *)outputFilename.toStdString().c_str());
-      strcpy(inputFilename, (char *)str.toStdString().c_str());
-
-      inFile.open(inputFilename, ifstream::binary);
-      processingFilenameList.append(processingFilename);
-
-      emit imageStarted(processingFilenameList.back());
-      if (!inFile)
-      {
-        qDebug() << "ProcessingBufferGenerator::handleProcessImages() - error opening " << inputFilename;
-      }
-
-      int bufferCount = 0;
-
-      while (inFile)
-      {
-         transferBuffer = (unsigned char *) calloc(nRows * nCols  * 500 * sizeof(uint16_t), sizeof(char));
-
-         inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
-         if (!inFile)
-         {
-            validFrames = inFile.gcount() / (nRows * nCols  * 2);
-            emit fileBufferReady(transferBuffer, validFrames);
-         }
-         else
-         {
-            validFrames = inFile.gcount() / (nRows * nCols  * 2);
-            emit fileBufferReady(transferBuffer, 500);
-         }
-         totalFramesAcquired += validFrames;
-         bufferCount++;
-         Sleep(50);
-      }
-      inFile.close();
-      emit imageComplete(totalFramesAcquired);
-   }
-   delete processingFilename;
-   delete inputFilename;
+   emit processingComplete();   // Calls processingForm::guiIdle()
 }
 
 void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
@@ -278,7 +187,7 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
    processingDefinition->setRows(nRows);
    processingDefinition->setCols(nCols);
    processingFilenameList.clear();
-   ///
+
 //   QTime qtTime;
 //   int readTime = 0, readyTime = 0;
 
@@ -308,26 +217,22 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       inFile.open(inputFilename, ifstream::binary);
       processingFilenameList.append(processingFilename);
 
-      emit imageStarted(processingFilenameList.back());
+      emit imageStarted(processingFilenameList.back()); // Passed via ::enqueueImage() into ImageItem() CTOR
       if (!inFile)
       {
         qDebug() << "ProcessingBufferGenerator::handlePostProcessImages() - error opening " << inputFilename;
       }
 
-      int bufferCount = 0;
-//       qDebug() << "PBG current time: " << QTime::currentTime() << " sizeof uint16_t, char: " << sizeof(uint16_t) << " " << sizeof(char);
-//      while (inFile)
+      while (inFile)
       {
-         int numFramesReqd = 2;
-         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
+         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char)); // free()'d in ::handleFileBufferReady
 
 //         qtTime.restart();
-         inFile.read((char *)transferBuffer, nRows * nCols  * numFramesReqd/*500*/ * 2);
+         inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
 //         readTime = qtTime.elapsed();
          if (!inFile)
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-//            fill(transferBuffer, transferBuffer + (160000 * validFrames), 150);
 //            qtTime.restart();
             emit fileBufferReady(transferBuffer, validFrames);
 //            readyTime = qtTime.elapsed();
@@ -335,19 +240,20 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
          else
          {
             validFrames = inFile.gcount() / (nRows * nCols  * 2);
-            emit fileBufferReady(transferBuffer, validFrames/*500*/);
+            emit fileBufferReady(transferBuffer, 500);
          }
-
          totalFramesAcquired += validFrames;
-         bufferCount++;
          Sleep(50);
       }
       inFile.close();
-//       qDebug() << "PBG reading: " << totalFramesAcquired << " Frames  (PROFILING).";
+      qDebug() << "PBG read " << totalFramesAcquired << " frames from: " << filename;
       emit imageComplete(totalFramesAcquired);
+      totalFramesAcquired = 0;
    }
 //   qDebug() << "PBG  binRead: " << (readTime) << " ms.";
 //   qDebug() << "PBG bufReady: " << (readyTime) << " ms.";
-   delete processingFilename;
-   delete inputFilename;
+   //  Freeing these locally assigned pointers causes crashes occasionally:
+//   delete processingFilename;
+//   delete inputFilename;
+
 }

@@ -75,20 +75,15 @@ MainWindow::MainWindow()
    readDir = "";
    readFilter = "";
 
-//   bHexitechProcessingBusy = false;
-   bUpdateVisualisationTab = false;
-   saveCsv = false;
 //   saveH5 = false;
 
    QTabWidget *tabs = new QTabWidget(this);
    setCentralWidget(tabs);
 
-//   ScriptingWidget *scriptingWidget = ScriptingWidget::instance();
    createApplicationOutput();
 
    tabs->addTab(createVisualisation(), QString("Visualisation"));
 
-//   connect(this, SIGNAL(addObject(QObject*, bool, bool)), ScriptingWidget::instance()->getScriptRunner(), SLOT(addObject(QObject*, bool, bool)));
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
    connect(this, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
@@ -163,12 +158,16 @@ MainWindow::MainWindow()
       connect(dataAcquisitionForm, SIGNAL(disableStopDAQAction()),
               this, SLOT(disableStopDAQAction()));
    }
-//   We don't have one of these so this won't happen.
-//   scriptingWidget->runInitScript();
 
    // The processing window needs to have been created before the data acquisition factory!
    processingDefinition = new ProcessingDefinition(6400);
    processingForm = new ProcessingForm();
+   /// 400X400 version:
+//   processingForm = new ProcessingForm();
+//   processingForm->readConfigFile();
+//   int frameSize = processingForm->getFrameSize();
+////   qDebug() << " *** Mainwindow.cpp frameSize: " << frameSize;
+//   processingDefinition = new ProcessingDefinition(frameSize);
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
    if (activeDAQ)
@@ -204,6 +203,12 @@ MainWindow::MainWindow()
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
    connect(processingBufferGenerator, SIGNAL(hxtFileWritten(unsigned short*, QString)),
            this, SLOT(readBuffer(unsigned short*, QString)));
+   /// Prevent HexitecGigE/ProcessingBufferGenerator swamping with iterations of
+   ///   same image while GUI busy rendering same image on display
+   connect(this, SIGNAL(mainWindowBusy(bool)),
+           processingBufferGenerator, SLOT(handleMainWindowBusy(bool)));
+   bMainWindowBusy = false;
+   ///
    connect(processingForm, SIGNAL(configureProcessing(QStringList, QString, QString)),
            processingBufferGenerator, SLOT(handleConfigureProcessing(QStringList, QString, QString)));
    connect(processingBufferGenerator, SIGNAL(processingComplete()),
@@ -230,20 +235,6 @@ MainWindow::MainWindow()
       connect(this, SIGNAL(stopHV()), detectorControlForm, SLOT(handleHVOff()));
    }
 
-//   tabs->addTab(scriptingWidget->getMainWindow(), QString("Scripting"));
-//REPLACE THIS   connect(processingWindow, SIGNAL(removeSlice()), this, SLOT(deleteFirstSlice( ) ));
-
-   // Need to signal to processingWindow to initialise itself with settings from 2Easy.ini file
-//REPLACE THIS    connect(this, SIGNAL(initialiseProcessingWindow()), processingWindow, SLOT(initialiseProcessingWindow()));
-
-   // Allow MainWindow signal to processingWindow if manual processing has begun/been abandoned
-//REPLACE THIS   connect(this, SIGNAL(manualProcessingStarted()), processingWindow, SLOT(guiProcessNowStarted()));
-//REPLACE THIS   connect(this, SIGNAL(manualProcessingAbandoned()), processingWindow, SLOT(guiProcessNowFinished()));
-   // Allow MainWindow signal to processWindow to discard unprocessed raw files
-//REPLACE THIS   connect(this, SIGNAL(removeUnprocessedFiles(bool)), processingWindow->getHxtProcessor(), SLOT(removeFiles(bool)));
-   // Allow MainWindow signal to processWindow's HxtProcessor when config updated
-//REPLACE THIS   connect(this, SIGNAL(hxtProcessingPrepSettings()), processingWindow->getHxtProcessor(), SLOT(handleHxtProcessingPrepSettings()));
-
    if (activeDAQ)
    {
       GigEDetector *gigEDetector = DetectorFactory::instance()->getGigEDetector();
@@ -253,10 +244,8 @@ MainWindow::MainWindow()
               DetectorFactory::instance()->getGigEDetector(), SLOT(handleReturnBufferReady(unsigned char*, unsigned long)));
       connect(this, SIGNAL(executeShowImage()),
               gigEDetector, SLOT(handleShowImage()));
-//      connect(this, SIGNAL(updateProgress(double)), progressForm, SLOT(handleUpdateProgress(double)));
    }
 
-//REPLACE THIS?   emit initialiseProcessingWindow();
 }
 
 MainWindow::~MainWindow()
@@ -324,55 +313,26 @@ void MainWindow::readFiles()
       // Save readDir for next call
       readDir = QFileInfo(fileNameList.at(0)).absoluteDir().canonicalPath();
 
-      // If all the files are scripting files then read them with
-      // ScriptingWidget::loadScript() otherwise pass the whole list to Slice::readFileNameList.
+      // Pass the whole list to Slice::readFileNameList.
       // Note that we cannot process the files one by one because we might be constructing
       // a slice from a whole set of files.
-      bool allScripts = true;
       for (int i = 0; i < fileNameList.size(); i++)
       {
          QString suffix = QFileInfo(fileNameList[i]).suffix();
          if (suffix != "js" && suffix != "m")
          {
-            allScripts = false;
             break;
          }
       }
 
-      if (allScripts)
-      {
-//         for (int j = 0; j < fileNameList.size(); j++)
-//         {
-            /*ScriptingWidget::instance()->loadScript(fileNameList[j])*/;
-//         }
-      }
-      else
-      {
+      QVector<Slice *> slices = Slice::readFileNameList(fileNameList);
 
-          QVector<Slice *> slices = Slice::readFileNameList(fileNameList);
-          /*
-          // SDMJ patch code to take account of .hif files
-          // stuff has also been added to MainWindow::readFiles(QStringList files)
-          // Nothing so far has been done to MainWindow::readData(QString fileName)
-          // Start of added stuff       for (int i = 0; i < fileNameList.size(); i++)
-          {
-             QString suffix = QFileInfo(fileNameList[i]).suffix();
-             if (suffix == "hif")
-             {
-                 writeMessage("Generating additional Eigen image slice");
-                 Slice *slice = slices[i]->eigenImageSlice();
-                 slices.append(slice);
-             }
-          }
-          // Endof added stuff
-          */
-          for (int i = 0; i < slices.size(); i++)
-          {
-             if (slices.at(i) != NULL)
-             {
-                initializeSlice(slices.at(i));
-             }
-          }
+      for (int i = 0; i < slices.size(); i++)
+      {
+         if (slices.at(i) != NULL)
+         {
+            initializeSlice(slices.at(i));
+         }
       }
    }
 }
@@ -392,160 +352,15 @@ void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 
       MainViewer::instance()->showNewActiveSlice();
       thumbViewer->addSlice(slice);
-//REPLACE THIS?      emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
 
    }
    else
    {
       DataModel::instance()->setActiveSlice(slice);
       MainViewer::instance()->showNewActiveSlice();
-//REPLACE THIS?       emit updateProgress(processingWindow->getHxtProcessor()->getDiscWritingInterval());
    }
    update();
 }
-
-////#define EZD_FILES "EZD FILES (*.ezd)"
-//#define HXT_FILES "HXT FILES (*.hxt)"
-////#define HIF_FILES "HIF FILES (*.hif)"
-////#define XY_FILES "XY FILES (*.xy)"
-////#define XMY_FILES "XMY FILES (*.xmy)"
-////#define SB_FILES "XMY FILES (*.sb)"
-
-//void MainWindow::saveFiles()
-//{
-////   const char *sf = "Script Files (*.js)";
-////   const char *mf = "Matlab Files (*.m)";
-//   QString filter = /*tr(EZD_FILES) + ";;" +*/ tr(HXT_FILES) /*+ ";;" + tr(HIF_FILES) + ";;" + tr(XY_FILES) + ";;" + tr(XMY_FILES) + ";;" + tr(SB_FILES)*/;
-//   filter = filter + ";;" /*+ sf + ";;"*/ /*+ mf*/;
-//   QString selectedFilter;
-//   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-//                                                   "", filter, &selectedFilter);
-
-//   emit writeMessage("FILENAME " + fileName);
-
-//   if (fileName.isNull())
-//      return;
-
-//   QFileInfo fi(fileName);
-//   QString base = fi.baseName();
-//   QString suffix = fi.suffix();
-//   base = fi.path() + "/" + base;
-//   QStringList fileNames;
-
-//   // The fileName always has a suffix, if the user types "ethelred" then the QFileDialog seems to add the suffix from
-//   // the current filter to the name. If the user types "ethelred.js" the QFileDialog leaves it alone.
-
-//   if (suffix.compare("js") == 0)
-//   {
-//      /*emit writeMessage("writing .js file")*/;
-////      ScriptingWidget::instance()->saveScript(fileName);
-//   }
-//   else if (suffix.compare("m") == 0)
-//   {
-//      /*emit writeMessage("writing .m file")*/;
-////      ScriptingWidget::instance()->saveScript(fileName);
-//   }
-//   else if (suffix.compare("ezd") == 0)
-//   {
-//       ;    /// CA: Not needed
-////      emit writeMessage("writing .ezd file");
-////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-////      {
-////         QString fileNumber;
-////         fileNumber.sprintf("%3.3d",i);
-////         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-////         emit writeMessage(fileNames.last());
-////      }
-////      if (fileNames.size() == 1)
-////         fileNames[0] = (base + "." + suffix);
-
-////      for (int i = 0; i < fileNames.size(); ++i)
-////      {
-////         DataModel::instance()->sliceAt(i)->writeEZD(fileNames[i]);
-////      }
-//   }
-//   else if (suffix.compare("hxt") == 0)
-//   {
-//      emit writeMessage("writing .hxt file");
-//      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-//      {
-//         QString fileNumber;
-//         fileNumber.sprintf("%3.3d",i);
-//         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-//         emit writeMessage(fileNames.last());
-//      }
-//      if (fileNames.size() == 1)
-//         fileNames[0] = (base + "." + suffix);
-
-//      for (int i = 0; i < fileNames.size(); ++i)
-//      {
-//         DataModel::instance()->sliceAt(i)->writeHXT(fileNames[i]);
-//      }
-//   }
-//   else if (suffix.compare("hif") == 0)
-//   {
-//       ; /// CA: Surplus to requirement
-////      emit writeMessage("writing .hif file");
-////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-////      {
-////         QString fileNumber;
-////         fileNumber.sprintf("%3.3d",i);
-////         fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-////         emit writeMessage(fileNames.last());
-////      }
-////      if (fileNames.size() == 1)
-////         fileNames[0] = (base + "." + suffix);
-
-////      for (int i = 0; i < fileNames.size(); ++i)
-////      {
-////         DataModel::instance()->sliceAt(i)->writeHIF(fileNames[i]);
-////      }
-//   }
-//   else if (suffix.compare("xy") == 0)
-//   {
-//      emit writeMessage("writing .xy file");
-//      emit writeMessage(" NOT IMPLEMENTED");
-//      /*
-//        for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-//        {
-//            QString fileNumber;
-//            fileNumber.sprintf("%3.3d",i);
-//            fileNames.push_back(base + "_" + fileNumber + "." + suffix);
-//            emit writeMessage(fileNames.last());
-//        }
-//        if (fileNames.size() == 1)
-//            fileNames[0] = (base + "." + suffix);
-
-//        for (int i = 0; i < fileNames.size(); ++i)
-//        {
-//            DataModel::sliceAt(i)->writeEZD(fileNames[i]);
-//        }
-//*/
-//   }
-//   else if ((suffix.compare("xmy") == 0) || (suffix.compare("sb") == 0))
-//   {
-//       ;
-////      emit writeMessage("writing .xmy file");
-////      for (int i = 0; i < DataModel::instance()->numberOfSlices(); ++i)
-////      {
-////         QString fileNumber;
-////         fileNumber.sprintf("%3.3d",i);
-////         fileNames.push_back(base + "_" + fileNumber);
-////      }
-////      if (fileNames.size() == 1)
-////         fileNames[0] = (base);
-
-////      for (int i = 0; i < fileNames.size(); ++i)
-////      {
-////         DataModel::instance()->sliceAt(i)->writeXMY(fileNames[i], suffix);
-////      }
-//   }
-//   else
-//   {
-//      writeError("Format " + suffix + " not currently supported");
-//   }
-
-//}
 
 void MainWindow::handleStartDAQ()
 {
@@ -808,60 +623,56 @@ void MainWindow::readData(QString fileName)
 
 void MainWindow::readFiles(QStringList files)
 {
-    // Update Visualisation tab if required
-    if (bUpdateVisualisationTab)
-    {
-       // Drag and Drop operations seem to result in files being in any old order so sort them first in
-       // case they are a set of numbered files representing a single slice.
-       files.sort();
+   // Drag and Drop operations seem to result in files being in any old order so sort them first in
+   // case they are a set of numbered files representing a single slice.
+   files.sort();
 
+   QVector<Slice *> slices = Slice::readFileNameList(files);
 
-       QStringList fileNameList = files;
-       QVector<Slice *> slices = Slice::readFileNameList(files);
-       /*
-       // SDMJ patch code to take account of .hif files
-       // stuff has also been added to MainWindow::readFiles(QStringList files)
-       // Nothing so far has been done to MainWindow::readData(QString fileName)
-       // Start of added stuff
-       for (int i = 0; i < fileNameList.size(); i++)
-       {
-          QString suffix = QFileInfo(fileNameList[i]).suffix();
-          if (suffix == "hif")
-          {
-              writeMessage("Generating additional Eigen image slice");
-              Slice *slice = slices[i]->eigenImageSlice();
-              slices.append(slice);
-          }
-       }
-       // End of added stuff
-       */
-       for (int i = 0; i < slices.size(); i++)
-       {
-          if (slices.at(i) != NULL)
-          {
-             initializeSlice(slices.at(i));
-          }
-       }
-    }
+   for (int i = 0; i < slices.size(); i++)
+   {
+      if (slices.at(i) != NULL)
+      {
+         initializeSlice(slices.at(i));
+      }
+   }
 }
 
 void MainWindow::readBuffer(unsigned short* buffer, QString fileName)
 {
+   if (busyMutex.tryLock(100))
+   {
+      bMainWindowBusy = true;
+      busyMutex.unlock();
+      emit mainWindowBusy(bMainWindowBusy);
+
+   }
+   else
+   {
+      emit writeError(QString(" *** ERROR: MainWindow couldn't lock busyMutex to signal it's BUSY!"));
+      return;
+   }
+
    int sliceNumber = -1;
+   /*qDebug() << QThread::currentThreadId() << " MainWind Updating file:" <<  fileName
+            << " buffer: " << &buffer;*/
 
    MainViewer::instance()->getRenderArea()->setMouseEnabled(false);
    Slice *slice = Slice::readFileBuffer(buffer, fileName);
    sliceNumber = slice->getSliceToReplace();
    initializeSlice(slice, sliceNumber);
+   /*qDebug() << QThread::currentThreadId() << " MainWind now finished";*/
 
-   emit returnHxtBuffer(buffer);
-/*
-   if (saveCsv)
+   if (busyMutex.tryLock(100))
    {
-      writeCsv(fileName, slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
+      bMainWindowBusy = false;
+      busyMutex.unlock();
+      emit mainWindowBusy(bMainWindowBusy);
    }
-*/
-   
+   else
+   {
+      emit writeError(QString(" *** ERROR: MainWindow couldn't lock busyMutex to signal it's IDLE!"));
+   }
 }
 
 void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, int numberOfBins)
@@ -891,11 +702,6 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, 
 //   QProcess *translateProcess = new QProcess();
 //   translateProcess->execute(program, arguments);
 //}
-
-void MainWindow::updateVisualisationTab(bool bUpdate)
-{
-    bUpdateVisualisationTab = bUpdate;
-}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -979,11 +785,6 @@ void MainWindow::handleShowImage()
 //{
 //   this->saveH5 = saveH5;
 //}
-
-void MainWindow::handleSaveCsvChanged(bool saveCsv)
-{
-   this->saveCsv = saveCsv;
-}
 
 void MainWindow::enableMainWindowActions()
 {

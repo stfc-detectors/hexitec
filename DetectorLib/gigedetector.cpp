@@ -466,6 +466,7 @@ void GigEDetector::collectImage()
    getImages(0, 0);
 }
 
+// TODO: Why not use switch statement?
 void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2)
 {
    int status;
@@ -503,7 +504,7 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    }
    else if (command == COLLECT_OFFSETS)
    {
-
+        // TODO: 20180 618, Not called anywhere
    }
 
    else if (command == ABORT)

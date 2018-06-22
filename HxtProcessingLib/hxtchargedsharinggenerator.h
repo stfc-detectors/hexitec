@@ -9,16 +9,12 @@ public:
    HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    void setPixelGridSize(int pixelGridSize);
 
-   virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
    virtual void processEnergies(uint16_t *frame);
 
 protected:
-  void calculateChargedSharing(unordered_map <int, double>*pixelEnergyMap);
   void calculateChargedSharing(uint16_t *frame);
 
 private:
-  void processAdditionChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
-  void processDiscriminationChargedSharing(unordered_map <int, double>*pixelEnergyMap, int length);
   void processDiscriminationRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
   void processAdditionRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
   void setChargedSharingMode(ChargedSharingMode chargedSharingMode);

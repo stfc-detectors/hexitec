@@ -7,7 +7,6 @@ class HxtSumGenerator : public HxtGenerator
 public:
    HxtSumGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
 
-   virtual void processEnergies(unordered_map<int, double> *pixelEnergyMap);
    virtual void processEnergies(uint16_t *frame);
 };
 

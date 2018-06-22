@@ -11,6 +11,7 @@ class ImageProcessorHandler  : public QThread
 
 public:
    ImageProcessorHandler(ImageProcessor *imageProcessor);
+   ~ImageProcessorHandler();
 
 signals:
    void processingComplete();
