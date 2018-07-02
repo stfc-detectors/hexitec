@@ -142,41 +142,41 @@ void DataAcquisition::run()
 {
    try
    {
-   if (mode == GigEDetector::GIGE_DEFAULT)
-   {
-      performGigEDefaultDataCollection();
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      daqStatus.getMinorStatus());
-   }
-   else if (mode == GigEDetector::CONTINUOUS)
-   {
-      if (dataAcquisitionDefinition->isTriggering())
+      if (mode == GigEDetector::GIGE_DEFAULT)
       {
-         performContinuousDataCollection(true);
+         performGigEDefaultDataCollection();
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                         daqStatus.getMinorStatus());
       }
-      else
+      else if (mode == GigEDetector::CONTINUOUS)
       {
-         performContinuousDataCollection();
+         if (dataAcquisitionDefinition->isTriggering())
+         {
+            performContinuousDataCollection(true);
+         }
+         else
+         {
+            performContinuousDataCollection();
+         }
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::DONE);
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                         DataAcquisitionStatus::READY);
       }
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(daqStatus.getMajorStatus(),
-                      DataAcquisitionStatus::DONE);
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      DataAcquisitionStatus::READY);
-   }
-   else if (mode == GigEDetector::RECONFIGURE)
-   {
-      performTriggeringConfigure();
-   }
-/*   else if (mode == GigEDetector::FIXED)
-   {
-      performFixedDataCollection();
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      daqStatus.getMinorStatus());
-   }
-   */
+      else if (mode == GigEDetector::RECONFIGURE)
+      {
+         performTriggeringConfigure();
+      }
+      /*   else if (mode == GigEDetector::FIXED)
+      {
+         performFixedDataCollection();
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                    daqStatus.getMinorStatus());
+      }
+      */
    }
    catch (DetectorException &ex)
    {

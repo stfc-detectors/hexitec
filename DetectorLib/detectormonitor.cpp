@@ -2,6 +2,8 @@
 
 #include <QDateTime>
 #include <cmath>
+/// Needed by catch()'s of showError() exceptions:
+#include <QDebug>
 
 DetectorMonitor::DetectorMonitor(GigEDetector *gigEDetector, QObject *parent) :
    QObject(parent)
@@ -186,7 +188,16 @@ void DetectorMonitor::receiveState(GigEDetector::DetectorState detectorState)
    if (detectorState == GigEDetector::INITIALISED)
    {
       readTAsic = true;
-      read();
+      try
+      {
+         read();
+      }
+      catch (DetectorException &ex)
+      {
+         emit writeError(ex.getMessage());
+         qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      }
+
    }
 }
 

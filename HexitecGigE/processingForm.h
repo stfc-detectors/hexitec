@@ -26,7 +26,6 @@ public:
    QMainWindow *getMainWindow();
 
    void initialiseProcessingForm();
-   void Qt2CppListHandler();
 
    int getFrameSize();
    void handleDetectorResolutionSet(unsigned char xRes, unsigned char yRes);

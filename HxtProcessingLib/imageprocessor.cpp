@@ -25,7 +25,6 @@ HANDLE ImageProcessor::getHxtFileWrittenEvent()
 
 ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-//    qDebug() << QThread::currentThreadId() << "ImageProcessor Feck orf" << this;
    imageCompleteEvent = CreateEvent(NULL, FALSE, FALSE, IMAGE_COMPLETE);
    processingCompleteEvent = CreateEvent(NULL, FALSE, FALSE, PROCESSING_COMPLETE);
    hxtFileWrittenEvent = CreateEvent(NULL, FALSE, FALSE, HXT_FILE_WRITTEN);

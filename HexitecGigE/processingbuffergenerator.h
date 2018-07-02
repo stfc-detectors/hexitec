@@ -55,6 +55,8 @@ signals:
 public slots:
    void handlePostProcessImages();
    void handleImageStarted(char *filename);
+
+   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleHxtFileWritten();

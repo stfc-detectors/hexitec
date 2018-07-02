@@ -11,7 +11,7 @@ ImageItem::ImageItem(const char *filename)
    this->processedFrameCount = 0;
    bufferItem = NULL;
    // Free filename, memory originally allocated in ProcBuffGen::handlePostProcessImages()
-   delete filename;
+//   delete filename;
 }
 
 ImageItem::~ImageItem()
