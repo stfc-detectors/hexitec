@@ -11,8 +11,18 @@ HxtChargedSharingSumGenerator::HxtChargedSharingSumGenerator(int nRows, int nCol
 
 void HxtChargedSharingSumGenerator::processEnergies(uint16_t *frame)
 {
+//   qDebug() << Q_FUNC_INFO;
    calculateChargedSharing(frame);
-   hxtItem->addFrameDataToHistogramWithSum(frame, thresholdValue);
+   hxtItem->addFrameDataToHistogramWithSum(frame, 1);
    incrementProcessedEnergyCount();
+}
+
+void HxtChargedSharingSumGenerator::processEnergies(double *frame)
+{
+//   qDebug() << Q_FUNC_INFO;
+   calculateChargedSharing(frame);
+   hxtItem->addFrameDataToHistogramWithSum(frame);
+   incrementProcessedEnergyCount();
+//   QThread::msleep(1200*2);
 }
 

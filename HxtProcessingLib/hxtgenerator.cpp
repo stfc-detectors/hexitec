@@ -13,6 +13,12 @@ HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processin
 
 void HxtGenerator::processEnergies(uint16_t *frame)
 {
-    hxtItem->addFrameDataToHistogram(frame, thresholdValue);
+    hxtItem->addFrameDataToHistogram(frame, 1);
+    incrementProcessedEnergyCount();
+}
+
+void HxtGenerator::processEnergies(double *frame)
+{
+    hxtItem->addFrameDataToHistogram(frame);
     incrementProcessedEnergyCount();
 }

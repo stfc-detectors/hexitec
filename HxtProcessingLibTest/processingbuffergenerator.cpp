@@ -106,7 +106,7 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool ne
    }
 }
 
-void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, bool hxtGeneration, 
+void ProcessingBufferGenerator::handleConfigureProcessing(bool energyCalibration, bool hxtGeneration,
                                                           long long binStart, long long binEnd, double binWidth, bool totalSpectrum,
                                                           QString gradientFilename, QString interceptFilename)
 {
@@ -172,6 +172,95 @@ void ProcessingBufferGenerator::handleProcessingComplete()
 {
    emit processingComplete();   // Calls processingForm::guiIdle()
 }
+
+///// This version of the function will only read in 1 frame from file
+//void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
+//{
+//   int fileExtensionPos;
+//   QString outputFilename;
+//   unsigned char *transferBuffer;
+//   unsigned long validFrames = 0;
+//   long long totalFramesAcquired = 0;
+//   std::ifstream inFile;
+//   char *processingFilename;
+//   char *inputFilename;
+
+//   processingDefinition->setRows(nRows);
+//   processingDefinition->setCols(nCols);
+//   processingFilenameList.clear();
+
+////   QTime qtTime;
+////   int readTime = 0, readyTime = 0;
+
+//   inputFilename = new char[1024];
+
+//   foreach (const QString &str, inputFilesList)
+//   {
+//      QFileInfo fi(str);
+//      QString filename = fi.fileName();
+
+//      processingFilename = new char[1024];
+
+//      fileExtensionPos = filename.lastIndexOf(".");
+//      filename.truncate(fileExtensionPos);
+
+//      outputFilename = processingDefinition->getOutputDirectory();
+//      if (!outputFilename.endsWith("/"))
+//      {
+//         outputFilename.append("/");
+//      }
+//      outputFilename.append(processingDefinition->getOutputPrefix());
+//      outputFilename.append(filename);
+
+//      strcpy(processingFilename, (char *)outputFilename.toStdString().c_str());
+//      strcpy(inputFilename, (char *)str.toStdString().c_str());
+
+//      inFile.open(inputFilename, ifstream::binary);
+//      processingFilenameList.append(processingFilename);
+
+//      emit imageStarted(processingFilenameList.back()); // Passed via ::enqueueImage() into ImageItem() CTOR
+//      if (!inFile)
+//      {
+//        qDebug() << "ProcessingBufferGenerator::handlePostProcessImages() - error opening " << inputFilename;
+//      }
+
+////      while (inFile)
+//      {
+//         int numFramesReqd = 1;
+//         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));
+
+////         qtTime.restart();
+//         inFile.read((char *)transferBuffer, nRows * nCols  * numFramesReqd/*500*/ * 2);
+////         readTime = qtTime.elapsed();
+//         if (!inFile)
+//         {
+//            validFrames = inFile.gcount() / (nRows * nCols  * 2);
+////            fill(transferBuffer, transferBuffer + (160000 * validFrames), 150);
+////            qtTime.restart();
+//            emit fileBufferReady(transferBuffer, validFrames);
+////            readyTime = qtTime.elapsed();
+//         }
+//         else
+//         {
+//            validFrames = inFile.gcount() / (nRows * nCols  * 2);
+//            emit fileBufferReady(transferBuffer, validFrames/*500*/);
+//         }
+
+//         totalFramesAcquired += validFrames;
+//         Sleep(50);
+//      }
+//      inFile.close();
+//      qDebug() << "PBG read " << totalFramesAcquired << " frames from: " << filename;
+//      emit imageComplete(totalFramesAcquired);
+//      totalFramesAcquired = 0;
+//   }
+////   qDebug() << "PBG  binRead: " << (readTime) << " ms.";
+////   qDebug() << "PBG bufReady: " << (readyTime) << " ms.";
+//   //  Freeing these locally assigned pointers causes crashes occasionally:
+////   delete processingFilename;
+////   delete inputFilename;
+
+//}
 
 void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
 {

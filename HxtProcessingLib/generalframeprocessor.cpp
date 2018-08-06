@@ -24,7 +24,6 @@ GeneralFrameProcessor::~GeneralFrameProcessor()
 void GeneralFrameProcessor::setFrameSize(int frameSize)
 {
    pixelProcessor->setFrameSize(frameSize);
-   //qDebug() << "Must also now change  size of lastRe_orderedFrame within PixelProcessorNextFrame..";
    pixelProcessor->resetLastRe_orderedSize();
 }
 

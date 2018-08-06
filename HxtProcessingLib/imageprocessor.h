@@ -72,12 +72,12 @@ private:
    long long processedFrameCount;
    bool inProgress;
 
-   void processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result,
+   void processThresholdNone(GeneralFrameProcessor *fp, double *result,
                              const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
-   void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result,
+   void processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, double *result,
                               const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
-                             uint16_t *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
+                             double *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
 
 public slots:
    ///

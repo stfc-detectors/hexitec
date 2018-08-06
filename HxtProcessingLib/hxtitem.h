@@ -55,6 +55,8 @@ public:
    ///
    void addFrameDataToHistogram(uint16_t *frame, uint16_t thresholdValue);
    void addFrameDataToHistogramWithSum(uint16_t *frame, uint16_t thresholdValue);
+   void addFrameDataToHistogram(double *frame);
+   void addFrameDataToHistogramWithSum(double *frame);
    ///
    HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();

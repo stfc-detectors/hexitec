@@ -23,6 +23,7 @@ public:
    long long *getSummedHistogram();
 
    virtual void processEnergies(uint16_t *frame) = 0;
+   virtual void processEnergies(double *frame) = 0;
 
 protected:
    bool getFrameProcessingInProgress();
@@ -33,11 +34,6 @@ protected:
    int frameSize;
    long long processedEnergyCount;
    bool inProgress;
-   int *pixelRow;
-   int *pixelCol;
-   double *pixelValue;
-   /// Assist histogramming requiring pixel threshold
-   int thresholdValue;
 
 };
 

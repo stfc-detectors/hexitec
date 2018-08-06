@@ -17,18 +17,18 @@ public:
    void setEnergyCalibration(bool energyCalibration);
    GeneralPixelProcessor *getPixelProcessor();
 
-   virtual uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+   virtual double *process(unordered_map<int, double>**pixelRawValMapPtr,
                              uint16_t *frame) = 0;
-   virtual uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+   virtual double *process(unordered_map<int, double>**pixelRawValMapPtr,
                              uint16_t *frame, uint16_t thresholdValue) = 0;
-   virtual uint16_t *process(unordered_map<int, double>**pixelRawValMapPtr, 
+   virtual double *process(unordered_map<int, double>**pixelRawValMapPtr,
                              uint16_t *frame, uint16_t *thresholdPerPixel) = 0;
 
-   virtual uint16_t *process(uint16_t *frame,
+   virtual double *process(uint16_t *frame,
                              unordered_map<int, double>**pixelEnergyMapPtr) = 0;
-   virtual uint16_t *process(uint16_t *frame, uint16_t thresholdValue,
+   virtual double *process(uint16_t *frame, uint16_t thresholdValue,
                              unordered_map<int, double>**pixelEnergyMapPtr) = 0;
-   virtual uint16_t *process(uint16_t *frame, uint16_t *thresholdPerPixel,
+   virtual double *process(uint16_t *frame, uint16_t *thresholdPerPixel,
                              unordered_map<int, double>**pixelEnergyMapPtr) = 0;
 
 protected:

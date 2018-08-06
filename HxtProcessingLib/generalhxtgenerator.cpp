@@ -9,41 +9,16 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    frameSize = nRows * nCols;
    hxtItem = new HxtItem(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
 
-   pixelValue = NULL;
    processedEnergyCount = 0;
    hxtItem->setTotalEnergiesToProcess(0);
 
    setFrameProcessingInProgress(true);
-
-   thresholdValue = 0;
-
-   switch (processingDefinition->getThreshholdMode())
-   {
-      case ThresholdMode::NONE:
-         // Nothing to do here really
-         break;
-      case ThresholdMode::SINGLE_VALUE:
-         thresholdValue = processingDefinition->getThresholdValue();
-         break;
-      case ThresholdMode::THRESHOLD_FILE:
-         break;
-      default:
-         break;
-   }
-
+//   qDebug() << Q_FUNC_INFO;
 }
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
-   if (pixelValue != NULL)
-   {
-      free(pixelRow);
-      pixelRow = NULL;
-      free(pixelCol);
-      pixelCol = NULL;
-      free(pixelValue);
-      pixelValue = NULL;
-   }
+   qDebug() << "This is GHG's DTOR, let's free that memory in hxtItem..";
    delete hxtItem;
    hxtItem = NULL;
 }
@@ -87,5 +62,3 @@ long long *GeneralHxtGenerator::getSummedHistogram()
 {
    return hxtItem->getSummedHistogram();
 }
-
-

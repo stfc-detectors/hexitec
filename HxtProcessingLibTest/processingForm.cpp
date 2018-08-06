@@ -209,7 +209,7 @@ void ProcessingForm::initialiseProcessingForm()
    {
       ui->chargedSharingComboBox->setCurrentText(chargedSharingOptionString);
    }
-   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_grid_Option")) != QVariant(INVALID))
+   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_Grid_Option")) != QVariant(INVALID))
    {
       ui->pixelGridComboBox->setCurrentText(pixelGridOptionString);
    }
@@ -222,8 +222,7 @@ void ProcessingForm::initialiseProcessingForm()
    }
    ui->outputDirectory->setText(defaultDirectory);
 
-//   if ((outputPrefix = twoEasyIniFile->getCharArray("Processing/Output_Prefix")) != QVariant(INVALID))
-      if ((outputPrefix = twoEasyIniFile->getString("Processing/Output_Prefix")) != QVariant(INVALID))
+   if ((outputPrefix = twoEasyIniFile->getString("Processing/Output_Prefix")) != QVariant(INVALID))
    {
       qDebug() << "outputPrefix = " << outputPrefix;
       ui->outputPrefix->setText(outputPrefix);

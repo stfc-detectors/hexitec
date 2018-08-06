@@ -10,14 +10,18 @@ public:
    void setPixelGridSize(int pixelGridSize);
 
    virtual void processEnergies(uint16_t *frame);
+   virtual void processEnergies(double *frame);
 
 protected:
   void calculateChargedSharing(uint16_t *frame);
+  void calculateChargedSharing(double *frame);
 
 private:
   void processDiscriminationRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
   void processAdditionRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
   void setChargedSharingMode(ChargedSharingMode chargedSharingMode);
+  void processDiscriminationRewritten(double *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
+  void processAdditionRewritten(double *extendedFrame, int extendedFrameRows, int startPosn, int endPosn);
   /// Debug function(s)
   void showFrameSubset(uint16_t *frame, int offset);
   void showCsdFrameSubset(uint16_t  *extendedFrame, int offset);

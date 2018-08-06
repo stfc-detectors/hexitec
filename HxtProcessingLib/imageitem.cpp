@@ -16,7 +16,7 @@ ImageItem::ImageItem(const char *filename)
 
 ImageItem::~ImageItem()
 {
-   delete filename;
+//   delete filename;	// Prevent crash in HexitecGigE GUI
 }
 
 void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)

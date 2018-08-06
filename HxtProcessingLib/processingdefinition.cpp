@@ -22,9 +22,9 @@ ProcessingDefinition::~ProcessingDefinition()
    delete outputPrefix;
    delete gradientFilename;
    delete interceptFilename;
-   delete gradientValue;
-   delete interceptValue;
-   delete thresholdPerPixel;
+   free(gradientValue);
+   free(interceptValue);
+   free(thresholdPerPixel);
 }
 
 void ProcessingDefinition::setThresholdMode(ThresholdMode threshholdMode)

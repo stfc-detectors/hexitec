@@ -79,13 +79,12 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
 
 ImageProcessor::~ImageProcessor()
 {
-   //qDebug() << "~ImageProcessor Address: " << this;
    delete filenameBin;
    delete filenameHxt;
    delete filenameCsv;
 }
 
-void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *result, const char* filenameBin, const char* filenameHxt, const char *filenameCsv)
+void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *result, const char* filenameBin, const char* filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
    char *bufferStart;
@@ -108,7 +107,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process((uint16_t *)frameIterator, &hxtMap);
-                  hxtGenerator->processEnergies((uint16_t *)result);
+                  hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -135,6 +134,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator);
+                  hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -157,7 +157,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, uint16_t *r
    }
 }
 
-void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, uint16_t *result,
+void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, double *result,
                                            const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
@@ -185,14 +185,13 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             frameIterator = bufferStart;
             if (frameIterator != NULL)
             {
-
                for (unsigned long i = 0; i < validFrames; i++)
                {
 //                  qtTime.restart();
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
 //                  processTime = qtTime.elapsed();
 //                  qtTime.restart();
-                  hxtGenerator->processEnergies((uint16_t *)result);
+                  hxtGenerator->processEnergies(result);
 //                  energiesTime = qtTime.elapsed();
                   frameIterator += frameSize;
                   processedFrameCount++;
@@ -224,7 +223,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue);
-                  hxtGenerator->processEnergies((uint16_t *)result);
+                  hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -257,7 +256,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
 }
 
 
-void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, uint16_t *result,
+void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, double *result,
                                           const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
@@ -283,7 +282,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
-                  hxtGenerator->processEnergies((uint16_t *)result);
+                  hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -310,6 +309,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                for (unsigned long i = 0; i < validFrames; i++)
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdPerPixel);
+                  hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -337,7 +337,8 @@ void ImageProcessor::handleProcess()
    GeneralFrameProcessor *fp;
    int thresholdValue = 0;
    uint16_t *thresholdPerPixel = NULL;
-   uint16_t *result = NULL;
+   double *result = NULL;
+
    filenameBin = new char[1024];
    filenameHxt = new char[1024];
    filenameCsv = new char[1024];
@@ -418,12 +419,16 @@ void ImageProcessor::handleProcess()
    }
    while(bBusy);
 
-   /*qDebug() << this << " IP::handleProcess()  - All done now.";*/
-
    delete imageItem;
    delete fp;
-   delete hxtGenerator;	/// Memory leak; Freeing this memory would crash GUI but test.exe would be fine
-   hxtGenerator = NULL;
+   //// Memory Leak versus calibration crash: If hxtGenerator is deleted, test.exe / HexitecGigE GUI
+   ///   will crash if Calibration selected with bins: 0 / 200 / 0.25
+   ///   (No crash with bins: 0 / 8000 / 100; nor without calibration selected)
+//   qDebug() << "IP::handleProcess() About to delete hxtGenerator";
+   qDebug() << "IP::handleProcess() Deleting hxtGenerator causes a crash, avoiding it for now..";
+//   delete hxtGenerator;	/// Memory leak; Freeing this memory would crash GUI but test.exe seems fine
+//   hxtGenerator = NULL;
+
    imageItem = NULL;
 }
 

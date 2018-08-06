@@ -8,6 +8,12 @@ HxtSumGenerator::HxtSumGenerator(int nRows, int nCols, ProcessingDefinition *pro
 
 void HxtSumGenerator::processEnergies(uint16_t *frame)
 {
-   hxtItem->addFrameDataToHistogramWithSum(frame, thresholdValue);
+   hxtItem->addFrameDataToHistogramWithSum(frame, 1);
+   incrementProcessedEnergyCount();
+}
+
+void HxtSumGenerator::processEnergies(double *frame)
+{
+   hxtItem->addFrameDataToHistogramWithSum(frame);
    incrementProcessedEnergyCount();
 }
