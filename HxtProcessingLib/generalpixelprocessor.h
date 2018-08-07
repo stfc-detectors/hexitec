@@ -25,30 +25,34 @@ public:
    void setInterceptValue(double *gradientValue);
    double *getGradientValue();
    double *getInterceptValue();
+   /// Need to change PixelProcessorFrame::lastRe_ordered size, but as member not part of parent,
+   ///  and PixelProcessorFrame object only known at program execution, we need a virtual function here
+   virtual void resetLastRe_orderedSize();
+   ///
 
-   uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+   double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
                           uint16_t *frame);
-   virtual uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+   virtual double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
                                   uint16_t *frame, uint16_t thresholdValue);
-   virtual uint16_t *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
+   virtual double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
                                   uint16_t *frame, uint16_t *thresholdPerPixel);
 
-   virtual uint16_t *processFrame(uint16_t *frame,
+   virtual double *processFrame(uint16_t *frame,
               unordered_map<int, double>**pixelEnergyMapPtr);
-   virtual uint16_t *processFrame(uint16_t *frame, uint16_t thresholdValue,
+   virtual double *processFrame(uint16_t *frame, uint16_t thresholdValue,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
-   virtual uint16_t *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+   virtual double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
 
-   uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
-   virtual uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue);
-   virtual uint16_t *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPixel);
+   double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
+   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue);
+   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPixel);
 
-   uint16_t *processRe_orderFrame(uint16_t *frame, 
+   double *processRe_orderFrame(uint16_t *frame,
 				  unordered_map<int, double>**pixelEnergyMapPtr);
-   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
+   virtual double *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
                                                   unordered_map<int, double>**pixelEnergyMapPtr);
-   virtual uint16_t *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+   virtual double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
               unordered_map<int, double>**pixelEnergyMapPtr);
 
 protected:

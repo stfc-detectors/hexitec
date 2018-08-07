@@ -1,4 +1,6 @@
 #include "generalhxtgenerator.h"
+///
+#include <QDebug>
 
 GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
@@ -7,7 +9,6 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    frameSize = nRows * nCols;
    hxtItem = new HxtItem(nRows, nCols, processingDefinition->getBinStart(), processingDefinition->getBinEnd(), processingDefinition->getBinWidth());
 
-   pixelValue = NULL;
    processedEnergyCount = 0;
    hxtItem->setTotalEnergiesToProcess(0);
 
@@ -16,20 +17,8 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
-
-   if (pixelValue != NULL)
-   {
-      free(pixelRow);
-      free(pixelCol);
-      free(pixelValue);
-   }
    delete hxtItem;
-
-}
-
-void GeneralHxtGenerator::freeAllocedMemory()
-{
-   hxtItem->freeAllocedMemory();
+   hxtItem = NULL;
 }
 
 bool GeneralHxtGenerator::getFrameProcessingInProgress()
@@ -71,5 +60,3 @@ long long *GeneralHxtGenerator::getSummedHistogram()
 {
    return hxtItem->getSummedHistogram();
 }
-
-

@@ -72,6 +72,9 @@ void GigEDetector::constructorInit(const QObject *parent)
    prefix = "GigE_";
    xRes = 0;
    yRes = 0;
+   /// 20180625 - Initialising triggeringMode because of above
+   ///  xRes, yRes defaults no good; They cause detector error
+   triggeringMode = Triggering::NO_TRIGGERING;
    vCal = 0.5;
    uMid = 1.0;
    detCtrl = 0;
@@ -177,12 +180,20 @@ int GigEDetector::getTtlInput()
 
 void GigEDetector::handleSetTargetTemperature(double targetTemperature)
 {
-    int status = -1;
+   int status = -1;
 
-    this->targetTemperature = targetTemperature;
+   this->targetTemperature = targetTemperature;
 
-    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
-    showError("SetDAC", status);
+   try
+   {
+      status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
+      showError("SetDAC", status);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
 }
 
 void GigEDetector::setHV(double *voltage)
@@ -192,12 +203,20 @@ void GigEDetector::setHV(double *voltage)
 
 void GigEDetector::handleSetHV(double voltage)
 {
-    int status = -1;
+   int status = -1;
 
-    this->hvSetPoint = voltage;
+   this->hvSetPoint = voltage;
 
-    status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
-    showError("SetDAC", status);
+   try
+   {
+      status = SetDAC(detectorHandle, &vCal, &uMid, &hvSetPoint, &detCtrl, &targetTemperature, timeout);
+      showError("SetDAC", status);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
 }
 
 void GigEDetector::handleAppendTimestamp(bool appendTimestamp)
@@ -227,15 +246,33 @@ void GigEDetector::handleSetTriggerTimeout(double triggerTimeout)
 
 int GigEDetector::initialiseConnection()
 {
-   int status = initialise();
-   RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   int status = -1;
+   try
+   {
+      status = initialise();
+      RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
    return status;
 }
 
 int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
 {
-   int status = initialise();
-   RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   int status = -1;
+   try
+   {
+      status = initialise();
+      RegisterTransferBufferReadyCallBack(detectorHandle, bufferCallBack);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
    return status;
 }
 
@@ -259,7 +296,7 @@ int GigEDetector::initialise(Triggering triggering)
 
    status = InitDevice(&detectorHandle, deviceDescriptor, &pleoraErrorCode, pleoraErrorCodeStr,
                        &pleoraErrorCodeStrLen, pleoraErrorDescription, &pleoraErrorDescriptionLen);
-   showError("InitDevice", status);
+   showError("InitDevice", status);    /// showError() caught by either of the two ::initialseConnection() funcs
 
    status = GetDeviceInformation(detectorHandle, &deviceInfo);
    showError("GetDeviceInformation", status);
@@ -319,21 +356,29 @@ int GigEDetector::configure(bool triggeringSuspended)
 {
    LONG status = -1;
 
-   updateState(INITIALISING);
+   try
+   {
+      updateState(INITIALISING);
 
-   status = CloseSerialPort(detectorHandle);
-   status = ClosePipeline(detectorHandle);
-   status = CloseStream(detectorHandle);
+      status = CloseSerialPort(detectorHandle);
+      status = ClosePipeline(detectorHandle);
+      status = CloseStream(detectorHandle);
 
-   status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d);
-   showError("OpenSerialPort", status);
+      status = OpenSerialPort(detectorHandle, 2, 2048, 1, 0x0d);
+      showError("OpenSerialPort", status);
 
-   status = OpenStream(detectorHandle);
-   showError("OpenStream", status);
+      status = OpenStream(detectorHandle);
+      showError("OpenStream", status);
 
-   status = configureDetector(triggeringSuspended);
+      status = configureDetector(triggeringSuspended);
 
-   updateState(READY);
+      updateState(READY);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
 
    return status;
 }
@@ -358,7 +403,7 @@ int GigEDetector::configureDetector(bool triggeringSuspended)
          qDebug() << "CONFIGURE: No Triggering";
          status = ConfigureDetectorWithTrigger(detectorHandle, &sensorConfig, &operationMode, &systemConfig,
                                     &xRes, &yRes, &frameTime, &collectDcTime, timeOut, AS_CONTROL_DISABLED, AS_CONTROL_DISABLED);
-         showError( "ConfigureDetector", status);
+         showError( "ConfigureDetector", status);  /// showError() caught by ::configure()
          break;
       case Triggering::STANDARD_TRIGGERING:
          qDebug() << "CONFIGURE: Standard Triggering";
@@ -388,18 +433,25 @@ int GigEDetector::terminateConnection()
 {
    LONG status = -1;
 
-   status = CloseSerialPort(detectorHandle);
-   showError( "CloseSerialPort", status);
+   try
+   {
+      status = CloseSerialPort(detectorHandle);
+      showError( "CloseSerialPort", status);
 
-   status = ClosePipeline(detectorHandle);
-   showError( "ClosePipeline", status);
+      status = ClosePipeline(detectorHandle);
+      showError( "ClosePipeline", status);
 
-   status = CloseStream(detectorHandle);
-   showError( "CloseStream", status);
+      status = CloseStream(detectorHandle);
+      showError( "CloseStream", status);
 
-   status = ExitDevice(detectorHandle);
-   showError( "ExitDevice", status);
-
+      status = ExitDevice(detectorHandle);
+      showError( "ExitDevice", status);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
    updateState(IDLE);
 
    return status;
@@ -412,7 +464,7 @@ int GigEDetector::getDetectorValues(double *rh, double *th, double *tasic, doubl
     UCHAR t1, t2, t3;
 
     status = ReadEnvironmentValues(detectorHandle, rh, th, tasic, tdac, t, timeout);
-    showError("ReadEnvironmentValues", status);
+    showError("ReadEnvironmentValues", status);    /// Caught by DetectorMonitor's calling funcs
 
     status = ReadOperatingValues(detectorHandle, &v3_3, &hvMon, &hvOut, &v1_2, &v1_8, &v3, &v2_5, &v3_31n, &v1_651n, &v1_8ana, &v3_8ana, &peltierCurrent, &ntcTemperature, timeout);
     showError("ReadOperatingValues", status);
@@ -449,7 +501,7 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
    // Unmodified:
    //status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution, yResolution, 0, 0, "One", "Off");
    status = SetFrameFormatControl(detectorHandle, pArg2, xResolution, yResolution, 0, 0, pArg7, pArg8);
-   showError( "SetFrameFormatControl", status);
+   showError( "SetFrameFormatControl", status);    /// showError() catch by ::configure(), ::initialise() respectively
    frameSize = xResolution * xResolution * 2;
 
    return status;
@@ -466,6 +518,7 @@ void GigEDetector::collectImage()
    getImages(0, 0);
 }
 
+// TODO: Why not use switch statement?
 void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, int ival1, int ival2)
 {
    int status;
@@ -503,7 +556,7 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    }
    else if (command == COLLECT_OFFSETS)
    {
-
+        // TODO: 20180 618, Not called anywhere
    }
 
    else if (command == ABORT)
@@ -661,6 +714,7 @@ void GigEDetector::handleExecuteOffsets()
       updateState(READY);
    }
 }
+
 void GigEDetector::collectOffsets()
 {
    updateState(OFFSETS);
@@ -672,9 +726,16 @@ void GigEDetector::collectOffsets()
 LONG GigEDetector::collectOffsetValues()
 {
    int status = -1;
-
-   status = CollectOffsetValues(detectorHandle, 1000, collectDcTime);								// make sure to have stable operating conditions (high voltage, temperature, x-ray turned off)
-   showError("CollectOffsetValues", status);
+   try
+   {
+      status = CollectOffsetValues(detectorHandle, 1000, collectDcTime);								// make sure to have stable operating conditions (high voltage, temperature, x-ray turned off)
+      showError("CollectOffsetValues", status);
+   }
+   catch (DetectorException &ex)
+   {
+      emit writeError(ex.getMessage());
+      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+   }
 
    return 0;
 }
@@ -706,9 +767,23 @@ void GigEDetector::acquireImages(bool startOfImage)
 
    if (triggerConfigMode == NO_TRIGGERING)
    {
-      status = SetFrameTimeOut(detectorHandle, frameTimeout);
-      status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
-      showError("AcquireFrames", status);
+      /// 20180627: Put these 3 lines within try, catch
+      ///   otherwise any error will crash showError() call
+      try
+      {
+         status = SetFrameTimeOut(detectorHandle, frameTimeout);
+         status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, frameTimeout);
+         showError("AcquireFrames", status);
+      }
+      catch (DetectorException &ex)
+      {
+         QString message = "No Triggering collection terminated: " + ex.getMessage();
+         qDebug() << "No Triggering collection aborted";
+         emit writeError(message);
+         remainingFrames = 0;
+         emit cancelDataCollection();
+      }
+      /// End of added try, catch block
 ///SHOULD THIS BE ADDED???
       if (mode == CONTINUOUS)
       {
@@ -718,10 +793,11 @@ void GigEDetector::acquireImages(bool startOfImage)
    }
    else
    {
-      status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
-      showError("SetTriggeredFrameCount", status);
       try
       {
+         status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
+         showError("SetTriggeredFrameCount", status);
+
          status = SetFrameTimeOut(detectorHandle, frameTimeout);
          status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, triggerTimeout);
          showError("AcquireFrames Triggered", status);

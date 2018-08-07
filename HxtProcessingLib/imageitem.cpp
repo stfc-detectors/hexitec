@@ -3,18 +3,20 @@
 
 using namespace std;
 
-ImageItem::ImageItem(const char *filename, int nRows, int nCols)
+ImageItem::ImageItem(const char *filename)
 {
    this->filename = new char[1024];
    strcpy(this->filename, filename);
    lock_guard<mutex> lock(iiMutex);
    this->processedFrameCount = 0;
    bufferItem = NULL;
+   // Free filename, memory originally allocated in ProcBuffGen::handlePostProcessImages()
+//   delete filename;
 }
 
 ImageItem::~ImageItem()
 {
-   delete filename;
+//   delete filename;	// Prevent crash in HexitecGigE GUI
 }
 
 void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
@@ -47,7 +49,7 @@ char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
    return address;
 }
 
-int ImageItem::getBufferQueueSize()
+size_t ImageItem::getBufferQueueSize()
 {
    lock_guard<mutex> lock(iiMutex);
    return bufferQueue.size();

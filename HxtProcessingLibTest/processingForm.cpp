@@ -65,7 +65,7 @@ void ProcessingForm::initialiseProcessingForm()
    IniFile *twoEasyIniFile;
 
    qDebug() <<"twoEasyFilename = " << twoEasyFilename;
-   char *filename =  new char[1024];
+   QString filename;
    char *gradientFilename =  new char[1024];
    char *interceptFilename =  new char[1024];
    QString outputPrefix;
@@ -82,7 +82,7 @@ void ProcessingForm::initialiseProcessingForm()
    int rows = 80;
    int columns = 80;
 
-   strcpy(filename, "DEFAULT");
+   filename = "DEFAULT";
    ui->thresholdModeComboBox->setCurrentIndex(1);
    ui->thresholdFile->setText("");
    ui->energyCalibrationCheckBox->setChecked(true);
@@ -209,10 +209,12 @@ void ProcessingForm::initialiseProcessingForm()
    {
       ui->chargedSharingComboBox->setCurrentText(chargedSharingOptionString);
    }
-   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_grid_Option")) != QVariant(INVALID))
+   if ((pixelGridOptionString = twoEasyIniFile->getString("Processing/Pixel_Grid_Option")) != QVariant(INVALID))
    {
       ui->pixelGridComboBox->setCurrentText(pixelGridOptionString);
    }
+
+   filename = twoEasyIniFile->getCharArray("Processing/Output_Directory");
 
    if ((filename = twoEasyIniFile->getCharArray("Processing/Output_Directory")) != QVariant(INVALID))
    {
@@ -220,10 +222,7 @@ void ProcessingForm::initialiseProcessingForm()
    }
    ui->outputDirectory->setText(defaultDirectory);
 
-   strcpy(filename, "DEFAULT");
-
-//   if ((outputPrefix = twoEasyIniFile->getCharArray("Processing/Output_Prefix")) != QVariant(INVALID))
-      if ((outputPrefix = twoEasyIniFile->getString("Processing/Output_Prefix")) != QVariant(INVALID))
+   if ((outputPrefix = twoEasyIniFile->getString("Processing/Output_Prefix")) != QVariant(INVALID))
    {
       qDebug() << "outputPrefix = " << outputPrefix;
       ui->outputPrefix->setText(outputPrefix);
@@ -234,7 +233,6 @@ void ProcessingForm::initialiseProcessingForm()
    }
 
 
-   strcpy(filename, "DEFAULT");
 
    if ((inputFilesList = twoEasyIniFile->getString("Processing/Input_File_List")) != QVariant(INVALID))
    {
@@ -265,16 +263,15 @@ void ProcessingForm::initialiseProcessingForm()
 
 void ProcessingForm::initialise()
 {
-   qDebug()<< "ProcessingForm::initialise()";
    setThresholdParameters();
 }
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId();
+   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId() << QTime::currentTime();
    emit processImages(nRows, nCols);
    guiBusy();
-   qDebug() << "PROCESSING CONTINUING!!!";
+//   qDebug() << "PROCESSING CONTINUING!!!";
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)
@@ -455,10 +452,6 @@ int ProcessingForm::getFrameSize()
    return frameSize;
 }
 
-void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
-{
-}
-
 void ProcessingForm::setChargedSharingOptions(int chargedSharingOption)
 {
    this->chargedSharingOption = chargedSharingOption;
@@ -492,13 +485,13 @@ void ProcessingForm::setChargedSharingParameters()
 
 void ProcessingForm::setInputFilesList()
 {
-   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", "Raw Data (*.bin)");
+   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "D://Data//", "Raw Data (*.bin)");
    ui->inputFilesList->setText(source.join(", "));
 }
 
 void ProcessingForm::setOutputDirectory()
 {
-   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//", QFileDialog::ShowDirsOnly);
+   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "D://Data//BinMe//", QFileDialog::ShowDirsOnly);
    ui->outputDirectory->setText(source);
 }
 

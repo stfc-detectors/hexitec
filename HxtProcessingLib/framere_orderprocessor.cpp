@@ -5,61 +5,44 @@ FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
 {
 }
 
-uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
+
+double *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr,
                                           uint16_t *frame)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame);
 }
 
-uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
+
+double *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr,
                                           uint16_t *frame, uint16_t thresholdValue)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdValue);
 }
 
-uint16_t *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, 
-                                          uint16_t *frame, uint16_t *thresholdPerPix)
+
+double *FrameRe_orderProcessor::process(unordered_map<int, double>**pixelRawValMapPtr,
+                                          uint16_t *frame, uint16_t *thresholdPerPixel)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdPerPix);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(pixelRawValMapPtr, frame, thresholdPerPixel);
 }
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame,
+
+
+double *FrameRe_orderProcessor::process(uint16_t *frame,
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(frame, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(frame, pixelEnergyMapPtr);
 }
 
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdValue,
+
+double *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t thresholdValue,
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(frame, thresholdValue, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(frame, thresholdValue, pixelEnergyMapPtr);
 }
 
-uint16_t *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix,
+
+double *FrameRe_orderProcessor::process(uint16_t *frame, uint16_t *thresholdPerPixel,
                                           unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processRe_orderFrame(frame, thresholdPerPix, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processRe_orderFrame(frame, thresholdPerPixel, pixelEnergyMapPtr);
 }

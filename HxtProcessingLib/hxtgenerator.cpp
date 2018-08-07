@@ -11,11 +11,8 @@ HxtGenerator::HxtGenerator(int nRows, int nCols, ProcessingDefinition *processin
    }
 }
 
-void HxtGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
+void HxtGenerator::processEnergies(double *frame)
 {
-   hxtItem->addToHistogram(*pixelEnergyMap);
-   incrementProcessedEnergyCount();
-   delete pixelEnergyMap;
+    hxtItem->addFrameDataToHistogram(frame);
+    incrementProcessedEnergyCount();
 }
-
-

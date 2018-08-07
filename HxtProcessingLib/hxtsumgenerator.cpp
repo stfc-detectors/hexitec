@@ -6,9 +6,8 @@ HxtSumGenerator::HxtSumGenerator(int nRows, int nCols, ProcessingDefinition *pro
 
 }
 
-void HxtSumGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
+void HxtSumGenerator::processEnergies(double *frame)
 {
-   hxtItem->addToHistogramWithSum(*pixelEnergyMap);
+   hxtItem->addFrameDataToHistogramWithSum(frame);
    incrementProcessedEnergyCount();
-   delete pixelEnergyMap;
 }

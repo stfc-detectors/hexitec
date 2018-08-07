@@ -24,8 +24,6 @@ private:
    IniFile *twoEasyIniFile;
    QThread *pbgThread;
    QMutex mutex;
-//   QList<ImageProcessor *>imageProcessorList;
-   QList<ImageProcessorHandler *>imageProcessorHandlerList;
    QList<char *>processingFilenameList;
    ImageProcessor *currentImageProcessor;
    ImageProcessorHandler *currentImageProcessorHandler;
@@ -45,21 +43,16 @@ signals:
    void fileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void returnBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
-   void processingComplete(long long totalFramesAcquired);
    void processingComplete();
    void hxtFileWritten(unsigned short *buffer, QString filename);
    void invalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
 
 public slots:
-   void handleProcessImages();
    void handlePostProcessImages(int nRows, int nCols);
    void handleImageStarted(char *filename);
-//   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames, int mode);
-   void handleTransferBufferReady(unsigned char *transferBuffer, unsigned long validFrames);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleProcessingComplete();
-   void handleHxtFileWritten(char *buffer, const char * filename);
    void handleHxtFileWritten();
 
    void handleConfigureSensor(int nRows, int nCols);
@@ -83,7 +76,6 @@ public slots:
    void handleConfigureProcessing(QStringList inputFilesList,
                                   QString outputDirectory,
                                   QString outputPrefix);
-   void handleProcessingComplete(ImageProcessor *completedImageProcessor, long long processedFrameCount);
 };
 
 #endif // PROCESSINGBUFFERGENERATOR_H

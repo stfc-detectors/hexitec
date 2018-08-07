@@ -40,7 +40,6 @@ public:
 
    HxtItem(int nRows, int nCols, long long binStart, long long binEnd, double binWidth);
    ~HxtItem();
-   void freeAllocedMemory();
    void initialiseTotalSpectrum();
    void enqueuePixelEnergy(double *pixelEnergy);
    double *getNextPixelEnergy();
@@ -53,6 +52,10 @@ public:
    long long getTotalEnergiesToProcess();
    void addToHistogram(unordered_map <int, double>pixelEnergyMap);
    void addToHistogramWithSum(unordered_map <int, double>pixelEnergyMap);
+   ///
+   void addFrameDataToHistogram(double *frame);
+   void addFrameDataToHistogramWithSum(double *frame);
+   ///
    HxtV3Buffer *getHxtV3Buffer();
    double *getHxtV3AllData();
    double *getEnergyBin();

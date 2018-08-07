@@ -2,7 +2,8 @@
 
 #include <iostream>
 #include <fstream>
-
+//
+#include <QDebug>
 GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
    if (nextFrameCorrection)
@@ -23,7 +24,9 @@ GeneralFrameProcessor::~GeneralFrameProcessor()
 void GeneralFrameProcessor::setFrameSize(int frameSize)
 {
    pixelProcessor->setFrameSize(frameSize);
+   pixelProcessor->resetLastRe_orderedSize();
 }
+
 
 void GeneralFrameProcessor::setGradients(double *gradientValue)
 {

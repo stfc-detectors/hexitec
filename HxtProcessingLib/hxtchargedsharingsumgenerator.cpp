@@ -6,10 +6,10 @@ HxtChargedSharingSumGenerator::HxtChargedSharingSumGenerator(int nRows, int nCol
 
 }
 
-void HxtChargedSharingSumGenerator::processEnergies(unordered_map <int, double>*pixelEnergyMap)
+void HxtChargedSharingSumGenerator::processEnergies(double *frame)
 {
-   calculateChargedSharing(pixelEnergyMap);
-   hxtItem->addToHistogramWithSum(*pixelEnergyMap);
+   calculateChargedSharing(frame);
+   hxtItem->addFrameDataToHistogramWithSum(frame);
    incrementProcessedEnergyCount();
-   delete pixelEnergyMap;
 }
+

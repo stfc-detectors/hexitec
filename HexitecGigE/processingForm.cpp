@@ -1,3 +1,4 @@
+
 #include "processingForm.h"
 #include "ui_processingForm.h"
 #include "parameters.h"
@@ -69,8 +70,6 @@ void ProcessingForm::initialiseProcessingForm()
    QString interceptFilename;
    QString outputPrefix;
    QString boolString = "true";
-//   int nRows = 80;
-//   int nCols = 80;
    int rows = 80;
    int columns = 80;
    long long binStart = 0;
@@ -173,23 +172,19 @@ void ProcessingForm::initialiseProcessingForm()
    }
    if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
    {
-      qDebug() << "Set rows = " << rows;
       nRows = rows;
    }
    else
    {
-      qDebug() << "failed " << rows;
       nRows = 80;
    }
 
    if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
    {
-      qDebug() << "Set columns = " << columns;
       nCols = columns;
    }
    else
    {
-      qDebug() << "failed " << columns;
       nCols = 80;
    }
    frameSize = nRows * nCols;
@@ -287,7 +282,7 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!";
+   qDebug() << "ThreadID: " << QThread::currentThreadId() << "PROCESS BUTTON has been clicked!";
 //   emit processImages(nRows, nCols);
    guiBusy();
    emit processImages();
@@ -355,7 +350,7 @@ void ProcessingForm::setThresholdParameters()
 
 void ProcessingForm::setThresholdFile()
 {
-   QString source = QFileDialog::getOpenFileName(this, tr("Open Threshold File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Threshold File"), "C://Detector//");
    ui->thresholdFile->setText(source);
 }
 
@@ -427,13 +422,13 @@ void ProcessingForm::setEnergyCalibrationParameters()
 
 void ProcessingForm::setGradientsFile()
 {
-   QString source = QFileDialog::getOpenFileName(this, tr("Open Gradients File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Gradients File"), "C://Detector//");
    ui->gradientFilename->setText(source);
 }
 
 void ProcessingForm::setInterceptsFile()
 {
-   QString source = QFileDialog::getOpenFileName(this, tr("Open Intercepts File"), "C://karen//STFC//Technical//DSoFt_NewProcessingLib_Images//");
+   QString source = QFileDialog::getOpenFileName(this, tr("Open Intercepts File"), "C://Detector//");
    ui->interceptFilename->setText(source);
 }
 
@@ -467,7 +462,10 @@ void ProcessingForm::guiIdle()
    ui->processButton->setEnabled(true);
 }
 
-
+int ProcessingForm::getFrameSize()
+{
+   return frameSize;
+}
 
 //void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)
 //{
@@ -507,13 +505,13 @@ void ProcessingForm::setChargedSharingParameters()
 
 void ProcessingForm::setInputFilesList()
 {
-   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "C://temp//QD_HxtGigE//hexitec//IniFiles//", "Raw Data (*.bin)");
+   QStringList source = QFileDialog::getOpenFileNames(this, tr("Open Input Files"), "D://Data//", "Raw Data (*.bin)");
    ui->inputFilesList->setText(source.join(", "));
 }
 
 void ProcessingForm::setOutputDirectory()
 {
-   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "C://temp//QD_HxtGigE//hexitec//IniFiles//", QFileDialog::ShowDirsOnly);
+   QString source = QFileDialog::getExistingDirectory(this, tr("Open Output Directory"), "D://Data//BinMe//", QFileDialog::ShowDirsOnly);
    ui->outputDirectory->setText(source);
 }
 

@@ -7,59 +7,41 @@ FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
 {
 }
 
-uint16_t *FrameProcessor::process(unordered_map<int, double> **pixelRawValMapPtr, uint16_t *frame)
+
+double *FrameProcessor::process(unordered_map<int, double> **pixelRawValMapPtr, uint16_t *frame)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame);
-
-   return result;
+   return pixelProcessor->processFrame(pixelRawValMapPtr, frame);
 }
 
-uint16_t *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue)
+
+double *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdValue);
-
-   return result;
+   return pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdValue);
 }
 
-uint16_t *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPix)
+
+double *FrameProcessor::process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPixel)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdPerPix);
-
-   return result;
+   return pixelProcessor->processFrame(pixelRawValMapPtr, frame, thresholdPerPixel);
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame,
+
+double *FrameProcessor::process(uint16_t *frame,
                                   unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(frame, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processFrame(frame, pixelEnergyMapPtr);
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
+
+double *FrameProcessor::process(uint16_t *frame, uint16_t thresholdValue,
                                   unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processFrame(frame, thresholdValue, pixelEnergyMapPtr);
 }
 
-uint16_t *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPix,
+
+double *FrameProcessor::process(uint16_t *frame, uint16_t *thresholdPerPixel,
                                   unordered_map<int, double>**pixelEnergyMapPtr)
 {
-   uint16_t *result;
-
-   result = pixelProcessor->processFrame(frame, thresholdPerPix, pixelEnergyMapPtr);
-
-   return result;
+   return pixelProcessor->processFrame(frame, thresholdPerPixel, pixelEnergyMapPtr);
 }

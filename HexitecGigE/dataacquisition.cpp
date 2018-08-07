@@ -3,17 +3,13 @@
 #include "detectorfilename.h"
 #include "detectorfactory.h"
 #include "voltageSourceFactory.h"
-//#include "processingwindow.h"
 #include "math.h"
-//#include "motor.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QDateTime>
 
 DataAcquisition *DataAcquisition::daqInstance = 0;
-//double DataAcquisition::motorPosition = 0;
-//QHash<QString, int> DataAcquisition::motorPositions;
 
 DataAcquisition::DataAcquisition(QObject *parent) :
    QThread(parent)
@@ -40,13 +36,6 @@ DataAcquisition::DataAcquisition(QObject *parent) :
    busy = false;
    rdaql.append(this);
 }
-
-//void DataAcquisition::positionChanged(Motor *motor, const QVariant & value)
-//{
-//   int position = value.toInt();
-//   QString name = motor->property("objectName").toString();
-//   motorPositions[name] = position;
-//}
 
 void DataAcquisition::configureTriggering(int triggeringMode)
 {
@@ -153,41 +142,41 @@ void DataAcquisition::run()
 {
    try
    {
-   if (mode == GigEDetector::GIGE_DEFAULT)
-   {
-      performGigEDefaultDataCollection();
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      daqStatus.getMinorStatus());
-   }
-   else if (mode == GigEDetector::CONTINUOUS)
-   {
-      if (dataAcquisitionDefinition->isTriggering())
+      if (mode == GigEDetector::GIGE_DEFAULT)
       {
-         performContinuousDataCollection(true);
+         performGigEDefaultDataCollection();
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                         daqStatus.getMinorStatus());
       }
-      else
+      else if (mode == GigEDetector::CONTINUOUS)
       {
-         performContinuousDataCollection();
+         if (dataAcquisitionDefinition->isTriggering())
+         {
+            performContinuousDataCollection(true);
+         }
+         else
+         {
+            performContinuousDataCollection();
+         }
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(daqStatus.getMajorStatus(),
+                         DataAcquisitionStatus::DONE);
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                         DataAcquisitionStatus::READY);
       }
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(daqStatus.getMajorStatus(),
-                      DataAcquisitionStatus::DONE);
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      DataAcquisitionStatus::READY);
-   }
-   else if (mode == GigEDetector::RECONFIGURE)
-   {
-      performTriggeringConfigure();
-   }
-/*   else if (mode == GigEDetector::FIXED)
-   {
-      performFixedDataCollection();
-      // TODO : would emiting this to DataAcquisition be better for thread safety
-      changeDAQStatus(DataAcquisitionStatus::IDLE,
-                      daqStatus.getMinorStatus());
-   }
-   */
+      else if (mode == GigEDetector::RECONFIGURE)
+      {
+         performTriggeringConfigure();
+      }
+      /*   else if (mode == GigEDetector::FIXED)
+      {
+         performFixedDataCollection();
+         // TODO : would emiting this to DataAcquisition be better for thread safety
+         changeDAQStatus(DataAcquisitionStatus::IDLE,
+                    daqStatus.getMinorStatus());
+      }
+      */
    }
    catch (DetectorException &ex)
    {
@@ -241,7 +230,7 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
-      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);
+      emit imageStarting(dataAcquisitionModel->getDaqCollectionDuration()/1000, repeatCount, nRepeat);  //TODO: 20180618, no connected slot
       performMonitorEnvironmentalValues();
 
       if (biasPriority)

@@ -2,7 +2,6 @@
 #include "voltageSourceFactory.h"
 #include "detectorfactory.h"
 #include "dataacquisition.h"
-//#include "processingwindow.h"
 #include "progressform.h"
 
 DataAcquisitionModel *DataAcquisitionModel::damInstance = 0;
@@ -14,8 +13,8 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
                                            QObject *parent) :
    QObject(parent)
 {
-//   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
-//   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
+   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
+   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
 
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
@@ -37,8 +36,8 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
    connectHV();
    connectObjectReserver();
 
-//   initialiseDetectorFilename(dataFilename);
-//   initialiseDetectorFilename(logFilename);
+   initialiseDetectorFilename(/*dataFilename*/);
+   initialiseDetectorFilename(/*logFilename*/);
    rdaqml.append((QObject *)this);
 }
 
