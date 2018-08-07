@@ -59,8 +59,8 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     ///   1206
     ///   1608 1609 1610 1611  ... 2007 2008 2009
     ///
-    ///   Where frame's first row is 400 pixels from position 402 - 800,
-    ///      second row is 803 - 1201, etc
+    ///   Where frame's first row is 400 pixels from position 403 - 802,
+    ///      second row is 805 - 1204, etc
 
     endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
 
