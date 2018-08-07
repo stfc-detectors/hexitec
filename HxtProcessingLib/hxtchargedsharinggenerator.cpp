@@ -1,10 +1,8 @@
 #include "hxtchargedsharinggenerator.h"
 #include <Windows.h>
-//
-#include <QDebug>
-#include <QTime>
-#include <QThread>
+// Used by debugging functions:
 #include <iostream>
+
 HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition) :
    HxtGenerator(nRows, nCols, processingDefinition)
 {
@@ -13,13 +11,6 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
 
    chargedSharingMode = processingDefinition->getChargedSharingMode();
    setPixelGridSize(processingDefinition->getPixelGridSize());
-}
-
-void HxtChargedSharingGenerator::processEnergies(uint16_t *frame)
-{
-   calculateChargedSharing(frame);
-   hxtItem->addFrameDataToHistogram(frame, 1);
-   incrementProcessedEnergyCount();
 }
 
 void HxtChargedSharingGenerator::processEnergies(double *frame)
@@ -35,179 +26,8 @@ void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
    directionalDistance = (int)pixelGridSize/2;
 }
 
-void HxtChargedSharingGenerator::calculateChargedSharing(uint16_t *frame)
-{
-    /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
-    int sidePadding           = 2 *  directionalDistance;
-    int extendedFrameRows    = (nRows + sidePadding);
-    int extendedFrameColumns = (nCols + sidePadding);
-    int extendedFrameSize    = extendedFrameRows * extendedFrameColumns;
-
-    uint16_t  *extendedFrame;
-    extendedFrame = (uint16_t *) calloc(extendedFrameSize, sizeof(uint16_t));
-
-    // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
-    int startPosn = extendedFrameColumns * directionalDistance + directionalDistance;
-    int endPosn   = extendedFrameSize;
-    int increment = extendedFrameColumns;
-    uint16_t *rowPtr = frame;
-
-//    qtTime.restart();
-    for (int i = startPosn; i < endPosn; )
-    {
-       memcpy(&(extendedFrame[i]), rowPtr, nCols * sizeof(uint16_t));
-       rowPtr = rowPtr + nCols;
-       i = i + increment;
-    }
-//    copyTime = qtTime.elapsed();
-
-    //// CSD example frame, with directionalDistance = 1
-    ///
-    ///      0    1    2    3  ...  399  400  401
-    ///    402  403  404  405  ...  801  802  803
-    ///    804  805  806  807  ... 1203 1204 1205
-    ///   1206
-    ///   1608 1609 1610 1611  ... 2007 2008 2009
-    ///
-    ///   Where frame's first row is 400 pixels from position 402 - 800,
-    ///      second row is 803 - 1201, etc
-
-    endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
-
-    switch (chargedSharingMode)
-    {
-       case ADDITION:
-//          qtTime.restart();
-          processAdditionRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-//          callTime = qtTime.elapsed();
-          break;
-       case DISCRIMINATION:
-//          qtTime.restart();
-          processDiscriminationRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-//          callTime = qtTime.elapsed();
-          break;
-       default:
-          break;
-    }
-
-    /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
-//    qtTime.restart();
-    rowPtr = frame;
-    for (int i = startPosn; i < endPosn; )
-    {
-       memcpy(rowPtr, &(extendedFrame[i]), nCols * sizeof(uint16_t));
-       rowPtr = rowPtr + nCols;
-       i = i + increment;
-    }
-//    recpTime = qtTime.elapsed();
-
-    free(extendedFrame);
-    extendedFrame = NULL;
-}
-
-void HxtChargedSharingGenerator::processDiscriminationRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
-{
-    uint16_t *neighbourPixel = NULL, *currentPixel = extendedFrame;
-    int rowIndexBegin = (-1*directionalDistance);
-    int rowIndexEnd   = (directionalDistance+1);
-    int colIndexBegin = rowIndexBegin;
-    int colIndexEnd   = rowIndexEnd;
-    bool bWipePixel = false;
-
-//    int pxlRow = -1, pxlCol = -1;
-    for (int i = startPosn; i < endPosn;  i++)
-    {
-       if (extendedFrame[i] != 0)
-       {
-          currentPixel = (&(extendedFrame[i]));       // Point at current (non-Zero) pixel
-
-          for (int row = rowIndexBegin; row < rowIndexEnd; row++)
-          {
-             for (int column = colIndexBegin; column < colIndexEnd; column++)
-             {
-
-                if ((row == 0) && (column == 0)) // Don't compare pixel with itself
-                   continue;
-
-                neighbourPixel = (currentPixel + (extendedFrameRows*row)  + column);
-
-                // Wipe this pixel if another neighbour was non-Zero
-                if (bWipePixel)
-                {
-                    *neighbourPixel = 0;
-                }
-                else
-                {
-                   // Is this the first neighbouring, non-Zero pixel?
-                   if (*neighbourPixel != 0)
-                   {
-                      // Yes; Wipe neighbour and current (non-zero) pixel
-                      *neighbourPixel = 0;
-                      *currentPixel = 0;
-                      bWipePixel = true;
-                   }
-                }
-             }
-          }
-          bWipePixel = false;
-       }
-    }
-}
-
-void HxtChargedSharingGenerator::processAdditionRewritten(uint16_t *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
-{
-    uint16_t *neighbourPixel = NULL, *currentPixel = extendedFrame;
-    int rowIndexBegin = (-1*directionalDistance);
-    int rowIndexEnd   = (directionalDistance+1);
-    int colIndexBegin = rowIndexBegin;
-    int colIndexEnd   = rowIndexEnd;
-    int maxValue;
-
-    for (int i = startPosn; i < endPosn;  i++)
-    {
-       if (extendedFrame[i] != 0)
-       {
-          maxValue = extendedFrame[i];
-          currentPixel = (&(extendedFrame[i]));
-          for (int row = rowIndexBegin; row < rowIndexEnd; row++)
-          {
-             for (int column = colIndexBegin; column < colIndexEnd; column++)
-             {
-                if ((row == 0) && (column == 0)) // Don't compare pixel with itself
-                   continue;
-
-                neighbourPixel = (currentPixel + (extendedFrameRows*row)  + column);
-                if (*neighbourPixel != 0)
-                {
-                   if (*neighbourPixel > maxValue)
-                   {
-                      *neighbourPixel += extendedFrame[i];
-                      maxValue = *neighbourPixel;
-                      extendedFrame[i] = 0;
-                   }
-                   else
-                   {
-                       extendedFrame[i] += *neighbourPixel;
-                       maxValue = extendedFrame[i];
-                       *neighbourPixel = 0;
-                   }
-                }
-             }
-          }
-       }
-    }
-}
-
-void HxtChargedSharingGenerator::setChargedSharingMode(ChargedSharingMode chargedSharingMode)
-{
-   this->chargedSharingMode = chargedSharingMode;
-}
-
-// -----
-
 void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
 {
-//   qDebug() << Q_FUNC_INFO;
     /// extendedFrame contains empty (1-2) pixel(s) on all 4 sides to enable charge sharing algorithm execution
     int sidePadding           = 2 *  directionalDistance;
     int extendedFrameRows    = (nRows + sidePadding);
@@ -215,7 +35,6 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     int extendedFrameSize    = extendedFrameRows * extendedFrameColumns;
 
     double  *extendedFrame;
-//    extendedFrame = (double *) calloc(extendedFrameSize, sizeof(double));
     extendedFrame = (double*) malloc(extendedFrameSize * sizeof(double));
     memset(extendedFrame, 0, extendedFrameSize * sizeof(double));
 
@@ -225,25 +44,12 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     int increment = extendedFrameColumns;
     double *rowPtr = frame;
 
-//    /// debug:
-//    for (int a=0; a < 80; a++)
-//       if ((frame[a]  > 0) && (a > 0) && (a < 4))
-//          cout << "BEFORE cp, frame [" << a << "]: " << frame[a] << endl << std::flush;
-    /// End of debug
-//    qtTime.restart();
     for (int i = startPosn; i < endPosn; )
     {
        memcpy(&(extendedFrame[i]), rowPtr, nCols * sizeof(double));
        rowPtr = rowPtr + nCols;
        i = i + increment;
     }
-
-//    /// debug:
-//    for (int a=0; a < 80; a++)
-//       if ((frame[a]  > 0) && (a > 0) && (a < 4))
-//          cout << "AFTER  cp, extFrm[" << a << "]: " << extendedFrame[a+startPosn] << endl << std::flush;
-//   /// End of debug
-//    copyTime = qtTime.elapsed();
 
     //// CSD example frame, with directionalDistance = 1
     ///
@@ -261,21 +67,16 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     switch (chargedSharingMode)
     {
        case ADDITION:
-//          qtTime.restart();
           processAdditionRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-//          callTime = qtTime.elapsed();
           break;
        case DISCRIMINATION:
-//          qtTime.restart();
           processDiscriminationRewritten(extendedFrame, extendedFrameRows, startPosn, endPosn);
-//          callTime = qtTime.elapsed();
           break;
        default:
           break;
     }
 
     /// Copy CSD frame (i.e. 402x402) back into originally sized frame (400x400)
-//    qtTime.restart();
     rowPtr = frame;
     for (int i = startPosn; i < endPosn; )
     {
@@ -283,12 +84,6 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
        rowPtr = rowPtr + nCols;
        i = i + increment;
     }
-//    recpTime = qtTime.elapsed();
-//    /// debug:
-//    for (int a=0; a < 80; a++)
-//       if ((frame[a]  > 0) && (a > 0) && (a < 4))
-//          cout << "AFTER CSD, (orig)frame[" << a << "]: " << frame[a] << endl << std::flush;
-//    /// End of debug
 
     free(extendedFrame);
     extendedFrame = NULL;
@@ -296,7 +91,6 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
 
 void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
 {
-//   qDebug() << Q_FUNC_INFO << "StartPosition: " << startPosn;
     double *neighbourPixel = NULL, *currentPixel = extendedFrame;
     int rowIndexBegin = (-1*directionalDistance);
     int rowIndexEnd   = (directionalDistance+1);
@@ -304,12 +98,10 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extended
     int colIndexEnd   = rowIndexEnd;
     bool bWipePixel = false;
 
-//    int pxlRow = -1, pxlCol = -1;
     for (int i = startPosn; i < endPosn;  i++)
     {
        if (extendedFrame[i] != 0)
        {
-//          qDebug() << "extendedFrame[" << i << "]: " << extendedFrame[i];
           currentPixel = (&(extendedFrame[i]));       // Point at current (non-Zero) pixel
 
           for (int row = rowIndexBegin; row < rowIndexEnd; row++)
@@ -336,7 +128,6 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extended
                       *neighbourPixel = 0;
                       *currentPixel = 0;
                       bWipePixel = true;
-//                      qDebug() << " ! [" << i << "], found neighbour at  row, column: " << row << column << " it's a wipeout";
                    }
                 }
              }
@@ -390,10 +181,12 @@ void HxtChargedSharingGenerator::processAdditionRewritten(double *extendedFrame,
     }
 }
 
+void HxtChargedSharingGenerator::setChargedSharingMode(ChargedSharingMode chargedSharingMode)
+{
+   this->chargedSharingMode = chargedSharingMode;
+}
 
-// -----
-
-/// DEBUGGING function:
+/// DEBUGGING functions:
 void HxtChargedSharingGenerator::showFrameSubset(uint16_t *frame, int offset)
 {
     std::cout << "showFrameSubset() - Displaying pixels surrounding [" << offset << "]" << endl;

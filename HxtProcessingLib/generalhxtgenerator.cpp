@@ -13,12 +13,10 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
    hxtItem->setTotalEnergiesToProcess(0);
 
    setFrameProcessingInProgress(true);
-//   qDebug() << Q_FUNC_INFO;
 }
 
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
-   qDebug() << "This is GHG's DTOR, let's free that memory in hxtItem..";
    delete hxtItem;
    hxtItem = NULL;
 }

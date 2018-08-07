@@ -22,7 +22,6 @@ public:
    double *getEnergyBin();
    long long *getSummedHistogram();
 
-   virtual void processEnergies(uint16_t *frame) = 0;
    virtual void processEnergies(double *frame) = 0;
 
 protected:

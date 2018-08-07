@@ -6,7 +6,6 @@ class HxtChargedSharingSumGenerator : public HxtChargedSharingGenerator
 {
 public:
    HxtChargedSharingSumGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
-   virtual void processEnergies(uint16_t *frame);
    virtual void processEnergies(double *frame);
 };
 

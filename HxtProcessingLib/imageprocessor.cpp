@@ -166,8 +166,6 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
 
    thresholdValue = processingDefinition->getThresholdValue();
 
-//   QTime qtTime;
-//   int accessTime = 0, processTime = 0, energiesTime = 0, binaryTime = 0, hxtTime = 0, spectrumTime = 0;
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
       while (inProgress &&((imageItem->getBufferQueueSize() == 0)))
@@ -187,12 +185,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-//                  qtTime.restart();
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
-//                  processTime = qtTime.elapsed();
-//                  qtTime.restart();
                   hxtGenerator->processEnergies(result);
-//                  energiesTime = qtTime.elapsed();
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
@@ -423,10 +417,8 @@ void ImageProcessor::handleProcess()
    delete fp;
    //// Memory Leak versus calibration crash: If hxtGenerator is deleted, test.exe / HexitecGigE GUI
    ///   will crash if Calibration selected with bins: 0 / 200 / 0.25
-   ///   (No crash with bins: 0 / 8000 / 100; nor without calibration selected)
-//   qDebug() << "IP::handleProcess() About to delete hxtGenerator";
-   qDebug() << "IP::handleProcess() Deleting hxtGenerator causes a crash, avoiding it for now..";
-//   delete hxtGenerator;	/// Memory leak; Freeing this memory would crash GUI but test.exe seems fine
+   ///   (No crash with bins: 0 / 8000 / 10; nor without calibration selected)
+//   delete hxtGenerator;	/// Memory leak; Freeing this memory would crash for most Calibration selection(s)
 //   hxtGenerator = NULL;
 
    imageItem = NULL;

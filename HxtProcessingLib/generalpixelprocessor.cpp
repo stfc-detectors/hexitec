@@ -6,10 +6,6 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
-//
-#include <QTime>
-#include <QThread>
-#include <QDebug>
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
@@ -182,10 +178,6 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
-//   QTime qtTime;
-//   int applyTime = 0;
-
-//   qtTime.restart();
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
       // re_orderedFrame is all the zeros, so need only concern ourselves with values above thresholdValue
@@ -194,9 +186,6 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
          re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
       }
    }
-//   applyTime = qtTime.elapsed();
-//   qDebug() << "finished calibration, i: " << i << " frameSize: " << GeneralPixelProcessor::frameSize;
-//   qDebug() << "GPP Calibrat: " << (applyTime) << " ms.";
 
    return re_orderedFrame;
 }
@@ -258,15 +247,6 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 
    for (unsigned int i = 0; i < frameSize; i++)
    {
-//      index = GeneralPixelProcessor::pixelMap[i];
-//      if (frame[i] < thresholdValue)
-//      {
-//         re_orderedFrame[index] = 0;
-//      }
-//      else
-//      {
-//         re_orderedFrame[index] = frame[i];
-//      }
       if (frame[i] >= thresholdValue)
       {
          index = GeneralPixelProcessor::pixelMap[i];
@@ -305,26 +285,16 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
    double *re_orderedFrame;
    pixelEnergyMapPtr = NULL;
    int index;
-//   qDebug() << Q_FUNC_INFO;
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
-//     if (((i > 0) && (i < 4)) &&  (frame[i] != 0))
-//       std::cout << " frame[" << i << "] = " << frame[i]  << " (double)frame: " << (double)frame[i];
-
       if (frame[i] != 0)
       {
          index = GeneralPixelProcessor::pixelMap[i];
          re_orderedFrame[index] = ( ((double)frame[i]) * gradientValue[index] + interceptValue[index]);
-//         if ((i > 0) && (i < 4))
-//            std::cout << " re_orderedFrame[" << index << "]  = " << re_orderedFrame[index] << "  = " << (double)frame[i]
-//                      << " * " << gradientValue[index] << " + " << interceptValue[index] << endl;
       }
-//      else
-//         if ((i > 0) && (i < 4))
-//            std::cout << endl;
    }
 
    return re_orderedFrame;

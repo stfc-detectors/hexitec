@@ -11,7 +11,6 @@ class HxtGenerator : public GeneralHxtGenerator
 public:
    HxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
 
-   virtual void processEnergies(uint16_t *frame);
    virtual void processEnergies(double *frame);
 };
 

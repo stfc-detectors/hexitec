@@ -174,68 +174,6 @@ void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
    hxtsProcessed++;
 }
 
-/// Written to support CS Algorithm rework
-void HxtItem::addFrameDataToHistogram(uint16_t *frame, uint16_t thresholdValue = 0)  /// No threshold needed!
-{
-    double *currentHistogram = &histogramPerPixel[0];
-    double thisEnergy;
-    int bin;
-    int pixel;
-
-    int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
-    for (int i = 0; i < frameSize; i++)
-    {
-       pixel = i;
-       thisEnergy = frame[i];
-       if (thisEnergy  < thresholdValue)
-           continue;
-       bin = (int)((thisEnergy / binWidth));
-       if (bin <= nBins)
-       {
-          (*(currentHistogram + (pixel * nBins) + bin))++;
-       }
-       else
-       {
- /*         qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
-                   << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
-       }
-    }
-
-    hxtsProcessed++;
-}
-
-void HxtItem::addFrameDataToHistogramWithSum(uint16_t *frame, uint16_t thresholdValue = 0) /// No threshold needed!
-{
-   double *currentHistogram = &histogramPerPixel[0];
-   long long *summed = &summedHistogram[0];
-   double thisEnergy;
-   int bin;
-   int pixel;
-
-   int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
-   for (int i = 0; i < frameSize; i++)
-   {
-      pixel = i;
-      thisEnergy = frame[i];
-      if ((thisEnergy < thresholdValue )|| (thisEnergy == 0))
-          continue;
-      bin = (int)((thisEnergy / binWidth));
-      if (bin <= nBins)
-      {
-         (*(currentHistogram + (pixel * nBins) + bin))++;
-         (*(summed + bin)) ++;
-      }
-      else
-      {
-/*         qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
-                  << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
-      }
-   }
-
-   hxtsProcessed++;
-}
-
-/// Written to support None-integer values
 void HxtItem::addFrameDataToHistogram(double *frame)
 {
     double *currentHistogram = &histogramPerPixel[0];
@@ -267,7 +205,6 @@ void HxtItem::addFrameDataToHistogram(double *frame)
 
 void HxtItem::addFrameDataToHistogramWithSum(double *frame)
 {
-//   qDebug() << Q_FUNC_INFO;
    double *currentHistogram = &histogramPerPixel[0];
    long long *summed = &summedHistogram[0];
    double thisEnergy;
@@ -279,28 +216,12 @@ void HxtItem::addFrameDataToHistogramWithSum(double *frame)
    {
       pixel = i;
       thisEnergy = frame[i];
-      ///
-//      if ((thisEnergy > 0) && (i > 0) && (i < 4))
-//      {
-//         bin = (int)((thisEnergy / binWidth));
-//         std::cout << i << " (bin <= nBins): " << (bin <= nBins) <<
-//                 " (thisEnergy aka) frame[" << i << "]: " << thisEnergy << " ie: " << frame[i] <<
-//                 std::endl;
-//         std::cout << "nbins: " << nBins << " bin: " << bin << " (bin <= nBins): " << (bin <= nBins) <<
-//                 " (thisEnergy aka) frame[" << i << "]: " << thisEnergy << " ie: " << frame[i] <<
-//                      std::endl;
-//      }
-      ///
+
       if (thisEnergy == 0)
           continue;
       bin = (int)((thisEnergy / binWidth));
       if (bin <= nBins)
       {
-//         if (i < 80)
-//            std::cout << "Dear Sir, incrementing  both histograms\n";
-//         if (( i % 5) == 1)
-//            std::cout << "histogram, pixel: " << pixel << "\n" << std::flush;
-//         std::cout << "histogram, pixel: " << pixel << " nBins: " << nBins << " bin: " << bin << "\n" << std::flush;
          (*(currentHistogram + (pixel * nBins) + bin))++;
          (*(summed + bin)) ++;
       }
@@ -310,7 +231,7 @@ void HxtItem::addFrameDataToHistogramWithSum(double *frame)
                   << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
       }
    }
-//   std::cout << "histoPerPixel cmt out\n" << std::flush;
+
    hxtsProcessed++;
 }
 

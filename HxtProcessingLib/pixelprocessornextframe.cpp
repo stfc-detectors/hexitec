@@ -86,7 +86,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    {
       if (frame[i] < thresholdValue || lastRe_orderedFrame[i] != 0)
       {
-         // double type frame's pixel already zero
+         // re_orderedFrame's pixel already zero
          // But must zero frame's corresponding pixel
          frame[i] = 0;
       }
