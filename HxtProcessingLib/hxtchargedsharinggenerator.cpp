@@ -144,7 +144,7 @@ void HxtChargedSharingGenerator::processAdditionRewritten(double *extendedFrame,
     int rowIndexEnd   = (directionalDistance+1);
     int colIndexBegin = rowIndexBegin;
     int colIndexEnd   = rowIndexEnd;
-    int maxValue;
+    double maxValue;
 
     for (int i = startPosn; i < endPosn;  i++)
     {

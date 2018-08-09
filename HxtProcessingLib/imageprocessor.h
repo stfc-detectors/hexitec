@@ -59,7 +59,7 @@ private:
    bool nextFrameCorrection;
    bool chargedSharing;
    bool totalSpectrum;
-   double *pixelEnergy;
+//   double *pixelEnergy;
    unordered_map<int, double> *hxtMap;
    char* filenameBin;
    char* filenameHxt;

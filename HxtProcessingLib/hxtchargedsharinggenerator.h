@@ -26,10 +26,10 @@ private:
   ///
   int pixelGridSize;
   int directionalDistance;
-  long long **pixelGrid;
-  double maxCharge;
+//  long long **pixelGrid;
+//  double maxCharge;
   double maxValue;
-  int maxIndex;
+//  int maxIndex;
   ChargedSharingMode chargedSharingMode;
 
 };

@@ -41,17 +41,9 @@ public:
    HxtItem(int nRows, int nCols, long long binStart, long long binEnd, double binWidth);
    ~HxtItem();
    void initialiseTotalSpectrum();
-   void enqueuePixelEnergy(double *pixelEnergy);
-   double *getNextPixelEnergy();
-   int getPixelEnergyQueueSize();
-   void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
-   unordered_map<int, double> *getNextPixelEnergyMap();
-   int getPixelEnergyMapQueueSize();
    void setTotalEnergiesToProcess(long long totalEnergiesToProcess);
    void incrementTotalEnergiesToProcess();
    long long getTotalEnergiesToProcess();
-   void addToHistogram(unordered_map <int, double>pixelEnergyMap);
-   void addToHistogramWithSum(unordered_map <int, double>pixelEnergyMap);
    ///
    void addFrameDataToHistogram(double *frame);
    void addFrameDataToHistogramWithSum(double *frame);
@@ -70,9 +62,6 @@ private:
    void setBinEnd(const long long value);
    double getBinWidth() const;
    void setBinWidth(double value);
-   double *pixelEnergy;
-   double *pixelRawVals;
-   unordered_map<int, double> *pixelEnergyMap;
    int frameSize;
    long long binStart;
    long long binEnd;
@@ -81,7 +70,6 @@ private:
    double *hxtBin;
    double *histogramPerPixel;
    long long *summedHistogram;
-   unsigned long histogramIndex;
    long long totalEnergiesToProcess;
    long long hxtsProcessed;
    void initialiseHxtBuffer(int nRows, int nCols);

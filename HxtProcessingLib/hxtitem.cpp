@@ -16,8 +16,6 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    hxtBin = NULL;
    initialiseHxtBuffer(nRows, nCols);
 
-   pixelEnergy = NULL;
-   pixelEnergyMap = NULL;
    summedHistogram = NULL;
    hxtsProcessed = 0;
 }
@@ -112,68 +110,7 @@ void HxtItem::setBinWidth(double value)
    binWidth = value;
 }
 
-void HxtItem::addToHistogram(unordered_map<int, double> pixelEnergyMap)
-{
-   double *currentHistogram = &histogramPerPixel[0];
-   double thisEnergy;
-   int bin;
-   int pixel;
-
-   unordered_map<int, double>::iterator it = pixelEnergyMap.begin();
-   unordered_map<int, double>::iterator itend = pixelEnergyMap.end();
-
-   while (it != itend)
-   {
-      pixel = it->first;
-      thisEnergy = it->second;
-      bin = (int)((thisEnergy / binWidth));
-      if (bin <= nBins)
-      {
-         (*(currentHistogram + (pixel * nBins) + bin))++;
-      }
-      else
-      {
-//         qDebug() << "BAD BIN = " << bin;
-      }
-      it++;
-   }
-
-   hxtsProcessed++;
-}
-
-
-void HxtItem::addToHistogramWithSum(unordered_map<int, double> pixelEnergyMap)
-{
-
-   double *currentHistogram = &histogramPerPixel[0];
-   long long *summed = &summedHistogram[0];
-   double thisEnergy;
-   int bin;
-   int pixel;
-
-   unordered_map<int, double>::iterator it = pixelEnergyMap.begin();
-   unordered_map<int, double>::iterator itend = pixelEnergyMap.end();
-
-   while (it != itend)
-   {
-      pixel = it->first;
-      thisEnergy = it->second;
-      bin = (int)((thisEnergy / binWidth));
-      if (bin <= nBins)
-      {
-         (*(currentHistogram + (pixel * nBins) + bin))++;
-         (*(summed + bin)) ++;
-      }
-      else
-      {
-//         qDebug() << "BAD BIN = " << bin;
-      }
-      it++;
-   }
-
-   hxtsProcessed++;
-}
-
+// Called when the user NOT selected spectrum option
 void HxtItem::addFrameDataToHistogram(double *frame)
 {
     double *currentHistogram = &histogramPerPixel[0];
@@ -203,6 +140,7 @@ void HxtItem::addFrameDataToHistogram(double *frame)
     hxtsProcessed++;
 }
 
+// Called when the user HAS selected spectrum option
 void HxtItem::addFrameDataToHistogramWithSum(double *frame)
 {
    double *currentHistogram = &histogramPerPixel[0];

@@ -12,8 +12,8 @@ class GeneralHxtGenerator
 public:
    GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinition *processingDefinition);
    ~GeneralHxtGenerator();
-   void enqueuePixelRawVals(double *pixelRawVals);
-   void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
+//   void enqueuePixelRawVals(double *pixelRawVals);
+//   void enqueuePixelEnergyMap(unordered_map<int, double> *pixelEnergyMap);
    void setFrameProcessingInProgress(bool inProgress);
    void incrementProcessedEnergyCount();
    long long getProcessedEnergyCount();
