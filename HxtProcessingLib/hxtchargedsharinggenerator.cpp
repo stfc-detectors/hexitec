@@ -40,7 +40,7 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
 
     // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
     int startPosn = extendedFrameColumns * directionalDistance + directionalDistance;
-    int endPosn   = extendedFrameSize;
+    int endPosn   = extendedFrameSize - extendedFrameColumns;
     int increment = extendedFrameColumns;
     double *rowPtr = frame;
 
@@ -62,6 +62,8 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     ///   Where frame's first row is 400 pixels from position 403 - 802,
     ///      second row is 805 - 1204, etc
 
+    // This change to end position brings it just one element sooner than the Soleil fix on line 43
+    //   but leaving this as is (path of least resistance)
     endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
 
     switch (chargedSharingMode)
