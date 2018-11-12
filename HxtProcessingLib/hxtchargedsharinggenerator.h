@@ -2,6 +2,9 @@
 #define HXTCHARGEDSHARINGGENERATOR_H
 
 #include "hxtgenerator.h"
+///
+#include <fstream>
+#include <sstream>
 
 class HxtChargedSharingGenerator : public HxtGenerator
 {
@@ -23,6 +26,9 @@ private:
   void showCsdFrameSubset(uint16_t  *extendedFrame, int offset);
   void showCsdFrameBinContents(int extendedFrameSize, uint16_t *extendedFrame, int bin);
   void showFrameBinContents(int frameSize, uint16_t *frame, int bin);
+  void writeFile(const char *buffer, unsigned long length, std::string filePrefix);
+  int debugFrameCounter;
+  std::ofstream outFile;
   ///
   int pixelGridSize;
   int directionalDistance;

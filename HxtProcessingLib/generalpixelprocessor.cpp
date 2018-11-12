@@ -6,6 +6,8 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
+//
+#include <QDebug>
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
@@ -20,6 +22,8 @@ GeneralPixelProcessor::GeneralPixelProcessor()
    }
    gradientValue = NULL;
    interceptValue = NULL;
+   ///
+   debugFrameCounter = 0;
 }
 
 void GeneralPixelProcessor::initialisePixelMap()
@@ -102,6 +106,19 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
          re_orderedFrame[i] = (double)frame[i];
       }
    }
+   ///
+//   std::ostringstream fileContents;
+//   fileContents << "------------------------------------------ frame " <<
+//                            debugFrameCounter << " ------------------------------------------\n";
+//   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++ )
+//   {
+//      if(re_orderedFrame[i] > 0)
+//         fileContents << "frame[" << i << "] = " << re_orderedFrame[i] << "\n";
+//   }
+//   std::string s  = fileContents.str();
+//   writeFile(s.c_str(), s.length());
+//   debugFrameCounter += 1;
+   ///
 
    return re_orderedFrame;
 }
@@ -296,6 +313,19 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
          re_orderedFrame[index] = ( ((double)frame[i]) * gradientValue[index] + interceptValue[index]);
       }
    }
+   ///
+//   std::ostringstream fileContents;
+//   fileContents << "------------------------------------------ frame " <<
+//                            debugFrameCounter << " ------------------------------------------\n";
+//   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++ )
+//   {
+//      if(re_orderedFrame[i] > 0)
+//         fileContents << "Cal[" << i << "] = " << re_orderedFrame[i] << "\n";
+//   }
+//   std::string s  = fileContents.str();
+//   writeFile(s.c_str(), s.length(), "All_540_frames_");
+//   debugFrameCounter += 1;
+   ///
 
    return re_orderedFrame;
 }
@@ -343,3 +373,11 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *t
 
    return re_orderedFrame;
 }
+
+//void GeneralPixelProcessor::writeFile(const char *buffer, unsigned long length, std::string filePrefix)
+//{
+//   std::string fname = filePrefix + /*std::to_string(debugFrameCounter) +*/ std::string("_HexitecGigE_Cal_detailed.txt");
+//   outFile.open(fname.c_str(), std::ofstream::app);
+//   outFile.write((const char *)buffer, length * sizeof(char));
+//   outFile.close();
+//}

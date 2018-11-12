@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+///
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -64,6 +67,10 @@ protected:
    double *interceptValue;
    uint16_t *lastFrame;
 
+   /// DEBUGGING:
+   int debugFrameCounter;
+   std::ofstream outFile;
+   void writeFile(const char *buffer, unsigned long length, std::string filePrefix);
 };
 
 #endif // GENREALPIXELPROCESSOR_H

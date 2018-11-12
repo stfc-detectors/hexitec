@@ -2,8 +2,7 @@
 
 #include <iostream>
 #include <fstream>
-//
-#include <QDebug>
+
 GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
 {
    if (nextFrameCorrection)

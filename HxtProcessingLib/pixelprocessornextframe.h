@@ -35,7 +35,8 @@ public:
 
 private:
    uint16_t  *lastRe_orderedFrame;
-
+   ///
+   void writeFile(const char *buffer, unsigned long length, std::string filePrefix);
 };
 
 

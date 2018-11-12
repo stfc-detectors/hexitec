@@ -11,6 +11,8 @@ HxtChargedSharingGenerator::HxtChargedSharingGenerator(int nRows, int nCols, Pro
 
    chargedSharingMode = processingDefinition->getChargedSharingMode();
    setPixelGridSize(processingDefinition->getPixelGridSize());
+   ///
+   debugFrameCounter = 0;
 }
 
 void HxtChargedSharingGenerator::processEnergies(double *frame)
@@ -40,7 +42,7 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
 
     // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
     int startPosn = extendedFrameColumns * directionalDistance + directionalDistance;
-    int endPosn   = extendedFrameSize - extendedFrameColumns;
+    int endPosn   = extendedFrameSize - (extendedFrameColumns*directionalDistance);
     int increment = extendedFrameColumns;
     double *rowPtr = frame;
 
@@ -66,6 +68,21 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     //   but leaving this as is (path of least resistance)
     endPosn = extendedFrameSize - (extendedFrameColumns * directionalDistance) - directionalDistance;
 
+    ///
+//    ostringstream preAlgorithmContents;
+//    preAlgorithmContents << "-------------- frame " << debugFrameCounter << " (Befor Algorithm) --------------\n";
+//    if (debugFrameCounter == 67)
+//    {
+//       for (int i = 0; i < nRows*nCols; i++ )
+//       {
+//          if(extendedFrame[i] > 0)
+//             preAlgorithmContents << "Before algorithm, CSA[" << i << "] = " << extendedFrame[i] << "\n";
+//       }
+//       std::string s  = preAlgorithmContents.str();
+//       writeFile(s.c_str(), s.length(), "BeforAlgorithm_");
+//    }
+    ///
+
     switch (chargedSharingMode)
     {
        case ADDITION:
@@ -86,7 +103,21 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
        rowPtr = rowPtr + nCols;
        i = i + increment;
     }
-
+    ///
+    ostringstream postAlgorithmContents;
+    postAlgorithmContents << "-------------- frame " << debugFrameCounter << " (Post Algorithm) --------------\n";
+////    if (debugFrameCounter == 67)
+//    {
+//       for (int i = 0; i < nRows*nCols; i++ )
+//       {
+//          if(extendedFrame[i] > 0)
+//             postAlgorithmContents << "Post  algorithm, CSA[" << i << "] = " << extendedFrame[i] << "\n";
+//       }
+//       std::string s  = postAlgorithmContents.str();
+//       writeFile(s.c_str(), s.length(), "All_540_frames_");
+//    }
+//    debugFrameCounter += 1;
+    ///
     free(extendedFrame);
     extendedFrame = NULL;
 }
@@ -102,7 +133,7 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extended
 
     for (int i = startPosn; i < endPosn;  i++)
     {
-       if (extendedFrame[i] != 0)
+       if (extendedFrame[i] > 0)
        {
           currentPixel = (&(extendedFrame[i]));       // Point at current (non-Zero) pixel
 
@@ -124,7 +155,7 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extended
                 else
                 {
                    // Is this the first neighbouring, non-Zero pixel?
-                   if (*neighbourPixel != 0)
+                   if (*neighbourPixel > 0)
                    {
                       // Yes; Wipe neighbour and current (non-zero) pixel
                       *neighbourPixel = 0;
@@ -150,7 +181,7 @@ void HxtChargedSharingGenerator::processAdditionRewritten(double *extendedFrame,
 
     for (int i = startPosn; i < endPosn;  i++)
     {
-       if (extendedFrame[i] != 0)
+       if (extendedFrame[i] > 0)
        {
           maxValue = extendedFrame[i];
           currentPixel = (&(extendedFrame[i]));
@@ -162,7 +193,7 @@ void HxtChargedSharingGenerator::processAdditionRewritten(double *extendedFrame,
                    continue;
 
                 neighbourPixel = (currentPixel + (extendedFrameRows*row)  + column);
-                if (*neighbourPixel != 0)
+                if (*neighbourPixel > 0)
                 {
                    if (*neighbourPixel > maxValue)
                    {
@@ -189,6 +220,14 @@ void HxtChargedSharingGenerator::setChargedSharingMode(ChargedSharingMode charge
 }
 
 /// DEBUGGING functions:
+void HxtChargedSharingGenerator::writeFile(const char *buffer, unsigned long length, std::string filePrefix)
+{
+   std::string fname = filePrefix + std::to_string(debugFrameCounter) + std::string("_HexitecGigE_CSA_detailed.txt");
+   outFile.open(fname.c_str(), std::ofstream::app);
+   outFile.write((const char *)buffer, length * sizeof(char));
+   outFile.close();
+}
+
 void HxtChargedSharingGenerator::showFrameSubset(uint16_t *frame, int offset)
 {
     std::cout << "showFrameSubset() - Displaying pixels surrounding [" << offset << "]" << endl;
