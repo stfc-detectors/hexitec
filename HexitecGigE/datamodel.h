@@ -20,8 +20,8 @@ class DataModel : public QAbstractItemModel
 public:
    friend class TreeItem;
 
-   DataModel(const QStringList &headers, const QString &data,
-             QObject *parent = 0);
+//   DataModel(const QStringList &headers, const QString &data,
+//             QObject *parent = 0);
    ~DataModel();
    static DataModel *instance();
 

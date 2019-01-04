@@ -44,7 +44,7 @@ public:
    string getDataDirectory();
    void collectOffsets();
    void setHV(double *voltage);
-   void setSaveRaw(bool *saveRaw);
+//   void setSaveRaw(bool *saveRaw);
    unsigned long long getRemainingFrames();
    DetectorState getState();
  
@@ -74,7 +74,7 @@ public:
    ULONGLONG setDataAcquisitionDuration(double imageAcquisitionDuration);
    void setTargetTemperature(double targetTemperature);
    void setHV(double voltage);
-   void setSaveRaw(bool saveRaw);
+//   void setSaveRaw(bool saveRaw);
    void setTriggeringMode(int triggeringMode);
    void setTtlInput(int ttlInput);
    int getTtlInput();
@@ -129,7 +129,7 @@ public slots:
    void handleSetTargetTemperature(double targetTemperature);
    void handleSetHV(double voltage);
    void handleAppendTimestamp(bool appendTimestamp);
-   void handleSaveRawChanged(bool saveRaw);
+//   void handleSaveRawChanged(bool saveRaw);
 //   void handleTriggeringSelectionChanged(int triggering);
    void handleSetTriggerTimeout(double triggerTimeout);
 
@@ -141,7 +141,7 @@ private:
    int frameSize;
    std::ofstream outFile;
    bool appendTimestamp;
-   bool saveRaw;
+//   bool saveRaw;
    QString errorMessage;
    bool triggeringAvailable;
    Triggering triggeringMode;

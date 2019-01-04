@@ -248,8 +248,6 @@ void DataAcquisitionModel::connectDataAcquisitionForm()
            dataAcquisition, SLOT(handleCancelReducedDataCollection()));
    connect(dataAcquisitionForm, SIGNAL(createLogFile(DetectorFilename *)),
            detectorMonitor, SLOT(createLogFile(DetectorFilename *)));
-   connect(dataAcquisitionForm, SIGNAL(saveRawChanged(bool)),
-           gigEDetector, SLOT(handleSaveRawChanged(bool)));
 }
 
 void DataAcquisitionModel::connectHV()

@@ -39,7 +39,8 @@ private:
 
    QMutex guiMutex;
    bool bMainWindowBusy;
-
+   ///
+   bool saveRaw;
 signals:
    void imageStarted(char *path);
    void imageStarted();
@@ -51,7 +52,8 @@ signals:
    void invalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
    /// Let MainWindow tell ImageProcessor object when ok send final buffer
    void mainWindowBusy(bool bBusy);
-
+   /// Fix: (Enable) save raw binary file
+   void saveRawChanged(bool bSaveRaw);
 public slots:
    void handlePostProcessImages();
    void handleImageStarted(char *filename);
@@ -83,6 +85,8 @@ public slots:
                                   QString outputDirectory,
                                   QString outputPrefix);
    void handleProcessingComplete();
+   ///
+   void handleSaveRawChanged(bool bSaveRaw);
 };
 
 #endif // PROCESSINGBUFFERGENERATOR_H

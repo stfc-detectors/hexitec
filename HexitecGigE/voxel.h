@@ -36,6 +36,8 @@ private:
     double meanY;
     double minY;
     double sumY;
+    ///
+    int iDebug;
 };
 
 #endif // VOXEL_H

@@ -28,12 +28,12 @@ DataModel::DataModel(QObject *parent)
    rootItem = new TreeItem();
 }
 
-DataModel::DataModel(const QStringList &headers, const QString &data,
-                     QObject *parent)
-   : QAbstractItemModel(parent)
-{
-   rootItem = new TreeItem();
-}
+//DataModel::DataModel(const QStringList &headers, const QString &data,
+//                     QObject *parent)
+//   : QAbstractItemModel(parent)
+//{
+//   rootItem = new TreeItem();
+//}
 
 DataModel::~DataModel()
 {

@@ -174,6 +174,9 @@ MainWindow::MainWindow()
    {
       dataAcquisitionFactory = DataAcquisitionFactory::instance(dataAcquisitionForm, detectorControlForm,
                                                                 progressForm, processingBufferGenerator, this);
+      /// Fix: Enable/disable save raw (binary file)
+      connect(dataAcquisitionForm, SIGNAL(saveRawChanged(bool)),
+              processingBufferGenerator, SLOT(handleSaveRawChanged(bool)));
    }
 
    if (activeDAQ)

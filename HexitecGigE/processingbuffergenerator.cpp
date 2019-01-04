@@ -30,6 +30,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
            this, SLOT(handleImageComplete(long long)));
 
    bMainWindowBusy = false;
+   saveRaw = true;
 }
 
 void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
@@ -43,6 +44,9 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
    connect(this, SIGNAL(mainWindowBusy(bool)),
            currentImageProcessor, SLOT(handleMainWindowBusy(bool)));
 
+   /// Enable/disable saving raw file (GUI only - test.exe not affected)
+   currentImageProcessor->setSaveRaw(saveRaw);
+
    HANDLE hxtHandle = currentImageProcessor->getHxtFileWrittenEvent();
    if (hxtHandle != NULL)
    {
@@ -52,6 +56,12 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
 
    currentHxtGenerator = currentImageProcessor->getHxtGenerator();
    qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
+}
+
+
+void ProcessingBufferGenerator::handleSaveRawChanged(bool bSaveRaw)
+{
+   saveRaw = bSaveRaw;
 }
 
 void ProcessingBufferGenerator::handleImageStarted(char *filename)

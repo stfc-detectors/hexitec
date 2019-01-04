@@ -81,7 +81,7 @@ void GigEDetector::constructorInit(const QObject *parent)
    targetTemperature = 24.0;
    hvSetPoint = 0;
    appendTimestamp = false;
-   saveRaw = true;
+//   saveRaw = true;
    triggeringAvailable = false;
    triggerTimeout = 60000.0;
    readIniFile(this->aspectFilename);
@@ -147,6 +147,7 @@ void GigEDetector::handleReturnBufferReady()
 
 void GigEDetector::handleReturnBufferReady(unsigned char *returnBuffer, unsigned long validFrames)
 {
+    /// This was already commented out by dSoft (hence saveRaw being redundant)
    /*
    if ((saveRaw) && (mode == CONTINUOUS))
    {
@@ -224,20 +225,20 @@ void GigEDetector::handleAppendTimestamp(bool appendTimestamp)
     this->appendTimestamp = appendTimestamp;
 }
 
-void GigEDetector::setSaveRaw(bool *saveRaw)
-{
-   this->saveRaw = *saveRaw;
-}
+//void GigEDetector::setSaveRaw(bool *saveRaw)
+//{
+//   this->saveRaw = *saveRaw;
+//}
 
 unsigned long long GigEDetector::getRemainingFrames()
 {
    return remainingFrames;
 }
 
-void GigEDetector::handleSaveRawChanged(bool saveRaw)
-{
-   this->saveRaw = saveRaw;
-}
+//void GigEDetector::handleSaveRawChanged(bool saveRaw)
+//{
+//   this->saveRaw = saveRaw;
+//}
 
 void GigEDetector::handleSetTriggerTimeout(double triggerTimeout)
 {

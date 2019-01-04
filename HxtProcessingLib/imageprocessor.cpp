@@ -75,6 +75,9 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    }
 
    setImageInProgress(true);
+   /// Fix: Ensure saveRaw (binary file) in Data Acquisition tab works again
+   saveRaw = true;
+   ///
 }
 
 ImageProcessor::~ImageProcessor()
@@ -112,7 +115,8 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                   processedFrameCount++;
                   free(result);
                }
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -139,7 +143,8 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                   processedFrameCount++;
                   free(result);
                }
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -192,7 +197,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   free(result);
                }
 //               qtTime.restart();
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
 //               binaryTime = qtTime.elapsed();
                if (hxtGeneration)
                {
@@ -222,7 +228,8 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   processedFrameCount++;
                   free(result);
                }
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                free(bufferStart);
                if (hxtGeneration)
                {
@@ -281,7 +288,8 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   processedFrameCount++;
                   free(result);
                }
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -308,7 +316,8 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                   processedFrameCount++;
                   free(result);
                }
-               writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+               if (saveRaw)
+                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -504,4 +513,9 @@ void ImageProcessor::writeCsvFile(double *energyBin, long long *summedHistogram,
    outFile << s;
    outFile.close();
 
+}
+
+void ImageProcessor::setSaveRaw(bool bSaveRaw)
+{
+   saveRaw = bSaveRaw;
 }
