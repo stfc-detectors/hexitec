@@ -19,11 +19,11 @@ Instructions for building the HexitecGigE source code
 
 The executable resulting from building the source code was built on Win 7, using Qt 5.6.2 (64 bit), Microsoft Visual Studio 2015 Professional and Windows SDK version 10.0.10586.0. Here's a table of confirmed working tool chains:
 
-Windows:       Qt:              MSVC:                                           Win SDK:
-Win 7,         5.6.2 (64 bit)   Microsoft Visual Studio 2015 Professional,      SDK version 10.0.10586.0 
-Win 10,        5.9.2,           Microsoft Visual Studio 2017 Community Edition, SDK version 10.0.16299.0
-Win 7,         5.9.2,           Microsoft Visual Studio 2017 Professional,      SDK version 10.0.16299.0
-
+Windows:       	Qt:              MSVC:                                           Win SDK:
+Win 7,         	5.6.2 (64 bit)  Microsoft Visual Studio 2015 Professional,      SDK version 10.0.10586.0 
+Win 10,        	5.9.2,          Microsoft Visual Studio 2017 Community Edition, SDK version 10.0.16299.0
+Win 7,         	5.9.2,          Microsoft Visual Studio 2017 Professional,      SDK version 10.0.16299.0
+Win 10,		5.9.2,		Microsoft Visual Studio 2017 Professional,	SDK ...
 
 Building the various projects:
 ------------------------------
@@ -45,7 +45,8 @@ HEXITECGIGE_SYSTEM=ckd_devel
 Look in the profile file near the end for the paragraph those beginning contains "ckd_devel".
 
 
-HexitecGigE also relies upon a deprecated Qt module called QtScript. To download it, run the QT maintenance tool which is typically can be found at: C:\Qt\MaintenanceTool.exe. Select "Add or remove components", click "Next" then for the installed Qt Version (e.g. 5.9.2), expend that section and ensure "Qt Script (Deprecated)" is ticked before clicking "Next" followed by "Update".
+HexitecGigE also relies upon a deprecated Qt module called QtScript. It is best to include it whilst installing QT for the first time. It may be possible to add it later but if these do not work, simply uninstall all of QT and reinstall with QtScript included. The instructions for adding this library with Qt already installed:
+Run the QT maintenance tool which is typically can be found at: C:\Qt\MaintenanceTool.exe. Select "Add or remove components", click "Next" then for the installed Qt Version (e.g. 5.9.2), expend that section and ensure "Qt Script (Deprecated)" is ticked before clicking "Next" followed by "Update". Build successfully on Windows 10, the Eigen library dependency was updated to version 3.3.7.
 
 
 Note that the project HxtProcessingLibTest isn't a dependency upon HexitecGigE. However, running its executable allows processing of data without using the GUI. This has proven useful for debugging purposes in the past. ConfigHexitecGigE is the tool used to define where the two configuration .ini files are located, along with toggling the Data Acquisition tabs on/off within the GUI. Example ini files, along with calibration files, can be found in IniFiles/.
@@ -64,9 +65,11 @@ In addition, The Windows Deploy Tool of QT must also be run to generate some add
 
 3) Execute the tool, specifying the full path: 
 
-(note that this is for QT 5.6, amend the path according to your version of QT)
+(note that these notes were originally prepared on QT 5.6, amend the path according to your version of QT)
 
 c:\Qt\5.6\msvc2015_64\bin\windeployqt.exe HexitecGigE.exe
 
 
-Instructions prepared by Christian Angelsen, 23/02/2018.
+Instructions prepared by Christian Angelsen, 23/02/2018. 
+Amendments made on 22/01/2019 - Added information related to Windows 10.
+

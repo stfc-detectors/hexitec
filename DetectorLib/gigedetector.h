@@ -199,8 +199,8 @@ private:
    HANDLE detectorHandle;
    DetectorCommand command;
 
-   void constructorInit(const QObject *parent = 0);
-   int initialise(Triggering triggering = Triggering::NO_TRIGGERING);
+   void constructorInit(const QObject *parent = nullptr);
+   int initialise(/*Triggering triggering = Triggering::NO_TRIGGERING*/);
    void connectUp(const QObject *parent);
    LONG readIniFile(QString aspectFilename);
    HexitecSetupRegister initSetupRegister(QString type);
@@ -208,7 +208,7 @@ private:
    int setImageFormat(unsigned long xResolution, unsigned long yResolution);
    void updateState(DetectorState state);
    void imageDestToPixmap();
-   unsigned char *getImage(int imageNumber);
+   unsigned char *getImage(/*int imageNumber*/);
    void run();
    void showError(const LPCSTR context, long asError);
    LONG collectOffsetValues();

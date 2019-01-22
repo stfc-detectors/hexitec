@@ -60,7 +60,7 @@ SOURCES += main.cpp \
     displaylegendsdialog.cpp \
     parameters.cpp \
     hv.cpp \
-    badinifiledialog.cpp \  
+    badinifiledialog.cpp \
     progressform.cpp \
     pixelmanipulationform.cpp \
     processingbuffergenerator.cpp \
@@ -260,12 +260,9 @@ DSoFt64 {
     CONFIG(release, debug|release): LIBS += ../HxtProcessingLib/release/HxtProcessingLib.lib
     CONFIG(debug, debug|release): LIBS += ../DetectorLib/debug/DetectorLib.lib ../SerialPortLib/debug/SerialPortLib.lib
     CONFIG(debug, debug|release): LIBS += ../HxtProcessingLib/debug/HxtProcessingLib.lib
-    INCLUDEPATH += "C:/Qt/Libs/Eigen/3.1.14/Eigen/"
+    INCLUDEPATH += "C:/Qt/Libs/Eigen/3.3.7/Eigen/"
     INCLUDEPATH += ../DetectorLib
     INCLUDEPATH  += ../HxtProcessingLib/include
     INCLUDEPATH  += ../HxtProcessingLib/
     INCLUDEPATH += ../SerialPortLib
 }
-
-
-

@@ -1,7 +1,8 @@
 #include "processingdefinition.h"
 #include <iostream>
 #include <fstream>
-
+///
+#include <QDebug>
 using namespace std;
 
 ProcessingDefinition::ProcessingDefinition(long long frameSize)
@@ -231,6 +232,17 @@ bool ProcessingDefinition::getGradientsStatus()
 bool ProcessingDefinition::getInterceptsStatus()
 {
    return interceptsStatus;
+}
+
+void ProcessingDefinition::setOccupancyThreshold(int occupancyThreshold)
+{
+   this->occupancyThreshold = occupancyThreshold;
+//   qDebug() << "ProcessingDefinition, occupancyThreshold: " << occupancyThreshold;
+}
+
+int ProcessingDefinition::getOccupancyThreshold()
+{
+    return occupancyThreshold;
 }
 
 int ProcessingDefinition::getPixelGridSize() const

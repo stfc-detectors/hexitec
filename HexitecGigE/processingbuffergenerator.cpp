@@ -201,17 +201,20 @@ void ProcessingBufferGenerator::handleMainWindowBusy(bool bBusy)
    }
 }
 
-void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
+//void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
+void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, int occupancyThreshold)
 {
    long long frameSize;
 
    this->nRows = nRows;
    this->nCols = nCols;
    frameSize = (long long)nRows * (long long)nCols;
-   qDebug() << "SET processingDefinition nRows, nCols, frameSize " << this->nRows << this->nCols << frameSize;
+   qDebug() << "SET processingDefinition nRows, nCols, frameSize " << this->nRows << this->nCols << frameSize
+            << "!\t\toccupancyThreshold: " << occupancyThreshold;
    processingDefinition->setRows((int)nRows);
    processingDefinition->setCols((int)nCols);
    processingDefinition->setFrameSize(frameSize);
+   processingDefinition->setOccupancyThreshold(occupancyThreshold);
 }
 
 void ProcessingBufferGenerator::handleProcessingComplete()

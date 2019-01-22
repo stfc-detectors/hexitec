@@ -194,8 +194,11 @@ MainWindow::MainWindow()
    createStatusBar();
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
-   connect(processingForm, SIGNAL(configureSensor(int, int)),
-           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
+//   connect(processingForm, SIGNAL(configureSensor(int, int)),
+//           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
+   connect(processingForm, SIGNAL(configureSensor(int, int, int)),
+           processingBufferGenerator, SLOT(handleConfigureSensor(int, int, int)));
+
    connect(processingForm, SIGNAL(processImages()),
            processingBufferGenerator, SLOT(handlePostProcessImages()));
    connect(processingForm, SIGNAL(configureProcessing(bool, bool, int, int, QString)),

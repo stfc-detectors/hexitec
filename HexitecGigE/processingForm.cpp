@@ -90,6 +90,8 @@ void ProcessingForm::initialiseProcessingForm()
    ui->binStartSpinBox->setValue(binStart);
    ui->binEndSpinBox->setValue(binEnd);
    ui->binWidthSpinBox->setValue(binWidth);
+   /// Implement Occupancy Threshold (Enables clearing any row containing > occupancyThreshold hits)
+   int occupancyThreshold = 0;
 
    if (settings.contains("hexitecGigEIniFilename"))
    {
@@ -263,7 +265,17 @@ void ProcessingForm::initialiseProcessingForm()
       ui->re_orderCheckBox->setEnabled(false);
    }
 
-   emit configureSensor(nRows, nCols);
+   // Recycling columns variable here whilst grabbing occupancyThreshold from ini file
+   if ((columns = twoEasyIniFile->getInt("Processing/Occupancy_Threshold")) != QVariant(INVALID))
+   {
+      occupancyThreshold = columns;
+   }
+   else
+   {
+      occupancyThreshold = 0;
+   }
+
+   emit configureSensor(nRows, nCols, occupancyThreshold);
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
    emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),

@@ -68,6 +68,9 @@ public:
    bool getThresholdsStatus();
    bool getGradientsStatus();
    bool getInterceptsStatus();
+   /// occupancyThreshold fix
+   void setOccupancyThreshold(int occupancyThreshold);
+   int getOccupancyThreshold();
 
 private:
    void setGradients();
@@ -105,6 +108,8 @@ private:
    bool thresholdsStatus;
    bool gradientsStatus;
    bool interceptsStatus;
+   ///
+   int occupancyThreshold;
 
 };
 

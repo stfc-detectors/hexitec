@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <QApplication>
-
+///
+#include <QDebug>
 using namespace std;
 
 DetectorFactory *DetectorFactory::dfInstance = 0;

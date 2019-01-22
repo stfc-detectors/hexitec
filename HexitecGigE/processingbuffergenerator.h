@@ -65,7 +65,9 @@ public slots:
 
    void handleMainWindowBusy(bool bBusy);
 
-   void handleConfigureSensor(int nRows, int nCols);
+//   void handleConfigureSensor(int nRows, int nCols);
+   void handleConfigureSensor(int nRows, int nCols, int occupancyThreshold);
+
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,
                                   int threshholdMode,

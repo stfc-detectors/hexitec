@@ -166,12 +166,12 @@ void GigEDetector::setTargetTemperature(double targetTemperature)
 
 void GigEDetector::setTriggeringMode(int triggeringMode)
 {
-   this->triggeringMode = (Triggering)triggeringMode;
+   this->triggeringMode = Triggering(triggeringMode);
 }
 
 void GigEDetector::setTtlInput(int ttlInput)
 {
-   this->ttlInput = (TtlInput)ttlInput;
+   this->ttlInput = TtlInput(ttlInput);
 }
 
 int GigEDetector::getTtlInput()
@@ -277,16 +277,16 @@ int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
    return status;
 }
 
-int GigEDetector::initialise(Triggering triggering)
+int GigEDetector::initialise(/*Triggering triggering*/)
 {
    LONG status = -1;
    CONST LPSTR deviceDescriptor = (const LPSTR )"";
    ULONG pleoraErrorCodeStrLen = STR_LENGTH;
    ULONG pleoraErrorDescriptionLen = STR_LENGTH;
-   ULONG pleoraErrorCode = -1;
+   ULONG pleoraErrorCode = 0;
    CHAR pleoraErrorCodeStr[STR_LENGTH] = {0};
    CHAR pleoraErrorDescription[STR_LENGTH] = {0};
-   GigEDeviceInfoStr deviceInfo = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+   GigEDeviceInfoStr deviceInfo = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
    UCHAR customerId = 0x01;
    UCHAR projectId = 0x12;
    UCHAR version = 0x02;
@@ -503,7 +503,7 @@ int GigEDetector::setImageFormat(unsigned long xResolution, unsigned long yResol
    //status = SetFrameFormatControl(detectorHandle, "Mono14", xResolution, yResolution, 0, 0, "One", "Off");
    status = SetFrameFormatControl(detectorHandle, pArg2, xResolution, yResolution, 0, 0, pArg7, pArg8);
    showError( "SetFrameFormatControl", status);    /// showError() catch by ::configure(), ::initialise() respectively
-   frameSize = xResolution * xResolution * 2;
+   frameSize = int(xResolution * xResolution * 2);
 
    return status;
 }
@@ -586,7 +586,7 @@ void GigEDetector::handleExecuteCommand(GigEDetector::DetectorCommand command, i
    }
    else if (command == STATE)
    {
-      updateState((DetectorState) ival1);
+      updateState(DetectorState (ival1));
    }
 }
 
@@ -746,8 +746,8 @@ void GigEDetector::acquireImages(bool startOfImage)
    int status = -1;
    ULONGLONG framesAcquired;
    double durationSeconds = dataAcquisitionDuration/1000.0;
-   ULONG frameCount = (durationSeconds/frameTime) + 0.5;
-   ULONG frameTimeout = (ULONG)(frameTime * 2500.0);
+   ULONG frameCount = ULONG((durationSeconds/frameTime) + 0.5);
+   ULONG frameTimeout = ULONG(frameTime * 2500.0);
 
    if (startOfImage)
    {
@@ -758,7 +758,7 @@ void GigEDetector::acquireImages(bool startOfImage)
    else
    {
       qDebug() <<"Restart collection, remainingFrames = " << remainingFrames;
-      frameCount = remainingFrames;
+      frameCount = ULONG(remainingFrames);
    }
 
    if( frameTimeout < 100 )
@@ -800,7 +800,7 @@ void GigEDetector::acquireImages(bool startOfImage)
          showError("SetTriggeredFrameCount", status);
 
          status = SetFrameTimeOut(detectorHandle, frameTimeout);
-         status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, triggerTimeout);
+         status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, ULONG(triggerTimeout));
          showError("AcquireFrames Triggered", status);
       }
       catch (DetectorException &ex)
@@ -879,7 +879,7 @@ void GigEDetector::setMode(Mode mode)
 ULONGLONG GigEDetector::setDataAcquisitionDuration(double *dataAcquisitionDuration)
 {
    double durationSeconds = *dataAcquisitionDuration/1000.0;
-   remainingFrames = (durationSeconds/frameTime) + 0.5;
+   remainingFrames = ULONGLONG((durationSeconds/frameTime) + 0.5);
 
    this->dataAcquisitionDuration = *dataAcquisitionDuration;
 
@@ -889,7 +889,7 @@ ULONGLONG GigEDetector::setDataAcquisitionDuration(double *dataAcquisitionDurati
 ULONGLONG GigEDetector::setDataAcquisitionDuration(double dataAcquisitionDuration)
 {
    double durationSeconds = dataAcquisitionDuration/1000.0;
-   remainingFrames = (durationSeconds/frameTime) + 0.5;
+   remainingFrames = ULONGLONG((durationSeconds/frameTime) + 0.5);
 
    this->dataAcquisitionDuration = dataAcquisitionDuration;
 
@@ -970,9 +970,9 @@ void GigEDetector::imageDestToPixmap()
       colorTable.push_back(QColor(i, i, i).rgb());
    }
 
-   if (getBufferReady() != NULL)
+   if (getBufferReady() != nullptr)
    {
-      charImageDest = getImage(0); // TO DO : Free the memory malloc'd
+      charImageDest = getImage(/*0*/); // TO DO : Free the memory malloc'd
       QImage image(charImageDest, xRes, yRes, QImage::Format_Indexed8);
 
       image.setColorTable(colorTable);
@@ -984,10 +984,10 @@ void GigEDetector::imageDestToPixmap()
    }
 }
 
-unsigned char *GigEDetector::getImage(int imageNumber)
+unsigned char *GigEDetector::getImage(/*int imageNumber*/)
 {
    int imageSize = xRes * yRes;
-   int segmentSize = xRes * yRes * 2;
+   size_t segmentSize = xRes * yRes * 2;
    unsigned char *buffer;
    unsigned char *image;
    short current, min = 32767, max = -32768, range;
