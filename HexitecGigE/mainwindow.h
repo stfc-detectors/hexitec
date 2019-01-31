@@ -135,8 +135,8 @@ public slots:
    void disableStopDAQAction();
    void enableHVActions();
    void disableHVActions();
-//   void handleProcessingComplete(QString fileName);
-//   void handleSaveH5Changed(bool saveH5);
+   /// Allow ImageProcessor (via ProcessingBufferGenerator) to signal occupancy corrections
+   void handleOccupancyCorrections(int occupancyThreshold, int corrections);
 };
 
 #endif

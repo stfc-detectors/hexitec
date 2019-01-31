@@ -43,6 +43,7 @@ public:
    GeneralHxtGenerator *getHxtGenerator();
    /// Allow User (Interface) to [not] save raw data file(s)
    void setSaveRaw(bool bSaveRaw);
+   long long getProcessedFrameCount() { return processedFrameCount; }
 
 private:
    void writeBinFile(char *buffer, unsigned long length, const char* filename);
@@ -80,12 +81,15 @@ private:
                               const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
    void processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel,
                              double *result, const char* filenameBin, const char *filenameHxt, const char *filenameCsv);
-   /// Support enable/disable writing raw binary files
    bool saveRaw;
    ///
+   int occupancyThreshold;
+
 public slots:
-   ///
    void handleMainWindowBusy(bool bBusy);
+
+signals:
+   void occupancyCorrections(int threshold, int corrections);
 
 };
 

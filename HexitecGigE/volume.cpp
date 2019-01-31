@@ -53,7 +53,7 @@ void Volume::removeSlice(Slice *slice)
 // the TreeItem children array.
 Slice *Volume::sliceAt(int index)
 {
-   Slice *slice = NULL;
+   Slice *slice = nullptr;
    if (index < slices->count())
    {
       slice = slices->at(index);

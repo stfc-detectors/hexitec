@@ -1,7 +1,7 @@
 #include "framere_orderprocessor.h"
 
-FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection) :
-   GeneralFrameProcessor(nextFrameCorrection)
+FrameRe_orderProcessor::FrameRe_orderProcessor(bool nextFrameCorrection, int occupancyThreshold ) :
+   GeneralFrameProcessor(nextFrameCorrection, occupancyThreshold)
 {
 }
 

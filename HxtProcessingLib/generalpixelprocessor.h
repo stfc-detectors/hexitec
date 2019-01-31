@@ -17,9 +17,11 @@ public:
    static uint16_t pixelMap[6400];
    static bool pixelMapInitialised;
    static uint32_t frameSize;
+   static uint32_t nRows;
+   static uint32_t nColumns;
 
 public:
-   GeneralPixelProcessor();
+   GeneralPixelProcessor(int occupancyThreshold);
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
    void setFrameSize(int frameSize);
    void setEnergyCalibration(bool energyCalibration);
@@ -58,6 +60,8 @@ public:
    virtual double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
               unordered_map<int, double>**pixelEnergyMapPtr);
 
+   virtual int getOccupancyCorrections() { return occupancyCorrections; }
+
 protected:
    void initialisePixelMap();
    bool energyCalibration;
@@ -66,6 +70,10 @@ protected:
    double *gradientValue;
    double *interceptValue;
    uint16_t *lastFrame;
+   int occupancyThreshold;
+   unsigned int clearCurrentRow(double *re_orderedFrame, unsigned int i);
+   void clearCurrentRow(uint16_t *re_orderedFrame, unsigned int i);
+   int occupancyCorrections;
 
    /// DEBUGGING:
    int debugFrameCounter;

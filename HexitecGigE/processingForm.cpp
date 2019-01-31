@@ -352,6 +352,7 @@ void ProcessingForm::setThresholdParameters()
          nextFrame = ui->nextFrameCorrectionCheckBox->isChecked();
          break;
       default:
+         thresholdValue = NULL;
          break;
    }
 

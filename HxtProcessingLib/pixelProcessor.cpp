@@ -6,8 +6,10 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
-
-PixelProcessor::PixelProcessor()
+///
+#include <QDebug>
+PixelProcessor::PixelProcessor(int occupancyThreshold) :
+    GeneralPixelProcessor(occupancyThreshold)
 {
 }
 

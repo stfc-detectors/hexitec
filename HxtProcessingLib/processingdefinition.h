@@ -69,8 +69,8 @@ public:
    bool getGradientsStatus();
    bool getInterceptsStatus();
    /// occupancyThreshold fix
-   void setOccupancyThreshold(int occupancyThreshold);
-   int getOccupancyThreshold();
+   void setOccupancyThreshold(int occupancyThreshold) { this->occupancyThreshold = occupancyThreshold; }
+   int getOccupancyThreshold() { return occupancyThreshold; }
 
 private:
    void setGradients();

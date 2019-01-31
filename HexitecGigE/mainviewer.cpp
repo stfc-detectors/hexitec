@@ -136,7 +136,7 @@ void MainViewer::renderSum(double minX, double maxX)
   ThumbNails. */
 void MainViewer::activeSliceChanged(RenderArea *selected)
 {
-   if (selected == NULL)
+   if (selected == nullptr)
    {
       renderArea->imageData.resize(0,0);
       renderArea->title("");

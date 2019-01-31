@@ -1199,7 +1199,7 @@ void Plotter::updatePlotter(QPoint p, bool wasDoubleClicked)
          }
          else
          {
-            emit pixelAdded(NULL);
+            emit pixelAdded(nullptr);
             emit pixelAdded(QString::number(p.x()+1) + "," + QString::number(p.y()+1));
          }
       }

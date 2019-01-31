@@ -11,17 +11,21 @@
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
- uint32_t GeneralPixelProcessor::frameSize = 80 * 80;
+ uint32_t GeneralPixelProcessor::nRows = 80;
+ uint32_t GeneralPixelProcessor::nColumns = 80;
+ uint32_t GeneralPixelProcessor::frameSize = GeneralPixelProcessor::nRows * GeneralPixelProcessor::nColumns;
 
-GeneralPixelProcessor::GeneralPixelProcessor()
+GeneralPixelProcessor::GeneralPixelProcessor(int occupancyThreshold)
 {
    if (!GeneralPixelProcessor::pixelMapInitialised)
    {
       initialisePixelMap();
       GeneralPixelProcessor::pixelMapInitialised = true;
    }
-   gradientValue = NULL;
-   interceptValue = NULL;
+   gradientValue = nullptr;
+   interceptValue = nullptr;
+   this->occupancyThreshold = occupancyThreshold;
+   occupancyCorrections = 0;
    ///
    debugFrameCounter = 0;
 }
@@ -94,16 +98,36 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
                                               uint16_t *frame)
 {
    double *re_orderedFrame;
-   pixelRawValMapPtr = NULL;
+   pixelRawValMapPtr = nullptr;
+   /// Test implementing occupancy
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] > 0)
       {
-         re_orderedFrame[i] = (double)frame[i];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+            re_orderedFrame[i] = (double)frame[i];
+
+         rowEventsAboveThreshold++;
       }
    }
    ///
@@ -127,16 +151,36 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
                                               uint16_t *frame, uint16_t thresholdValue)
 {
    double  *re_orderedFrame;
-   pixelRawValMapPtr = NULL;
+   pixelRawValMapPtr = nullptr;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize *sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdValue)
       {
-         re_orderedFrame[i] = (double)frame[i];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+            re_orderedFrame[i] = (double)frame[i];
+
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -146,8 +190,11 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
 double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRawValMapPtr,
                                               uint16_t *frame, uint16_t *thresholdPerPixel)
 {
-    double *re_orderedFrame;
-    pixelRawValMapPtr = NULL;
+   double *re_orderedFrame;
+   pixelRawValMapPtr = nullptr;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
@@ -156,9 +203,26 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
    //    copy that value into re_orderedFrame's pixel
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i %  GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdPerPixel[i])
       {
-         re_orderedFrame[i] = (double)frame[i];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+            re_orderedFrame[i] = (double)frame[i];
+
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -169,27 +233,86 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
+   pixelEnergyMapPtr = nullptr;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize *  sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] != 0)
       {
-         re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);    // Clear the current row, Move i to end the current row
+               bClearRowOnce = true;
+            }
+         }
+         else
+            re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+
+         rowEventsAboveThreshold++;
       }
    }
 
    return re_orderedFrame;
 }
 
+/// Accepts pointer to re_orderedFrame and index i to current pixel in the entire frame.
+///     Determine first and final pixel in current row, zero all pixels in current row
+///     and return index of final pixel (because calling function will increment index
+///     and thus carry out next operation on first pixel of the next row)
+unsigned int GeneralPixelProcessor::clearCurrentRow(double *re_orderedFrame, unsigned int i)
+{
+   unsigned int rowIndex = i / GeneralPixelProcessor::nRows;            // Workout which row with integer division
+   unsigned int iStart = rowIndex * GeneralPixelProcessor::nColumns;    // Find index within whole frame
+
+   unsigned int iEnd = iStart + (GeneralPixelProcessor::nColumns-1);
+   unsigned int index = iStart;
+
+   for ( ; index < iEnd; index++)
+   {
+      re_orderedFrame[index] = 0;
+   }
+   occupancyCorrections++;
+
+   return iEnd;
+}
+
+void GeneralPixelProcessor::clearCurrentRow(uint16_t *re_orderedFrame, unsigned int i)
+{
+   unsigned int rowIndex = i / GeneralPixelProcessor::nRows;            // Workout which row with integer division
+   unsigned int iStart = rowIndex * GeneralPixelProcessor::nColumns;    // Find index within whole frame
+
+   unsigned int iEnd = iStart + (GeneralPixelProcessor::nColumns-1);
+   unsigned int index = iStart;
+
+   for ( ; index < iEnd; index++)
+   {
+      re_orderedFrame[index] = 0;
+   }
+}
+
+
 double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
+   pixelEnergyMapPtr = nullptr;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    // Reordered frame will be array of double(s) (not int(s))
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
@@ -197,10 +320,27 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       // re_orderedFrame is all the zeros, so need only concern ourselves with values above thresholdValue
       if (frame[i] >= thresholdValue)
       {
-         re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+            re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -211,7 +351,10 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
                                               unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
+   pixelEnergyMapPtr = nullptr;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
@@ -220,9 +363,26 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
    //    calibrate and place that value in re_ orderedFrame's pixel
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdPerPixel[i])
       {
-         re_orderedFrame[i] = ((double)(frame[i]) * gradientValue[i] + interceptValue[i]);
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+            re_orderedFrame[i] = ((double)(frame[i]) * gradientValue[i] + interceptValue[i]);
+
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -233,20 +393,41 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
                                                       uint16_t *frame)
 {
    double *re_orderedFrame;
-   pixelRawValMapPtr = NULL;
+   pixelRawValMapPtr = nullptr;
    int index;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
-      if (frame[i] > 0)
+      if (i % GeneralPixelProcessor::nColumns == 0)
       {
-         index = GeneralPixelProcessor::pixelMap[i];
-         re_orderedFrame[index] = (double)frame[i];
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
       }
 
+      if (frame[i] > 0)
+      {
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+         {
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
+         }
+
+         rowEventsAboveThreshold++;
+      }
    }
 
    return re_orderedFrame;
@@ -256,18 +437,39 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
                                                       uint16_t *frame, uint16_t thresholdValue)
 {
    double  *re_orderedFrame;
-   pixelRawValMapPtr = NULL;
+   pixelRawValMapPtr = nullptr;
    int index;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame  = (double *)  malloc(frameSize * sizeof(double));
    memset(re_orderedFrame, 0, frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdValue)
       {
-         index = GeneralPixelProcessor::pixelMap[i];
-         re_orderedFrame[index] = (double)frame[i];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+         {
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
+         }
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -278,18 +480,40 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
                                                       uint16_t *frame, uint16_t *thresholdPerPixel)
 {
    double *re_orderedFrame;
-   pixelRawValMapPtr = NULL;
+   pixelRawValMapPtr = nullptr;
    int index;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(frameSize * sizeof(double));
    memset(re_orderedFrame, 0, frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdPerPixel[i])
       {
-         index = pixelMap[i];
-         re_orderedFrame[index] = (double)frame[i];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+         {
+            index = pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
+         }
+
+         rowEventsAboveThreshold++;
       }
    }
 
@@ -300,17 +524,39 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
                                                       unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
-   int index;
+   pixelEnergyMapPtr = nullptr;
+   int index = 0;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
+
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+       if (i % GeneralPixelProcessor::nColumns == 0)
+       {
+          rowEventsAboveThreshold = 0;
+          bClearRowOnce = true;
+       }
+
       if (frame[i] != 0)
       {
-         index = GeneralPixelProcessor::pixelMap[i];
-         re_orderedFrame[index] = ( ((double)frame[i]) * gradientValue[index] + interceptValue[index]);
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+         {
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ( ((double)frame[i]) * gradientValue[index] + interceptValue[index]);
+         }
+         rowEventsAboveThreshold++;
       }
    }
    ///
@@ -334,18 +580,36 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t th
 						      unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
+   pixelEnergyMapPtr = nullptr;
    int index;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *)  malloc(GeneralPixelProcessor::frameSize *  sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdValue)
       {
-         index = GeneralPixelProcessor::pixelMap[i];
-         re_orderedFrame[index] = (double)(frame[i]) * gradientValue[index] + interceptValue[index];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            i = clearCurrentRow(re_orderedFrame, i);
+            bClearRowOnce = false;
+         }
+         else
+         {
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)(frame[i]) * gradientValue[index] + interceptValue[index];
+         }
+         rowEventsAboveThreshold++;
      }
    }
 
@@ -356,18 +620,40 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *t
 						      unordered_map<int, double>**pixelEnergyMapPtr)
 {
    double *re_orderedFrame;
-   pixelEnergyMapPtr = NULL;
+   pixelEnergyMapPtr = nullptr;
    int index;
+   /// Test implementing occupancy threshold
+   int rowEventsAboveThreshold = 0;
+   bool bClearRowOnce = true;
 
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+      if (i % GeneralPixelProcessor::nColumns == 0)
+      {
+         rowEventsAboveThreshold = 0;
+         bClearRowOnce = true;
+      }
+
       if (frame[i] >= thresholdPerPixel[i])
       {
-         index = GeneralPixelProcessor::pixelMap[i];
-         re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
+         if (rowEventsAboveThreshold >= occupancyThreshold)
+         {
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
+         }
+         else
+         {
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
+         }
+
+         rowEventsAboveThreshold++;
       }
    }
 

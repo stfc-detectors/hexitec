@@ -2,8 +2,8 @@
 #include <iostream>
 #include <fstream>
 
-FrameProcessor::FrameProcessor(bool nextFrameCorrection) :
-   GeneralFrameProcessor(nextFrameCorrection)
+FrameProcessor::FrameProcessor(bool nextFrameCorrection, int occupancyThreshold) :
+   GeneralFrameProcessor(nextFrameCorrection, occupancyThreshold)
 {
 }
 

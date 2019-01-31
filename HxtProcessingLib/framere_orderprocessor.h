@@ -8,7 +8,7 @@ using namespace std;
 class FrameRe_orderProcessor : public GeneralFrameProcessor
 {
 public:
-   FrameRe_orderProcessor(bool nextFrameCorrection);
+   FrameRe_orderProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~FrameRe_orderProcessor();
    double *process(unordered_map<int, double> **pixelRawValMapPtr,
                      uint16_t *frame);

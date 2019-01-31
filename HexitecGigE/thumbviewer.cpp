@@ -260,8 +260,8 @@ void ThumbViewer::deleteSlice(Slice *slice)
          }
          else
          {
-            DataModel::instance()->setActiveSlice(NULL);
-            activeSliceChanged(NULL);
+            DataModel::instance()->setActiveSlice(nullptr);
+            activeSliceChanged(nullptr);
          }
       }
       // If the Slice removed wasn't the activeSlice but was before it in the list then we need to change

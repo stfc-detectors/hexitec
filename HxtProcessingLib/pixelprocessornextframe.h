@@ -12,9 +12,10 @@ class PixelProcessorNextFrame : public GeneralPixelProcessor
 {
 
 public:
-   PixelProcessorNextFrame();
+   PixelProcessorNextFrame(int occupancyThreshold);
 
    void resetLastRe_orderedSize();
+   int getOccupancyCorrections() { return occupancyCorrections; }
 
    double *processFrame(uint16_t *frame, uint16_t thresholdValue);
    double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);

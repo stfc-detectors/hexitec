@@ -125,10 +125,10 @@ TreeItem *TreeItem::child(int number)
 
 TreeItem *TreeItem::child(QString requiredName)
 {
-   TreeItem *found = NULL;
+   TreeItem *found = nullptr;
    QString searchString;
 
-   if (requiredName != NULL)
+   if (requiredName != nullptr)
    {
       searchString = splitRequiredName(requiredName);
 
@@ -154,7 +154,7 @@ TreeItem *TreeItem::child(QString requiredName)
 
 QString TreeItem::splitRequiredName(QString &requiredName)
 {
-   QString searchString = NULL;
+   QString searchString = nullptr;
    int index = requiredName.indexOf('.');
 
    if (index != -1)

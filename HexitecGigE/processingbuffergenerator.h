@@ -54,6 +54,7 @@ signals:
    void mainWindowBusy(bool bBusy);
    /// Fix: (Enable) save raw binary file
    void saveRawChanged(bool bSaveRaw);
+   void occupancyCorrections(int occupancyThreshold, int corrections);
 public slots:
    void handlePostProcessImages();
    void handleImageStarted(char *filename);
@@ -89,6 +90,7 @@ public slots:
    void handleProcessingComplete();
    ///
    void handleSaveRawChanged(bool bSaveRaw);
+   void handleOccupancyCorrections(int occupancyThreshold, int corrections);
 };
 
 #endif // PROCESSINGBUFFERGENERATOR_H

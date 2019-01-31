@@ -14,7 +14,7 @@ class FrameProcessor : public GeneralFrameProcessor
 {
 
 public:
-   FrameProcessor(bool nextFrameCorrection);
+   FrameProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~FrameProcessor();
    double *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
    double *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame,

@@ -35,7 +35,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
 
 void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-   this->frameSize = nRows * nCols * sizeof(uint16_t);
+   this->frameSize = int(nRows * nCols * sizeof(uint16_t));
 
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
@@ -54,10 +54,18 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
       connect(hxtNotifier, SIGNAL(activated(HANDLE)), this, SLOT(handleHxtFileWritten()));
    }
 
+   /// Enable (current)ImageProcessor to signal occupancyCorrections, corrections
+   connect(currentImageProcessor, SIGNAL(occupancyCorrections(int, int)),
+           this, SLOT(handleOccupancyCorrections(int, int)));
+
    currentHxtGenerator = currentImageProcessor->getHxtGenerator();
    qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
 }
 
+void ProcessingBufferGenerator::handleOccupancyCorrections(int occupancyThreshold, int corrections)
+{
+   emit occupancyCorrections(occupancyThreshold, corrections);
+}
 
 void ProcessingBufferGenerator::handleSaveRawChanged(bool bSaveRaw)
 {
@@ -104,9 +112,9 @@ void ProcessingBufferGenerator::handleConfigureProcessing(bool re_order, bool ne
 
    processingDefinition->setRe_order(re_order);
    processingDefinition->setNextFrameCorrection(nextFrame);
-   processingDefinition->setThresholdMode((ThresholdMode)threshholdMode);
+   processingDefinition->setThresholdMode(ThresholdMode(threshholdMode));
 
-   switch ((ThresholdMode)threshholdMode)
+   switch (ThresholdMode(threshholdMode))
    {
       case SINGLE_VALUE:
          processingDefinition->setThresholdValue(thresholdValue);
@@ -150,7 +158,7 @@ void ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode
 {
    qDebug() << /*"ThreadID: " << QThread::currentThreadId() << */"ProcessingBufferGenerator::handleConfigureProcessing(int chargedSharingMode, int pixelGridOption: "
            << chargedSharingMode << pixelGridOption;
-   processingDefinition->setChargedSharingMode((ChargedSharingMode)chargedSharingMode);
+   processingDefinition->setChargedSharingMode(ChargedSharingMode(chargedSharingMode));
    processingDefinition->setPixelGridSize(pixelGridOption);
 }
 
@@ -182,6 +190,10 @@ void ProcessingBufferGenerator::handleHxtFileWritten()
       hxtFilename = QString(currentImageProcessor->getHxtFilename());
       char *buffer = (char *)currentHxtGenerator->getHxtV3Buffer();
 
+      ///
+      long long processedFrameCount = currentImageProcessor->getProcessedFrameCount();
+      qDebug() << "ThreadID: " << QThread::currentThreadId() << "PBG::hanHxtFileWritten, ProcessedFrameCount: " << processedFrameCount;
+
       emit hxtFileWritten((unsigned short *)buffer, hxtFilename);  /// SLOT: MW::readBuffer(..)
    }
 }
@@ -209,10 +221,9 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, int 
    this->nRows = nRows;
    this->nCols = nCols;
    frameSize = (long long)nRows * (long long)nCols;
-   qDebug() << "SET processingDefinition nRows, nCols, frameSize " << this->nRows << this->nCols << frameSize
-            << "!\t\toccupancyThreshold: " << occupancyThreshold;
-   processingDefinition->setRows((int)nRows);
-   processingDefinition->setCols((int)nCols);
+   qDebug() << "SET processingDefinition nRows, nCols, frameSize " << this->nRows << this->nCols;
+   processingDefinition->setRows(int(nRows));
+   processingDefinition->setCols(int(nCols));
    processingDefinition->setFrameSize(frameSize);
    processingDefinition->setOccupancyThreshold(occupancyThreshold);
 }

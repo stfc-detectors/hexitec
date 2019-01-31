@@ -10,8 +10,6 @@
 
 #include "datamodel.h"
 #include "getvaluedialog.h"
-//#include "matlab.h"
-//#include "matlabvariable.h"
 #include "mainviewer.h"
 
 class Workspace : public QWidget
@@ -29,12 +27,8 @@ private slots:
    void addConstant();
    void addSlices();
    void deleteSlice();
-//   void exportSlice();
-//   void importArray();
-//   void maskSlice();
    void multiplySlice();
    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-//   void refresh();
 
 signals:
    void exportSlice(Slice *);
@@ -48,11 +42,9 @@ private:
    QAction *addSlicesAction;
    DataModel *dataModel;
    QAction *deleteAction;
-//   QAction *exportAction;
    QAction *importAction;
    QMainWindow *mainWindow;
    QAction *maskAction;
-//   bool matlabAvailable;
    QAction *multiplyAction;
    QTreeView *workspaceTree;
    int slicesSelected;

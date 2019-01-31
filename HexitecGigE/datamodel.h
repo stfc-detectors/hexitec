@@ -20,8 +20,6 @@ class DataModel : public QAbstractItemModel
 public:
    friend class TreeItem;
 
-//   DataModel(const QStringList &headers, const QString &data,
-//             QObject *parent = 0);
    ~DataModel();
    static DataModel *instance();
 
@@ -57,8 +55,6 @@ public:
    Volume *getVolume(QString name);
    Slice *getSlice(QString name);
    Slice *getSlice(const QModelIndex &index);
-//   MatlabVariable *getMatlabArray(QModelIndex &index);
-//   void removeAllMatlabVariables();
    void removeSlice(const QModelIndex &index);
    void add(QModelIndex index);
    void end();

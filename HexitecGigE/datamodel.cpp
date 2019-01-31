@@ -28,13 +28,6 @@ DataModel::DataModel(QObject *parent)
    rootItem = new TreeItem();
 }
 
-//DataModel::DataModel(const QStringList &headers, const QString &data,
-//                     QObject *parent)
-//   : QAbstractItemModel(parent)
-//{
-//   rootItem = new TreeItem();
-//}
-
 DataModel::~DataModel()
 {
    delete rootItem;
@@ -245,26 +238,6 @@ Slice *DataModel::getSlice(const QModelIndex &index)
    }
    return slice;
 }
-
-//MatlabVariable *DataModel::getMatlabArray(QModelIndex &index)
-//{
-//   MatlabVariable *mv = NULL;
-//   TreeItem *item = DataModel::instance()->getItem(index);
-//   if ((item != NULL) && (item->getType() == TreeItem::MATLABVAR))
-//   {
-//      mv = static_cast<MatlabVariable *>(item);
-//      if (!mv->isArray())
-//      {
-//         mv = NULL;
-//      }
-//   }
-//   return mv;
-//}
-
-//void DataModel::removeAllMatlabVariables()
-//{
-
-//}
 
 void DataModel::removeSlice(const QModelIndex &index)
 {

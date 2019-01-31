@@ -224,10 +224,9 @@ MainWindow::MainWindow()
    connect(processingBufferGenerator, SIGNAL(invalidParameterFiles(bool,bool,bool)),
            processingForm, SLOT(handleInvalidParameterFiles(bool,bool,bool)));
 
-//   connect(processingForm, SIGNAL(processImages(int, int)),
-//           processingBufferGenerator, SLOT(handlePostProcessImages(int, int)));
-//   connect(DetectorFactory::instance()->getGigEDetector(), SIGNAL(detectorResolutionSet(unsigned char, unsigned char)),
-//           processingForm, SLOT(handleDetectorResolutionSet(unsigned char, unsigned char)));
+   /// Enable ImageProcessor to signal occupancy corrections made (via ProcessingBufferGenerator)
+   connect(processingBufferGenerator, SIGNAL(occupancyCorrections(int, int)),
+           this, SLOT(handleOccupancyCorrections(int, int)));
 
    processingForm->initialiseProcessingForm();
 
@@ -767,6 +766,11 @@ bool MainWindow::checkDAQChoice()
    return activeDAQ;
 }
 
+void MainWindow::handleOccupancyCorrections(int occupancyThresholds, int corrections)
+{
+   emit writeMessage("Occupancy Threshold: " + QString::number(occupancyThresholds) + " corrected: " + QString::number(corrections) + " Rows");
+
+}
 void MainWindow::handleBufferReady()
 {
 //   qDebug() << "!!!!!!!!!!!!!!!!!!!!!!MainWindow::handleBufferReady() " << GigEDetector::getBufferReady();

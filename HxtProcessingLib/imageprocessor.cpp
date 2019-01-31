@@ -25,9 +25,9 @@ HANDLE ImageProcessor::getHxtFileWrittenEvent()
 
 ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
-   imageCompleteEvent = CreateEvent(NULL, FALSE, FALSE, IMAGE_COMPLETE);
-   processingCompleteEvent = CreateEvent(NULL, FALSE, FALSE, PROCESSING_COMPLETE);
-   hxtFileWrittenEvent = CreateEvent(NULL, FALSE, FALSE, HXT_FILE_WRITTEN);
+   imageCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, IMAGE_COMPLETE);
+   processingCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, PROCESSING_COMPLETE);
+   hxtFileWrittenEvent = CreateEvent(nullptr, FALSE, FALSE, HXT_FILE_WRITTEN);
 
    /// Assume library not built against GUI, unless HexitecGigE/ProcessingBufferGenerator emits mainWindowBusy(bool) signal
    bMainWindowBusy = false;
@@ -53,7 +53,7 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
 
    if (chargedSharing)
    {
-      if(totalSpectrum)
+      if (totalSpectrum)
       {
          hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
       }
@@ -64,7 +64,7 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    }
    else
    {
-      if(totalSpectrum)
+      if (totalSpectrum)
       {
          hxtGenerator = new HxtSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
       }
@@ -75,7 +75,6 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    }
 
    setImageInProgress(true);
-   /// Fix: Ensure saveRaw (binary file) in Data Acquisition tab works again
    saveRaw = true;
    ///
 }
@@ -105,7 +104,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -133,7 +132,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -186,7 +185,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             bufferStart = imageItem->getNextBuffer(&validFrames);
 //            accessTime = qtTime.elapsed();
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -195,6 +194,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  qDebug() << "ThreadID: " << QThread::currentThreadId() << "IP::processThresholdValue, ProcessedFrameCount: " << processedFrameCount;
                }
 //               qtTime.restart();
                if (saveRaw)
@@ -218,7 +218,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -278,7 +278,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -306,7 +306,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
             frameIterator = bufferStart;
-            if (frameIterator != NULL)
+            if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
@@ -339,8 +339,8 @@ void ImageProcessor::handleProcess()
 {
    GeneralFrameProcessor *fp;
    int thresholdValue = 0;
-   uint16_t *thresholdPerPixel = NULL;
-   double *result = NULL;
+   uint16_t *thresholdPerPixel = nullptr;
+   double *result = nullptr;
 
    filenameBin = new char[1024];
    filenameHxt = new char[1024];
@@ -355,13 +355,14 @@ void ImageProcessor::handleProcess()
 
    processedFrameCount = 0;
 
+   int occupancyThreshold = processingDefinition->getOccupancyThreshold();
    if (processingDefinition->getRe_order())
    {
-      fp = new FrameRe_orderProcessor(nextFrameCorrection);
+      fp = new FrameRe_orderProcessor(nextFrameCorrection, occupancyThreshold);
    }
    else
    {
-      fp = new FrameProcessor(nextFrameCorrection);
+      fp = new FrameProcessor(nextFrameCorrection, occupancyThreshold);
    }
 
    fp->setFrameSize(processingDefinition->getFrameSize());
@@ -383,6 +384,11 @@ void ImageProcessor::handleProcess()
       default:
          break;
    }
+
+   int corrections = fp->getOccupancyCorrections();
+   qDebug() << "IP reports that an occupancyThreshold of" << occupancyThreshold << "produced" << corrections << "occupancy correction(s).";
+   if (corrections != 80)
+      emit occupancyCorrections(occupancyThreshold, corrections);
 
    hxtGenerator->setFrameProcessingInProgress(false);
    /*qDebug() << this << " IP::handleProcess()  - Wait if MainWindow busy..";*/
@@ -428,9 +434,9 @@ void ImageProcessor::handleProcess()
    ///   will crash if Calibration selected with bins: 0 / 200 / 0.25
    ///   (No crash with bins: 0 / 8000 / 10; nor without calibration selected)
 //   delete hxtGenerator;	/// Memory leak; Freeing this memory would crash for most Calibration selection(s)
-//   hxtGenerator = NULL;
+//   hxtGenerator = nullptr;
 
-   imageItem = NULL;
+   imageItem = nullptr;
 }
 
 void ImageProcessor::handleMainWindowBusy(bool bBusy)
@@ -477,7 +483,7 @@ void ImageProcessor::writeBinFile(char *buffer, unsigned long length, const char
 
    outFile.open(filename, std::ofstream::binary | std::ofstream::app);
    outFile.write((const char *)buffer, length * sizeof(char));
-   outFile.close();   
+   outFile.close();
 }
 
 void ImageProcessor::writeHxtFile(char *header, unsigned long headerLength, char *data, unsigned long dataLength, const char *filename)

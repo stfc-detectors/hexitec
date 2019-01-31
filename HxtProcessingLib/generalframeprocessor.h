@@ -9,13 +9,15 @@
 class GeneralFrameProcessor
 {
 public:
-   GeneralFrameProcessor(bool nextFrameCorrection);
+   GeneralFrameProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~GeneralFrameProcessor();
    void setFrameSize(int frameSize);
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);
    void setEnergyCalibration(bool energyCalibration);
    GeneralPixelProcessor *getPixelProcessor();
+
+   int getOccupancyCorrections() { return pixelProcessor->getOccupancyCorrections(); }
 
    virtual double *process(unordered_map<int, double>**pixelRawValMapPtr,
                              uint16_t *frame) = 0;
@@ -34,6 +36,7 @@ public:
 protected:
    GeneralPixelProcessor *pixelProcessor;
    double *getData(const char *filename);
+   int occupancyThreshold;
 };
 
 #endif // GENERALFRAMEPROCESSOR_H

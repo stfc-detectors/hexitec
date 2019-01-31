@@ -12,7 +12,9 @@ class PixelProcessor : public GeneralPixelProcessor
 {
 
 public:
-   PixelProcessor();
+   PixelProcessor(int occupancyThreshold);
+
+   int getOccupancyCorrections() { return occupancyCorrections; }
 };
 
 #endif // PIXELPROCESSOR_H

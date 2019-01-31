@@ -11,8 +11,8 @@ class TreeItem
 public:
    enum ItemType {NONE, VOLUME, SLICE, MATLABVAR};
 
-   TreeItem(QString name = NULL, ItemType type = NONE);
-   TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0, QString name = NULL, ItemType type = NONE);
+   TreeItem(QString name = nullptr, ItemType type = NONE);
+   TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0, QString name = nullptr, ItemType type = NONE);
    // NB TreeItem destructor MUST be virtual because we refer to classes derived from it (e.g. Slice) by
    // TreeItem pointers.
    virtual ~TreeItem();

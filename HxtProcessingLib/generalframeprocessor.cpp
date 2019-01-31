@@ -3,16 +3,17 @@
 #include <iostream>
 #include <fstream>
 
-GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection)
+GeneralFrameProcessor::GeneralFrameProcessor(bool nextFrameCorrection, int occupancyThreshold)
 {
    if (nextFrameCorrection)
    {
-      pixelProcessor = new PixelProcessorNextFrame();
+      pixelProcessor = new PixelProcessorNextFrame(occupancyThreshold);
    }
    else
    {
-      pixelProcessor = new PixelProcessor();
+      pixelProcessor = new PixelProcessor(occupancyThreshold);
    }
+   this->occupancyThreshold = occupancyThreshold;
 }
 
 GeneralFrameProcessor::~GeneralFrameProcessor()

@@ -234,17 +234,6 @@ bool ProcessingDefinition::getInterceptsStatus()
    return interceptsStatus;
 }
 
-void ProcessingDefinition::setOccupancyThreshold(int occupancyThreshold)
-{
-   this->occupancyThreshold = occupancyThreshold;
-//   qDebug() << "ProcessingDefinition, occupancyThreshold: " << occupancyThreshold;
-}
-
-int ProcessingDefinition::getOccupancyThreshold()
-{
-    return occupancyThreshold;
-}
-
 int ProcessingDefinition::getPixelGridSize() const
 {
    return pixelGridSize;
@@ -288,11 +277,6 @@ void ProcessingDefinition::setChargedSharingMode(const ChargedSharingMode &value
 long long ProcessingDefinition::getHxtBufferHeaderSize() const
 {
     return hxtBufferHeaderSize;
-}
-
-void ProcessingDefinition::setHxtBufferHeaderSize(long long value)
-{
-    hxtBufferHeaderSize = value;
 }
 
 long long ProcessingDefinition::getHxtBufferAllDataSize() const
