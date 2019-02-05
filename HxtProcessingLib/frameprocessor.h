@@ -16,18 +16,20 @@ class FrameProcessor : public GeneralFrameProcessor
 public:
    FrameProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~FrameProcessor();
-   double *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
    double *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame,
-                     uint16_t thresholdValue);
+                   unsigned int *eventsInFrame);
+   double *process(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame,
+                   uint16_t thresholdValue, unsigned int *eventsInFrame);
    double *process(unordered_map<int, double>**pixelRawValMapPtr,
-                     uint16_t *frame, uint16_t *thresholdPerPixel);
+                   uint16_t *frame, uint16_t *thresholdPerPixel,
+                   unsigned int *eventsInFrame);
 
    double *process(uint16_t *frame,
-                     unordered_map<int, double>**pixelEnergyMapPtr);
+                   unordered_map<int, double>**pixelEnergyMapPtr, unsigned int *eventsInFrame);
    double *process(uint16_t *frame, uint16_t thresholdValue,
-                     unordered_map<int, double>**pixelEnergyMapPtr);
+                   unordered_map<int, double>**pixelEnergyMapPtr, unsigned int *eventsInFrame);
    double *process(uint16_t *frame, uint16_t *thresholdPerPixel,
-                     unordered_map<int, double>**pixelEnergyMapPtr);
+                   unordered_map<int, double>**pixelEnergyMapPtr, unsigned int *eventsInFrame);
 };
 
 #endif // FRAMEPROCESSOR_H

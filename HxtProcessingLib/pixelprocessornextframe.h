@@ -17,22 +17,30 @@ public:
    void resetLastRe_orderedSize();
    int getOccupancyCorrections() { return occupancyCorrections; }
 
-   double *processFrame(uint16_t *frame, uint16_t thresholdValue);
-   double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   double *processFrame(uint16_t *frame, uint16_t thresholdValue,
+                        unsigned int *eventsInFrame);
+   double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+                        unsigned int *eventsInFrame);
 
    double *processFrame(uint16_t *frame, uint16_t thresholdValue,
-                                  unordered_map<int, double>**pixelEnergyMapPtr);
+                        unordered_map<int, double>**pixelEnergyMapPtr,
+                        unsigned int *eventsInFrame);
    double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-                                  unordered_map<int, double>**pixelEnergyMapPtr);
+                        unordered_map<int, double>**pixelEnergyMapPtr,
+                        unsigned int *eventsInFrame);
 
   
-   double *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue);
-   double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel);
+   double *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
+                                unsigned int *eventsInFrame);
+   double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
+                                unsigned int *eventsInFrame);
 
    virtual double *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
-                                  unordered_map<int, double>**pixelEnergyMapPtr);
+                                        unordered_map<int, double>**pixelEnergyMapPtr,
+                                        unsigned int *eventsInFrame);
    double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-                                  unordered_map<int, double>**pixelEnergyMapPtr);
+                                unordered_map<int, double>**pixelEnergyMapPtr,
+                                unsigned int *eventsInFrame);
 
 private:
    uint16_t  *lastRe_orderedFrame;

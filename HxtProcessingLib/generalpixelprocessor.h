@@ -36,29 +36,41 @@ public:
    ///
 
    double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                          uint16_t *frame);
+                        uint16_t *frame, unsigned int *eventsInFrame);
    virtual double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                  uint16_t *frame, uint16_t thresholdValue);
+                                uint16_t *frame, uint16_t thresholdValue,
+                                unsigned int *eventsInFrame);
    virtual double *processFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                  uint16_t *frame, uint16_t *thresholdPerPixel);
+                                uint16_t *frame, uint16_t *thresholdPerPixel,
+                                unsigned int *eventsInFrame);
 
    virtual double *processFrame(uint16_t *frame,
-              unordered_map<int, double>**pixelEnergyMapPtr);
+                                unordered_map<int, double>**pixelEnergyMapPtr,
+                                unsigned int *eventsInFrame);
    virtual double *processFrame(uint16_t *frame, uint16_t thresholdValue,
-				  unordered_map<int, double>**pixelEnergyMapPtr);
+                                unordered_map<int, double>**pixelEnergyMapPtr,
+                                unsigned int *eventsInFrame);
    virtual double *processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-				  unordered_map<int, double>**pixelEnergyMapPtr);
+                                unordered_map<int, double>**pixelEnergyMapPtr,
+                                unsigned int *eventsInFrame);
 
-   double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame);
-   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t thresholdValue);
-   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr, uint16_t *frame, uint16_t *thresholdPerPixel);
+   double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                                uint16_t *frame, unsigned int *eventsInFrame);
+   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                                        uint16_t *frame, uint16_t thresholdValue,
+                                        unsigned int *eventsInFrame);
+   virtual double *processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
+                                        uint16_t *frame, uint16_t *thresholdPerPixel,
+                                        unsigned int *eventsInFrame);
 
    double *processRe_orderFrame(uint16_t *frame,
-				  unordered_map<int, double>**pixelEnergyMapPtr);
+                  unordered_map<int, double>**pixelEnergyMapPtr, unsigned int *eventsInFrame);
    virtual double *processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
-                                                  unordered_map<int, double>**pixelEnergyMapPtr);
+                                        unordered_map<int, double>**pixelEnergyMapPtr,
+                                        unsigned int *eventsInFrame);
    virtual double *processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-              unordered_map<int, double>**pixelEnergyMapPtr);
+                                        unordered_map<int, double>**pixelEnergyMapPtr,
+                                        unsigned int *eventsInFrame);
 
    virtual int getOccupancyCorrections() { return occupancyCorrections; }
 

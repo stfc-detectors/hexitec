@@ -123,12 +123,7 @@ public slots:
    void readFiles(QStringList files);
    void readBuffer(unsigned short* buffer, QString fileName);   /// HexitecGigE Addition
    void readData(QString fileName);
-//   void sendActiveSliceToMatlab();
-//   void getActiveSliceFromMatlab();
-//   void updateHexitechProcessingStatus(bool isBusy);
-//   void updateVisualisationTab(bool bUpdate);
    void handleBufferReady();
-//   void handleReturnBufferReady(unsigned char *buffer);
    void handleShowImage();
    void enableMainWindowActions();
    void disableMainWindowActions();

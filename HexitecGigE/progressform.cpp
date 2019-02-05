@@ -27,6 +27,11 @@ void ProgressForm::handleNewDataAcquisitionState(QString state)
     ui->state->setText(state);
 }
 
+void ProgressForm::handleRunningAverageEvents(unsigned long averageValue)
+{
+   ui->runningAverageValue->setText(QString::number(averageValue) + " Events/Frame");
+}
+
 void ProgressForm::handleNewDataAcquisitionProgressBarValue(int progressBarValue)
 {
     ui->progressBar->setValue(progressBarValue);

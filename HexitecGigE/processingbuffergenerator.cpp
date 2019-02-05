@@ -12,7 +12,7 @@
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
-   currentImageProcessor = NULL;
+   currentImageProcessor = nullptr;
    this->processingDefinition = processingDefinition;
    nRows = this->processingDefinition->getRows();
    nCols = this->processingDefinition->getCols();
@@ -48,7 +48,7 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
    currentImageProcessor->setSaveRaw(saveRaw);
 
    HANDLE hxtHandle = currentImageProcessor->getHxtFileWrittenEvent();
-   if (hxtHandle != NULL)
+   if (hxtHandle != nullptr)
    {
       hxtNotifier = new QWinEventNotifier(hxtHandle);
       connect(hxtNotifier, SIGNAL(activated(HANDLE)), this, SLOT(handleHxtFileWritten()));
@@ -185,14 +185,16 @@ void ProcessingBufferGenerator::handleHxtFileWritten()
 
    if (!bBusy)
    {
+      ///
+      unsigned long runningAverageEvents = currentImageProcessor->getRunningAverageEvents();
+//      qDebug() << "ThreadID: " << QThread::currentThreadId() << "PBG::hanHxtFileWritten, runningAverageEvents: " << runningAverageEvents;
+      emit updateRunningAverageEvents(runningAverageEvents);
+
       /*qDebug() << "ThreadID: " << QThread::currentThreadId() << "PBG::hanHxtFileWritten; bMainWindowBusy: " << bMainWindowBusy;
       qDebug() << "\t ImageProcessor: " << currentImageProcessor << "\t hxtGenerator: " << currentHxtGenerator;*/
       hxtFilename = QString(currentImageProcessor->getHxtFilename());
       char *buffer = (char *)currentHxtGenerator->getHxtV3Buffer();
 
-      ///
-      long long processedFrameCount = currentImageProcessor->getProcessedFrameCount();
-      qDebug() << "ThreadID: " << QThread::currentThreadId() << "PBG::hanHxtFileWritten, ProcessedFrameCount: " << processedFrameCount;
 
       emit hxtFileWritten((unsigned short *)buffer, hxtFilename);  /// SLOT: MW::readBuffer(..)
    }

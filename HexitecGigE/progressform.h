@@ -29,6 +29,7 @@ public slots:
    void handleNewDataAcquisitionState(QString state);
    void handleNewDataAcquisitionProgressBarValue(int progressBarValue);
    void handleNewDataAcquisitionImageProgressValue(int imageProgressValue);
+   void handleRunningAverageEvents(unsigned long averageValue);
 };
 
 #endif // PROGRESSFORM_H

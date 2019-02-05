@@ -55,6 +55,7 @@ signals:
    /// Fix: (Enable) save raw binary file
    void saveRawChanged(bool bSaveRaw);
    void occupancyCorrections(int occupancyThreshold, int corrections);
+   void updateRunningAverageEvents(unsigned long runningAverageEvents);
 public slots:
    void handlePostProcessImages();
    void handleImageStarted(char *filename);
