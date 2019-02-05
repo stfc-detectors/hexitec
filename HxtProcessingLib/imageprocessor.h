@@ -43,7 +43,7 @@ public:
    GeneralHxtGenerator *getHxtGenerator();
    /// Allow User (Interface) to [not] save raw data file(s)
    void setSaveRaw(bool bSaveRaw);
-   long long getProcessedFrameCount() { return processedFrameCount; }
+   unsigned long getRunningAverageEvents();
 
 private:
    void writeBinFile(char *buffer, unsigned long length, const char* filename);
@@ -56,13 +56,13 @@ private:
   /// NOTE: Not freeing hxtGenerator; The resulting memory leak prevents GUI crashing
    bool bMainWindowBusy;
    QMutex waitMutex;
+   QMutex eventsMutex;
 
    bool energyCalibration;
    bool hxtGeneration;
    bool nextFrameCorrection;
    bool chargedSharing;
    bool totalSpectrum;
-//   double *pixelEnergy;
    unordered_map<int, double> *hxtMap;
    char* filenameBin;
    char* filenameHxt;
@@ -84,6 +84,7 @@ private:
    bool saveRaw;
    ///
    int occupancyThreshold;
+   unsigned long runningAverageEvents;
 
 public slots:
    void handleMainWindowBusy(bool bBusy);

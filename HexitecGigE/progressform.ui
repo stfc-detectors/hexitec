@@ -20,45 +20,59 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QLabel" name="progressBarLabel">
-     <property name="text">
-      <string>Image Progress</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="progressBarLabel_2">
-     <property name="text">
-      <string>DAQ Progress</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="dataAcquisitionModel_2">
-     <property name="text">
-      <string>Status</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QProgressBar" name="imageProgressBar">
-     <property name="value">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
       <number>0</number>
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="2">
+   <item row="1" column="1" colspan="2">
     <widget class="QLabel" name="state">
      <property name="text">
       <string>Idle</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="progressBarLabel">
+     <property name="text">
+      <string>Image Progress</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="progressBarLabel_2">
+     <property name="text">
+      <string>DAQ Progress</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="dataAcquisitionModel_2">
+     <property name="text">
+      <string>Status</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QProgressBar" name="imageProgressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="runningAverageValue">
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="runningAverageLabel">
+     <property name="text">
+      <string>Running Average</string>
      </property>
     </widget>
    </item>

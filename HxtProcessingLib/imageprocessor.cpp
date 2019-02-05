@@ -91,6 +91,8 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
+   unsigned int eventsInFrame = 0;
+   unsigned long bufferEvents = 0;
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
    {
@@ -108,12 +110,21 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, &hxtMap);
+                  result = fp->process((uint16_t *)frameIterator, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+//               qDebug() << "\t" << i << "\tvalidFrames:" << validFrames << " bufferEvents:" << bufferEvents << "Average events/frame:" << (bufferEvents/i) << " buffEv/valFrms: " << (bufferEvents/validFrames);
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
@@ -136,12 +147,20 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process(&hxtMap, (uint16_t *)frameIterator);
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
@@ -161,13 +180,26 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
    }
 }
 
+unsigned long ImageProcessor::getRunningAverageEvents()
+{
+   unsigned long runningAverageEventsCopy = -1;
+   if (eventsMutex.tryLock(100))
+   {
+      runningAverageEventsCopy = runningAverageEvents;
+      eventsMutex.unlock();
+   }
+   return runningAverageEventsCopy;
+}
+
 void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, double *result,
                                            const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
-
+   unsigned int eventsInFrame = 0;
+   unsigned long bufferEvents = 0;
+//   QTime qtTime = QTime();
    thresholdValue = processingDefinition->getThresholdValue();
 
    while (inProgress || (imageItem->getBufferQueueSize() > 0))
@@ -189,13 +221,20 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap);
+                  result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
-                  qDebug() << "ThreadID: " << QThread::currentThreadId() << "IP::processThresholdValue, ProcessedFrameCount: " << processedFrameCount;
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
 //               qtTime.restart();
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
@@ -222,12 +261,20 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue);
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                free(bufferStart);
@@ -263,6 +310,8 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
+   unsigned int eventsInFrame = 0;
+   unsigned long bufferEvents = 0;
 
    thresholdPerPixel = processingDefinition->getThresholdPerPixel();
 
@@ -277,17 +326,26 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
          while (imageItem->getBufferQueueSize() > 0)
          {
             bufferStart = imageItem->getNextBuffer(&validFrames);
+            bufferEvents = 0;
             frameIterator = bufferStart;
             if (frameIterator != nullptr)
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap);
+                  result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)
@@ -310,12 +368,20 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
             {
                for (unsigned long i = 0; i < validFrames; i++)
                {
-                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdPerPixel);
+                  result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdPerPixel, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
                   frameIterator += frameSize;
                   processedFrameCount++;
                   free(result);
+                  bufferEvents += eventsInFrame;
+                  eventsInFrame = 0;
                }
+               if (eventsMutex.tryLock(100))
+               {
+                  runningAverageEvents = (bufferEvents/validFrames);
+                  eventsMutex.unlock();
+               }
+               bufferEvents = 0;
                if (saveRaw)
                   writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
                if (hxtGeneration)

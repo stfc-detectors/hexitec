@@ -294,10 +294,12 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "ThreadID: " << QThread::currentThreadId() << "PROCESS BUTTON has been clicked!";
+   qDebug() << QDateTime::currentSecsSinceEpoch() << "ThreadID: " << QThread::currentThreadId() << "PROCESS BUTTON has been clicked!";
 //   emit processImages(nRows, nCols);
    guiBusy();
    emit processImages();
+   /// Debugging purposes:
+   emit processingHasBegun();
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)

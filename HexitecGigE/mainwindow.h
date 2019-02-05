@@ -84,6 +84,9 @@ private:
    ///
    bool bMainWindowBusy;
    QMutex busyMutex;
+   ///
+   int timeElapsed;
+   QTime qtTime;
 
 signals:
    void addObject(QObject *object, bool scripting = TRUE, bool gui = TRUE);
@@ -123,12 +126,7 @@ public slots:
    void readFiles(QStringList files);
    void readBuffer(unsigned short* buffer, QString fileName);   /// HexitecGigE Addition
    void readData(QString fileName);
-//   void sendActiveSliceToMatlab();
-//   void getActiveSliceFromMatlab();
-//   void updateHexitechProcessingStatus(bool isBusy);
-//   void updateVisualisationTab(bool bUpdate);
    void handleBufferReady();
-//   void handleReturnBufferReady(unsigned char *buffer);
    void handleShowImage();
    void enableMainWindowActions();
    void disableMainWindowActions();
@@ -137,6 +135,9 @@ public slots:
    void disableHVActions();
    /// Allow ImageProcessor (via ProcessingBufferGenerator) to signal occupancy corrections
    void handleOccupancyCorrections(int occupancyThreshold, int corrections);
+   ///
+   void startTimer();
+   void stopTimer();
 };
 
 #endif

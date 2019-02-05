@@ -28,7 +28,8 @@
 #include "processingbuffergenerator.h"
 #include "serialport.h"
 #include "badinifiledialog.h"
-
+///
+#include <QTime>
 MainWindow::MainWindow()
 {
    DetectorControlForm *detectorControlForm;
@@ -209,6 +210,8 @@ MainWindow::MainWindow()
            processingBufferGenerator, SLOT(handleConfigureProcessing(int, int)));
    connect(processingBufferGenerator, SIGNAL(hxtFileWritten(unsigned short*, QString)),
            this, SLOT(readBuffer(unsigned short*, QString)));
+   connect(processingBufferGenerator, SIGNAL(updateRunningAverageEvents(unsigned long)),
+           progressForm, SLOT(handleRunningAverageEvents(unsigned long)));
    /// Prevent HexitecGigE/ProcessingBufferGenerator swamping with iterations of
    ///   same image while GUI busy rendering same image on display
    connect(this, SIGNAL(mainWindowBusy(bool)),
@@ -251,6 +254,10 @@ MainWindow::MainWindow()
               gigEDetector, SLOT(handleShowImage()));
    }
 
+   /// Debugging purposes: Calculate duration for processing
+   qtTime = QTime();
+   connect(processingForm, SIGNAL(processingHasBegun()), this, SLOT(startTimer()));
+   connect(processingBufferGenerator, SIGNAL(processingHasStopped()), this, SLOT(stopTimer()));
 }
 
 MainWindow::~MainWindow()
@@ -259,6 +266,17 @@ MainWindow::~MainWindow()
    {
       delete dataAcquisitionFactory;
    }
+}
+
+void MainWindow::startTimer()
+{
+   qtTime.restart();
+   timeElapsed = qtTime.elapsed();
+}
+
+void MainWindow::stopTimer()
+{
+   qDebug() << "Processing time taking:" << (qtTime.elapsed() - timeElapsed);
 }
 
 QMainWindow *MainWindow::createVisualisation()
@@ -581,8 +599,8 @@ void MainWindow::createProgressViewer()
    visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
 //   viewMenu->addAction(dock->toggleViewAction());
    QMainWindow *progressWindow = progressForm->getMainWindow();
-   dock->setWidget(progressWindow) ;
-   progressWindow->setParent(dock) ;
+   dock->setWidget(progressWindow);
+   progressWindow->setParent(dock);
 }
 
 void MainWindow::createWorkSpace()
@@ -768,7 +786,7 @@ bool MainWindow::checkDAQChoice()
 
 void MainWindow::handleOccupancyCorrections(int occupancyThresholds, int corrections)
 {
-   emit writeMessage("Occupancy Threshold: " + QString::number(occupancyThresholds) + " corrected: " + QString::number(corrections) + " Rows");
+   emit writeMessage("Occupancy Threshold at " + QString::number(occupancyThresholds) + " zero'd " + QString::number(corrections) + " Rows");
 
 }
 void MainWindow::handleBufferReady()

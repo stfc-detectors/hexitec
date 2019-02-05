@@ -78,6 +78,8 @@ signals:
    void imageStarted(const char *path);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);
+   ///
+   void processingHasBegun();
 
 private slots:
    void initialise();

@@ -95,7 +95,7 @@ double *GeneralPixelProcessor::getInterceptValue()
 }
 
 double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                              uint16_t *frame)
+                                            uint16_t *frame, unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -125,8 +125,10 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
             }
          }
          else
+         {
             re_orderedFrame[i] = (double)frame[i];
-
+            (*eventsInFrame)++;
+         }
          rowEventsAboveThreshold++;
       }
    }
@@ -148,7 +150,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
 }
 
 double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                              uint16_t *frame, uint16_t thresholdValue)
+                                            uint16_t *frame, uint16_t thresholdValue,
+                                            unsigned int *eventsInFrame)
 {
    double  *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -178,8 +181,10 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
             }
          }
          else
+         {
             re_orderedFrame[i] = (double)frame[i];
-
+            (*eventsInFrame)++;
+         }
          rowEventsAboveThreshold++;
       }
    }
@@ -188,7 +193,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
 }
 
 double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRawValMapPtr,
-                                              uint16_t *frame, uint16_t *thresholdPerPixel)
+                                            uint16_t *frame, uint16_t *thresholdPerPixel,
+                                            unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -220,8 +226,10 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
             }
          }
          else
+         {
             re_orderedFrame[i] = (double)frame[i];
-
+            (*eventsInFrame)++;
+         }
          rowEventsAboveThreshold++;
       }
    }
@@ -230,7 +238,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
 }
 
 double *GeneralPixelProcessor::processFrame(uint16_t *frame,
-                                              unordered_map<int, double>**pixelEnergyMapPtr)
+                                            unordered_map<int, double>**pixelEnergyMapPtr,
+                                            unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -260,7 +269,10 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame,
             }
          }
          else
+         {
             re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+            (*eventsInFrame)++;
+         }
 
          rowEventsAboveThreshold++;
       }
@@ -306,7 +318,8 @@ void GeneralPixelProcessor::clearCurrentRow(uint16_t *re_orderedFrame, unsigned 
 
 
 double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdValue,
-                                              unordered_map<int, double>**pixelEnergyMapPtr)
+                                            unordered_map<int, double>**pixelEnergyMapPtr,
+                                            unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -338,8 +351,10 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
             }
          }
          else
+         {
             re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
-
+            (*eventsInFrame)++;
+         }
          rowEventsAboveThreshold++;
       }
    }
@@ -348,7 +363,8 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
 }
 
 double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-                                              unordered_map<int, double>**pixelEnergyMapPtr)
+                                            unordered_map<int, double>**pixelEnergyMapPtr,
+                                            unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -380,8 +396,10 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
             }
          }
          else
+         {
             re_orderedFrame[i] = ((double)(frame[i]) * gradientValue[i] + interceptValue[i]);
-
+            (*eventsInFrame)++;
+         }
          rowEventsAboveThreshold++;
       }
    }
@@ -390,7 +408,7 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                                      uint16_t *frame)
+                                                    uint16_t *frame, unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -424,8 +442,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
          {
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = (double)frame[i];
+            (*eventsInFrame)++;
          }
-
          rowEventsAboveThreshold++;
       }
    }
@@ -434,7 +452,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                                      uint16_t *frame, uint16_t thresholdValue)
+                                                    uint16_t *frame, uint16_t thresholdValue,
+                                                    unsigned int *eventsInFrame)
 {
    double  *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -468,6 +487,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
          {
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = (double)frame[i];
+            (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
       }
@@ -477,7 +497,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**pixelRawValMapPtr,
-                                                      uint16_t *frame, uint16_t *thresholdPerPixel)
+                                                    uint16_t *frame, uint16_t *thresholdPerPixel,
+                                                    unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
@@ -511,8 +532,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
          {
             index = pixelMap[i];
             re_orderedFrame[index] = (double)frame[i];
+            (*eventsInFrame)++;
          }
-
          rowEventsAboveThreshold++;
       }
    }
@@ -521,7 +542,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
-                                                      unordered_map<int, double>**pixelEnergyMapPtr)
+                                                    unordered_map<int, double>**pixelEnergyMapPtr,
+                                                    unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -555,6 +577,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
          {
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = ( ((double)frame[i]) * gradientValue[index] + interceptValue[index]);
+            (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
       }
@@ -577,7 +600,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
-						      unordered_map<int, double>**pixelEnergyMapPtr)
+                                                    unordered_map<int, double>**pixelEnergyMapPtr,
+                                                    unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -601,23 +625,28 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t th
       {
          if (rowEventsAboveThreshold >= occupancyThreshold)
          {
-            i = clearCurrentRow(re_orderedFrame, i);
-            bClearRowOnce = false;
+            if (bClearRowOnce)
+            {
+               i = clearCurrentRow(re_orderedFrame, i);
+               bClearRowOnce = false;
+            }
          }
          else
          {
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = (double)(frame[i]) * gradientValue[index] + interceptValue[index];
+            (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
-     }
+      }
    }
 
    return re_orderedFrame;
 }
 
 double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
-						      unordered_map<int, double>**pixelEnergyMapPtr)
+                                                    unordered_map<int, double>**pixelEnergyMapPtr,
+                                                    unsigned int *eventsInFrame)
 {
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
@@ -651,8 +680,8 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *t
          {
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
+            (*eventsInFrame)++;
          }
-
          rowEventsAboveThreshold++;
       }
    }
