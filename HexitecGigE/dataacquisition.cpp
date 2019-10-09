@@ -205,7 +205,7 @@ void DataAcquisition::performTriggeringConfigure()
    emit storeBiasSettings();
    emit disableBiasRefresh();
    emit disableMonitoring();
-
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::performTriggeringConfigure() CONFIGURE command";
    emit executeCommand(GigEDetector::CONFIGURE, 0, 0);
    waitForConfiguringDone();
 
@@ -227,6 +227,7 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
 
    for (repeatCount = 0; repeatCount < nRepeat; repeatCount++)
    {
+       qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  DA:perfContDaColl(..) iteration:" << repeatCount << "start..";
       totalFramesAcquired = 0;
       emit appendTimestamp(true);
       setDirectory(repeatCount);
@@ -235,7 +236,9 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
 
       if (biasPriority)
       {
+          qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  DA:perfContDaColl(..) iteration:" << repeatCount << "before doSplitDataColl(..)..";
          nDaqOverall = doSplitDataCollections(nDaqOverall, repeatCount, triggering);
+         qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  DA:perfContDaColl(..) iteration:" << repeatCount << "after doSplitDataColl(..)..";
       }
       else
       {
@@ -251,13 +254,16 @@ void DataAcquisition::performContinuousDataCollection(bool triggering)
 
       if (repeatPauseRequired(repeatCount))
       {
+          qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  pause..";
          pauseDataAcquisition();
          
          if (abortRequired())
             break;
          changeDAQStatus(daqStatus.getMajorStatus(),
                          DataAcquisitionStatus::COLLECTING);
+         qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  unpause!";
       }
+      qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  DA:perfContDaColl(..) iteration:" << repeatCount << " Done!";
    }
 
    daqStatus.setCurrentImage(++nDaqOverall);
@@ -275,6 +281,7 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
 
    for (nDaq = 0; nDaq < splitDataCollections ; nDaq++)
    {
+       qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) iter " << nDaq << "BEGIN";
       setDataAcquisitionTime(nDaq);
       triggered = false;
 
@@ -282,11 +289,13 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
       {
          emit appendTimestamp(false);
          collecting = true;
+         qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) nD AQ > 0 COLLECT";
          emit executeCommand(GigEDetector::COLLECT,
                              dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
       }
       else
       {
+          qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) nDAQ else COLLECT";
          collecting = true;
          emit executeCommand(GigEDetector::COLLECT,
                              dataAcquisitionDefinition->getRepeatCount(), nDaqOverall);
@@ -298,8 +307,9 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
 
       nDaqOverall++;
       waitForCollectingDone();
-
+        qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) 2 (!?)";
       daqStatus.setCurrentImage(nDaqOverall);
+
       if (abortRequired())
       {
          break;
@@ -308,6 +318,7 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
       if (nDaq < (splitDataCollections - 1) ||
           !repeatPauseRequired(repeatCount))
       {
+          qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) 2.1";
          performMonitorEnvironmentalValues();
          performSingleBiasRefresh();
          if (abortRequired())
@@ -323,6 +334,7 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
          configureRequired = true;
          suspendTriggering = false;
       }
+      qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doSplitDataCollections(..) iter " << nDaq << "FIN'D";
    }
 
    if (configureRequired && (!abortRequired()))
@@ -331,7 +343,7 @@ int DataAcquisition::doSplitDataCollections(int nDaqOverall, int repeatCount, bo
       emit executeCommand(GigEDetector::CONFIGURE, 0, 0);
       waitForConfiguringDone();
    }
-
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << Q_FUNC_INFO << "DONE";
    return nDaqOverall;
 }
 
@@ -355,6 +367,7 @@ int DataAcquisition::doLowPriorityBiasDataCollections(int nDaqOverall)
       {
          emit appendTimestamp(false);
       }
+      qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::doBlowPriorityBiasDataCollections(..) While(remainingFrames != 0) RESTART";
       hv->setReadyForRefresh(false);
       collecting = true;
       emit executeCommand(GigEDetector::RESTART, startOfImage, 0);
@@ -391,6 +404,7 @@ void DataAcquisition::performGigEDefaultDataCollection()
    emit disableMonitoring();
 //   waitForMonitoringDone();
 
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::performGigEDefaultDataCollection() COLLECT";
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
    waitForCollectingDone();
@@ -418,7 +432,7 @@ void DataAcquisition::performFixedDataCollection()
    dataAcquisitionDefinition = dataAcquisitionModel->getDataAcquisitionDefinition();
    emit storeBiasSettings();
    emit disableBiasRefresh();
-
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::performDataCollection() COLLECT";
    collecting = true;
    emit executeCommand(GigEDetector::COLLECT, dataAcquisitionDefinition->getFixedImageCount(), 1);
 
@@ -539,6 +553,8 @@ int DataAcquisition::waitForConfiguringDone()
 
 int DataAcquisition::waitForCollectingDone()
 {
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << Q_FUNC_INFO << " BEGIN; collecting: " <<
+                collecting << "mode == CONTINUOUS: " << (mode == GigEDetector::CONTINUOUS);
    int status = 0;
    int elapsed = 0;
    int percentage = 0;
@@ -587,6 +603,7 @@ int DataAcquisition::waitForCollectingDone()
    {
       percentage = 100;
    }
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << Q_FUNC_INFO << " FIN'D";
    return status;
 }
 
@@ -798,7 +815,8 @@ void DataAcquisition::handleExecuteOffsets()
 
 void DataAcquisition::handleCancelOffsets()
 {
-   abort = true;
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  handleCouncilOffset() STATE";
+    abort = true;
    collecting = false;
    emit executeCommand(GigEDetector::STATE, GigEDetector::READY, 0);
    // Following 2 line necessary for when soft trigger cancelled.
@@ -813,6 +831,7 @@ void DataAcquisition::handleExecuteReducedDataCollection()
 
 void DataAcquisition::handleCancelReducedDataCollection()
 {
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "  ->  DA::handleCancelReducedDataCollection() STATE";
    abort = true;
    collecting = false;
    emit executeCommand(GigEDetector::STATE, GigEDetector::READY, 0);

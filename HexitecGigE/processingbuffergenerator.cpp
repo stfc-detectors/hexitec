@@ -59,7 +59,7 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
            this, SLOT(handleOccupancyCorrections(int, int)));
 
    currentHxtGenerator = currentImageProcessor->getHxtGenerator();
-   qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
+   qDebug() << QThread::currentThreadId()  << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
 }
 
 void ProcessingBufferGenerator::handleOccupancyCorrections(int occupancyThreshold, int corrections)
@@ -232,7 +232,7 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, int 
 
 void ProcessingBufferGenerator::handleProcessingComplete()
 {
-   qDebug() << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
+   qDebug() << QThread::currentThreadId()  << "ProcessingBufferGenerator::handleProcessingComplete() called!!!";
    emit processingComplete();
 }
 

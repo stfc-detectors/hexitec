@@ -13,7 +13,7 @@ void ImageProcessorHandler::run()
    imageProcessor->setImageInProgress(true);
    imageProcessor->handleProcess();
 
-   qDebug()<< "ImageProcessorHandler::run()ENDING!!! threadId: "<< QThread::currentThreadId();
+   qDebug() << QThread::currentThreadId() << int(QThread::currentThreadId()) << "ImageProcessorHandler::run()ENDING!!! threadId: "<< QThread::currentThreadId();
    delete imageProcessor;
    emit processingComplete();
 }

@@ -31,6 +31,7 @@ HexitecSystemConfig	systemConfig = {2, 10, AS_HEXITEC_ADC_SAMPLE_FALLING_EDGE, 4
 #ifdef DETECTORLIB_EXPORTS
 static void __cdecl bufferCallBack(PUCHAR transferBuffer, ULONG frameCount)
 {
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " remainingFrames, validFrames: " << remainingFrames << validFrames;
    bufferReady = transferBuffer;
    validFrames = frameCount;
    remainingFrames -=validFrames;
@@ -279,6 +280,7 @@ int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
 
 int GigEDetector::initialise(/*Triggering triggering*/)
 {
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()  << " -=-=-=-=-=- GigEDetector::initialise()";
    LONG status = -1;
    CONST LPSTR deviceDescriptor = (const LPSTR )"";
    ULONG pleoraErrorCodeStrLen = STR_LENGTH;
@@ -303,7 +305,7 @@ int GigEDetector::initialise(/*Triggering triggering*/)
    showError("GetDeviceInformation", status);
    frameTime = 0;
 
-
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " CLOSING pipeline. ::initialise()";
    status = CloseSerialPort(detectorHandle);
    status = ClosePipeline(detectorHandle);
    status = CloseStream(detectorHandle);
@@ -360,7 +362,7 @@ int GigEDetector::configure(bool triggeringSuspended)
    try
    {
       updateState(INITIALISING);
-
+        qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " CLOSING pipeline ::configure()";
       status = CloseSerialPort(detectorHandle);
       status = ClosePipeline(detectorHandle);
       status = CloseStream(detectorHandle);
@@ -422,7 +424,7 @@ int GigEDetector::configureDetector(bool triggeringSuspended)
          triggeringMode = Triggering::INVALID_TRIGGERING;
          break;
    }
-
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " OPENING pipeline ::configureDetector(); framePerBuffer:  " << framesPerBuffer;
    status = setImageFormat(xRes, yRes);
    status = CreatePipeline(detectorHandle, 512, 100, framesPerBuffer);
    showError( "CreatePipeline", status);
@@ -438,7 +440,7 @@ int GigEDetector::terminateConnection()
    {
       status = CloseSerialPort(detectorHandle);
       showError( "CloseSerialPort", status);
-
+        qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " CLOSING pipeline ::terminateConnection";
       status = ClosePipeline(detectorHandle);
       showError( "ClosePipeline", status);
 
@@ -671,6 +673,7 @@ void GigEDetector::handleReducedDataCollection()
 
 void GigEDetector::restartImages(bool startOfImage)
 {
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << Q_FUNC_INFO;
 //   qDebug() << "GigEDetector::restartImages() called, startOfImage = " << startOfImage;
    if (mode == CONTINUOUS && appendTimestamp)
    {
@@ -748,10 +751,11 @@ void GigEDetector::acquireImages(bool startOfImage)
    double durationSeconds = dataAcquisitionDuration/1000.0;
    ULONG frameCount = ULONG((durationSeconds/frameTime) + 0.5);
    ULONG frameTimeout = ULONG(frameTime * 2500.0);
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "SANITY; durationSeconds / frameTime: (" << durationSeconds << " / " << frameTime << ") = " << frameCount;
 
    if (startOfImage)
    {
-      qDebug() <<"Starting a new collection, frameCount = " << frameCount;
+      qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   <<"Starting a new collection, frameCount = " << frameCount;
       remainingFrames = frameCount;
       totalFramesAcquired = 0;
    }
@@ -760,14 +764,13 @@ void GigEDetector::acquireImages(bool startOfImage)
       qDebug() <<"Restart collection, remainingFrames = " << remainingFrames;
       frameCount = ULONG(remainingFrames);
    }
-
    if( frameTimeout < 100 )
    {
       frameTimeout = 100;
    }
-
    if (triggerConfigMode == NO_TRIGGERING)
    {
+       qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " GigE2.1 ?";
       /// 20180627: Put these 3 lines within try, catch
       ///   otherwise any error will crash showError() call
       try
@@ -798,10 +801,11 @@ void GigEDetector::acquireImages(bool startOfImage)
       {
          status = SetTriggeredFrameCount(detectorHandle, frameCount, frameTimeout);
          showError("SetTriggeredFrameCount", status);
-
+            qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " GigE4";
          status = SetFrameTimeOut(detectorHandle, frameTimeout);
          status = AcquireFrames(detectorHandle, frameCount, &framesAcquired, ULONG(triggerTimeout));
          showError("AcquireFrames Triggered", status);
+         qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << " GigE5";
       }
       catch (DetectorException &ex)
       {
@@ -811,7 +815,7 @@ void GigEDetector::acquireImages(bool startOfImage)
          remainingFrames = 0;
          emit cancelDataCollection();
       }
-      qDebug() << "Collect triggered image over!";
+      qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << "Collect triggered image over!";
    }
 
    totalFramesAcquired += framesAcquired;
@@ -821,6 +825,7 @@ void GigEDetector::acquireImages(bool startOfImage)
       emit imageComplete(totalFramesAcquired);
    }
    updateState(READY);
+   qDebug() << QDateTime::currentMSecsSinceEpoch() << QThread::currentThreadId()   << Q_FUNC_INFO << "DONE";
 }
 
 int GigEDetector::getLoggingInterval()

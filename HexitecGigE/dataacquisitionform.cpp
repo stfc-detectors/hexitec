@@ -3,7 +3,9 @@
 
 #include "dataacquisitionform.h"
 #include "ui_dataacquisitionform.h"
-
+///
+#include <QDebug>
+#include <QThread>
 DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
    QWidget(parent),
    ui(new Ui::DataAcquisitionForm)
@@ -283,6 +285,7 @@ void DataAcquisitionForm::offsetsDialogRejected()
 
 void DataAcquisitionForm::dataCollectionDialogAccepted()
 {
+    qDebug() << QThread::currentThreadId()   << Q_FUNC_INFO;
    emit executeReducedDataCollection();
 }
 

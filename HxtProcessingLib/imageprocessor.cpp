@@ -452,7 +452,7 @@ void ImageProcessor::handleProcess()
    }
 
    int corrections = fp->getOccupancyCorrections();
-   qDebug() << "IP reports that an occupancyThreshold of" << occupancyThreshold << "produced" << corrections << "occupancy correction(s).";
+   qDebug() << QThread::currentThreadId() << int(QThread::currentThreadId()) << "IP reports that an occupancyThreshold of" << occupancyThreshold << "produced" << corrections << "occupancy correction(s).";
    if (corrections != 80)
       emit occupancyCorrections(occupancyThreshold, corrections);
 
