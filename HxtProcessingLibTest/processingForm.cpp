@@ -271,7 +271,6 @@ void ProcessingForm::processClicked()
    qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId() << QTime::currentTime();
    emit processImages(nRows, nCols);
    guiBusy();
-//   qDebug() << "PROCESSING CONTINUING!!!";
 }
 
 void ProcessingForm::setThresholdOptions(int thresholdOption)
@@ -498,7 +497,6 @@ void ProcessingForm::setOutputDirectory()
 
 void ProcessingForm::setDataFileParameters()
 {
-
    inputFilesList = ui->inputFilesList->text().split(", ");
    outputDirectory = ui->outputDirectory->text();
    outputPrefix = ui->outputPrefix->text();

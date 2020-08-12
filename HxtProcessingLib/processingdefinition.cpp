@@ -10,9 +10,9 @@ ProcessingDefinition::ProcessingDefinition(long long frameSize)
    gradientFilename =  new char[1024];
    interceptFilename =  new char[1024];
    this->frameSize = frameSize;
-   gradientValue = (double *) calloc(frameSize, sizeof(double));
-   interceptValue = (double *) calloc(frameSize, sizeof(double));
-   thresholdPerPixel = (uint16_t *) calloc(frameSize, sizeof(uint16_t));
+   gradientValue = static_cast<double *>(calloc(frameSize, sizeof(double)));
+   interceptValue = static_cast<double *>(calloc(frameSize, sizeof(double)));
+   thresholdPerPixel = static_cast<uint16_t *>(calloc(frameSize, sizeof(uint16_t)));
    outputDirectory = new char[1024];
    outputPrefix = new char[1024];
 }
@@ -58,7 +58,7 @@ void ProcessingDefinition::setHxtGeneration(bool hxtGeneration)
 
 bool ProcessingDefinition::setGradientFilename(char *gradientFilename)
 {
-   strcpy(this->gradientFilename, (const char *)gradientFilename);
+   strcpy(this->gradientFilename, const_cast<char *>(gradientFilename));
    setGradients();
 
    return gradientsStatus;
@@ -66,7 +66,7 @@ bool ProcessingDefinition::setGradientFilename(char *gradientFilename)
 
 bool ProcessingDefinition::setInterceptFilename(char *interceptFilename)
 {
-   strcpy(this->interceptFilename, (const char *)interceptFilename);
+   strcpy(this->interceptFilename, const_cast<char *>(interceptFilename));
    setIntercepts();
 
    return interceptsStatus;
@@ -141,7 +141,7 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
      }
    }
 
-   while (inFile >> dataValue[i])
+   while ((i < frameSize) && (inFile >> dataValue[i]))
    {
       i++;
    }
@@ -166,7 +166,7 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
 {
    int i = 0;
    std::ifstream inFile;
-   bool success;
+   bool success = false;
 
    inFile.open(filename);
 
@@ -178,9 +178,9 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
      }
    }
 
-   while (inFile >> dataValue[i])
+   while ((i < frameSize) && (inFile >> dataValue[i]))
    {
-      i++;
+     i++;
    }
 
    if (i < frameSize)
@@ -322,8 +322,8 @@ bool ProcessingDefinition::getTotalSpectrum() const
 void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
    this->totalSpectrum = totalSpectrum;
-   nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
-   hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * sizeof(double);
+   nBins = static_cast<int>(((binEnd - binStart) / binWidth) + 0.5);
+   hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * static_cast<long long>(sizeof(double));
    hxtBufferHeaderSize = sizeof(HxtItem::HxtV3Buffer) - sizeof(double *);
 }
 

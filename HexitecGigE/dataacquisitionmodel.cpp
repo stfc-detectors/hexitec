@@ -13,8 +13,8 @@ DataAcquisitionModel::DataAcquisitionModel(DataAcquisitionForm *dataAcquisitionF
                                            QObject *parent) :
    QObject(parent)
 {
-   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
-   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
+//   DetectorFilename *dataFilename = dataAcquisitionDefinition.getDataFilename();
+//   DetectorFilename *logFilename = dataAcquisitionDefinition.getLogFilename();
 
    this->dataAcquisitionForm = dataAcquisitionForm;
    this->detectorControlForm = detectorControlForm;
