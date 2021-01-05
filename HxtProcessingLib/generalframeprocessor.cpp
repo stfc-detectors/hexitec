@@ -27,6 +27,15 @@ void GeneralFrameProcessor::setFrameSize(int frameSize)
    pixelProcessor->resetLastRe_orderedSize();
 }
 
+void GeneralFrameProcessor::setCols(int columns)
+{
+   pixelProcessor->setCols(columns);
+}
+
+void GeneralFrameProcessor::setRows(int rows)
+{
+    pixelProcessor->setRows(rows);
+}
 
 void GeneralFrameProcessor::setGradients(double *gradientValue)
 {

@@ -432,6 +432,8 @@ void ImageProcessor::handleProcess()
    }
 
    fp->setFrameSize(processingDefinition->getFrameSize());
+   fp->setCols( processingDefinition->getCols());
+   fp->setRows( processingDefinition->getRows());
    fp->setEnergyCalibration(processingDefinition->getEnergyCalibration());
    fp->setGradients(processingDefinition->getGradients());
    fp->setIntercepts(processingDefinition->getIntercepts());

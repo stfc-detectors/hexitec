@@ -173,6 +173,7 @@ void ProcessingBufferGenerator::handleProcessingComplete()
    emit processingComplete();   // Calls processingForm::guiIdle()
 }
 
+// Called when Test.exe processes data
 void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
 {
    int fileExtensionPos;

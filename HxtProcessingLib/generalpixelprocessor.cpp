@@ -6,8 +6,6 @@
 #include <bitset>
 #include <vector>
 #include <sys/stat.h>
-//
-#include <QDebug>
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
@@ -76,6 +74,16 @@ void GeneralPixelProcessor::initialiseEnergyCalibration(double *gradientValue, d
 void GeneralPixelProcessor::setFrameSize(int frameSize)
 {
    GeneralPixelProcessor::frameSize = frameSize;
+}
+
+void GeneralPixelProcessor::setCols(int columns)
+{
+   GeneralPixelProcessor::nColumns = columns;
+}
+
+void GeneralPixelProcessor::setRows(int Rows)
+{
+   GeneralPixelProcessor::nRows = Rows;
 }
 
 void GeneralPixelProcessor::resetLastRe_orderedSize()

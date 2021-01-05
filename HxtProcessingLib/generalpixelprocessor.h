@@ -24,6 +24,8 @@ public:
    GeneralPixelProcessor(int occupancyThreshold);
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
    void setFrameSize(int frameSize);
+   void setCols(int columns);
+   void setRows(int rows);
    void setEnergyCalibration(bool energyCalibration);
    void setLastFrameCorrection(bool lastFrameCorrection);
    void setGradientValue(double *gradientValue);

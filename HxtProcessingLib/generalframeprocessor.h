@@ -12,6 +12,9 @@ public:
    GeneralFrameProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~GeneralFrameProcessor();
    void setFrameSize(int frameSize);
+   void setCols(int columns);
+   void setRows(int rows);
+
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);
    void setEnergyCalibration(bool energyCalibration);
