@@ -14,8 +14,10 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
 {
    currentImageProcessor = nullptr;
    this->processingDefinition = processingDefinition;
-   nRows = this->processingDefinition->getRows();
-   nCols = this->processingDefinition->getCols();
+   nInRows = this->processingDefinition->getFrameInRows();
+   nInCols = this->processingDefinition->getFrameInCols();
+   nOutRows = this->processingDefinition->getFrameOutRows();
+   nOutCols = this->processingDefinition->getFrameOutCols();
    pbgThread = new QThread();
    pbgThread->start();
    moveToThread(pbgThread);
@@ -33,11 +35,11 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    saveRaw = true;
 }
 
-void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
+void ProcessingBufferGenerator::enqueueImage(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition)
 {
-   this->frameSize = int(nRows * nCols * sizeof(uint16_t));
+   this->frameInSize = int(nInRows * nInCols * sizeof(uint16_t));
 
-   currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
+   currentImageProcessor = new ImageProcessor(filename, nInRows, nInCols, nOutRows, nOutCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
    connect(currentImageProcessorHandler, SIGNAL(processingComplete()),
            this, SLOT(handleProcessingComplete()));
@@ -76,7 +78,8 @@ void ProcessingBufferGenerator::handleImageStarted(char *filename)
 {
    emit imageStarted();
    QMutexLocker locker(&mutex);
-   enqueueImage(filename, processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+   enqueueImage(filename, processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(),
+                processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
 }
 
 void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames)
@@ -93,8 +96,8 @@ void ProcessingBufferGenerator::handleTransferBufferReady(unsigned char *transfe
 
 void ProcessingBufferGenerator::bufferReady(unsigned char *buffer, unsigned long validFrames)
 {
-   bufferToProcess = (char *) malloc(frameSize * validFrames);      // Free()'d by calling ImageProcessor::processThreshold...()
-   memcpy(bufferToProcess, buffer, frameSize * validFrames);
+   bufferToProcess = (char *) malloc(frameInSize * validFrames);      // Free()'d by calling ImageProcessor::processThreshold...()
+   memcpy(bufferToProcess, buffer, frameInSize * validFrames);
    currentImageProcessor->enqueueBuffer(bufferToProcess, validFrames);
 }
 
@@ -215,18 +218,23 @@ void ProcessingBufferGenerator::handleMainWindowBusy(bool bBusy)
    }
 }
 
-//void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
-void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols, int occupancyThreshold)
+void ProcessingBufferGenerator::handleConfigureSensor(int nInRows, int nInCols, int nOutRows, int nOutCols, int occupancyThreshold)
 {
    long long frameSize;
 
-   this->nRows = nRows;
-   this->nCols = nCols;
-   frameSize = (long long)nRows * (long long)nCols;
-   qDebug() << "SET processingDefinition nRows, nCols, frameSize " << this->nRows << this->nCols << frameSize;
-   processingDefinition->setRows(int(nRows));
-   processingDefinition->setCols(int(nCols));
-   processingDefinition->setFrameSize(frameSize);
+   this->nInRows = nInRows;
+   this->nInCols = nInCols;
+   this->nOutRows = nOutRows;
+   this->nOutCols = nOutCols;
+   frameSize = (long long)nInRows * (long long)nInCols;
+   qDebug() << "SET processingDefinition nInRows, nInCols, frameSize " << this->nInRows << this->nInCols << frameSize << this->nOutRows << this->nOutCols;
+   processingDefinition->setFrameInRows(nInRows);
+   processingDefinition->setFrameInCols(nInCols);
+   processingDefinition->setFrameInSize(frameSize);
+   processingDefinition->setFrameOutRows(nOutRows);
+   processingDefinition->setFrameOutCols(nOutCols);
+   frameSize = (long long)nOutRows * (long long)nOutCols;
+   processingDefinition->setFrameOutSize(frameSize);
    processingDefinition->setOccupancyThreshold(occupancyThreshold);
 }
 
@@ -247,8 +255,8 @@ void ProcessingBufferGenerator::handlePostProcessImages()
    char *processingFilename;
    char *inputFilename;
 
-   int nRows = processingDefinition->getRows();
-   int nCols = processingDefinition->getCols();
+   int nInRows = processingDefinition->getFrameInRows();
+   int nInCols = processingDefinition->getFrameInCols();
 
    processingFilenameList.clear();
 
@@ -288,18 +296,18 @@ void ProcessingBufferGenerator::handlePostProcessImages()
 
       while (inFile)
       {
-         transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char));   // freed()'d in handleFileBufferReady
+         transferBuffer = (unsigned char *) calloc(nInRows * nInCols * 500 * sizeof(uint16_t), sizeof(char));   // freed()'d in handleFileBufferReady
          /// transferBuffer passed onto ImageProcessor->enqueueBuffer(buffer, frames) via bufferReady(..)
 
-         inFile.read((char *)transferBuffer, nRows * nCols  * 500 * 2);
+         inFile.read((char *)transferBuffer, nInRows * nInCols  * 500 * 2);
          if (!inFile)
          {
-            validFrames = inFile.gcount() / (nRows * nCols  * 2);
+            validFrames = inFile.gcount() / (nInRows * nInCols  * 2);
             emit fileBufferReady(transferBuffer, validFrames);
          }
          else
          {
-            validFrames = inFile.gcount() / (nRows * nCols * 2);
+            validFrames = inFile.gcount() / (nInRows * nInCols * 2);
             emit fileBufferReady(transferBuffer, 500);
          }
          totalFramesAcquired += validFrames;

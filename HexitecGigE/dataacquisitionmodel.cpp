@@ -160,22 +160,16 @@ void DataAcquisitionModel::connectGigEDetector()
    connect(gigEDetector, SIGNAL(imageAcquired(QPixmap)), detectorControlForm, SLOT(setPixmap(QPixmap)));
    connect(gigEDetector, SIGNAL(prepareForOffsets()), dataAcquisitionForm, SLOT(prepareForOffsets()));
    connect(gigEDetector, SIGNAL(prepareForDataCollection()), dataAcquisitionForm, SLOT(prepareForDataCollection()));
-//   connect(gigEDetector, SIGNAL(imageStarted(char *, int)),
-//           dataAcquisition, SLOT(handleImageStarted(char *, int)));
    connect(gigEDetector, SIGNAL(imageStarted(char *)),
            processingBufferGenerator, SLOT(handleImageStarted(char *)));
    connect(gigEDetector, SIGNAL(imageComplete(unsigned long long)),
            dataAcquisition, SLOT(handleImageComplete(unsigned long long)));
-//   connect(gigEDetector, SIGNAL(executeBufferReady(unsigned char*,ulong)),
-//           dataAcquisition, SLOT(handleBufferReady(unsigned char*,ulong));
    connect(gigEDetector, SIGNAL(enableMonitoring()),
            detectorMonitor, SLOT(enableMonitoring()));
    connect(gigEDetector, SIGNAL(executeCommand(GigEDetector::DetectorCommand, int, int)),
            gigEDetector, SLOT(handleExecuteCommand(GigEDetector::DetectorCommand, int, int)));
    connect(gigEDetector, SIGNAL(triggeringAvailableChanged(bool)),
            detectorControlForm, SLOT(handleTriggeringAvailable(bool)));
-//   connect(gigEDetector, SIGNAL(detectorResolutionSet(int, int)),
-//           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(gigEDetector, SIGNAL(cancelDataCollection()),
            dataAcquisition, SLOT(handleCancelReducedDataCollection()));
 }

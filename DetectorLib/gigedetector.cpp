@@ -312,9 +312,11 @@ int GigEDetector::initialise(/*Triggering triggering*/)
 
    status = OpenStream(detectorHandle);
    showError("OpenStream", status);
-
+   qDebug() << Q_FUNC_INFO << " GigEDet:init(); Before/After CheckFirmware(..) called (but status code ignored - temporary)";
+   qDebug() << Q_FUNC_INFO << " GigEDet:init(); custId, projId, vers, forceEqlVers: " << customerId << projectId << version << forceEqualVersion << timeout;
    status = CheckFirmware(detectorHandle,&customerId, &projectId, &version, forceEqualVersion, timeout);
-   showError("CheckFirmware", status);
+   qDebug() << Q_FUNC_INFO << " GigEDet:init(); custId, projId, vers, forceEqlVers: " << customerId << projectId << version << forceEqualVersion << timeout;
+//   showError("CheckFirmware", status);    /// TEMPORARY HACK: Don't check file as its apparently the "wrong version"(!)
    if (!status)
    {
       qDebug() <<"Detector in use - customer ID:" << customerId;

@@ -104,8 +104,8 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
        i = i + increment;
     }
     ///
-    ostringstream postAlgorithmContents;
-    postAlgorithmContents << "-------------- frame " << debugFrameCounter << " (Post Algorithm) --------------\n";
+   //  ostringstream postAlgorithmContents;
+   //  postAlgorithmContents << "-------------- frame " << debugFrameCounter << " (Post Algorithm) --------------\n";
 ////    if (debugFrameCounter == 67)
 //    {
 //       for (int i = 0; i < nRows*nCols; i++ )

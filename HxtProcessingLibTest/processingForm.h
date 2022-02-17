@@ -37,8 +37,10 @@ private:
    void guiBusy();
    void guiIdle();
 
-   int nRows;
-   int nCols;
+   int nInRows;
+   int nInCols;
+   int nOutRows;
+   int nOutCols;
    int frameSize;
    int thresholdOption;
    uint16_t thresholdPerPixel[160000];
@@ -53,7 +55,7 @@ private:
    QStringList inputFilesList;
 
 signals:
-   void configureSensor(int nRows, int nCols);
+   void configureSensor(int nInRows, int nInCols, int nOutRows, int nOutCols);
    void configureProcessing(bool re_order,
                             bool nextFrame,
                             int threshholdMode,
@@ -73,7 +75,7 @@ signals:
                             QString outputDirectory,
                             QString outputPrefix);
 
-   void processImages(int nRows, int nCols);
+   void processImages(int nInRows, int nInCols, int nOutRows, int nOutCols);
    void imageStarted(const char *path);
    void transferBufferReady(char *transferBuffer, unsigned long validFrames);
    void imageComplete(long long totalFramesAcquired);

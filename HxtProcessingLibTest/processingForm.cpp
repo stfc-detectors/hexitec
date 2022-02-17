@@ -81,6 +81,8 @@ void ProcessingForm::initialiseProcessingForm()
    int fileStartPos;
    int rows = 20;
    int columns = 80;
+   nOutRows = 20; /// Do not just hard code?
+   nOutCols = 80; /// Do not just hardcode?
 
    filename = "DEFAULT";
    ui->thresholdModeComboBox->setCurrentIndex(1);
@@ -157,26 +159,26 @@ void ProcessingForm::initialiseProcessingForm()
    if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
    {
       qDebug() << "Set rows = " << rows;
-      nRows = rows;
+      nInRows = rows;
    }
    else
    {
       qDebug() << "failed " << rows;
-      nRows = 80;
+      nInRows = 80;
    }
 
    if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
    {
       qDebug() << "Set columns = " << columns;
-      nCols = columns;
+      nInCols = columns;
    }
    else
    {
       qDebug() << "failed " << columns;
-      nCols = 80;
+      nInCols = 80;
    }
-   frameSize = nRows * nCols;
-   qDebug() << "pF:179, frameSize: " << frameSize;
+   frameSize = nInRows * nInCols;
+
    if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
    {
       ui->binStartSpinBox->setValue(binStart);
@@ -242,9 +244,9 @@ void ProcessingForm::initialiseProcessingForm()
    {
       ui->inputFilesList->setText(filename);
    }
-
-   emit configureSensor(nRows, nCols);
-   if ((nRows != 20) || (nCols !=80))
+   
+   emit configureSensor(nInRows, nInCols, nOutRows, nOutCols);
+   if ((nInRows != 20) || (nInCols !=80))
    {
       ui->re_orderCheckBox->setChecked(false);
       ui->re_orderCheckBox->setEnabled(false);
@@ -268,8 +270,8 @@ void ProcessingForm::initialise()
 
 void ProcessingForm::processClicked()
 {
-   qDebug() << "PROCESS BUTTON has been clicked!" << nRows << nCols << QThread::currentThreadId() << QTime::currentTime();
-   emit processImages(nRows, nCols);
+   qDebug() << "PROCESS BUTTON has been clicked!" << nInRows << nInCols << QThread::currentThreadId() << QTime::currentTime();
+   emit processImages(nInRows, nInCols, nOutRows, nOutCols);
    guiBusy();
 }
 
@@ -448,7 +450,6 @@ void ProcessingForm::guiIdle()
 
 int ProcessingForm::getFrameSize()
 {
-   qDebug() << "pF:451, getFrmSz() ret frameSize: " << frameSize;
    return frameSize;
 }
 

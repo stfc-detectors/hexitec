@@ -174,22 +174,22 @@ void ProcessingForm::initialiseProcessingForm()
    }
    if ((rows = twoEasyIniFile->getInt("Processing/Rows")) != QVariant(INVALID))
    {
-      nRows = rows;
+      nInRows = rows;
    }
    else
    {
-      nRows = 80;
+      nInRows = 80;
    }
 
    if ((columns = twoEasyIniFile->getInt("Processing/Columns")) != QVariant(INVALID))
    {
-      nCols = columns;
+      nInCols = columns;
    }
    else
    {
-      nCols = 80;
+      nInCols = 80;
    }
-   frameSize = nRows * nCols;
+   frameInSize = nInRows * nInCols;
 
    if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
    {
@@ -259,7 +259,7 @@ void ProcessingForm::initialiseProcessingForm()
       ui->inputFilesList->setText(filename);
    }
 
-   if ((nRows != 20) || (nCols !=80))
+   if ((nInRows != 20) || (nInCols !=80))
    {
       ui->re_orderCheckBox->setChecked(false);
       ui->re_orderCheckBox->setEnabled(false);
@@ -275,7 +275,7 @@ void ProcessingForm::initialiseProcessingForm()
       occupancyThreshold = 0;
    }
 
-   emit configureSensor(nRows, nCols, occupancyThreshold);
+   emit configureSensor(nInRows, nInCols, nOutRows, nOutCols, occupancyThreshold);
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
    emit configureProcessing(ui->energyCalibrationCheckBox->isChecked(), ui->hxtCheckBox->isChecked(),
@@ -295,7 +295,6 @@ void ProcessingForm::initialise()
 void ProcessingForm::processClicked()
 {
    qDebug() << "ThreadID: " << QThread::currentThreadId() << "PROCESS BUTTON has been clicked!";
-//   emit processImages(nRows, nCols);
    guiBusy();
    emit processImages();
 }
@@ -477,7 +476,7 @@ void ProcessingForm::guiIdle()
 
 int ProcessingForm::getFrameSize()
 {
-   return frameSize;
+   return frameInSize;
 }
 
 //void ProcessingForm::NextFrameCorrectionOption(bool nextFrameCorrection)

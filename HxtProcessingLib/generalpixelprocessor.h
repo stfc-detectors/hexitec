@@ -14,18 +14,25 @@ class GeneralPixelProcessor
 {
 
 public:
-   static uint16_t pixelMap[6400];
+   static uint16_t pixelMap[1600];
+//   static uint16_t 4x16PixelMap[64];
    static bool pixelMapInitialised;
-   static uint32_t frameSize;
-   static uint32_t nRows;
-   static uint32_t nColumns;
+   static uint32_t frameInSize;
+   static uint32_t nInRows;
+   static uint32_t nInColumns;
+   static uint32_t frameOutSize;
+   static uint32_t nOutRows;
+   static uint32_t nOutColumns;
 
 public:
    GeneralPixelProcessor(int occupancyThreshold);
    void initialiseEnergyCalibration(double *gradientValue, double *interceptValue);
-   void setFrameSize(int frameSize);
-   void setCols(int columns);
-   void setRows(int rows);
+   void setFrameInSize(uint32_t frameSize);
+   void setFrameInCols(uint32_t columns);
+   void setFrameInRows(uint32_t rows);
+   void setFrameOutSize(uint32_t frameSize);
+   void setFrameOutCols(uint32_t columns);
+   void setFrameOutRows(uint32_t rows);
    void setEnergyCalibration(bool energyCalibration);
    void setLastFrameCorrection(bool lastFrameCorrection);
    void setGradientValue(double *gradientValue);

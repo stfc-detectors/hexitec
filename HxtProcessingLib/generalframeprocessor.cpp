@@ -21,20 +21,36 @@ GeneralFrameProcessor::~GeneralFrameProcessor()
    delete pixelProcessor;
 }
 
-void GeneralFrameProcessor::setFrameSize(int frameSize)
+void GeneralFrameProcessor::setFrameInSize(uint32_t frameSize)
 {
-   pixelProcessor->setFrameSize(frameSize);
+   pixelProcessor->setFrameInSize(frameSize);
    pixelProcessor->resetLastRe_orderedSize();
 }
 
-void GeneralFrameProcessor::setCols(int columns)
+void GeneralFrameProcessor::setFrameInCols(uint32_t columns)
 {
-   pixelProcessor->setCols(columns);
+   pixelProcessor->setFrameInCols(columns);
 }
 
-void GeneralFrameProcessor::setRows(int rows)
+void GeneralFrameProcessor::setFrameInRows(uint32_t rows)
 {
-    pixelProcessor->setRows(rows);
+    pixelProcessor->setFrameInRows(rows);
+}
+
+void GeneralFrameProcessor::setFrameOutSize(uint32_t frameSize)
+{
+   pixelProcessor->setFrameOutSize(frameSize);
+   pixelProcessor->resetLastRe_orderedSize();
+}
+
+void GeneralFrameProcessor::setFrameOutCols(uint32_t columns)
+{
+   pixelProcessor->setFrameOutCols(columns);
+}
+
+void GeneralFrameProcessor::setFrameOutRows(uint32_t rows)
+{
+    pixelProcessor->setFrameOutRows(rows);
 }
 
 void GeneralFrameProcessor::setGradients(double *gradientValue)

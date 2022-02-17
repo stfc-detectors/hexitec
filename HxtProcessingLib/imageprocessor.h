@@ -32,7 +32,7 @@ public:
    HANDLE getImageCompleteEvent();
    HANDLE getHxtFileWrittenEvent();
 
-   ImageProcessor(const char *name, int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   ImageProcessor(const char *name, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition);
    ~ImageProcessor();
 //   void freeAllocedMemory();
    void enqueueBuffer(char *transferBuffer, unsigned long validFrames);
@@ -70,7 +70,8 @@ private:
 
    ImageItem *imageItem;
    char *bufferToProcess;
-   int frameSize;
+   int frameInSize;
+   int frameOutSize;
    long long totalFramesToProcess;
    long long processedFrameCount;
    bool inProgress;

@@ -23,7 +23,7 @@ HANDLE ImageProcessor::getHxtFileWrittenEvent()
    return hxtFileWrittenEvent;
 }
 
-ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
+ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition)
 {
    imageCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, IMAGE_COMPLETE);
    processingCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, PROCESSING_COMPLETE);
@@ -32,9 +32,11 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    /// Assume library not built against GUI, unless HexitecGigE/ProcessingBufferGenerator emits mainWindowBusy(bool) signal
    bMainWindowBusy = false;
 
-   frameSize = nRows * nCols * sizeof(uint16_t);
+   frameInSize = nInRows * nInCols * sizeof(uint16_t);
+   frameOutSize = nOutRows * nOutCols * sizeof(uint16_t);
 
-   this->frameSize = frameSize;
+   this->frameInSize = frameInSize;
+   this->frameOutSize = frameOutSize;
    imageItem = new ImageItem(filename);
    this->processingDefinition = processingDefinition;
    energyCalibration = processingDefinition->getEnergyCalibration();
@@ -55,22 +57,22 @@ ImageProcessor::ImageProcessor(const char *filename, int nRows, int nCols, Proce
    {
       if (totalSpectrum)
       {
-         hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
       }
       else
       {
-         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
       }
    }
    else
    {
       if (totalSpectrum)
       {
-         hxtGenerator = new HxtSumGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         hxtGenerator = new HxtSumGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
       }
       else
       {
-         hxtGenerator = new HxtGenerator(processingDefinition->getRows(), processingDefinition->getCols(), processingDefinition);
+         hxtGenerator = new HxtGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
       }
    }
 
@@ -113,7 +115,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                {
                   result = fp->process((uint16_t *)frameIterator, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -127,7 +129,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                }
                bufferEvents = 0;
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -150,7 +152,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -163,7 +165,7 @@ void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *res
                }
                bufferEvents = 0;
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -225,7 +227,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                {
                   result = fp->process((uint16_t *)frameIterator, thresholdValue, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -239,7 +241,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                bufferEvents = 0;
 //               qtTime.restart();
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
 //               binaryTime = qtTime.elapsed();
                if (hxtGeneration)
                {
@@ -265,7 +267,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdValue, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -278,7 +280,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
                }
                bufferEvents = 0;
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
                free(bufferStart);
                if (hxtGeneration)
                {
@@ -337,7 +339,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                {
                   result = fp->process((uint16_t *)frameIterator, thresholdPerPixel, &hxtMap, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -350,7 +352,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                }
                bufferEvents = 0;
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -373,7 +375,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                {
                   result = fp->process(&hxtMap, (uint16_t *)frameIterator, thresholdPerPixel, &eventsInFrame);
                   hxtGenerator->processEnergies(result);
-                  frameIterator += frameSize;
+                  frameIterator += frameInSize;
                   processedFrameCount++;
                   free(result);
                   bufferEvents += eventsInFrame;
@@ -386,7 +388,7 @@ void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *t
                }
                bufferEvents = 0;
                if (saveRaw)
-                  writeBinFile((char*)bufferStart, (validFrames * frameSize), filenameBin);
+                  writeBinFile((char*)bufferStart, (validFrames * frameOutSize), filenameBin);
                if (hxtGeneration)
                {
                   writeHxtFile((char *) hxtGenerator->getHxtV3Buffer(), processingDefinition->getHxtBufferHeaderSize(),
@@ -434,9 +436,9 @@ void ImageProcessor::handleProcess()
       fp = new FrameProcessor(nextFrameCorrection, occupancyThreshold);
    }
 
-   fp->setFrameSize(processingDefinition->getFrameSize());
-   fp->setCols( processingDefinition->getCols());
-   fp->setRows( processingDefinition->getRows());
+   fp->setFrameInSize(processingDefinition->getFrameInSize());
+   fp->setFrameInCols( processingDefinition->getFrameInCols());
+   fp->setFrameInRows( processingDefinition->getFrameInRows());
    fp->setEnergyCalibration(processingDefinition->getEnergyCalibration());
    fp->setGradients(processingDefinition->getGradients());
    fp->setIntercepts(processingDefinition->getIntercepts());

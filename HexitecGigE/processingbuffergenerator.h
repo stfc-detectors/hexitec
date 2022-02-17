@@ -17,7 +17,7 @@ class ProcessingBufferGenerator : public QObject
    Q_OBJECT
 public:
    explicit ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent = 0);
-   void enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   void enqueueImage(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition);
 
 private:
    void bufferReady(unsigned char *buffer, unsigned long validFrames);
@@ -32,9 +32,12 @@ private:
    ProcessingDefinition *processingDefinition;
    QString hxtFilename;
    char *bufferToProcess;
-   int frameSize;
-   int nRows;
-   int nCols;
+   int frameInSize;
+   int nInRows;
+   int nInCols;
+   int frameOutSize;
+   int nOutRows;
+   int nOutCols;
    QWinEventNotifier *hxtNotifier;
 
    QMutex guiMutex;
@@ -67,8 +70,7 @@ public slots:
 
    void handleMainWindowBusy(bool bBusy);
 
-//   void handleConfigureSensor(int nRows, int nCols);
-   void handleConfigureSensor(int nRows, int nCols, int occupancyThreshold);
+   void handleConfigureSensor(int nInRows, int nInCols, int nOutRows, int nOutCols, int occupancyThreshold);
 
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,

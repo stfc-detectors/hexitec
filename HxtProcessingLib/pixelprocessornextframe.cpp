@@ -12,8 +12,8 @@
 PixelProcessorNextFrame::PixelProcessorNextFrame(int occupancyThreshold) :
    GeneralPixelProcessor(occupancyThreshold)
 {
-   lastRe_orderedFrame = (uint16_t *) malloc(GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   lastRe_orderedFrame = (uint16_t *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
    ///
    debugFrameCounter = 0;
 }
@@ -21,8 +21,8 @@ PixelProcessorNextFrame::PixelProcessorNextFrame(int occupancyThreshold) :
 void PixelProcessorNextFrame::resetLastRe_orderedSize()
 {
    free(lastRe_orderedFrame);
-   lastRe_orderedFrame  = (uint16_t *) malloc(GeneralPixelProcessor::frameSize * sizeof(uint16_t));
-   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   lastRe_orderedFrame  = (uint16_t *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
 }
 
 double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresholdValue,
@@ -33,12 +33,12 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
 
-   re_orderedFrame = (double *) calloc(GeneralPixelProcessor::frameSize, sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) calloc(GeneralPixelProcessor::frameOutSize, sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
@@ -67,7 +67,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
          rowEventsAboveThreshold++;
       }
    }
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
 
    return re_orderedFrame;
 }
@@ -80,14 +80,14 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    // (Re-)use frame as processed uint16_t array (to be copied into lastRe_orderedFrame),
    //    with re_orderedFrame has processed double array
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
@@ -120,7 +120,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    }
    // We now know which pixels in current frame met the threshold, copied these to
    //    lastRe_orderedFrame to compare against next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
 
    return re_orderedFrame;
 }
@@ -137,12 +137,12 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    bool bClearRowOnce = true;
 
    // Create empty frame of type double, to contain calibrated pixels
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
@@ -175,7 +175,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    }
    // Copy current frame (now stripped of any pixel not meeting threshold/that was hit in previous frame)
    //    into lastRe_orderedFrame, as comparison for the next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
 
    return re_orderedFrame;
 }
@@ -190,14 +190,14 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    // uint16_t *frame to contain uncalibrated pixels, after next frame correction applied
    //    double *re_orderedFrame to contain calibrated & corrected pixels
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
@@ -227,7 +227,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
       }
    }
    // Save copy of hit pixels to compare against next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
 
    return re_orderedFrame;
 }
@@ -238,10 +238,10 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    double *re_orderedFrame;
    int index;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] - thresholdValue < 0 || lastRe_orderedFrame[index] != 0)
@@ -265,10 +265,10 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    double *re_orderedFrame;
    int index;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize *  sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize *  sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
       index = GeneralPixelProcessor::pixelMap[i];
       if (frame[i] - thresholdPerPixel[i] < 0 || lastRe_orderedFrame[index] != 0)
@@ -299,12 +299,12 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
@@ -336,20 +336,6 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
          rowEventsAboveThreshold++;
       }
    }
-   // No need to copy to lastRe_orderedFrame, already carried out in above for loop
-   ///
-//   std::ostringstream fileContents;
-//   fileContents << "------------------------------------------ frame " <<
-//                            debugFrameCounter << " ------------------------------------------\n";
-//   for (int i = 0; i < GeneralPixelProcessor::frameSize; i++ )
-//   {
-//      if(re_orderedFrame[i] > 0)
-//         fileContents << "Cal[" << i << "] = " << re_orderedFrame[i] << "\n";
-//   }
-//   std::string s  = fileContents.str();
-//   writeFile(s.c_str(), s.length(), "All_540_frames_");
-//   debugFrameCounter += 1;
-   ///
 
    return re_orderedFrame;
 }
@@ -365,12 +351,12 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
 
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
-   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
-      if (i % GeneralPixelProcessor::nColumns == 0)
+      if (i % GeneralPixelProcessor::nInColumns == 0)
       {
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;

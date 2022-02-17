@@ -11,9 +11,12 @@ class GeneralFrameProcessor
 public:
    GeneralFrameProcessor(bool nextFrameCorrection, int occupancyThreshold);
    ~GeneralFrameProcessor();
-   void setFrameSize(int frameSize);
-   void setCols(int columns);
-   void setRows(int rows);
+   void setFrameInSize(uint32_t frameSize);
+   void setFrameInCols(uint32_t columns);
+   void setFrameInRows(uint32_t rows);
+   void setFrameOutSize(uint32_t frameSize);
+   void setFrameOutCols(uint32_t columns);
+   void setFrameOutRows(uint32_t rows);
 
    void setGradients(double *gradientValue);
    void setIntercepts(double *interceptValue);

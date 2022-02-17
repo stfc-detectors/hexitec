@@ -17,7 +17,7 @@ class ProcessingBufferGenerator : public QObject
    Q_OBJECT
 public:
    explicit ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent = 0);
-   void enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition);
+   void enqueueImage(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition);
 
 private:
    void bufferReady(unsigned char *buffer, unsigned long validFrames);
@@ -32,9 +32,12 @@ private:
    ProcessingDefinition *processingDefinition;
    QString hxtFilename;
    char *bufferToProcess;
-   int frameSize;
-   int nRows;
-   int nCols;
+   int frameInSize;
+   int nInRows;
+   int nInCols;
+   int frameOutSize;
+   int nOutRows;
+   int nOutCols;
    QWinEventNotifier *hxtNotifier;
 
 
@@ -48,16 +51,16 @@ signals:
    void invalidParameterFiles(bool thresholdsStatus, bool gradientsStatus, bool interceptsStatus);
 
 public slots:
-   void handlePostProcessImages(int nRows, int nCols);
+   void handlePostProcessImages(int nInRows, int nInCols, int nOutRows, int nOutCols);
    void handleImageStarted(char *filename);
    void handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames);
    void handleImageComplete(long long totalFramesAcquired);
    void handleProcessingComplete();
    void handleHxtFileWritten();
 
-   void handleConfigureSensor(int nRows, int nCols);
-   void handleConfigureProcessing(int nRows, int nCols,
-                                  long long frameSize);
+   void handleConfigureSensor(int nInRows, int nInCols, int nOutRows, int nOutCols);
+   void handleConfigureProcessing(int nInRows, int nInCols, int nOutRows, int nOutCols,
+                                  long long frameInSize, long long frameOutSize);
    void handleConfigureProcessing(bool re_order,
                                   bool nextFrame,
                                   int threshholdMode,

@@ -5,18 +5,18 @@
 #include <QDebug>
 using namespace std;
 
-ProcessingDefinition::ProcessingDefinition(long long frameSize)
+ProcessingDefinition::ProcessingDefinition(long long frameInSize)
 {
    gradientFilename =  new char[1024];
    interceptFilename =  new char[1024];
-   this->frameSize = frameSize;
-   gradientValue = static_cast<double *>(calloc(frameSize, sizeof(double)));
-   interceptValue = static_cast<double *>(calloc(frameSize, sizeof(double)));
-   thresholdPerPixel = static_cast<uint16_t *>(calloc(frameSize, sizeof(uint16_t)));
+   this->frameInSize = frameInSize;
+   gradientValue = static_cast<double *>(calloc(frameInSize, sizeof(double)));
+   interceptValue = static_cast<double *>(calloc(frameInSize, sizeof(double)));
+   thresholdPerPixel = static_cast<uint16_t *>(calloc(frameInSize, sizeof(uint16_t)));
    outputDirectory = new char[1024];
    outputPrefix = new char[1024];
-   nRows = 20;
-   nCols = 80;
+   nInRows = 20;
+   nInCols = 80;
 }
 
 ProcessingDefinition::~ProcessingDefinition()
@@ -137,20 +137,20 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
 
    if (!inFile)
    {
-     for (int val = 0; val < frameSize; val ++)
+     for (int val = 0; val < frameInSize; val ++)
      {
         dataValue[val] = defaultValue;
      }
    }
 
-   while ((i < frameSize) && (inFile >> dataValue[i]))
+   while ((i < frameInSize) && (inFile >> dataValue[i]))
    {
       i++;
    }
 
-   if (i < frameSize)
+   if (i < frameInSize)
    {
-      for (int val = i; val < frameSize; val ++)
+      for (int val = i; val < frameInSize; val ++)
       {
          dataValue[val] = defaultValue;
       }
@@ -174,20 +174,20 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
 
    if (!inFile)
    {
-     for (int val = 0; val < frameSize; val ++)
+     for (int val = 0; val < frameInSize; val ++)
      {
         dataValue[val] = defaultValue;
      }
    }
 
-   while ((i < frameSize) && (inFile >> dataValue[i]))
+   while ((i < frameInSize) && (inFile >> dataValue[i]))
    {
      i++;
    }
 
-   if (i < frameSize)
+   if (i < frameInSize)
    {
-      for (int val = i; val < frameSize; val ++)
+      for (int val = i; val < frameInSize; val ++)
       {
          dataValue[val] = defaultValue;
       }
@@ -201,24 +201,44 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
    return success;
 }
 
-int ProcessingDefinition::getRows()
+uint32_t ProcessingDefinition::getFrameInRows()
 {
-   return nRows;
+   return nInRows;
 }
 
-void ProcessingDefinition::setRows(int nRows)
+void ProcessingDefinition::setFrameInRows(uint32_t nInRows)
 {
-   this->nRows = nRows;
+   this->nInRows = nInRows;
 }
 
-int ProcessingDefinition::getCols()
+uint32_t ProcessingDefinition::getFrameInCols()
 {
-   return nCols;
+   return nInCols;
 }
 
-void ProcessingDefinition::setCols(int nCols)
+void ProcessingDefinition::setFrameInCols(uint32_t nInCols)
 {
-   this->nCols = nCols;
+   this->nInCols = nInCols;
+}
+
+uint32_t ProcessingDefinition::getFrameOutRows()
+{
+   return nOutRows;
+}
+
+void ProcessingDefinition::setFrameOutRows(uint32_t nOutRows)
+{
+   this->nOutRows = nOutRows;
+}
+
+uint32_t ProcessingDefinition::getFrameOutCols()
+{
+   return nOutCols;
+}
+
+void ProcessingDefinition::setFrameOutCols(uint32_t nOutCols)
+{
+   this->nOutCols = nOutCols;
 }
 
 bool ProcessingDefinition::getThresholdsStatus()
@@ -286,14 +306,24 @@ long long ProcessingDefinition::getHxtBufferAllDataSize() const
    return hxtBufferAllDataSize;
 }
 
-long long ProcessingDefinition::getFrameSize() const
+uint32_t ProcessingDefinition::getFrameInSize() const
 {
-   return frameSize;
+   return frameInSize;
 }
 
-void ProcessingDefinition::setFrameSize(long long value)
+void ProcessingDefinition::setFrameInSize(uint32_t value)
 {
-   frameSize = value;
+   frameInSize = value;
+}
+
+uint32_t ProcessingDefinition::getFrameOutSize() const
+{
+   return frameOutSize;
+}
+
+void ProcessingDefinition::setFrameOutSize(uint32_t value)
+{
+   frameOutSize = value;
 }
 
 char *ProcessingDefinition::getOutputPrefix()
@@ -325,7 +355,7 @@ void ProcessingDefinition::setTotalSpectrum(bool totalSpectrum)
 {
    this->totalSpectrum = totalSpectrum;
    nBins = static_cast<int>(((binEnd - binStart) / binWidth) + 0.5);
-   hxtBufferAllDataSize = ((nBins * frameSize) + nBins) * static_cast<long long>(sizeof(double));
+   hxtBufferAllDataSize = ((nBins * frameOutSize) + nBins) * static_cast<long long>(sizeof(double));
    hxtBufferHeaderSize = sizeof(HxtItem::HxtV3Buffer) - sizeof(double *);
 }
 
