@@ -88,6 +88,7 @@ ImageProcessor::~ImageProcessor()
 
 void ImageProcessor::processThresholdNone(GeneralFrameProcessor *fp, double *result, const char* filenameBin, const char* filenameHxt, const char *filenameCsv)
 {
+   qDebug() << " WRONG prThrNone WRONG";
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
@@ -194,6 +195,7 @@ unsigned long ImageProcessor::getRunningAverageEvents()
 void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresholdValue, double *result,
                                            const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
+   qDebug() << " CORRECT prThrVal CORRECT";
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;
@@ -307,6 +309,7 @@ void ImageProcessor::processThresholdValue(GeneralFrameProcessor *fp, int thresh
 void ImageProcessor::processThresholdFile(GeneralFrameProcessor *fp, uint16_t *thresholdPerPixel, double *result,
                                           const char* filenameBin, const char *filenameHxt, const char *filenameCsv)
 {
+   qDebug() << " WRONG prThrFile WRONG";
    unsigned long validFrames = 0;
    char *bufferStart;
    char *frameIterator;

@@ -79,7 +79,7 @@ void ProcessingForm::initialiseProcessingForm()
    long long thresholdValue = 100;
    char *thresholdFile =  new char[1024];
    int fileStartPos;
-   int rows = 80;
+   int rows = 20;
    int columns = 80;
 
    filename = "DEFAULT";
@@ -176,7 +176,7 @@ void ProcessingForm::initialiseProcessingForm()
       nCols = 80;
    }
    frameSize = nRows * nCols;
-
+   qDebug() << "pF:179, frameSize: " << frameSize;
    if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
    {
       ui->binStartSpinBox->setValue(binStart);
@@ -244,7 +244,7 @@ void ProcessingForm::initialiseProcessingForm()
    }
 
    emit configureSensor(nRows, nCols);
-   if ((nRows != 80) || (nCols !=80))
+   if ((nRows != 20) || (nCols !=80))
    {
       ui->re_orderCheckBox->setChecked(false);
       ui->re_orderCheckBox->setEnabled(false);
@@ -448,6 +448,7 @@ void ProcessingForm::guiIdle()
 
 int ProcessingForm::getFrameSize()
 {
+   qDebug() << "pF:451, getFrmSz() ret frameSize: " << frameSize;
    return frameSize;
 }
 

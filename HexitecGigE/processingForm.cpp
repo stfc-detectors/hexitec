@@ -259,7 +259,7 @@ void ProcessingForm::initialiseProcessingForm()
       ui->inputFilesList->setText(filename);
    }
 
-   if ((nRows != 80) || (nCols !=80))
+   if ((nRows != 20) || (nCols !=80))
    {
       ui->re_orderCheckBox->setChecked(false);
       ui->re_orderCheckBox->setEnabled(false);

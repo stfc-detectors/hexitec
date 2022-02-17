@@ -43,7 +43,7 @@ public:
 
 protected:
    GeneralPixelProcessor *pixelProcessor;
-   double *getData(const char *filename);
+//   double *getData(const char *filename); ///REDUNDANT
    int occupancyThreshold;
 };
 

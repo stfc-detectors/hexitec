@@ -193,7 +193,7 @@ void GigEDetector::handleSetTargetTemperature(double targetTemperature)
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 0.caught: " << ex.getMessage();
    }
 }
 
@@ -216,7 +216,7 @@ void GigEDetector::handleSetHV(double voltage)
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 1.caught: " << ex.getMessage();
    }
 }
 
@@ -256,7 +256,7 @@ int GigEDetector::initialiseConnection()
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 2.caught: " << ex.getMessage();
    }
    return status;
 }
@@ -272,7 +272,7 @@ int GigEDetector::initialiseConnection(p_bufferCallBack bufferCallBack)
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 3.caught: " << ex.getMessage();
    }
    return status;
 }
@@ -378,7 +378,7 @@ int GigEDetector::configure(bool triggeringSuspended)
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 4.caught: " << ex.getMessage();
    }
 
    return status;
@@ -451,7 +451,7 @@ int GigEDetector::terminateConnection()
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 5.caught: " << ex.getMessage();
    }
    updateState(IDLE);
 
@@ -735,7 +735,7 @@ LONG GigEDetector::collectOffsetValues()
    catch (DetectorException &ex)
    {
       emit writeError(ex.getMessage());
-      qDebug() << Q_FUNC_INFO << "caught: " << ex.getMessage();
+      qDebug() << Q_FUNC_INFO << " 6.caught: " << ex.getMessage();
    }
 
    return 0;
@@ -1123,17 +1123,17 @@ HexitecSetupRegister GigEDetector::initSetupRegister(QString type)
 
 void GigEDetector::configCharacters2Bytes(std::string configCharacters, unsigned char *result)
 {
-   unsigned char zero = '0';
-
-   for (int i = 0; i < AS_HEXITEC_SETUP_REGISTER_SIZE; i++)
-   {
-      result[i] = 0;
-      for (int j = 0; j < 8; j++)
-      {
-         result[i] = result[i] << 1;
-         result[i] |= ((configCharacters[i * 8 + j]) - zero);
-      }
-   }
+    unsigned char zero = '0';
+    for (int i = 0; i < AS_HEXITEC_SETUP_REGISTER_SIZE; i++)
+    {
+       result[i] = 0;
+       // Reverse bit order (e.g. ABCD.EFGH => HGFE.DCBA)
+       for (int j = 7; j > -1; j--)
+       {
+          result[i] = result[i] << 1;
+          result[i] |= ((configCharacters[i * 8 + j]) - zero);
+       }
+    }
 }
 
 

@@ -9,10 +9,12 @@
 
  uint16_t GeneralPixelProcessor::pixelMap[6400];
  bool GeneralPixelProcessor::pixelMapInitialised = false;
- uint32_t GeneralPixelProcessor::nRows = 80;
+ uint32_t GeneralPixelProcessor::nRows = 20;
  uint32_t GeneralPixelProcessor::nColumns = 80;
  uint32_t GeneralPixelProcessor::frameSize = GeneralPixelProcessor::nRows * GeneralPixelProcessor::nColumns;
-
+/// DEBUGGING:
+#include <iostream>
+#include <iomanip>
 GeneralPixelProcessor::GeneralPixelProcessor(int occupancyThreshold)
 {
    if (!GeneralPixelProcessor::pixelMapInitialised)
@@ -30,19 +32,25 @@ GeneralPixelProcessor::GeneralPixelProcessor(int occupancyThreshold)
 
 void GeneralPixelProcessor::initialisePixelMap()
 {
-   int pmIndex = 0;
+   uint16_t pmIndex = 0, col = 0;
 
-   for (int row = 0; row < 80; row++)
+   for (uint16_t row = 0; row < GeneralPixelProcessor::nRows; row++)
    {
-      for (int col = 0; col < 20; col++)
+      for (uint16_t j = 0; j < 20; j++)
       {
-         for (int pix = 0; pix < 80; pix+=20)
+         for (uint16_t k = 0; k < 80; k+=20)
          {
-            GeneralPixelProcessor::pixelMap[pmIndex] = pix + col +(row * 80);
+            col = j + k;
+            GeneralPixelProcessor::pixelMap[pmIndex] = (row*80)+col;
             pmIndex++;
          }
       }
    }
+//   for (uint16_t index = 0; index < 1600; index++)
+//   {
+//      if (index < 6*80)
+//         qDebug() << " *pixelMap[" << index <<"] = " << pixelMap[index];
+//   }
 }
 
 void GeneralPixelProcessor::setEnergyCalibration(bool energyCalibration)
@@ -472,9 +480,18 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 
    re_orderedFrame  = (double *)  malloc(frameSize * sizeof(double));
    memset(re_orderedFrame, 0, frameSize * sizeof(double));
-
-   for (unsigned int i = 0; i < frameSize; i++)
+//   std::cout << "\n____________________________________________________________________________________\n";
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameSize; i++)
    {
+//      if (i < 80*7)
+//      {
+//          if (i % GeneralPixelProcessor::nColumns == 0)
+//              std::cout << "\n____(" << std::setw(0) << i << ")_____________\n";
+//          else if (i % GeneralPixelProcessor::nColumns == 25)
+//              std::cout << "\n";
+//          std::cout << std::setw(3) << GeneralPixelProcessor::pixelMap[i] << " = " << std::setw(5) << frame[i] << std::endl;
+//      }
+
       if (i % GeneralPixelProcessor::nColumns == 0)
       {
          rowEventsAboveThreshold = 0;

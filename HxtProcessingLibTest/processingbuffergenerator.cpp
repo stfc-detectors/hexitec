@@ -22,7 +22,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    pbgThread->start();
    moveToThread(pbgThread);
 
-   qDebug() << "PBG Start ThreadId: " <<QThread::currentThreadId();
+   qDebug() << "(HxtGigE)PBG Start ThreadId: " <<QThread::currentThreadId() << " rows, columns, frameSize: " << nRows << nCols << frameSize;
 
    connect(this, SIGNAL(imageStarted(char*)),
            this, SLOT(handleImageStarted(char *)));
@@ -35,7 +35,7 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
 void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, int nCols, ProcessingDefinition *processingDefinition)
 {
    this->frameSize = nRows * nCols * sizeof(uint16_t);
-
+   qDebug() << "PBG::enqueueImage(..) rows, columns, frameSize: " << nRows << nCols << frameSize;
    currentImageProcessor = new ImageProcessor(filename, nRows, nCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
    connect(currentImageProcessorHandler, SIGNAL(processingComplete()),
@@ -154,13 +154,14 @@ void ProcessingBufferGenerator::handleHxtFileWritten()
 
 void ProcessingBufferGenerator::handleConfigureProcessing(int nRows, int nCols, long long frameSize)
 {
+   qDebug() << "PBG::handle..:157 rows, columns, frameSize = " << nRows << nCols << frameSize;
    processingDefinition->setRows(nRows);
    processingDefinition->setCols(nCols);
-   processingDefinition->setFrameSize(frameSize);
 }
 
 void ProcessingBufferGenerator::handleConfigureSensor(int nRows, int nCols)
 {
+   qDebug() << "PBG::handle..:165 rows, columns, hence frameSize = " << nRows << nCols << frameSize;
    this->nRows = nRows;
    this->nCols = nCols;
    processingDefinition->setRows(nRows);
@@ -223,7 +224,7 @@ void ProcessingBufferGenerator::handlePostProcessImages(int nRows, int nCols)
       {
         qDebug() << "ProcessingBufferGenerator::handlePostProcessImages() - error opening " << inputFilename;
       }
-
+      qDebug() << "PBG::handle..:228 rows, columns, frameSize = " << nRows << nCols << frameSize;
       while (inFile)
       {
          transferBuffer = (unsigned char *) calloc(nRows * nCols * 500 * sizeof(uint16_t), sizeof(char)); // free()'d in ::handleFileBufferReady

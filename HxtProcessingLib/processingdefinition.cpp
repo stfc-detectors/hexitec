@@ -15,6 +15,8 @@ ProcessingDefinition::ProcessingDefinition(long long frameSize)
    thresholdPerPixel = static_cast<uint16_t *>(calloc(frameSize, sizeof(uint16_t)));
    outputDirectory = new char[1024];
    outputPrefix = new char[1024];
+   nRows = 20;
+   nCols = 80;
 }
 
 ProcessingDefinition::~ProcessingDefinition()
