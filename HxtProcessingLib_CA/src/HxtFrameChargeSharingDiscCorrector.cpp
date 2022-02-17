@@ -28,7 +28,7 @@ HxtFrameChargeSharingDiscCorrector::~HxtFrameChargeSharingDiscCorrector() {
 /// @param apCurrentDecoded frame ptr to current decoded frame
 /// @return bool value indicating success of correction
 bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame) {
-	
+
 	// Determine last and current frame indices from objects - current decoded frame ptr can be null at end
 	// of processing (i.e. on last frame), in which case we still apply the correction to the last frame but
 	// there is no forward rejection of pixel into current frame
@@ -72,13 +72,13 @@ bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFra
 														<< " adjacent sum = " << adjacentSum;
 				apLastDecodedFrame->setPixel(iRow, iCol, 0.0);
 				apLastDecodedFrame->clearAdjacent(iRow, iCol);
-	
+
 				// If current frame is consecutive to last frame, also clear pixels in current
 				if (consecutiveFrames) {
 					apCurrentDecodedFrame->setPixel(iRow, iCol, 0.0);
 					apCurrentDecodedFrame->clearAdjacent(iRow, iCol);
 				}
-				
+
 				// Increment running total of number of corrections applied
 				mEventsCorrected++;
 			}	// if (pixelValue)
@@ -102,7 +102,7 @@ bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFra
 					if (mDebug) LOG(gLogConfig, logDEBUG2) << "Row " << iRow << " col " << iCol
 														   << " charge sharing, pixel value = " << pixelValue
 														   << " adjacent sum = " << adjacentSum;
-					
+
 					apLastDecodedFrame->setPixel(iRow, iCol, 0.0);
                     apLastDecodedFrame->clearAdjacent(iRow, iCol);
 

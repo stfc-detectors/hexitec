@@ -36,7 +36,7 @@ public:
 protected:
 	unsigned int mRow;
 	unsigned int mCol;
-	
+
 };
 
 }

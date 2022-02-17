@@ -32,7 +32,7 @@ bool HxtPixelThreshold::loadThresholds(string aFileName) {
 	bool loadOK = true;
 
 	unsigned int numLoaded = 0;
-	
+
 	ifstream threshFile;
 	threshFile.open(aFileName.c_str(), ios::in);
 
@@ -42,7 +42,7 @@ bool HxtPixelThreshold::loadThresholds(string aFileName) {
 
 	} else {
 
-		while ((numLoaded < mPixels) && !threshFile.eof()) {			
+        while ((numLoaded < mPixels) && !threshFile.eof()) {
 			threshFile >> mPixelThreshold[numLoaded];
 			numLoaded++;			
 		}
@@ -50,7 +50,7 @@ bool HxtPixelThreshold::loadThresholds(string aFileName) {
 		if (numLoaded != mPixels) {
 			LOG(gLogConfig, logERROR) << "Failed to read " << mPixels << " threshold values, loaded " << numLoaded << " from file " << aFileName;
 			loadOK = false;
-		}		
+        }
 		threshFile.close();
 	}
 

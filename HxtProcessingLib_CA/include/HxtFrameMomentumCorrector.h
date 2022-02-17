@@ -21,7 +21,7 @@ public:
 
     bool HxtFrameMomentumCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
-private:	
+private:
 	unsigned long long	mLastFrameProcessed;
 	unsigned int mRows;
 	unsigned int mCols;

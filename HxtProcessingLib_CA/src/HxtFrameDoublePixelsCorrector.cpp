@@ -52,7 +52,7 @@ bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, H
 
 	// Iterate over rows and columns in frames
 	for (unsigned int iRow = 0; iRow < nRows; iRow++) {
-		for (unsigned int iCol = 0; iCol < nCols; iCol++) {			
+        for (unsigned int iCol = 0; iCol < nCols; iCol++) {
 
 			double pixelValue = apLastDecodedFrame->getPixel(iRow, iCol);
 

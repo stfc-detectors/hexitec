@@ -88,7 +88,7 @@ string Log::ToString(LogLevel level)
 string Timestamp()
 {
     char result[100] = {0};
-	
+
 #if defined(OS_WIN)
 	SYSTEMTIME st;
 	GetSystemTime(&st);

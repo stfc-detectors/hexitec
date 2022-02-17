@@ -30,21 +30,21 @@ using namespace std;
 
 // Define our enum of log levels here
 enum LogLevel { logERROR, logWARNING, logNOTICE, logINFO,
-				logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4, 
+                logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4,
 				logDEBUG5, logDEBUG6, logDEBUG7, logDEBUG8 };
 
 string Timestamp(void);
 
 class Log
 {
-	
+
 	public:
 	    Log(LogConfig&);
 	    Log(LogConfig&, char* aFileName, char* aFunction, int aLine);
 	    virtual ~Log();
 	    virtual ostringstream& Get(LogLevel level = logINFO);
 	    ostringstream& GetStr(void);
-	    LogLevel GetLevel(void); 
+        LogLevel GetLevel(void);
 	    void     SetLevel(LogLevel level);
 	    static string ToString(LogLevel level);
 	protected:

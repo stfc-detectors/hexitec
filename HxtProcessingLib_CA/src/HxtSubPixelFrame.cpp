@@ -22,7 +22,7 @@ HxtSubPixelFrame::HxtSubPixelFrame(unsigned int aRows, unsigned int aCols) :
 	// Nothing to do
 }
 
-HxtSubPixelFrame::~HxtSubPixelFrame() 
+HxtSubPixelFrame::~HxtSubPixelFrame()
 {
 	// Nothing to do
 }

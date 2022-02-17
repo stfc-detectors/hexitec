@@ -25,7 +25,7 @@ HxtDecodedFrame::HxtDecodedFrame(unsigned int aRows, unsigned int aCols) :
 	for (unsigned int iPixel = 0; iPixel < mPixels; iPixel++) {
 		mPixelValue[iPixel] = 0.0;
 	}
-	
+
 }
 
 HxtDecodedFrame::~HxtDecodedFrame() {
@@ -73,7 +73,7 @@ void HxtDecodedFrame::clearAdjacent(unsigned int aRow, unsigned int aCol) {
     mPixelValue[pixelAddress((aRow + 1), (aCol - 1))] = 0.0;
     mPixelValue[pixelAddress((aRow + 1), aCol)]       = 0.0;
     mPixelValue[pixelAddress((aRow + 1), (aCol + 1))] = 0.0;
-	
+
 }
 
 }

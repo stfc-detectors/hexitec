@@ -20,7 +20,7 @@ public:
 
     bool HxtFrameInducedNoiseCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 
-private:	
+private:
 	unsigned long long	mLastFrameProcessed;
 	double				mInducedNoiseThreshold;
 	unsigned int		mNoiseCurrentFrame;

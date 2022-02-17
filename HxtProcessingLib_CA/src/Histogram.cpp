@@ -158,7 +158,7 @@ const unsigned int Histogram::GetTotalAboveThreshold(const unsigned int aValue) 
 	unsigned int total = 0;
 	if( idx < mBins )
 	{
-		for (unsigned int i = idx; i < mBins; i++)		
+        for (unsigned int i = idx; i < mBins; i++)
 			total += mFrequency[i];
 	}
 	else

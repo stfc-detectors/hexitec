@@ -24,7 +24,7 @@ private:
 	unsigned int mInternalCols;
 
 	inline unsigned int pixelAddress(int aRow, int aCol) {
-		return ((aRow) * mInternalCols) + (aCol);		
+        return ((aRow) * mInternalCols) + (aCol);
 	}
 };
 

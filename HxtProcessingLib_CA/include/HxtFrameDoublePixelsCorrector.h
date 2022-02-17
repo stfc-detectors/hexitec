@@ -17,7 +17,7 @@ class HxtFrameDoublePixelsCorrector: public hexitech::HxtFrameCorrector {
 public:
 	HxtFrameDoublePixelsCorrector();
 	virtual ~HxtFrameDoublePixelsCorrector();
-	
+
     bool HxtFrameDoublePixelsCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 };
 

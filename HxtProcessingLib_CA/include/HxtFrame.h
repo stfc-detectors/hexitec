@@ -53,7 +53,7 @@ protected:
 	virtual inline unsigned int pixelAddress(int aRow, int aCol) {
 		return ((aRow * mCols) + aCol);
 	}
-	
+
 	vector<hxtPixel> mPixelList;
 	bool mEnableVector;
 };

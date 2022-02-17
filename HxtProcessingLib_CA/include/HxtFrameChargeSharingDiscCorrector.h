@@ -17,7 +17,7 @@ class HxtFrameChargeSharingDiscCorrector: public hexitech::HxtFrameCorrector {
 public:
 	HxtFrameChargeSharingDiscCorrector();
 	virtual ~HxtFrameChargeSharingDiscCorrector();
-	
+
     bool HxtFrameChargeSharingDiscCorrector::apply(HxtDecodedFrame* apLastDecodedFrame, HxtDecodedFrame* apCurrentDecodedFrame);
 };
 
