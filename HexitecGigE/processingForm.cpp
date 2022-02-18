@@ -190,6 +190,10 @@ void ProcessingForm::initialiseProcessingForm()
       nInCols = 80;
    }
    frameInSize = nInRows * nInCols;
+   /// Hard coding output frame dimensions, hack to suit this branch only
+   nOutRows = 4;
+   nOutCols = 16;
+   frameOutSize = nOutRows * nOutCols;
 
    if ((binStart = twoEasyIniFile->getInt("Processing/Bin_Start")) != QVariant(INVALID))
    {

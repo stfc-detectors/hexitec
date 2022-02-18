@@ -17,6 +17,8 @@ ProcessingDefinition::ProcessingDefinition(long long frameInSize)
    outputPrefix = new char[1024];
    nInRows = 20;
    nInCols = 80;
+   nOutRows = 4;
+   nOutCols = 16;
 }
 
 ProcessingDefinition::~ProcessingDefinition()

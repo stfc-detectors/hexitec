@@ -77,17 +77,17 @@ void HexitecSoftTrigger::stopSleepTimer()
    sleepTimer->stop();
 }
 
-void HexitecSoftTrigger::sleep(int localSleepTime)
-{
-    if (sleepTimer->isActive());
-        emit stopSleepTimerSignal();
-    if (localSleepTime == 0)
-        return;
-    sleepTime = localSleepTime;
-    sleepState = true;
-    writeMessage("sleepState = " + QString::number(sleepState));
-    emit startSleepTimerSignal();
-}
+//void HexitecSoftTrigger::sleep(int localSleepTime)
+//{
+//    if (sleepTimer->isActive());
+//        emit stopSleepTimerSignal();
+//    if (localSleepTime == 0)
+//        return;
+//    sleepTime = localSleepTime;
+//    sleepState = true;
+//    writeMessage("sleepState = " + QString::number(sleepState));
+//    emit startSleepTimerSignal();
+//}
 
 void HexitecSoftTrigger::sleepEnd()
 {

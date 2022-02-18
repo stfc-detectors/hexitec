@@ -30,7 +30,7 @@ public:
     Q_INVOKABLE void whatsGoingOn() {verbose = true; emit writeMessage("Verbose Mode");}
     Q_INVOKABLE void whatsGoingOff(){verbose = false; emit writeMessage("Verbose Mode Off");}
     Q_INVOKABLE bool getStatus() {return(state);}
-    Q_INVOKABLE void sleep(int);
+//    Q_INVOKABLE void sleep(int);
     Q_INVOKABLE void sleepEnd();
     Q_INVOKABLE bool getSleepStatus() {return(sleepState);}
 
