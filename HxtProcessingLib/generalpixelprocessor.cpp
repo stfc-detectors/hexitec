@@ -488,7 +488,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
    double *displayFrame;
-   uint16_t rowMin = 0, rowMax = 80, displIndex = 0;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
    displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
    memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
