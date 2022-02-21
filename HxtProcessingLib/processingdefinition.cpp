@@ -131,7 +131,7 @@ void ProcessingDefinition::setIntercepts()
 
 bool ProcessingDefinition::getData(char *filename, double *dataValue, double defaultValue)
 {
-   int i = 0;
+   uint32_t i = 0;
    std::ifstream inFile;
    bool success = false;
 
@@ -139,7 +139,7 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
 
    if (!inFile)
    {
-     for (int val = 0; val < frameInSize; val ++)
+     for (uint32_t val = 0; val < frameInSize; val++)
      {
         dataValue[val] = defaultValue;
      }
@@ -152,7 +152,7 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
 
    if (i < frameInSize)
    {
-      for (int val = i; val < frameInSize; val ++)
+      for (uint32_t val = i; val < frameInSize; val++)
       {
          dataValue[val] = defaultValue;
       }
@@ -168,7 +168,7 @@ bool ProcessingDefinition::getData(char *filename, double *dataValue, double def
 
 bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, uint16_t defaultValue)
 {
-   int i = 0;
+   uint32_t i = 0;
    std::ifstream inFile;
    bool success = false;
 
@@ -176,7 +176,7 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
 
    if (!inFile)
    {
-     for (int val = 0; val < frameInSize; val ++)
+     for (uint32_t val = 0; val < frameInSize; val++)
      {
         dataValue[val] = defaultValue;
      }
@@ -189,7 +189,7 @@ bool ProcessingDefinition::getData(const char *filename, uint16_t *dataValue, ui
 
    if (i < frameInSize)
    {
-      for (int val = i; val < frameInSize; val ++)
+      for (uint32_t val = i; val < frameInSize; val++)
       {
          dataValue[val] = defaultValue;
       }

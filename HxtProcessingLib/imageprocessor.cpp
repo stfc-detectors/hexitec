@@ -57,22 +57,22 @@ ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, i
    {
       if (totalSpectrum)
       {
-         hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
+         hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
       }
       else
       {
-         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
+         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
       }
    }
    else
    {
       if (totalSpectrum)
       {
-         hxtGenerator = new HxtSumGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
+         hxtGenerator = new HxtSumGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
       }
       else
       {
-         hxtGenerator = new HxtGenerator(processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(), processingDefinition);
+         hxtGenerator = new HxtGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
       }
    }
 
