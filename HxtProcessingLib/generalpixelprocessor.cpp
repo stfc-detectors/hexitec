@@ -180,7 +180,6 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-   qDebug() << "  pF 1";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize *sizeof(double));
 
@@ -486,14 +485,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
 
    re_orderedFrame  = (double *)  malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
-   /// Construct second, to be displayed, frame
-   double *displayFrame;
-   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
-   uint16_t rowMin = 0, rowMax = 80, displIndex = 0;
-   // thresholdValue = 0;
    // std::cout << "____________________________________________________________________________________";
-//   std::cout << " !Start! Min: " << std::setw(4) << rowMin << " Max: " << std::setw(4) << rowMax << " __________________________________________\n";
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
 
@@ -502,13 +494,6 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
          rowEventsAboveThreshold = 0;
          bClearRowOnce = true;
       }
-      /// Update row minimum, maximum independent of threshold values
-      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
-      {
-         rowMin += (GeneralPixelProcessor::nInColumns * 5);
-         rowMax += (GeneralPixelProcessor::nInColumns * 5);
-         // std::cout << "\n !MOD'D! Min: " << std::setw(4) << rowMin << " Max: " << std::setw(4) << rowMax << ".";
-      }///
 
       if (frame[i] >= thresholdValue)
       {
@@ -525,15 +510,6 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
             index = GeneralPixelProcessor::pixelMap[i];
             re_orderedFrame[index] = (double)frame[i];
             (*eventsInFrame)++;
-            /// Fill 4x16 displayed frame with selected pixels
-            // std::cout << "\n ** i; " << i << " Min: " << std::setw(4) << rowMin << " max: " << std::setw(4) << rowMax <<
-            //              " condition1: " << ((i > rowMin) && (i < rowMax )) << " condition2: " << (((i % 5) - 2) == 0) << ". ";
-            if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
-               (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
-            {
-               displayFrame[displIndex++] = re_orderedFrame[index];
-               // std::cout <<  " [" << std::setw(4) << i << "]. ";
-            }///
          }
          rowEventsAboveThreshold++;
       }

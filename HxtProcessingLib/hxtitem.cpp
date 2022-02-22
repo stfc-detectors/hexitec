@@ -123,7 +123,7 @@ void HxtItem::addFrameDataToHistogram(double *frame)
     {
        pixel = i;
        thisEnergy = frame[i];
-       if (thisEnergy == 0)
+       if (thisEnergy == 0.0)
            continue;
        bin = (int)((thisEnergy / binWidth));
        if (bin <= nBins)
@@ -146,18 +146,17 @@ void HxtItem::addFrameDataToHistogramWithSum(double *frame)
    double *currentHistogram = &histogramPerPixel[0];
    long long *summed = &summedHistogram[0];
    double thisEnergy;
-   int bin;
-   int pixel;
+   uint32_t bin=0, pixel=0;
 
-   int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
-   for (int i = 0; i < frameSize; i++)
+   uint32_t frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+   for (uint32_t i = 0; i < frameSize; i++)
    {
       pixel = i;
       thisEnergy = frame[i];
-
-      if (thisEnergy == 0)
+      // 22 Feb'22: Verified 0 comparison's safe
+      if (thisEnergy == 0.0)
           continue;
-      bin = (int)((thisEnergy / binWidth));
+      bin = (uint16_t)((thisEnergy / binWidth));
       if (bin <= nBins)
       {
          (*(currentHistogram + (pixel * nBins) + bin))++;
