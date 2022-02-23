@@ -12,8 +12,8 @@
 PixelProcessorNextFrame::PixelProcessorNextFrame(int occupancyThreshold) :
    GeneralPixelProcessor(occupancyThreshold)
 {
-   lastRe_orderedFrame = (uint16_t *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
-   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   lastRe_orderedFrame = (uint16_t *) malloc(GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
+   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
    ///
    debugFrameCounter = 0;
 }
@@ -21,8 +21,8 @@ PixelProcessorNextFrame::PixelProcessorNextFrame(int occupancyThreshold) :
 void PixelProcessorNextFrame::resetLastRe_orderedSize()
 {
    free(lastRe_orderedFrame);
-   lastRe_orderedFrame  = (uint16_t *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
-   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   lastRe_orderedFrame  = (uint16_t *) malloc(GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
+   memset(lastRe_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
 }
 
 double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresholdValue,
@@ -32,9 +32,14 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
-   re_orderedFrame = (double *) calloc(GeneralPixelProcessor::frameOutSize, sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 01";
+   re_orderedFrame = (double *) calloc(GeneralPixelProcessor::frameInSize, sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -67,9 +72,25 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
          rowEventsAboveThreshold++;
       }
    }
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
@@ -79,9 +100,14 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 02";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    // (Re-)use frame as processed uint16_t array (to be copied into lastRe_orderedFrame),
    //    with re_orderedFrame has processed double array
@@ -120,11 +146,26 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    }
    // We now know which pixels in current frame met the threshold, copied these to
    //    lastRe_orderedFrame to compare against next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
-
 
 double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t thresholdValue,
                                               unordered_map<int, double>**pixelEnergyMapPtr,
@@ -135,10 +176,15 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
+   qDebug() << "PPNF 03";
    // Create empty frame of type double, to contain calibrated pixels
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -175,9 +221,25 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    }
    // Copy current frame (now stripped of any pixel not meeting threshold/that was hit in previous frame)
    //    into lastRe_orderedFrame, as comparison for the next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
@@ -189,9 +251,14 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 04";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    // uint16_t *frame to contain uncalibrated pixels, after next frame correction applied
    //    double *re_orderedFrame to contain calibrated & corrected pixels
@@ -227,9 +294,25 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
       }
    }
    // Save copy of hit pixels to compare against next frame
-   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameOutSize * sizeof(uint16_t));
+   memcpy(lastRe_orderedFrame, frame, GeneralPixelProcessor::frameInSize * sizeof(uint16_t));
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
@@ -237,9 +320,14 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
 {
    double *re_orderedFrame;
    int index;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 05";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -256,7 +344,23 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
       }
    }
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
@@ -264,9 +368,14 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
 {
    double *re_orderedFrame;
    int index;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize *  sizeof(double));
+   qDebug() << "PPNF 06";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -285,7 +394,23 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    }
    // No need to copy wholesale to lastRe_orderedFrame, already carried out in above for loop
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t thresholdValue,
@@ -298,9 +423,14 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 07";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -337,7 +467,23 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
       }
    }
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t *thresholdPerPixel,
@@ -350,9 +496,14 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-
-   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
-   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
+   qDebug() << "PPNF 08";
+   re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
+   memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
+   /// Construct second, to be displayed, frame
+   double *displayFrame;
+   uint16_t rowMin = 320, rowMax = 400, displIndex = 0;
+   displayFrame = (double *) malloc(GeneralPixelProcessor::frameOutSize * sizeof(double));
+   memset(displayFrame, 0, GeneralPixelProcessor::frameOutSize * sizeof(double));
 
    for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
    {
@@ -389,7 +540,23 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
       }
    }
 
-   return re_orderedFrame;
+   /// Fill 4x16 displayed frame with selected pixels from re_orderedFrame
+   for (unsigned int i = 0; i < GeneralPixelProcessor::frameInSize; i++)
+   {
+      /// Update row minimum, maximum
+      if ((i > 0) && (i % (GeneralPixelProcessor::nInColumns * 5) == 0))
+      {
+         rowMin += (GeneralPixelProcessor::nInColumns * 5);
+         rowMax += (GeneralPixelProcessor::nInColumns * 5);
+      }
+      if ((i > rowMin) && (i < rowMax ) &&   // On row 0, 5, 10, 15, 20?
+         (((i % 5) - 2) == 0))                // on col 2, 7, 12, .., 77?
+      {
+         displayFrame[displIndex++] = re_orderedFrame[i];
+      }
+   }
+
+   return displayFrame;
 }
 
 void PixelProcessorNextFrame::writeFile(const char *buffer, unsigned long length, std::string filePrefix)

@@ -514,9 +514,8 @@ void ProcessingForm::setChargedSharingParameters()
    int pixelGridOption;
 
    pixelGridOption = ui->pixelGridComboBox->currentIndex();
-
+   chargedSharingOption = ui->chargedSharingComboBox->currentIndex();
    emit configureProcessing(chargedSharingOption, pixelGridOption);
-
 }
 
 void ProcessingForm::setInputFilesList()
