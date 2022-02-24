@@ -53,29 +53,6 @@ ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, i
       chargedSharing = true;
    }
 
-   if (chargedSharing)
-   {
-      if (totalSpectrum)
-      {
-         hxtGenerator = new HxtChargedSharingSumGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
-      }
-      else
-      {
-         hxtGenerator = new HxtChargedSharingGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
-      }
-   }
-   else
-   {
-      if (totalSpectrum)
-      {
-         hxtGenerator = new HxtSumGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
-      }
-      else
-      {
-         hxtGenerator = new HxtGenerator(processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
-      }
-   }
-
    setImageInProgress(true);
    saveRaw = true;
    ///
@@ -424,6 +401,43 @@ void ImageProcessor::handleProcess()
    processedFrameCount = 0;
 
    int occupancyThreshold = processingDefinition->getOccupancyThreshold();
+   ///
+   bool reordering = processingDefinition->getRe_order();
+   uint32_t rows=0, cols=0;
+   if (reordering)
+   {
+      rows = processingDefinition->getFrameOutRows();
+      cols = processingDefinition->getFrameOutCols();
+   }
+   else
+   {
+      rows = processingDefinition->getFrameInRows();
+      cols = processingDefinition->getFrameInCols();
+   }
+
+   if (chargedSharing)
+   {
+      if (totalSpectrum)
+      {
+         hxtGenerator = new HxtChargedSharingSumGenerator(rows, cols, processingDefinition);
+      }
+      else
+      {
+         hxtGenerator = new HxtChargedSharingGenerator(rows, cols, processingDefinition);
+      }
+   }
+   else
+   {
+      if (totalSpectrum)
+      {
+         hxtGenerator = new HxtSumGenerator(rows, cols, processingDefinition);
+      }
+      else
+      {
+         hxtGenerator = new HxtGenerator(rows, cols, processingDefinition);
+      }
+   }
+   ///
    if (processingDefinition->getRe_order())
    {
       fp = new FrameRe_orderProcessor(nextFrameCorrection, occupancyThreshold);

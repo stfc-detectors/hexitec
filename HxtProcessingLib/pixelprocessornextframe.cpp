@@ -176,7 +176,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-   qDebug() << "PPNF 03";
+//   qDebug() << "PPNF 03";
    // Create empty frame of type double, to contain calibrated pixels
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
@@ -251,7 +251,7 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-   qDebug() << "PPNF 04";
+//   qDebug() << "PPNF 04";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -423,7 +423,7 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-   qDebug() << "PPNF 07";
+//   qDebug() << "PPNF 07";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -496,7 +496,7 @@ double *PixelProcessorNextFrame::processRe_orderFrame(uint16_t *frame, uint16_t 
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-   qDebug() << "PPNF 08";
+//   qDebug() << "PPNF 08";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame

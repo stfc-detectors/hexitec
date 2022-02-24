@@ -28,7 +28,6 @@ public:
    void initialiseProcessingForm();
 
    int getFrameSize();
-   void handleDetectorResolutionSet(unsigned char xRes, unsigned char yRes);
 
 private:
    Ui::ProcessingForm *ui;

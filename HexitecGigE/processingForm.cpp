@@ -514,8 +514,9 @@ void ProcessingForm::setChargedSharingParameters()
    int pixelGridOption;
 
    pixelGridOption = ui->pixelGridComboBox->currentIndex();
-   chargedSharingOption = ui->chargedSharingComboBox->currentIndex();
+
    emit configureProcessing(chargedSharingOption, pixelGridOption);
+
 }
 
 void ProcessingForm::setInputFilesList()
@@ -575,18 +576,4 @@ void ProcessingForm::handleProcessingComplete()
 void ProcessingForm::handleImageStarted()
 {
    guiBusy();
-}
-
-void ProcessingForm::handleDetectorResolutionSet(unsigned char xRes, unsigned char yRes)
-{
-   qDebug() << "ProcessingForm::handleDetectorResolutionSet";
-   if ((xRes != 80) || (yRes !=80))
-   {
-      ui->re_orderCheckBox->setChecked(false);
-      ui->re_orderCheckBox->setEnabled(false);
-   }
-
-   emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
-                            ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
-
 }

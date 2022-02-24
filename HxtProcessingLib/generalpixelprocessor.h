@@ -15,7 +15,6 @@ class GeneralPixelProcessor
 
 public:
    static uint16_t pixelMap[1600];
-//   static uint16_t 4x16PixelMap[64];
    static bool pixelMapInitialised;
    static uint32_t frameInSize;
    static uint32_t nInRows;
@@ -99,7 +98,7 @@ protected:
    /// DEBUGGING:
    int debugFrameCounter;
    std::ofstream outFile;
-   void writeFile(const char *buffer, unsigned long length, std::string filePrefix);
+//   void writeFile(const char *buffer, unsigned long length, std::string filePrefix);
 };
 
 #endif // GENREALPIXELPROCESSOR_H

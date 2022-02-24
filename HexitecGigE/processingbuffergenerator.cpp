@@ -13,6 +13,7 @@
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
    currentImageProcessor = nullptr;
+   currentHxtGenerator = nullptr;
    this->processingDefinition = processingDefinition;
    nInRows = this->processingDefinition->getFrameInRows();
    nInCols = this->processingDefinition->getFrameInCols();
@@ -60,7 +61,7 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nInRows, 
    connect(currentImageProcessor, SIGNAL(occupancyCorrections(int, int)),
            this, SLOT(handleOccupancyCorrections(int, int)));
 
-   currentHxtGenerator = currentImageProcessor->getHxtGenerator();
+//   currentHxtGenerator = currentImageProcessor->getHxtGenerator();
    qDebug() << "IMAGE QUEUED: currentImageProcessor " << currentImageProcessor;
 }
 
@@ -195,6 +196,7 @@ void ProcessingBufferGenerator::handleHxtFileWritten()
 
       /*qDebug() << "ThreadID: " << QThread::currentThreadId() << "PBG::hanHxtFileWritten; bMainWindowBusy: " << bMainWindowBusy;
       qDebug() << "\t ImageProcessor: " << currentImageProcessor << "\t hxtGenerator: " << currentHxtGenerator;*/
+      currentHxtGenerator = currentImageProcessor->getHxtGenerator();   /// Moved from line: 64
       hxtFilename = QString(currentImageProcessor->getHxtFilename());
       char *buffer = (char *)currentHxtGenerator->getHxtV3Buffer();
 
@@ -285,7 +287,7 @@ void ProcessingBufferGenerator::handlePostProcessImages()
 
       inFile.open(inputFilename, ifstream::binary);
       processingFilenameList.append(processingFilename);
-        qDebug() << QThread::currentThreadId() << "  PBG file: " << processingFilename;
+      qDebug() << QThread::currentThreadId() << "  PBG file: " << processingFilename;
       emit imageStarted(processingFilenameList.back());
       if (!inFile)
       {
