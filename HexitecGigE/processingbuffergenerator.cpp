@@ -229,7 +229,6 @@ void ProcessingBufferGenerator::handleConfigureSensor(int nInRows, int nInCols, 
    this->nOutRows = nOutRows;
    this->nOutCols = nOutCols;
    frameSize = (long long)nInRows * (long long)nInCols;
-   qDebug() << "SET processingDefinition nInRows, nInCols, frameSize " << this->nInRows << this->nInCols << frameSize << this->nOutRows << this->nOutCols;
    processingDefinition->setFrameInRows(nInRows);
    processingDefinition->setFrameInCols(nInCols);
    processingDefinition->setFrameInSize(frameSize);

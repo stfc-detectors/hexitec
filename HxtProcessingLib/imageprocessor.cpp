@@ -406,6 +406,12 @@ void ImageProcessor::handleProcess()
    uint32_t rows=0, cols=0;
    if (reordering)
    {
+      /// Because 4x16, PD's rows, columns, frame out dimensions must be 4x16
+      processingDefinition->setFrameOutRows(4);
+      processingDefinition->setFrameOutCols(16);
+      processingDefinition->setFrameOutSize(64);
+      bool spectrum = processingDefinition->getTotalSpectrum();
+      processingDefinition->setTotalSpectrum(spectrum);
       rows = processingDefinition->getFrameOutRows();
       cols = processingDefinition->getFrameOutCols();
    }
@@ -413,6 +419,12 @@ void ImageProcessor::handleProcess()
    {
       rows = processingDefinition->getFrameInRows();
       cols = processingDefinition->getFrameInCols();
+      /// Because 20x80, PD's rows, columns, frame out dimensions must be 20x80
+      processingDefinition->setFrameOutRows(20);
+      processingDefinition->setFrameOutCols(80);
+      processingDefinition->setFrameOutSize(1600);
+      bool spectrum = processingDefinition->getTotalSpectrum();
+      processingDefinition->setTotalSpectrum(spectrum);
    }
 
    if (chargedSharing)
