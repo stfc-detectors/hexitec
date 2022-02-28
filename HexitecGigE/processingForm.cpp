@@ -278,7 +278,7 @@ void ProcessingForm::initialiseProcessingForm()
    {
       occupancyThreshold = 0;
    }
-
+   qDebug() << " *** ProcessingForm::setChargedSharingParameters() chargedSharingOption: " << chargedSharingOption;
    emit configureSensor(nInRows, nInCols, nOutRows, nOutCols, occupancyThreshold);
    emit configureProcessing(ui->re_orderCheckBox->isChecked(), nextFrame,
                             ui->thresholdModeComboBox->currentIndex(), ui->thresholdValue->value(), ui->thresholdFile->text());
@@ -514,9 +514,8 @@ void ProcessingForm::setChargedSharingParameters()
    int pixelGridOption;
 
    pixelGridOption = ui->pixelGridComboBox->currentIndex();
-
+   chargedSharingOption = ui->chargedSharingComboBox->currentIndex();
    emit configureProcessing(chargedSharingOption, pixelGridOption);
-
 }
 
 void ProcessingForm::setInputFilesList()

@@ -174,9 +174,9 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "PPNF 03";
+//   qDebug() << "PPNF 03 - Modified!";
    // Create empty frame of type double, to contain calibrated pixels
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
@@ -213,7 +213,8 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t threshol
          }
          else
          {
-            re_orderedFrame[i] = ((double)frame[i]) * gradientValue[i] + interceptValue[i];
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
@@ -249,9 +250,9 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "PPNF 04";
+//   qDebug() << "PPNF 04 - Modified!";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -287,7 +288,8 @@ double *PixelProcessorNextFrame::processFrame(uint16_t *frame, uint16_t *thresho
          }
          else
          {
-            re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;

@@ -133,9 +133,9 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
    /// Test implementing occupancy
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "01: 132 pF(raw, frame,) - output 20x80..";
+//   qDebug() << "01: 132 pF(raw, frame,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -159,7 +159,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
          }
          else
          {
-            re_orderedFrame[i] = (double)frame[i];
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
@@ -177,9 +178,9 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
    double  *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "02: 183 pF(raw, frame, thresholdValue,)";
+//   qDebug() << "02: 183 pF(raw, frame, thresholdValue,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize *sizeof(double));
 
@@ -203,7 +204,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
          }
          else
          {
-            re_orderedFrame[i] = (double)frame[i];
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
@@ -220,9 +222,9 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
    double *re_orderedFrame;
    pixelRawValMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "03: 217 pF(raw, frame, thresholdPixel,)";
+//   qDebug() << "03: 217 pF(raw, frame, thresholdPixel,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -248,7 +250,8 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
          }
          else
          {
-            re_orderedFrame[i] = (double)frame[i];
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = (double)frame[i];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
@@ -265,9 +268,9 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame,
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "04: 271 pF(frame, pixelEnergyMap,)";
+//   qDebug() << "04: 271 pF(frame, pixelEnergyMap,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize *  sizeof(double));
 
@@ -291,7 +294,8 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame,
          }
          else
          {
-            re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
             (*eventsInFrame)++;
          }
 
@@ -345,9 +349,9 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "05: 351 pF(frame, thresholdValue, map,)";
+//   qDebug() << "05: 351 pF(frame, thresholdValue, map,) - modified";
    // Reordered frame will be array of double(s) (not int(s))
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
@@ -373,7 +377,8 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
          }
          else
          {
-            re_orderedFrame[i] = ( ((double)frame[i]) * gradientValue[i] + interceptValue[i]);
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
@@ -390,9 +395,9 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
    double *re_orderedFrame;
    pixelEnergyMapPtr = nullptr;
    /// Test implementing occupancy threshold
-   int rowEventsAboveThreshold = 0;
+   int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "06: 396 pF(frame, thresholdPerPixel, map,)";
+//   qDebug() << "06: 396 pF(frame, thresholdPerPixel, map,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -418,7 +423,8 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
          }
          else
          {
-            re_orderedFrame[i] = ((double)(frame[i]) * gradientValue[i] + interceptValue[i]);
+            index = GeneralPixelProcessor::pixelMap[i];
+            re_orderedFrame[index] = ((double)frame[i]) * gradientValue[index] + interceptValue[index];
             (*eventsInFrame)++;
          }
          rowEventsAboveThreshold++;
