@@ -135,7 +135,7 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
    /// Test implementing occupancy
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "01: 132 pF(raw, frame,) - modified";
+   qDebug() << "01: 132 pF(raw, frame,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -180,7 +180,7 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double>**pixelRaw
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "02: 183 pF(raw, frame, thresholdValue,) - modified";
+   qDebug() << "02: 183 pF(raw, frame, thresholdValue,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize *sizeof(double));
 
@@ -224,7 +224,7 @@ double *GeneralPixelProcessor::processFrame(unordered_map<int, double> **pixelRa
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "03: 217 pF(raw, frame, thresholdPixel,) - modified";
+   qDebug() << "03: 217 pF(raw, frame, thresholdPixel,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -270,7 +270,7 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame,
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "04: 271 pF(frame, pixelEnergyMap,) - modified";
+   qDebug() << "04: 271 pF(frame, pixelEnergyMap,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize *  sizeof(double));
 
@@ -351,7 +351,7 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t thresholdV
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "05: 351 pF(frame, thresholdValue, map,) - modified";
+   qDebug() << "05: 351 pF(frame, thresholdValue, map,) - modified";
    // Reordered frame will be array of double(s) (not int(s))
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
@@ -397,7 +397,7 @@ double *GeneralPixelProcessor::processFrame(uint16_t *frame, uint16_t *threshold
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0, index = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "06: 396 pF(frame, thresholdPerPixel, map,) - modified";
+   qDebug() << "06: 396 pF(frame, thresholdPerPixel, map,) - modified";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
 
@@ -443,7 +443,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "07: 432 pReodF(map, frame,)";
+   qDebug() << "07: 432 pReodF(map, frame,)";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -509,7 +509,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "000";
+   qDebug() << "000";
    re_orderedFrame  = (double *)  malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -574,7 +574,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(unordered_map<int, double>**
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "08: 545 pReodF(map, frame, thresholdPixel,)";
+   qDebug() << "08: 545 pReodF(map, frame, thresholdPixel,)";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -640,7 +640,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame,
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "09: 590 pReodF(frame, map, )";
+   qDebug() << "09: 590 pReodF(frame, map, )";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -706,7 +706,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t th
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "10: 635 pReodF(frame, thresholdValue, map, )";
+   qDebug() << "10: 635 pReodF(frame, thresholdValue, map, )";
    re_orderedFrame = (double *)  malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
@@ -772,7 +772,7 @@ double *GeneralPixelProcessor::processRe_orderFrame(uint16_t *frame, uint16_t *t
    /// Test implementing occupancy threshold
    int rowEventsAboveThreshold = 0;
    bool bClearRowOnce = true;
-//   qDebug() << "11: 680 pReodF(frame, thresholdPixel, map, )";
+   qDebug() << "11: 680 pReodF(frame, thresholdPixel, map, )";
    re_orderedFrame = (double *) malloc(GeneralPixelProcessor::frameInSize * sizeof(double));
    memset(re_orderedFrame, 0, GeneralPixelProcessor::frameInSize * sizeof(double));
    /// Construct second, to be displayed, frame
