@@ -81,7 +81,6 @@ void GigEDetector::constructorInit(const QObject *parent)
    targetTemperature = 24.0;
    hvSetPoint = 0;
    appendTimestamp = false;
-//   saveRaw = true;
    triggeringAvailable = false;
    triggerTimeout = 60000.0;
    readIniFile(this->aspectFilename);
@@ -89,10 +88,6 @@ void GigEDetector::constructorInit(const QObject *parent)
    qRegisterMetaType<GigEDetector::DetectorCommand>("GigE::DetectorCommand");
    qRegisterMetaType<GigEDetector::DetectorState>("GigE::DetectorState");
    qRegisterMetaType<HANDLE>("HANDLE");
-
-
-//   notifyStateEvent = new WindowsEvent(HEXITEC_NOTIFY_STATE, true);
-//   notifyStateEvent = CreateEvent(NULL, FALSE, FALSE, HEXITEC_NOTIFY_STATE);
 
    connectUp(parent);
 }

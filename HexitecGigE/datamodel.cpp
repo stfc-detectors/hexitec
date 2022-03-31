@@ -4,20 +4,18 @@
 #include "treeitem.h"
 #include "volume.h"
 #include "slice.h"
-//#include "matlabvariable.h"
 
-
-DataModel *DataModel::dmInstance = 0;
+DataModel *DataModel::dmInstance = nullptr;
 
 DataModel *DataModel::instance()
 {
-   if (dmInstance == 0)
+   if (dmInstance == nullptr)
    {
       dmInstance = new DataModel();
       // The creation of activeVolume cannot go in the constructor because creation of its
       // TreeItem needs dmInstance.
       dmInstance->activeVolume = new Volume("myVolume");
-      dmInstance->activeSlice = NULL;
+      dmInstance->activeSlice = nullptr;
    }
    return dmInstance;
 }
@@ -54,7 +52,7 @@ QVariant DataModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags DataModel::flags(const QModelIndex &index) const
 {
    if (!index.isValid())
-      return 0;
+      return nullptr;
 
    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -208,9 +206,9 @@ TreeItem *DataModel::getItem(QString name)
 
 Volume *DataModel::getVolume(QString name)
 {
-   Volume *volume = NULL;
+   Volume *volume = nullptr;
    TreeItem *item = getItem(name);
-   if ((item != NULL) && (item->getType() == TreeItem::VOLUME))
+   if ((item != nullptr) && (item->getType() == TreeItem::VOLUME))
    {
       volume = static_cast<Volume *>(item);
    }
@@ -219,9 +217,9 @@ Volume *DataModel::getVolume(QString name)
 
 Slice *DataModel::getSlice(QString name)
 {
-   Slice *slice = NULL;
+   Slice *slice = nullptr;
    TreeItem *item = getItem(name);
-   if ((item != NULL) && (item->getType() == TreeItem::SLICE))
+   if ((item != nullptr) && (item->getType() == TreeItem::SLICE))
    {
       slice = static_cast<Slice *>(item);
    }
@@ -230,9 +228,9 @@ Slice *DataModel::getSlice(QString name)
 
 Slice *DataModel::getSlice(const QModelIndex &index)
 {
-   Slice *slice = NULL;
+   Slice *slice = nullptr;
    TreeItem *item = DataModel::instance()->getItem(index);
-   if ((item != NULL) && (item->getType() == TreeItem::SLICE))
+   if ((item != nullptr) && (item->getType() == TreeItem::SLICE))
    {
       slice = static_cast<Slice *>(item);
    }
@@ -268,7 +266,7 @@ void DataModel::deleteSlice(Slice *slice)
 {
    if (slice == dmInstance->activeSlice)
    {
-      dmInstance->activeSlice = NULL;
+      dmInstance->activeSlice = nullptr;
    }
    // The method for getting an index from a name requires a fully qualified name.
    dmInstance->removeSlice(dmInstance->getItemIndex(dmInstance->activeVolume->getName() + "." + slice->getName()));

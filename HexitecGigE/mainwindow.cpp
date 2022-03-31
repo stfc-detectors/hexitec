@@ -31,8 +31,10 @@
 
 MainWindow::MainWindow()
 {
-   DetectorControlForm *detectorControlForm;
-   DataAcquisitionForm *dataAcquisitionForm;
+   DetectorControlForm *detectorControlForm = nullptr;
+   DataAcquisitionForm *dataAcquisitionForm = nullptr;
+   dataAcquisitionFactory = nullptr;
+
    ProcessingForm *processingForm;
    ProcessingBufferGenerator *processingBufferGenerator;
    ProcessingDefinition *processingDefinition;
@@ -336,7 +338,7 @@ void MainWindow::readFiles()
 
       for (int i = 0; i < slices.size(); i++)
       {
-         if (slices.at(i) != NULL)
+         if (slices.at(i) != nullptr)
          {
             initializeSlice(slices.at(i));
          }
@@ -402,7 +404,7 @@ void MainWindow::deleteActiveSlice()
 
 void MainWindow::deleteSlice(Slice *slice)
 {
-   if (slice != NULL)
+   if (slice != nullptr)
    {
       emit writeMessage("Volume size was: " + QString::number(DataModel::instance()->numberOfSlices()));
       emit writeMessage("...deleting slice " + slice->objectName());
@@ -604,7 +606,7 @@ void MainWindow::createApplicationOutput()
 
 void MainWindow::externalChargeShare()
 {
-   chargeSharingInstance = new ChargeSharing(0);
+   chargeSharingInstance = new ChargeSharing(nullptr);
    connect(chargeSharingInstance, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(chargeSharingInstance, SIGNAL(readData(QString)), this, SLOT(readData(QString)));
    chargeSharingInstance->exec();
@@ -638,7 +640,7 @@ void MainWindow::readFiles(QStringList files)
 
    for (int i = 0; i < slices.size(); i++)
    {
-      if (slices.at(i) != NULL)
+      if (slices.at(i) != nullptr)
       {
          initializeSlice(slices.at(i));
       }

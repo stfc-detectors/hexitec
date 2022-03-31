@@ -18,7 +18,7 @@ GeneralHxtGenerator::GeneralHxtGenerator(int nRows, int nCols, ProcessingDefinit
 GeneralHxtGenerator::~GeneralHxtGenerator()
 {
    delete hxtItem;
-   hxtItem = NULL;
+   hxtItem = nullptr;
 }
 
 bool GeneralHxtGenerator::getFrameProcessingInProgress()

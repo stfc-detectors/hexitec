@@ -13,26 +13,28 @@ HxtItem::HxtItem(int nRows, int nCols, long long binStart, long long binEnd, dou
    setBinEnd(binEnd);
    setBinWidth(binWidth);
    nBins = (int)(((binEnd - binStart) / binWidth) + 0.5);
-   hxtBin = NULL;
+   hxtBin = nullptr;
    initialiseHxtBuffer(nRows, nCols);
 
-   summedHistogram = NULL;
+   summedHistogram = nullptr;
    hxtsProcessed = 0;
+   /// Debugging:
+   debugging = true;
 }
 
 HxtItem::~HxtItem()
 {
    qDebug() << "~HxtItem free dat mem man!";
-   if (summedHistogram != NULL)
+   if (summedHistogram != nullptr)
    {
       free(summedHistogram);
-      summedHistogram = NULL;
+      summedHistogram = nullptr;
    }
 
-   if (hxtBin != NULL)
+   if (hxtBin != nullptr)
    {
       free(hxtBin);
-      hxtBin = NULL;
+      hxtBin = nullptr;
    }
 }
 
@@ -63,6 +65,7 @@ void HxtItem::initialiseHxtBuffer(int nRows, int nCols)
 void HxtItem::initialiseTotalSpectrum()
 {
    summedHistogram = (long long *) calloc(nBins, sizeof(long long));    // free()'d in DTOR
+//   summedHistogram = reinterpret_cast<long long *> (calloc(nBins, sizeof(long long)));    /// Produces empty histograms..
 }
 
 void HxtItem::setTotalEnergiesToProcess(long long totalEnergiesToProcess)
@@ -116,24 +119,19 @@ void HxtItem::addFrameDataToHistogram(double *frame)
     double *currentHistogram = &histogramPerPixel[0];
     double thisEnergy;
     int bin;
-    int pixel;
+    uint32_t pixel;
 
-    int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
-    for (int i = 0; i < frameSize; i++)
+    uint32_t frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+    for (uint32_t i = 0; i < frameSize; i++)
     {
        pixel = i;
        thisEnergy = frame[i];
-       if (thisEnergy == 0)
+       if (thisEnergy == 0.0)
            continue;
-       bin = (int)((thisEnergy / binWidth));
+       bin = static_cast<int>((thisEnergy / binWidth));
        if (bin <= nBins)
        {
           (*(currentHistogram + (pixel * nBins) + bin))++;
-       }
-       else
-       {
- /*         qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
-                   << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
        }
     }
 
@@ -149,27 +147,29 @@ void HxtItem::addFrameDataToHistogramWithSum(double *frame)
    int bin;
    int pixel;
 
-   int frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+    frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;   /// Fixing this warning produce empty histogram(!)
+//   uint32_t frameSize = hxtV3Buffer.nRows * hxtV3Buffer.nCols;
+//   if (debugging) qDebug() << "frameSize: " << frameSize;
    for (int i = 0; i < frameSize; i++)
    {
       pixel = i;
       thisEnergy = frame[i];
 
-      if (thisEnergy == 0)
+      if (thisEnergy == 0)  /// Fixing this warning (ie == 0.0) also produce empty histogram(!)
           continue;
-      bin = (int)((thisEnergy / binWidth));
+      bin = static_cast<int>((thisEnergy / binWidth));
       if (bin <= nBins)
       {
          (*(currentHistogram + (pixel * nBins) + bin))++;
          (*(summed + bin)) ++;
       }
-      else
-      {
-         /*qDebug() << "BAD BIN = " << bin << " in pixel " << pixel << " ("
-                  << (int)(pixel/400) << "," << (pixel % 400) <<")"*/;
-      }
    }
 
+//   if (debugging)
+//   {
+//       qDebug() << "HxtItem::addFrameDataToHistogramWithSum()";
+//       debugging = false;
+//   }
    hxtsProcessed++;
 }
 

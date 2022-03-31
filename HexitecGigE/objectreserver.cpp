@@ -1,10 +1,10 @@
 #include "objectreserver.h"
 
-ObjectReserver *ObjectReserver::objectReserverInstance = 0;
+ObjectReserver *ObjectReserver::objectReserverInstance = nullptr;
 
 ObjectReserver *ObjectReserver::instance()
 {
-   if (objectReserverInstance == 0)
+   if (objectReserverInstance == nullptr)
    {
       objectReserverInstance = new ObjectReserver();
    }
@@ -58,9 +58,9 @@ Reservation ObjectReserver::reserveForScript(QString script,
          {
             //qDebug() << s << "is in script";
             reservable = dynamic_cast <Reservable *> (objects.at(i));
-            if (reservable == NULL)
+            if (reservable == nullptr)
             {
-               message = "Object cast returned NULL";
+               message = "Object cast returned nullptr";
                //KSA replaced empty() with clear(), as empty() is equivalent to isEmpty()
                reserved.clear();
                break;
@@ -139,7 +139,7 @@ Reservation ObjectReserver::reserveForGUI(QList<QObject *> objects)
       QString s = QString(objects.at(i)->objectName());
 
       reservable = dynamic_cast <Reservable *> (objects.at(i));
-      if (reservable == NULL)
+      if (reservable == nullptr)
       {
          message = "Object reserved by " + reservable->reservedFor();
          //qDebug() << "ObjectReserver::reserveForGUI releasing (1)" << s;

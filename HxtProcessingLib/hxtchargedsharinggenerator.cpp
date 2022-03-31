@@ -25,7 +25,7 @@ void HxtChargedSharingGenerator::processEnergies(double *frame)
 void HxtChargedSharingGenerator::setPixelGridSize(int pixelGridSize)
 {
    this->pixelGridSize = pixelGridSize;
-   directionalDistance = (int)pixelGridSize/2;
+   directionalDistance = static_cast<int>(pixelGridSize/2);
 }
 
 void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
@@ -37,7 +37,7 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
     int extendedFrameSize    = extendedFrameRows * extendedFrameColumns;
 
     double  *extendedFrame;
-    extendedFrame = (double*) malloc(extendedFrameSize * sizeof(double));
+    extendedFrame = reinterpret_cast<double*>(malloc(extendedFrameSize * sizeof(double)));
     memset(extendedFrame, 0, extendedFrameSize * sizeof(double));
 
     // Copy frame's each row into extendedFrame leaving (directionalDistance pixel(s)) padding on each side
@@ -119,12 +119,12 @@ void HxtChargedSharingGenerator::calculateChargedSharing(double *frame)
 //    debugFrameCounter += 1;
     ///
     free(extendedFrame);
-    extendedFrame = NULL;
+    extendedFrame = nullptr;
 }
 
 void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
 {
-    double *neighbourPixel = NULL, *currentPixel = extendedFrame;
+    double *neighbourPixel = nullptr, *currentPixel = extendedFrame;
     int rowIndexBegin = (-1*directionalDistance);
     int rowIndexEnd   = (directionalDistance+1);
     int colIndexBegin = rowIndexBegin;
@@ -172,7 +172,7 @@ void HxtChargedSharingGenerator::processDiscriminationRewritten(double *extended
 
 void HxtChargedSharingGenerator::processAdditionRewritten(double *extendedFrame, int extendedFrameRows, int startPosn, int endPosn)
 {
-    double *neighbourPixel = NULL, *currentPixel = extendedFrame;
+    double *neighbourPixel = nullptr, *currentPixel = extendedFrame;
     int rowIndexBegin = (-1*directionalDistance);
     int rowIndexEnd   = (directionalDistance+1);
     int colIndexBegin = rowIndexBegin;

@@ -133,9 +133,9 @@ char *DataAcquisition::getStatus()
 {
    int major = daqStatus.getMajorStatus();
    int minor = daqStatus.getMinorStatus();
-   char *status = NULL;
+   char *status = nullptr;
    sprintf(status,"%d.%d", major, minor);
-   return status;//daqStatus.getMajorStatus() + "." + daqStatus.getMinorStatus();
+   return status;
 }
 
 void DataAcquisition::run()

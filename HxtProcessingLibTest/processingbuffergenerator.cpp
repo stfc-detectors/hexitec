@@ -13,7 +13,7 @@
 
 ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent) : QObject(parent)
 {
-   currentImageProcessor = NULL;
+   currentImageProcessor = nullptr;
    this->processingDefinition = processingDefinition;
    nRows = this->processingDefinition->getRows();
    nCols = this->processingDefinition->getCols();
@@ -42,7 +42,7 @@ void ProcessingBufferGenerator::enqueueImage(const char *filename, int nRows, in
            this, SLOT(handleProcessingComplete()));
 
    HANDLE hxtHandle = currentImageProcessor->getHxtFileWrittenEvent();
-   if (hxtHandle != NULL)
+   if (hxtHandle != nullptr)
    {
       hxtNotifier = new QWinEventNotifier(hxtHandle);
       connect(hxtNotifier, SIGNAL(activated(HANDLE)), this, SLOT(handleHxtFileWritten()));
@@ -63,7 +63,7 @@ void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer,
 {
    bufferReady(fileBuffer, validFrames);
    free(fileBuffer);
-   fileBuffer = NULL;
+   fileBuffer = nullptr;
 }
 
 void ProcessingBufferGenerator::bufferReady(unsigned char *buffer, unsigned long validFrames)

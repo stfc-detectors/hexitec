@@ -73,6 +73,8 @@ private:
    long long totalEnergiesToProcess;
    long long hxtsProcessed;
    void initialiseHxtBuffer(int nRows, int nCols);
+   /// Debugging
+   bool debugging;
 };
 
 #endif // HXTITEM_H

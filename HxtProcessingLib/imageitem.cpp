@@ -9,7 +9,7 @@ ImageItem::ImageItem(const char *filename)
    strcpy(this->filename, filename);
    lock_guard<mutex> lock(iiMutex);
    this->processedFrameCount = 0;
-   bufferItem = NULL;
+   bufferItem = nullptr;
    // Free filename, memory originally allocated in ProcBuffGen::handlePostProcessImages()
 //   delete filename;
 }
@@ -28,9 +28,9 @@ void ImageItem::enqueueBuffer(char *address, unsigned long validFrameCount)
 char *ImageItem::getNextBuffer(unsigned long *validFrameCount)
 {
    lock_guard<mutex> lock(iiMutex);
-   char *address = NULL;
+   char *address = nullptr;
 
-   if (bufferItem != NULL)
+   if (bufferItem != nullptr)
    {
       delete bufferItem;
    }

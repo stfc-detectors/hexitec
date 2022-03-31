@@ -504,7 +504,7 @@ void RenderArea::renderSum(Slice *slice)
       this->stats();
       this->autoScaleZ();
    }
-   if (slice->getSummedImageY() != NULL)
+   if (slice->getSummedImageY() != nullptr)
    {
       emit updatePlotter(slice->getXData(0, 0), slice->getSummedImageY(), slice->getNumberOfBins());
    }

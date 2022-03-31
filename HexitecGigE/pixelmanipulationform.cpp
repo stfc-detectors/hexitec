@@ -21,7 +21,7 @@ void PixelManipulationForm::connectSignals()
 
 void PixelManipulationForm::updatePixelList(QString newPixel)
 {
-   if (newPixel == NULL)
+   if (newPixel == nullptr)
    {
       ui->pixelList->clear();
    }

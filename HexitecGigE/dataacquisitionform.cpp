@@ -26,7 +26,6 @@ DataAcquisitionForm::DataAcquisitionForm(QWidget *parent) :
 
    connectSignals();
    handleSaveRawChanged(true);
-//   handleDataAcquisitionDefinition();
 }
 
 DataAcquisitionForm::~DataAcquisitionForm()
@@ -123,17 +122,6 @@ void DataAcquisitionForm::setDaqModelName(QString daqModelName)
 
 void DataAcquisitionForm::handleCollectImagesPressed()
 {
-   /*
-   try
-   {
-      emit collectImagesPressed();
-   }
-   catch (DetectorException &ex)
-   {
-      qDebug() << "handleCollectImages caught a DetectorException";
-//      emit writeError(ex.getMessage());
-   }
-   */
    emit collectImagesPressed();
 }
 
@@ -154,7 +142,7 @@ void DataAcquisitionForm::handleLoggingEnabled(int loggingEnabled)
    else
    {
       enableLogfileParameters(true);
-      emit createLogFile(NULL);
+      emit createLogFile(nullptr);
    }
 }
 
@@ -351,8 +339,6 @@ void DataAcquisitionForm::handleDataAcquisitionStatusChanged(DataAcquisitionStat
          }
          break;
       case DataAcquisitionStatus::READY:
-//         operatedForScripting = false;
-//         guiReady();
          if (!operatedForScripting)
          {
             guiReady();
