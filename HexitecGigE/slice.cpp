@@ -11,8 +11,6 @@ S D M Jacques 24 Feb 2011
 #include <QDataStream>
 #include <math.h>
 #include <QProgressDialog>
-#include <gridsizequery.h>
-//#include <matlab.h>
 #include <cfloat>
 #include <QDebug>
 
@@ -31,7 +29,6 @@ Slice::Slice(QString name, QObject *parent) : QObject(parent)
 
 /* Returns a title suitable for using on e.g. images of the slice.
   */
-
 QString Slice::getTitle()
 {
     return QString(objectName()  + ", max value: " + QString::number(maxData));
@@ -47,7 +44,6 @@ QString Slice::getFileName()
 Slice::Slice(QString name, QString fileName)
 {
 //    qDebug() << "::Slice(QStr, QStr)  ";
-
    preDataInit(name);
    bool status = false;
    QString fileRoot = QFileInfo(fileName).fileName();
@@ -105,7 +101,6 @@ void Slice::preDataInit(QString name)
    meanData = 0.0;
    contentVoxel.resize(0);
    commonX.resize(0);
-   zeroStats();
    xType = NONE;
    connect(this, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(this, SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
@@ -212,23 +207,6 @@ int Slice::getNumberOfBins()
    return numberOfBins;
 }
 
-int Slice::getVoxelDataLen()
-{
-   return voxelDataLen;
-}
-
-void Slice::setVoxelDataLen(int voxelDataLen)
-{
-   this->voxelDataLen = voxelDataLen;
-}
-
-/* The variables in this method are only used in the commented out part of stats().
-  */
-void Slice::zeroStats()
-{
-   return;
-}
-
 /* Resets contentVoxel to be a rows * cols array of (Voxel *)
   */
 void Slice::resize(int rows, int cols)
@@ -246,7 +224,6 @@ void Slice::resize(int rows, int cols)
    gridSizeY = cols;
    return;
 }
-
 
 /* Calculates the statistics for this Slice.
   */
@@ -268,69 +245,6 @@ void Slice::stats()
       }
    }
    meanData = sumData/(1.0 * gridSizeX * gridSizeY);
-}
-
-void Slice::writeHXT(QString fileName)
-{
-   if (!xType == COMMON)
-   {
-      emit writeMessage("Currently only implemented for slice data with common X scale");
-      return;
-   }
-   if (voxelDataLen != commonX.size())
-   {
-      emit writeMessage("VoxelDataLen != commonX.size()");
-      return;
-   }
-
-   QFile ofile(fileName);
-   if (!ofile.open(QIODevice::WriteOnly))
-   {
-      emit writeMessage("Can not write file : " + fileName);
-      return;
-   }
-   QDataStream bout(&ofile);
-   char myChar;
-   quint64 hxtVersion;
-   quint32 nRows, nCols, nBins;
-   hxtVersion = 1;
-   nRows = (quint32) gridSizeX;
-   nCols = (quint32) gridSizeY;
-   nBins = (quint32) voxelDataLen;
-   QString hxtLabel = "HEXITECH";
-   for (int i = 0; i < 8; ++i)
-   {
-      myChar = hxtLabel.at(i).toLatin1();
-      bout.writeRawData((char *) &myChar, sizeof(myChar));
-      hxtLabel += myChar;
-   }
-   bout.writeRawData((char *) &hxtVersion, sizeof(hxtVersion));
-   bout.writeRawData((char *) &nRows, sizeof(nRows));
-   bout.writeRawData((char *) &nCols, sizeof(nRows));
-   bout.writeRawData((char *) &nBins, sizeof(nRows));
-
-   quint32 iBin, iRow, iCol;
-   // Read Channels
-   QVector <double> channels(nBins);
-   for (iBin = 0 ; iBin < nBins ; ++iBin)
-   {
-      bout.writeRawData((char *) &commonX[iBin], sizeof(commonX[iBin]));
-   }
-   // Read data
-   QVector <double> spectrum(nBins);
-   QString fileStem;
-   for (iRow = 0; iRow < nRows; ++iRow)
-   {
-      for (iCol = 0; iCol < nCols; ++iCol)
-      {
-         for (iBin = 0 ; iBin < nBins ; ++iBin)
-         {
-            bout.writeRawData((char *) &contentVoxel[iRow][iCol]->contentYData[iBin], sizeof(double));
-         }
-      }
-   }
-   emit writeMessage("data successfully writen");  // should comment this out
-   ofile.close();
 }
 
 bool Slice::readHXT(unsigned short *buffer)
@@ -385,7 +299,6 @@ bool Slice::readHXT(unsigned short *buffer)
     }
 
     voxelDataLen = numberOfBins;
-    zeroStats();
     xType = COMMON;
 
     free(hxtBuffer.allData);
@@ -475,7 +388,6 @@ bool Slice::readHXT(QString fileName)
             timeStampStream << c;
         }
         dataTimeStamp = timeStampStream.str();
-
    }
    file.read((char *) &nRows, sizeof(nRows));
    file.read((char *) &nCols, sizeof(nCols));
@@ -531,30 +443,7 @@ bool Slice::readHXT(QString fileName)
 
    file.close();
    voxelDataLen = nBins;
-   zeroStats();
    xType = COMMON;
-   return(true);
-}
-
-bool Slice::squeezeX()
-{
-   // Squeeze X axis
-   if (!(xType == UNIQUE))
-      return(false);
-
-   // this is the case where all pixels have idenitcal x
-   commonX.resize(voxelDataLen);
-   for (int k = 0; k < voxelDataLen ; ++k)
-      commonX[k] = contentVoxel[0][0]->contentXData[k];
-   for (int i = 0; i < gridSizeX; ++i)
-   {
-      for (int j = 0; j < gridSizeY; ++j)
-      {
-         contentVoxel[i][j]->contentXData.resize(0);;
-      }
-   }
-   xType = COMMON;
-
    return(true);
 }
 
@@ -717,17 +606,7 @@ QVector<Slice *> Slice::readFileNameList(QStringList fileNameList)
 
 Slice *Slice::readFileBuffer(unsigned short* buffer, QString fileName)
 {
-   Slice *slice;
-   // If the extension of the first file contained sb xmy xy or txt then you pass ALL the
-   // file names to the Slice constructor to construct a single Slice.
-         slice = new Slice(nextSliceName(), buffer, fileName);
-//        progress.setValue(i + 1);
-//         if (progress.wasCanceled())
-//            break;
-
-//      progress.update();
-//      progress.deleteLater();
-
+   Slice *slice = new Slice(nextSliceName(), buffer, fileName);
    return slice;
 }
 
@@ -845,7 +724,7 @@ QVector<double> Slice::getYData(int xPix, int yPix)
    return contentVoxel[xPix][yPix]->contentYData;
 }
 
-/* Creates a new Slice by adding 'this' to 'anOtherSlice'. See Q_INVOKABLE counterpart plus().
+/* Creates a new Slice by adding 'this' to 'anOtherSlice'.
  */
 Slice *Slice::add(Slice *anOtherSlice)
 {
@@ -873,7 +752,7 @@ Slice *Slice::add(Slice *anOtherSlice)
    return newSlice;
 }
 
-/* Creates a new Slice by adding value to each Voxel. See Q_INVOKABLE counterpart plus().
+/* Creates a new Slice by adding value to each Voxel.
  */
 Slice *Slice::add(double value)
 {
@@ -892,7 +771,7 @@ Slice *Slice::add(double value)
    return newSlice;
 }
 
-/* Creates a new Slice by multiplying all the Voxels of 'this' by value. See Q_INVOKABLE counterpart times().
+/* Creates a new Slice by multiplying all the Voxels of 'this' by value.
   */
 Slice *Slice::multiply(double value)
 {
@@ -904,67 +783,6 @@ Slice *Slice::multiply(double value)
       for (j = 0; j < gridSizeY; j++)
       {
          newSlice->contentVoxel[i][j] = contentVoxel[i][j]->multiply(value);
-      }
-   }
-   newSlice->postDataInit();
-
-   return newSlice;
-}
-
-/* This is a Q_INVOKABLE wrapper for add() for use in scripts. As well as creating the new slice it
-   also emits the signal to add it to the object list and returns it as a (QObject *) rather than a (Slice *)
-  */
-QObject *Slice::plus(QObject *anotherSlice)
-{
-   Slice *newSlice = add((Slice *)anotherSlice);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
-
-/* This is a Q_INVOKABLE wrapper for add() for use in scripts. As well as creating the new slice it
-   also emits the signal to add it to the object list and returns it as a (QObject *) rather than a (Slice *)
-  */
-QObject *Slice::plus(double value)
-{
-   Slice *newSlice = add(value);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
-
-/* This is a Q_INVOKABLE wrapper for multiply() for use in scripts. As well as creating the new slice it
-   also emits the signal to add it to the object list and returns it as a (QObject *) rather than a (Slice *)
-  */
-QObject *Slice::times(double value)
-{
-   Slice *newSlice = multiply(value);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
-
-/* This is a Q_INVOKABLE wrapper for veil() for use in scripts. As well as creating the new slice it
-   also emits the signal to add it to the object list and returns it as a (QObject *) rather than a (Slice *)
-  */
-QObject *Slice::mask(double *theMask)
-{
-   Slice *newSlice = veil(theMask);
-   emit initializeSlice(newSlice);
-   return newSlice;
-}
-
-/* Creates a new Slice by masking the data of this one. Each contentVoxel is multiplied by the value
-   in theMask at the same position. NB it is called veil() to distinguish it from its Q_INVOKABLE
-   counterpart mask() cf add()/plus(), multiply()/times().
-   */
-Slice *Slice::veil(double *theMask)
-{
-   int i, j;
-   Slice *newSlice = clone(name + "_MASKED");
-
-   for (i = 0; i < gridSizeX; i++)
-   {
-      for (j = 0; j < gridSizeY; j++)
-      {
-         newSlice->contentVoxel[i][j] = contentVoxel[i][j]->multiply(theMask[i * gridSizeX + j]);
       }
    }
    newSlice->postDataInit();

@@ -24,11 +24,8 @@ SOURCES += main.cpp \
     plotsettings.cpp \
     mainwindow.cpp \
     hxtframe.cpp \
-    hxtfilereader.cpp \
-    gridsizequery.cpp \
     curve.cpp \
     colormap.cpp \
-    chargesharing.cpp \
     axissettings.cpp \
     treeitem.cpp \
     colormapeditor.cpp \
@@ -47,7 +44,6 @@ SOURCES += main.cpp \
     offsetsdialog.cpp \
     datacollectiondialog.cpp \
     dpwarningdialog.cpp \
-    vboutofrangedialog.cpp \
     detectorcontrolform.cpp \
     dataacquisitionform.cpp \
     dataacquisition.cpp \
@@ -75,11 +71,8 @@ HEADERS += mainwindow.h \
     plotter.h \
     plotsettings.h \
     hxtframe.h \
-    hxtfilereader.h \
-    gridsizequery.h \
     curve.h \
     colormap.h \
-    chargesharing.h \
     axissettings.h \
     thumbviewer.h \
     treeitem.h \
@@ -99,7 +92,6 @@ HEADERS += mainwindow.h \
     offsetsdialog.h \
     datacollectiondialog.h \
     dpwarningdialog.h \
-    vboutofrangedialog.h \
     detectorcontrolform.h \
     dataacquisitionform.h \
     dataacquisition.h \
@@ -120,14 +112,11 @@ HEADERS += mainwindow.h \
     imageprocessorhandler.h
 
 FORMS += \
-    gridsizequery.ui \
-    chargesharing.ui \
     colormapeditor.ui \
     getvaluedialog.ui \
     offsetsdialog.ui \
     datacollectiondialog.ui \
     dpwarningdialog.ui \
-    vboutofrangedialog.ui \
     detectorcontrolform.ui \
     dataacquisitionform.ui \
     setaxesdialog.ui \

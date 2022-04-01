@@ -20,7 +20,6 @@
 #include "renderarea.h"
 #include "plotter.h"
 #include "thumbviewer.h"
-#include "chargesharing.h"
 #include "mainviewer.h"
 #include "workspace.h"
 #include "dataacquisitionfactory.h"
@@ -39,8 +38,6 @@ public:
    MainWindow();
    ~MainWindow();
 
-//protected:
-
 private:
    void createMenus();
    QMainWindow *createVisualisation();
@@ -55,7 +52,6 @@ private:
    void closeEvent(QCloseEvent *event);
    bool checkDAQChoice();
    void writeCsv(QString filename, QVector<double> col0, double *col1, int numberOfBins);
-//   void writeH5(QString fileName);
    QAction *startDAQAct;
    QAction *stopDAQAct;
    QAction *startHVAct;
@@ -68,7 +64,6 @@ private:
    Plotter *plotter;
    PixelManipulationForm *pixelManipulationForm;
    Workspace *workspace;
-   ChargeSharing *chargeSharingInstance;
    bool activeHexitec;
    QMenu *viewMenu;
    QMenu *fileMenu;
@@ -80,7 +75,6 @@ private:
    bool activeDAQ;
    bool hVOn;
    std::ofstream outFile;
-//   bool saveH5;
    ///
    bool bMainWindowBusy;
    QMutex busyMutex;
@@ -102,14 +96,12 @@ signals:
    // The private slots are used only internally to connect to the menus and to other parts of the program
 private slots:
    void readFiles();
-//   void saveFiles();
    void deleteSlice(Slice *slice);
    void deleteActiveSlice();
    void deleteAllSlices();
    void deleteFirstSlice(); // Necessary because cannot do SIGNAL(deleteSlice( DataModel::instance()->sliceAt(0)))...
    void deleteExcessSlices();   // Added 11.04.2014
    void about();
-   void externalChargeShare();
    void initializeSlice(Slice *slice, int sliceNumber = -1);
    void save();
    void handleSpectrumFile(QString fileName);

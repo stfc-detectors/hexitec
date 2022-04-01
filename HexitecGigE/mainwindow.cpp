@@ -4,7 +4,6 @@
 #include "mainwindow.h"
 #include "renderarea.h"
 #include "thumbviewer.h"
-#include "chargesharing.h"
 #include "plotter.h"
 
 #include "detectorcontrolform.h"
@@ -77,8 +76,6 @@ MainWindow::MainWindow()
    readDir = "";
    readFilter = "";
 
-//   saveH5 = false;
-
    QTabWidget *tabs = new QTabWidget(this);
    setCentralWidget(tabs);
 
@@ -114,11 +111,6 @@ MainWindow::MainWindow()
    connect(workspace, SIGNAL(initializeSlice(Slice *)), this, SLOT(initializeSlice(Slice *)));
    connect(workspace, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
    connect(workspace, SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
-//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), workspace, SLOT(matlabStatus(bool)));
-
-//   connect(matlab::instance(), SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-//   connect(matlab::instance(), SIGNAL(writeWarning(QString)), ApplicationOutput::instance(), SLOT(writeWarning(QString)));
-//   connect(matlab::instance(), SIGNAL(writeError(QString)), ApplicationOutput::instance(), SLOT(writeError(QString)));
 
    if (activeDAQ)
    {
@@ -164,12 +156,6 @@ MainWindow::MainWindow()
    // The processing window needs to have been created before the data acquisition factory!
    processingDefinition = new ProcessingDefinition(6400);
    processingForm = new ProcessingForm();
-   /// 400X400 version:
-//   processingForm = new ProcessingForm();
-//   processingForm->readConfigFile();
-//   int frameSize = processingForm->getFrameSize();
-////   qDebug() << " *** Mainwindow.cpp frameSize: " << frameSize;
-//   processingDefinition = new ProcessingDefinition(frameSize);
    processingBufferGenerator = new ProcessingBufferGenerator(processingDefinition);
 
    if (activeDAQ)
@@ -196,8 +182,6 @@ MainWindow::MainWindow()
    createStatusBar();
    tabs->addTab(processingForm->getMainWindow(), QString("Processing"));
 
-//   connect(processingForm, SIGNAL(configureSensor(int, int)),
-//           processingBufferGenerator, SLOT(handleConfigureSensor(int, int)));
    connect(processingForm, SIGNAL(configureSensor(int, int, int)),
            processingBufferGenerator, SLOT(handleConfigureSensor(int, int, int)));
 
@@ -303,10 +287,8 @@ QMainWindow *MainWindow::createVisualisation()
 void MainWindow::readFiles()
 {
    const char *df = "Data Files (*.hxt)";
-//   const char *sf = "Script Files (*.js)";
-//   const char *mf = "Matlab Files (*.m)";
 
-   QString filter = tr(df) + ";;" /*+ tr(sf) + ";;" *//*+ tr(mf)*/;
+   QString filter = tr(df) + ";;";
    QStringList files = QFileDialog::getOpenFileNames(this,
                                                      tr("Select Files for Reading"),
                                                      readDir,
@@ -352,7 +334,7 @@ void MainWindow::readFiles()
 void MainWindow::initializeSlice(Slice *slice, int sliceNumber)
 {
    // This connect enables the new Slice to create another slice from scripting and emit this signal
-   // to get to this point - see Slice::times().
+   // to get to this point.
    if (sliceNumber < 0)
    {
       connect(slice, SIGNAL(initializeSlice(Slice*)), this, SLOT(initializeSlice(Slice*)));
@@ -409,7 +391,6 @@ void MainWindow::deleteSlice(Slice *slice)
       emit writeMessage("Volume size was: " + QString::number(DataModel::instance()->numberOfSlices()));
       emit writeMessage("...deleting slice " + slice->objectName());
       thumbViewer->deleteSlice(slice);
-      //DataModel::instance()->deleteSlice(slice);
       emit writeMessage("Volume size is now: " + QString::number(DataModel::instance()->numberOfSlices()));
       update();
    }
@@ -424,15 +405,11 @@ void MainWindow::deleteAllSlices()
 
 void MainWindow::deleteFirstSlice()
 {
-//    deleteSlice(DataModel::instance()->sliceAt(0));               // Causes a crash in a very specific case?
-     thumbViewer->deleteSlice( DataModel::instance()->sliceAt(0));  // Also causes a crash, in a very specific use case
+     thumbViewer->deleteSlice(DataModel::instance()->sliceAt(0));  // Causes a crash in a very specific case?
 }
 
 void MainWindow::deleteExcessSlices()
 {
-    //int numberOfSlices = DataModel::instance()->numberOfSlices();
-    //emit writeMessage("MainWindow::deleteExcessSlices numberOfSlices: " + QString::number(numberOfSlices));   // Debug info
-
     // Keep removing slices until we have less than 10 remaining
     while (DataModel::instance()->numberOfSlices() > 9)
     {
@@ -501,12 +478,11 @@ void MainWindow::createMenus()
    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-   /*QMenu **/fileMenu = menuBar()->addMenu(tr("&File"));
+   fileMenu = menuBar()->addMenu(tr("&File"));
    viewMenu = menuBar()->addMenu(tr("&View"));
    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
 
    // Must make fileMenu a class number
-   // this->fileMenu
    fileMenu->addAction(readAction);
    fileMenu->addAction(deleteSliceAct);
    fileMenu->addSeparator();
@@ -517,20 +493,6 @@ void MainWindow::createMenus()
 
    fileToolBar->addAction(deleteSliceAct);
    fileToolBar->addAction(readAction);
-
-//   QAction *exportActiveSliceToMatlab = new QAction(QIcon(":/images/exportToMatlab.png"), tr(""),this);
-//   exportActiveSliceToMatlab->setText(tr("Export active slice to Matlab"));
-//   exportActiveSliceToMatlab->setEnabled(false);
-//   fileToolBar->addAction(exportActiveSliceToMatlab);
-//   connect(exportActiveSliceToMatlab, SIGNAL(triggered()), this, SLOT(sendActiveSliceToMatlab()));
-//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), exportActiveSliceToMatlab, SLOT(setEnabled(bool)));
-
-//   QAction *importActiveSliceFromMatlab = new QAction(QIcon(":/images/importFromMatlab.png"), tr(""),this);
-//   importActiveSliceFromMatlab->setEnabled(false);
-//   importActiveSliceFromMatlab->setText(tr("Import active slice from Matlab"));
-//   fileToolBar->addAction(importActiveSliceFromMatlab);
-//   connect(importActiveSliceFromMatlab, SIGNAL(triggered()), this, SLOT(getActiveSliceFromMatlab()));
-//   connect(matlab::instance(), SIGNAL(matlabStatus(bool)), importActiveSliceFromMatlab, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::createStatusBar()
@@ -570,8 +532,8 @@ void MainWindow::createThumbViewer()
    visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
    viewMenu->addAction(dock->toggleViewAction());
    QMainWindow *thumbWindow = thumbViewer->getMainWindow();
-   dock->setWidget(thumbWindow) ;
-   thumbWindow->setParent(dock) ;
+   dock->setWidget(thumbWindow);
+   thumbWindow->setParent(dock);
 }
 
 void MainWindow::createProgressViewer()
@@ -581,9 +543,7 @@ void MainWindow::createProgressViewer()
    QDockWidget *dock = new QDockWidget(tr("ProgressViewer"), visualisation);
    dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
    dock->setMinimumHeight(175);
-//   dock->setMaximumWidth(120);
    visualisation->addDockWidget(Qt::BottomDockWidgetArea, dock);
-//   viewMenu->addAction(dock->toggleViewAction());
    QMainWindow *progressWindow = progressForm->getMainWindow();
    dock->setWidget(progressWindow);
    progressWindow->setParent(dock);
@@ -603,15 +563,6 @@ void MainWindow::createApplicationOutput()
    dock->setWidget(ApplicationOutput::instance());
    viewMenu->addAction(dock->toggleViewAction());
 }
-
-void MainWindow::externalChargeShare()
-{
-   chargeSharingInstance = new ChargeSharing(nullptr);
-   connect(chargeSharingInstance, SIGNAL(writeMessage(QString)), ApplicationOutput::instance(), SLOT(writeMessage(QString)));
-   connect(chargeSharingInstance, SIGNAL(readData(QString)), this, SLOT(readData(QString)));
-   chargeSharingInstance->exec();
-}
-
 
 void MainWindow::handleSpectrumFile(QString fileName)
 {
@@ -702,16 +653,6 @@ void MainWindow::writeCsv(QString fileName, QVector<double> col0, double *col1, 
 
 }
 
-//void MainWindow::writeH5(QString fileName)
-//{
-//   QString program = "Translator.exe";
-//   QStringList arguments;
-//   arguments << fileName << "h5";
-
-//   QProcess *translateProcess = new QProcess();
-//   translateProcess->execute(program, arguments);
-//}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 //    if ( bHexitechProcessingBusy )
@@ -777,7 +718,6 @@ void MainWindow::handleOccupancyCorrections(int occupancyThresholds, int correct
 }
 void MainWindow::handleBufferReady()
 {
-//   qDebug() << "!!!!!!!!!!!!!!!!!!!!!!MainWindow::handleBufferReady() " << GigEDetector::getBufferReady();
    emit executeBufferReady(GigEDetector::getBufferReady(), GigEDetector::getValidFrames());
 }
 
@@ -785,20 +725,6 @@ void MainWindow::handleShowImage()
 {
    emit executeShowImage();
 }
-
-//void MainWindow::handleProcessingComplete(QString fileName)
-//{
-//   if (saveH5)
-//   {
-//      writeH5(fileName);
-//   }
-
-//}
-
-//void MainWindow::handleSaveH5Changed(bool saveH5)
-//{
-//   this->saveH5 = saveH5;
-//}
 
 void MainWindow::enableMainWindowActions()
 {

@@ -34,7 +34,7 @@ class Slice : public QObject, public TreeItem, public Reservable
 
 public:
    // Constructors
-   Slice(QString name, QObject *parent = 0);
+   Slice(QString name, QObject *parent = nullptr);
    Slice(QString name, QString fileName);
    Slice(QString name, QStringList fileNameList);
    Slice(QString name, unsigned short* buffer, QString fileName);
@@ -56,25 +56,17 @@ public:
    QString getTitle();
    QString getFileName();
    int getSliceToReplace();
-   int getVoxelDataLen();
    QVector<double> getXData(int xPix, int yPix);
    QVector<double> getYData(int xPix, int yPix);
    bool isCompatible(Slice *anOtherSlice);
-   Q_INVOKABLE QObject *mask(double *theMask);
    Slice *multiply(double value);
-   Q_INVOKABLE QObject *plus(QObject *anotherSlice);
-   Q_INVOKABLE QObject *plus(double value);
    static QVector <Slice *> readFileNameList(QStringList fileNameList);
    static Slice *readFileBuffer(unsigned short* buffer, QString fileName);
    void resize(int, int);
-   void setVoxelDataLen(int voxelDataLen);
    SArray<double> sumImage();
    SArray<double> sumImage(int start, int end);
    Q_INVOKABLE void testInfo() {writeMessage("This is a test");}
-   Q_INVOKABLE QObject *times(double value);
    int valueToChannel(double value);
-   Slice *veil(double *theMask);
-   void writeHXT(QString);
 signals:
    void writeError(QString);
    void writeMessage(QString);
@@ -138,9 +130,7 @@ private:
    void preDataInit(QString name);
    bool readHXT(QString);
    bool readHXT(unsigned short *buffer);
-   bool squeezeX();
    void stats();
-   void zeroStats();
 };
 
 #endif // SLICE_H

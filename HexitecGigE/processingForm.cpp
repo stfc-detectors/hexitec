@@ -295,7 +295,6 @@ void ProcessingForm::initialise()
 void ProcessingForm::processClicked()
 {
    qDebug() << "ThreadID: " << QThread::currentThreadId() << "PROCESS BUTTON has been clicked!";
-//   emit processImages(nRows, nCols);
    guiBusy();
    emit processImages();
 }

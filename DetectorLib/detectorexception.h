@@ -13,7 +13,7 @@ public:
    DetectorException(string message);
    DetectorException(QString message);
    void raise() const {throw *this;}
-   DetectorException *clone() const {return new DetectorException(*this);}
+   DetectorException *clone() const {return new DetectorException(*this);}  /// CA: Never used
    QString getMessage() const {return message;}
 
 private:
