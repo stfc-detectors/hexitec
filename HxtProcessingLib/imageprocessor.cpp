@@ -23,7 +23,7 @@ HANDLE ImageProcessor::getHxtFileWrittenEvent()
    return hxtFileWrittenEvent;
 }
 
-ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition)
+ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, /*int nOutRows, int nOutCols,*/ ProcessingDefinition *processingDefinition)
 {
    imageCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, IMAGE_COMPLETE);
    processingCompleteEvent = CreateEvent(nullptr, FALSE, FALSE, PROCESSING_COMPLETE);
@@ -33,10 +33,9 @@ ImageProcessor::ImageProcessor(const char *filename, int nInRows, int nInCols, i
    bMainWindowBusy = false;
 
    frameInSize = nInRows * nInCols * sizeof(uint16_t);
-   frameOutSize = nOutRows * nOutCols * sizeof(uint16_t);
+   /// frameOutSize determine size of raw frame, which is always 20x80 regardless of reorder en-/dis-abled
+   frameOutSize = frameInSize;
 
-   this->frameInSize = frameInSize;
-   this->frameOutSize = frameOutSize;
    imageItem = new ImageItem(filename);
    this->processingDefinition = processingDefinition;
    energyCalibration = processingDefinition->getEnergyCalibration();

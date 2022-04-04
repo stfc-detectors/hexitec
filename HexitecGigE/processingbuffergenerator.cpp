@@ -36,11 +36,11 @@ ProcessingBufferGenerator::ProcessingBufferGenerator(ProcessingDefinition *proce
    saveRaw = true;
 }
 
-void ProcessingBufferGenerator::enqueueImage(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition)
+void ProcessingBufferGenerator::enqueueImage(const char *filename, int nInRows, int nInCols, ProcessingDefinition *processingDefinition)
 {
    this->frameInSize = int(nInRows * nInCols * sizeof(uint16_t));
 
-   currentImageProcessor = new ImageProcessor(filename, nInRows, nInCols, nOutRows, nOutCols, processingDefinition);
+   currentImageProcessor = new ImageProcessor(filename, nInRows, nInCols, processingDefinition);
    currentImageProcessorHandler = new ImageProcessorHandler(currentImageProcessor);
    connect(currentImageProcessorHandler, SIGNAL(processingComplete()),
            this, SLOT(handleProcessingComplete()));
@@ -80,7 +80,7 @@ void ProcessingBufferGenerator::handleImageStarted(char *filename)
    emit imageStarted();
    QMutexLocker locker(&mutex);
    enqueueImage(filename, processingDefinition->getFrameInRows(), processingDefinition->getFrameInCols(),
-                processingDefinition->getFrameOutRows(), processingDefinition->getFrameOutCols(), processingDefinition);
+                processingDefinition);
 }
 
 void ProcessingBufferGenerator::handleFileBufferReady(unsigned char *fileBuffer, unsigned long validFrames)

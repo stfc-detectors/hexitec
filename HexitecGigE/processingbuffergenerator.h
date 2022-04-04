@@ -17,7 +17,7 @@ class ProcessingBufferGenerator : public QObject
    Q_OBJECT
 public:
    explicit ProcessingBufferGenerator(ProcessingDefinition *processingDefinition, QObject *parent = 0);
-   void enqueueImage(const char *filename, int nInRows, int nInCols, int nOutRows, int nOutCols, ProcessingDefinition *processingDefinition);
+   void enqueueImage(const char *filename, int nInRows, int nOutCols, ProcessingDefinition *processingDefinition);
 
 private:
    void bufferReady(unsigned char *buffer, unsigned long validFrames);
